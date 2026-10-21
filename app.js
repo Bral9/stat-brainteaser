@@ -2,9 +2,9 @@
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.2.0';
+  var APP_VERSION = '1.3.0';
   var STORE_KEY = 'statbt.progress.v1'; // key kept stable across versions; schema version lives in state.v
-  var SCHEMA = 2;
+  var SCHEMA = 3;
   var PROBLEMS = Array.isArray(window.PROBLEMS) ? window.PROBLEMS : [];
   var BY_ID = {};
   PROBLEMS.forEach(function (p) { BY_ID[p.id] = p; });
@@ -43,7 +43,8 @@
   }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
   function ymd(d) { d = d || new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
-  function today() { return ymd(new Date()); }
+  var DEBUG_TODAY = (function () { try { var v = localStorage.getItem('statbt.debugToday'); return /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : null; } catch (e) { return null; } })();
+  function today() { return DEBUG_TODAY || ymd(new Date()); }
   function parseYmd(s) { var a = s.split('-'); return new Date(+a[0], +a[1] - 1, +a[2]); }
   function addDays(key, n) { var d = parseYmd(key); d.setDate(d.getDate() + n); return ymd(d); }
   function randInt(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
@@ -117,6 +118,7 @@
       drills: { n: 0, c: 0, bestStreak: 0, byType: {} },
       interviews: [],
       session: null,  // {ids, idx, label, res:{id:bool}, t}
+      comp: {},       // competition coach state (filled by coach.js)
       settings: {
         theme: 'auto',
         sprint: { mode: 'classic', dur: 120, ops: { add: true, sub: true, mul: true, div: true }, addA: [2, 100], addB: [2, 100], mulA: [2, 12], mulB: [2, 100] },
@@ -145,10 +147,11 @@
   function migrate(o) {
     if (!isPlainObj(o)) return defaultState();
     var v = +o.v || 1;
+    if (v < 3) { o.v = 3; if (!isPlainObj(o.comp)) o.comp = {}; }
     if (v < 2) {
       var f = (o.settings && o.settings.filters) || {};
       if (o.settings) o.settings.filters = { cats: Array.isArray(f.cats) ? f.cats : [], diffs: Array.isArray(f.diffs) ? f.diffs : [], status: f.status || 'all', q: '' };
-      o.v = 2;
+      o.v = 3;
     }
     o = mergeDefaults(o, defaultState());
     if (o.session && (!Array.isArray(o.session.ids) || !o.session.ids.length)) o.session = null;
@@ -631,6 +634,7 @@
   function runCleanups() { while (cleanups.length) { try { cleanups.pop()(); } catch (e) { } } ctl = null; }
 
   var VIEWS = {};
+  var HOOKS = { graded: [], homeCards: [], homeAfter: [], settingsCards: [], settingsAfter: [], exportData: [], importData: [], mergeState: [], boot: [] };
   var TAB_OF = { home: 'home', practice: 'practice', play: 'practice', review: 'review', train: 'train', sprint: 'train', drills: 'train', interview: 'train', stats: 'stats', settings: 'settings' };
   var TITLES = { home: 'Home', practice: 'Practice', play: 'Practice', review: 'Review', train: 'Train', sprint: 'Mental math', drills: 'Probability drills', interview: 'Interview mode', stats: 'Stats', settings: 'Settings' };
   function route() {
@@ -647,7 +651,7 @@
     main.classList.add('view-enter');
     var tab = TAB_OF[name] || 'home';
     $all('[data-tab]').forEach(function (a) {
-      if (a.getAttribute('data-tab') === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      if ((' ' + a.getAttribute('data-tab') + ' ').indexOf(' ' + tab + ' ') >= 0) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
     document.body.setAttribute('data-view', name);
     VIEWS[name](main, parts.slice(1));
@@ -827,6 +831,7 @@
       if (st.graded) return;
       st.graded = true; st.correct = correct;
       recordAttempt(p.id, correct, { hints: st.hints });
+      HOOKS.graded.forEach(function (fn) { try { fn(p, correct, card); } catch (e) { console.warn(e); } });
       setState(correct);
       if (opts.onResult) opts.onResult(correct, how);
       primaryNext();
@@ -1024,6 +1029,7 @@
       '<div class="stat-tile"><div class="v">' + sk.cur + '<small> d</small></div><div class="l">Streak</div></div>' +
       '<div class="stat-tile"><div class="v">' + solvedCount() + '<small>/' + PROBLEMS.length + '</small></div><div class="l">Solved</div></div>' +
       '<div class="stat-tile"><div class="v">' + bestSprintText() + '</div><div class="l">Best sprint</div></div></div>';
+    HOOKS.homeCards.forEach(function (fn) { try { html += fn() || ''; } catch (e) { console.warn(e); } });
     GROUPS.forEach(function (g) {
       var cs = CATS.filter(function (c) { return c.group === g.id && catStats(c.id).total; });
       if (!cs.length) return;
@@ -1045,6 +1051,7 @@
       html = html.replace('<section class="group">', offer + '<section class="group">');
     }
     main.innerHTML = html;
+    HOOKS.homeAfter.forEach(function (fn) { try { fn(main); } catch (e) { console.warn(e); } });
     var oy = $('#offerYes');
     if (oy) {
       var closeOffer = function () { S.ui.notifyOffered = true; save(); var o = $('#notifyOffer'); if (o) o.remove(); };
@@ -1850,6 +1857,7 @@
   /* ------------------------------------------------------------------ */
   function exportProgress() {
     var data = { app: 'stat-brainteaser', version: APP_VERSION, schema: SCHEMA, exportedAt: new Date().toISOString(), progress: S };
+    HOOKS.exportData.forEach(function (fn) { try { fn(data); } catch (e) { console.warn(e); } });
     var blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
@@ -1873,6 +1881,7 @@
     cur.sprint.history = Object.keys(seen).map(function (k) { return seen[k]; }).sort(function (a, b) { return a.t - b.t; });
     var d = inc.drills || {};
     if ((d.n || 0) > cur.drills.n) cur.drills = mergeDefaults(d, defaultState().drills);
+    HOOKS.mergeState.forEach(function (fn) { try { fn(cur, inc); } catch (e) { console.warn(e); } });
     var iv = {};
     cur.interviews.concat(inc.interviews || []).forEach(function (r) { iv[r.t] = r; });
     cur.interviews = Object.keys(iv).map(function (k) { return iv[k]; }).sort(function (a, b) { return a.t - b.t; });
@@ -1886,6 +1895,7 @@
         var prog = obj && obj.progress ? obj.progress : obj;
         if (!isPlainObj(prog) || !isPlainObj(prog.attempts)) throw new Error('Not a Stat Brainteaser progress file');
         prog = migrate(prog);
+        HOOKS.importData.forEach(function (fn) { try { fn(obj, mode); } catch (e) { console.warn(e); } });
         if (mode === 'replace') { if (!confirm('Replace ALL progress on this device with the imported file?')) return; S = prog; }
         else S = mergeProgress(S, prog);
         S.ui.onboarded = true;
@@ -1922,6 +1932,7 @@
       [['Enter', 'Check answer / start'], ['H', 'Open next hint'], ['S', 'Open solution (interview: give up)'], ['N / P', 'Next / previous problem'], ['1–4', 'Pick a multiple-choice option'], ['Esc', 'Skip (mental math)']].map(function (r) {
         return '<tr><td><span class="kbd">' + r[0] + '</span></td><td>' + r[1] + '</td></tr>';
       }).join('') + '</tbody></table></div>' +
+      HOOKS.settingsCards.map(function (fn) { try { return fn() || ''; } catch (e) { return ''; } }).join('') +
       '<div class="card"><h2>Problem bank</h2><p class="small muted" style="margin:0">' + counts + '</p></div></div>' +
       '<p class="muted small">MIT licensed · © 2026 Breal Tchuimi. Works offline after the first visit.</p>';
     $all('[data-theme-set]', main).forEach(function (b) { b.addEventListener('click', function () { S.settings.theme = b.getAttribute('data-theme-set'); save(); applyTheme(); route(); }); });
@@ -1951,6 +1962,7 @@
     });
     $('#instBtn2').addEventListener('click', doInstall);
     $('#obBtn').addEventListener('click', showOnboarding);
+    HOOKS.settingsAfter.forEach(function (fn) { try { fn(main); } catch (e) { console.warn(e); } });
   };
 
   /* ------------------------------------------------------------------ */
@@ -1980,6 +1992,18 @@
   /* ------------------------------------------------------------------ */
   window.StatBT = { parseNumber: parseNumber, checkAnswer: checkAnswer, checkNumeric: checkNumeric, DRILLS: DRILLS, version: APP_VERSION, migrate: migrate, dailyMix: dailyMix, state: function () { return S; } };
 
+  /* Plugin API (competition coach etc. live in separate files and register views/hooks here) */
+  var core = {
+    VIEWS: VIEWS, TAB_OF: TAB_OF, TITLES: TITLES, HOOKS: HOOKS, ICONS: ICONS, svg: svg,
+    get S() { return S; }, save: save, toast: toast, go: go, route: route, esc: esc, $: $, $all: $all,
+    today: today, ymd: ymd, parseYmd: parseYmd, addDays: addDays, fmtDate: fmtDate, pad2: pad2, fmtTime: fmtTime,
+    onCleanup: onCleanup, setCtl: function (c) { ctl = c; }, markDay: markDay, mergeDefaults: mergeDefaults, isPlainObj: isPlainObj,
+    checkNumeric: checkNumeric, codeNorm: codeNorm, stripTags: stripTags, hoverDevice: hoverDevice, diffDots: diffDots,
+    statusIcon: statusIcon, startSession: startSession, updateBadges: updateBadges, isIOS: isIOS, version: APP_VERSION,
+    get modalOpen() { return modalOpen; }, set modalOpen(v) { modalOpen = v; }
+  };
+  (window.SBT_PLUGINS || []).forEach(function (fn) { try { fn(core); } catch (e) { console.error('plugin failed', e); } });
+
   function boot() {
     applyTheme();
     if (window.matchMedia) {
@@ -1996,6 +2020,7 @@
     updateBadges();
     route();
     registerSW();
+    HOOKS.boot.forEach(function (fn) { try { fn(); } catch (e) { console.warn(e); } });
     if (!S.ui.onboarded) showOnboarding();
     document.documentElement.setAttribute('data-ready', '1');
   }

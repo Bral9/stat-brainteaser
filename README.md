@@ -24,6 +24,66 @@ It is plain static files with no build step, no frameworks, no CDNs and no track
 
 **Every answer that can be computed was checked by a script before it shipped.** Numeric answers were recomputed with exact fractions, enumeration, DP or Monte Carlo. Every Python output was produced by running the snippet. Every SQL answer was produced by running the query on the shown tables in SQLite.
 
+### Competitions: QUMC & Putnam coach (v1.3)
+
+A separate **Compete** section prepares you for the Quebec University Mathematics Competition (ISM) and the Putnam. It covers 139 original or classical problems at levels 1–5, a 40-technique skill tree with lesson cards, 134 official Putnam references, and 3 + 3 mock exams. Official Putnam problems are **linked**, never copied. Competition problems stay in their own section; turn on *Settings → Competition problem of the day* if you want one on Home.
+
+- **Competition pages:**
+  - countdown and format
+  - the date rule: the Putnam is the first Saturday of December; the QUMC date is editable because ISM announces it each year
+  - a registration checklist you tick off, with "confirm with your local supervisor" where facts can change
+  - goals for your current year of competing
+  - day-of strategy, topic weights, past-paper status and resources
+- **Smart planner (deterministic, offline, no AI):**
+  - A setup wizard asks for your targets, hours per week, the days you can study and your background. It offers an optional 90-minute placement diagnostic (12 problems, self-graded 0/1/2).
+  - It then generates a **day-by-day plan** to each contest. The time bucket sets the phase split (Foundations → Toolbox → Mixed → Competition → Taper), and each day follows a session template:
+    - a lesson card, two problems at your level, and a write-up with a reflection
+    - triage practice in mixed sets
+    - mocks under real timing
+    - taper days before the contest
+- **Adaptation:** the plan applies the rules in `plans.json` and tells you what changed and why.
+  - **prerequisite review:** e.g. "Added a review of Pigeonhole because only 1/4 Graphs problems were solved"
+  - **level up / level down**
+  - **hint dependence:** hints lock for 15 minutes
+  - **write-up gap:** proof-writing drills are added
+  - **spaced retry:** at +3 and +10 days
+  - **time pressure:** under 14 days, no new hard topics
+  - **burnout:** if you miss sessions, the next week is 30% lighter
+  - **missed days:** the remaining plan re-flows from today, without guilt
+- **Skill tree:** mastery dots, target level, prerequisites, lesson cards, linked problems, and Putnam references you can mark attempted or solved.
+- **Problem screen:**
+  - a stopwatch and progressive hints
+  - an answer check for numeric and short answers
+  - the model solution with common mistakes
+  - self-grading on a rubric: **0** no progress · **1** key idea · **2** mostly complete · **3** complete & rigorous
+  - the grade updates mastery (an exponentially weighted model)
+- **Mock exams:**
+  - QUMC-style papers: 7 problems in 210 minutes
+  - Putnam-style half papers: two 90-minute blocks of 3, or the full 4 × 90-minute day with breaks
+  - a timed **triage A/B/C** step opens every block; you then grade on the Putnam scale and get a triage audit
+- **Seasons and multiple years:**
+  - Each contest year is a season ("2026–27"). When it ends it is archived, and your mastery, journal and history carry over.
+  - Year-of-competing goals run from Year 1 to Year 4.
+  - A post-competition review wizard records scores and lessons, and those lessons seed the next season.
+
+### Journal (thinking log)
+
+- **Guided reflection after every competition problem:**
+  - takes about 30 seconds and is always skippable
+  - you fill in: approach chips, where you got stuck, the key insight, mistake-type chips, confidence, and a **tip to future me**
+  - the prompt adapts to the outcome: "What would have made you see it?" after a miss, "What pattern did you recognise?" after a quick solve
+  - you can turn the same reflection on for quant problems in Settings
+- **Free-form entries:** a daily reflection, an end-of-session note, a competition-day log, or a mock post-mortem.
+- **Organisation:**
+  - entries are tagged automatically with problem, skills, competition, season and date
+  - a timeline groups them by month and season, with search and filters
+- **Tips library:** filter by skill, competition or season, and pin favourites. Pinned tips show up in a **"Read before you start"** card before every mock and on contest day.
+- **Resurfacing:** opening a skill or problem shows your past notes on it.
+- **Export:**
+  - **Markdown for Obsidian:** one file, or a `.zip` with one note per entry and YAML front-matter (the zip is built in the browser, with no libraries)
+  - the journal is also included in the JSON progress export and import
+- **Storage:** the journal lives under its own localStorage key, and the app warns you when storage is close to full.
+
 ### Modes
 
 - **Home:** topic cards grouped into *Quant core* and *Technical*, each with a progress bar. Tap a card to start practising that topic. The *Continue* button resumes your last session; *Daily mix* builds 10 problems weighted toward due reviews and your weakest topics.
@@ -53,7 +113,7 @@ It is plain static files with no build step, no frameworks, no CDNs and no track
   - Numbers can be typed as `5/36`, `0.1389`, `13.9%`, `1/6+1/36`, `1-(5/6)^4`, `C(10,3)`, `10!`, `sqrt(2)`, `2.5k` or `$1,250`. A small safe parser reads them; `eval` is never used.
   - Code-output answers such as `[1, 2, 3]` or `True` are compared ignoring case, spaces and quote style.
 - **Layout:**
-  - Mobile: a bottom tab bar.
+  - Mobile: a bottom tab bar (Home, Practice, Compete, Train, More — Review, Journal, Stats and Settings live under More).
   - Desktop (900 px and wider): a sidebar, a two-column practice screen and a session panel.
   - Light and dark themes, accessible labels and focus states, and `aria-live` feedback.
   - No horizontal scrolling at 360 px.
@@ -169,7 +229,10 @@ On https://github.com/bral9/stat-brainteaser, click **Watch → Custom**, then t
 index.html            app shell
 styles.css            all styles (light/dark tokens)
 app.js                router, views, sessions, parser, SRS, sprint, drills, stats, migration
-problems.js           problem bank
+problems.js           problem bank (quant / technical)
+competitions.js       competition content: QUMC & Putnam facts, skill tree, 139 problems, mocks, plans (generated from JSON)
+coach.js              competition coach logic: seasons, mastery, planner, adaptation, journal store, Markdown/zip export
+coach-ui.js           competition & journal views
 manifest.webmanifest  PWA manifest (relative paths, scope "./")
 sw.js                 cache-first service worker; cache name = version + build; periodic update check
 icons/                192/512 icons, maskable variants, apple-touch-icon, favicon
