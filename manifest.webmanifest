@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Stat Brainteaser — Quant Interview Trainer",
   "short_name": "StatBrain",
-  "description": "Offline trainer for quant interviews: probability, statistics, brainteasers, EV games, combinatorics, Fermi estimates and mental math sprints.",
+  "description": "Offline trainer for quant, data and ML interviews: probability, statistics, brainteasers, EV games, combinatorics, Fermi, Python, SQL, machine learning and mental math.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",

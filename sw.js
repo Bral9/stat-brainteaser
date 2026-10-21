@@ -1,6 +1,6 @@
 /* Stat Brainteaser service worker: cache-first, versioned, precaches everything.
  * When you change ANY file, bump VERSION (and APP_VERSION in app.js) so users get an update prompt. */
-var VERSION = '1.0.0';
+var VERSION = '1.1.0';
 var CACHE_PREFIX = 'stat-brainteaser-';
 var CACHE = CACHE_PREFIX + 'v' + VERSION;
 

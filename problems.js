@@ -1324,516 +1324,6 @@ window.PROBLEMS = [
   "key": "Var(aX + bY) = a²σ_X² + b²σ_Y² + 2ab·Cov(X,Y)."
  },
  {
-  "id": "brain-001",
-  "cat": "brainteasers",
-  "diff": 2,
-  "title": "Five pirates and 100 gold coins",
-  "tags": [
-   "backward-induction",
-   "game-theory",
-   "pirates"
-  ],
-  "prompt": "<p>Five pirates of strictly ranked seniority must split 100 indivisible gold coins. The most senior pirate proposes a split; all pirates (including the proposer) vote. If <b>at least half</b> vote yes, the split is adopted. Otherwise the proposer is thrown overboard and the next most senior pirate proposes, and so on.</p>\n<p>Every pirate is perfectly rational and (1) wants to survive, (2) wants as many coins as possible, (3) given equal coins, prefers to see someone thrown overboard.</p>\n<p>How many coins does the most senior pirate keep?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 98.0,
-   "display": "98"
-  },
-  "hints": [
-   "Start from the end: what happens with only 1 pirate? With 2?",
-   "A pirate votes yes only if he gets strictly more than he would in the next round. Buy the cheapest votes with 1 coin each."
-  ],
-  "solution": "<p>Label pirates P1 (most junior) … P5 (most senior). Work backwards.</p>\n<ol>\n<li><b>1 pirate (P1):</b> P1 keeps 100.</li>\n<li><b>2 pirates (P2, P1):</b> P2 needs 1 of 2 votes — his own. Split: P2 = 100, P1 = 0.</li>\n<li><b>3 pirates:</b> P3 needs 2 votes. P1 gets 0 in the next round, so 1 coin buys him. Split: P3 = 99, P2 = 0, P1 = 1.</li>\n<li><b>4 pirates:</b> P4 needs 2 votes. P2 gets 0 in the 3-pirate round, so 1 coin buys him. Split: P4 = 99, P3 = 0, P2 = 1, P1 = 0.</li>\n<li><b>5 pirates:</b> P5 needs 3 votes, i.e. 2 besides his own. The pirates getting 0 in the 4-pirate round are P3 and P1; 1 coin each buys them. Split: P5 = 98, P4 = 0, P3 = 1, P2 = 0, P1 = 1.</li>\n</ol>\n<p><b>Answer: 98 coins.</b></p>",
-  "key": "Backward induction: each proposer bribes, at 1 coin each, exactly the pirates who would get nothing in the next round."
- },
- {
-  "id": "brain-002",
-  "cat": "brainteasers",
-  "diff": 1,
-  "title": "Burning ropes: measure 45 minutes",
-  "tags": [
-   "ropes",
-   "timing",
-   "construction"
-  ],
-  "prompt": "<p>You have two ropes and a lighter. Each rope takes exactly 60 minutes to burn completely, but burns <b>non-uniformly</b> (half the rope does not necessarily take 30 minutes). How do you measure exactly 45 minutes?</p>",
-  "answer": {
-   "type": "self",
-   "display": "Light rope A at both ends and rope B at one end; when A finishes (30 min), light B's other end; B finishes 15 min later (45 min total)."
-  },
-  "hints": [
-   "Lighting a rope at both ends makes it burn out in exactly half its time, whatever the burn profile.",
-   "Use one rope to mark 30 minutes while the other burns from one end only."
-  ],
-  "solution": "<p><b>Key fact:</b> a rope lit at both ends burns out in exactly 30 minutes: the two flames together consume the rope at a combined rate that always totals 60 rope-minutes, so they meet after 30 minutes regardless of where.</p>\n<ol>\n<li>At t = 0, light rope A at <b>both</b> ends and rope B at <b>one</b> end.</li>\n<li>Rope A burns out at t = 30. At that instant rope B has exactly 30 minutes of burn left.</li>\n<li>Immediately light the other end of B. Its remaining 30 minutes of burn now take 15 minutes.</li>\n<li>B burns out at t = 45.</li>\n</ol>\n<p><b>Answer:</b> 45 minutes elapse from the first lighting until B is consumed.</p>",
-  "key": "Lighting both ends halves the remaining burn time, independent of how unevenly the rope burns."
- },
- {
-  "id": "brain-003",
-  "cat": "brainteasers",
-  "diff": 3,
-  "title": "100 prisoners and a light bulb",
-  "tags": [
-   "prisoners",
-   "strategy",
-   "counting",
-   "protocol"
-  ],
-  "prompt": "<p>100 prisoners are in solitary cells. Each day the warden picks one prisoner uniformly at random (with replacement) and takes him to a room with a single light bulb, initially <b>off</b>. The prisoner may toggle the bulb or leave it. At any time any prisoner may declare “everyone has visited the room.” If correct, all are freed; if wrong, all are executed.</p>\n<p>The prisoners may plan once beforehand and never communicate again. Give a strategy that guarantees freedom with probability 1.</p>",
-  "answer": {
-   "type": "self",
-   "display": "Elect one counter. Every other prisoner turns the bulb ON the first time he finds it off (only once). The counter turns it OFF each time he finds it on, counting; at 99 he declares."
-  },
-  "hints": [
-   "The bulb can carry only one bit, so let one designated prisoner be the only one who ever resets it.",
-   "Each non-counter should signal exactly once."
-  ],
-  "solution": "<ol>\n<li>Designate one prisoner as the <b>counter</b>. The other 99 are <b>signalers</b>.</li>\n<li>A signaler who enters and finds the bulb <b>off</b> turns it <b>on</b> — but only the first time this happens to him. Ever after, he leaves the bulb untouched.</li>\n<li>The counter, whenever he finds the bulb <b>on</b>, turns it <b>off</b> and adds 1 to his count. If he finds it off, he does nothing.</li>\n<li>Each “on” the counter sees was produced by a distinct signaler (each signals once, and no one turns the bulb on again until the counter resets it). When his count reaches <b>99</b>, every signaler has visited, and the counter has obviously visited, so he declares.</li>\n</ol>\n<p>Because visits are random with replacement, every prisoner visits infinitely often with probability 1, so the count reaches 99 with probability 1 (expected time is roughly 10,000 days — slow but certain).</p>\n<p><b>Answer:</b> the single-counter protocol above.</p>",
-  "key": "One bit of shared memory suffices if exactly one agent is allowed to reset it and everyone else signals exactly once."
- },
- {
-  "id": "brain-004",
-  "cat": "brainteasers",
-  "diff": 3,
-  "title": "100 prisoners and 100 boxes",
-  "tags": [
-   "prisoners",
-   "permutations",
-   "cycles",
-   "probability"
-  ],
-  "prompt": "<p>100 prisoners are numbered 1–100. A room holds 100 closed boxes, numbered 1–100, containing the prisoners' numbers in a uniformly random arrangement (one number per box). One at a time, each prisoner enters, opens at most <b>50</b> boxes, and leaves the room exactly as found, with no communication afterwards. All are freed only if <b>every</b> prisoner finds his own number.</p>\n<p>Using the optimal strategy (each prisoner starts at the box with his own number and then follows the number he finds), what is the probability that all prisoners are freed? Give 4 decimals.</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 0.31182782068,
-   "display": "1 − (1/51 + 1/52 + … + 1/100) ≈ 0.3118",
-   "tolAbs": 0.002
-  },
-  "hints": [
-   "Following the pointer chain from your own box traces the cycle of the permutation that contains your number.",
-   "Everyone succeeds iff the random permutation has no cycle longer than 50. Count permutations with a cycle of length k > 50."
-  ],
-  "solution": "<ol>\n<li>The box contents define a random permutation σ of {1,…,100}. Prisoner i opens box i, sees σ(i), opens box σ(i), and so on. He is walking around the cycle of σ that contains i, and he finds his number exactly when he gets back to the start, i.e. after (cycle length) boxes.</li>\n<li>So prisoner i succeeds iff his cycle has length ≤ 50, and <b>all</b> succeed iff σ has no cycle of length > 50.</li>\n<li>At most one cycle can exceed 50. The number of permutations of n = 100 with a specific cycle of length k > 50 is C(100,k)·(k−1)!·(100−k)! = 100!/k. So P(longest cycle = k) = 1/k.</li>\n<li>P(fail) = ∑<sub>k=51</sub><sup>100</sup> 1/k = H<sub>100</sub> − H<sub>50</sub> ≈ 0.6882.</li>\n<li>P(all freed) = 1 − 0.6882 ≈ <b>0.3118</b>. (As n → ∞ this tends to 1 − ln 2 ≈ 0.307.)</li>\n</ol>\n<p>Compare with independent random guessing: (1/2)<sup>100</sup> ≈ 8·10<sup>−31</sup>.</p>",
-  "key": "The pointer-chasing strategy correlates everyone's success: all win iff the permutation has no cycle longer than 50, probability 1 − (H₁₀₀ − H₅₀)."
- },
- {
-  "id": "brain-005",
-  "cat": "brainteasers",
-  "diff": 1,
-  "title": "Nine coins, one heavier",
-  "tags": [
-   "weighing",
-   "balance",
-   "information"
-  ],
-  "prompt": "<p>You have 9 identical-looking coins; exactly one is slightly <b>heavier</b>. Using a two-pan balance (no weights), what is the minimum number of weighings that <b>guarantees</b> you find the heavy coin?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 2.0,
-   "display": "2"
-  },
-  "hints": [
-   "Each weighing has three outcomes: left heavy, right heavy, balance.",
-   "Split into three groups of three."
-  ],
-  "solution": "<ol>\n<li>Each weighing gives one of 3 outcomes, so w weighings distinguish at most 3<sup>w</sup> cases. With 9 candidates we need 3<sup>w</sup> ≥ 9, so w ≥ 2. One weighing (3 outcomes) cannot separate 9 cases.</li>\n<li>Two suffice: weigh coins {1,2,3} vs {4,5,6}. If one side is heavier, the heavy coin is among those three; if they balance, it is among {7,8,9}.</li>\n<li>From the 3 suspects, weigh one against another: the heavier one is fake; if they balance, it is the third.</li>\n</ol>\n<p><b>Answer: 2 weighings.</b></p>",
-  "key": "A balance is a ternary device: w weighings separate up to 3ʷ possibilities, so split into thirds."
- },
- {
-  "id": "brain-006",
-  "cat": "brainteasers",
-  "diff": 3,
-  "title": "Twelve coins, heavier or lighter",
-  "tags": [
-   "weighing",
-   "balance",
-   "information",
-   "strategy"
-  ],
-  "prompt": "<p>You have 12 coins; exactly one is counterfeit and is either <b>heavier or lighter</b> (you don't know which). With a two-pan balance and exactly <b>3 weighings</b>, identify the counterfeit coin <b>and</b> whether it is heavier or lighter. Describe a strategy.</p>",
-  "answer": {
-   "type": "self",
-   "display": "Weigh 1234 vs 5678. If balanced, fake is in 9–12: weigh 9,10,11 vs 1,2,3 (known good), then one more. If unbalanced, weigh 1,2,5 vs 3,6,G (G a known-good coin) and resolve with the third weighing."
-  },
-  "hints": [
-   "There are 24 cases (12 coins × heavy/light) and 3³ = 27 outcomes, so every weighing must split the remaining cases as evenly as possible (≤ 9, ≤ 3, ≤ 1).",
-   "After an unbalanced first weighing, move some coins across pans, swap some for known-good coins, and leave some off."
-  ],
-  "solution": "<p>Counting: 24 hypotheses ≤ 27 outcomes, so it is possible only if each weighing splits cases into groups of size ≤ 9, then ≤ 3, then ≤ 1.</p>\n<p><b>Weighing 1:</b> {1,2,3,4} vs {5,6,7,8}.</p>\n<p><b>Case A — balance.</b> Coins 1–8 are genuine; fake is in 9–12 (8 cases). Weigh {9,10,11} vs {1,2,3}.</p>\n<ul>\n<li>Balance → coin 12 is fake; weigh 12 vs 1 to learn heavy/light.</li>\n<li>Left heavy → one of 9,10,11 is heavy; weigh 9 vs 10: the heavier is fake, or 11 if balanced.</li>\n<li>Left light → same with “lighter”.</li>\n</ul>\n<p><b>Case B — left side heavy</b> (so either one of 1–4 is heavy or one of 5–8 is light; 8 cases). Weigh {1,2,5} vs {3,6,9} (9 is genuine).</p>\n<ul>\n<li>Left heavy → 1 heavy, 2 heavy, or 6 light. Weigh 1 vs 2: heavier one is fake (heavy); balance → 6 is light.</li>\n<li>Right heavy → 3 heavy or 5 light. Weigh 3 vs 9: if heavy, 3 is heavy; if balanced, 5 is light.</li>\n<li>Balance → 4 heavy, 7 light, or 8 light. Weigh 7 vs 8: the lighter is fake; balance → 4 is heavy.</li>\n</ul>\n<p><b>Case C — right side heavy:</b> symmetric to B with roles swapped.</p>\n<p>In every branch, after 3 weighings exactly one hypothesis remains. In fact (3<sup>w</sup> − 3)/2 = 12 is the largest number of coins solvable this way with w = 3.</p>",
-  "key": "Count hypotheses vs outcomes (24 ≤ 27) and design each weighing to split the remaining cases into thirds, using rotation and known-good coins."
- },
- {
-  "id": "brain-007",
-  "cat": "brainteasers",
-  "diff": 2,
-  "title": "Ants on a stick",
-  "tags": [
-   "ants",
-   "symmetry",
-   "relabeling"
-  ],
-  "prompt": "<p>100 ants are placed at arbitrary positions on a 1-metre stick (endpoints allowed), each facing left or right arbitrarily. All walk at 1 cm/s. When two ants meet, both instantly reverse direction. An ant falls off when it walks past an end.</p>\n<p>Over all possible starting configurations, what is the longest time (in seconds) you might have to wait until every ant has fallen off?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 100.0,
-   "display": "100 s"
-  },
-  "hints": [
-   "Two ants bouncing off each other looks exactly like two ants passing through each other — if you ignore their names.",
-   "So each 'ghost' ant walks straight to the end it faces."
-  ],
-  "solution": "<ol>\n<li>When two ants collide and reverse, the set of positions and directions is identical to what it would be if they had simply walked through each other. Only the labels differ.</li>\n<li>So treat the ants as ghosts that pass through one another. Each ghost walks straight off the end it faces, taking (distance to that end)/1 cm/s.</li>\n<li>The stick is empty when the last ghost falls off, after max over ants of distance-to-facing-end, which is at most 100 cm → 100 s.</li>\n<li>This is attained: an ant at the left end facing right needs 100 s.</li>\n</ol>\n<p><b>Answer: 100 seconds</b>, no matter how many ants or collisions.</p>",
-  "key": "Collisions that swap directions are equivalent to ants passing through each other; relabeling removes the interactions."
- },
- {
-  "id": "brain-008",
-  "cat": "brainteasers",
-  "diff": 2,
-  "title": "Bridge and torch",
-  "tags": [
-   "river-crossing",
-   "optimization",
-   "greedy"
-  ],
-  "prompt": "<p>Four people must cross a rickety bridge at night. At most <b>two</b> can be on the bridge at once, and any crossing needs the single torch, which must be walked back (it cannot be thrown). They take 1, 2, 5 and 10 minutes to cross individually; a pair moves at the slower person's pace.</p>\n<p>What is the minimum total time (in minutes) for all four to cross?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 17.0,
-   "display": "17 minutes"
-  },
-  "hints": [
-   "The obvious plan — 1 escorts everyone — costs 10 + 1 + 5 + 1 + 2 = 19. Can the two slowest cross together?",
-   "Send the two fastest first, so a fast person is waiting on the far side to bring the torch back."
-  ],
-  "solution": "<ol>\n<li>1 and 2 cross: 2 min.</li>\n<li>1 returns with the torch: 1 min (total 3).</li>\n<li>5 and 10 cross together: 10 min (total 13).</li>\n<li>2 returns: 2 min (total 15).</li>\n<li>1 and 2 cross: 2 min (total 17).</li>\n</ol>\n<p>Pairing the two slowest saves 5 minutes versus having 1 escort each (19 min). An exhaustive search confirms nothing beats 17.</p>\n<p><b>Answer: 17 minutes.</b></p>",
-  "key": "Make the two slowest cross together, with the two fastest acting as torch shuttles."
- },
- {
-  "id": "brain-009",
-  "cat": "brainteasers",
-  "diff": 1,
-  "title": "100 lockers",
-  "tags": [
-   "divisors",
-   "perfect-squares",
-   "number-theory"
-  ],
-  "prompt": "<p>A hallway has 100 closed lockers numbered 1–100. Student 1 opens every locker. Student 2 toggles every 2nd locker (2, 4, 6, …). Student 3 toggles every 3rd locker, and so on, until student 100 toggles locker 100.</p>\n<p>How many lockers are open at the end?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 10.0,
-   "display": "10"
-  },
-  "hints": [
-   "Locker n is toggled once for each divisor of n.",
-   "Which numbers have an odd number of divisors?"
-  ],
-  "solution": "<ol>\n<li>Locker n is toggled by student d exactly when d divides n, so it is toggled d(n) times, where d(n) is its number of divisors.</li>\n<li>It ends open iff d(n) is odd.</li>\n<li>Divisors come in pairs (d, n/d). The pair collapses to a single divisor only when d = n/d, i.e. n is a perfect square. So d(n) is odd iff n is a perfect square.</li>\n<li>Perfect squares ≤ 100: 1, 4, 9, …, 100. That is <b>10</b> lockers.</li>\n</ol>",
-  "key": "Divisors pair up except at √n, so only perfect squares are toggled an odd number of times."
- },
- {
-  "id": "brain-010",
-  "cat": "brainteasers",
-  "diff": 2,
-  "title": "Two eggs, 100 floors",
-  "tags": [
-   "dynamic-programming",
-   "optimization",
-   "worst-case"
-  ],
-  "prompt": "<p>You have 2 identical eggs and a 100-floor building. There is a critical floor F (0 ≤ F ≤ 100): an egg dropped from a floor above F breaks, and one dropped from floor F or below survives (and can be reused). What is the minimum number of drops that guarantees you determine F in the worst case?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 14.0,
-   "display": "14"
-  },
-  "hints": [
-   "Once the first egg breaks, the second must scan linearly from the last safe floor upward.",
-   "If you allow d drops in total, the first drop should be from floor d, the next from d + (d−1), and so on. You need d + (d−1) + … + 1 ≥ 100."
-  ],
-  "solution": "<ol>\n<li>Suppose you can afford at most d drops. Drop egg 1 from floor d: if it breaks, egg 2 checks floors 1…d−1 one by one, which is d−1 more drops. Total ≤ d.</li>\n<li>If it survives, you have d−1 drops left, so the next drop of egg 1 can go up d−1 more floors, then d−2, and so on.</li>\n<li>So d drops cover d + (d−1) + … + 1 = d(d+1)/2 floors. We need d(d+1)/2 ≥ 100.</li>\n<li>13·14/2 = 91 &lt; 100 and 14·15/2 = 105 ≥ 100, so d = <b>14</b>. One schedule: floors 14, 27, 39, 50, 60, 69, 77, 84, 90, 95, 99, 100.</li>\n</ol>",
-  "key": "Balance the worst case: decrease the jump by one after each safe drop, so d drops cover d(d+1)/2 floors."
- },
- {
-  "id": "brain-011",
-  "cat": "brainteasers",
-  "diff": 2,
-  "title": "Clock hands overlapping",
-  "tags": [
-   "clock",
-   "relative-speed",
-   "counting"
-  ],
-  "prompt": "<p>On an analog clock, how many times do the hour and minute hands exactly overlap during a 12-hour period (count the times t in [12:00, 12:00 + 12 h), so 12:00 is counted once)?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 11.0,
-   "display": "11"
-  },
-  "hints": [
-   "The minute hand gains on the hour hand at 360° − 30° = 330° per hour.",
-   "How many full laps does it gain in 12 hours?"
-  ],
-  "solution": "<ol>\n<li>The minute hand moves 360°/h and the hour hand 30°/h, so the minute hand gains 330°/h on the hour hand.</li>\n<li>The hands overlap each time the gain is a multiple of 360°, i.e. every 360/330 = 12/11 h ≈ 1 h 5 min 27 s.</li>\n<li>In 12 hours the gain is 12·330 = 3960° = 11 full laps, so overlaps occur at t = 0, 12/11, 24/11, …, 120/11 h: <b>11</b> times. (There is no overlap between 11:00 and 12:00 except at 12:00 itself.)</li>\n</ol>",
-  "key": "Use relative speed: the minute hand laps the hour hand 11 times every 12 hours."
- },
- {
-  "id": "brain-012",
-  "cat": "brainteasers",
-  "diff": 2,
-  "title": "Right angles in a day",
-  "tags": [
-   "clock",
-   "relative-speed",
-   "counting"
-  ],
-  "prompt": "<p>How many times in a full 24-hour day (from midnight inclusive to the next midnight exclusive) do the hour and minute hands of a clock form an exact right angle (90°)?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 44.0,
-   "display": "44"
-  },
-  "hints": [
-   "The relative angle grows at 330° per hour. Every lap it passes 90° once and 270° once.",
-   "How many relative laps happen in 24 hours?"
-  ],
-  "solution": "<ol>\n<li>The relative angle (minute − hour) increases at 330°/h. It is a right angle when it equals 90° or 270° (mod 360°).</li>\n<li>In 24 h the relative angle increases by 24·330 = 7920° = 22 full laps.</li>\n<li>Each lap passes 90° once and 270° once, and at midnight the angle is 0, which is not a right angle. So there are 2·22 = <b>44</b> right angles.</li>\n<li>Note that it is not 48: 3:00 and 9:00 are right angles, but the hands lose slots around them because the hour hand moves.</li>\n</ol>",
-  "key": "Two right angles per relative lap, 22 relative laps per day → 44."
- },
- {
-  "id": "brain-013",
-  "cat": "brainteasers",
-  "diff": 1,
-  "title": "Angle at 3:15",
-  "tags": [
-   "clock",
-   "angles",
-   "mental-math"
-  ],
-  "prompt": "<p>What is the angle, in degrees, between the hour and minute hands of a clock at exactly 3:15?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 7.5,
-   "display": "7.5°"
-  },
-  "hints": [
-   "At 3:15 the minute hand is exactly on the 3. Where is the hour hand?",
-   "The hour hand moves 0.5° per minute."
-  ],
-  "solution": "<ol>\n<li>Minute hand at 15 min: 15·6° = 90°.</li>\n<li>Hour hand: 3·30° + 15·0.5° = 90° + 7.5° = 97.5°.</li>\n<li>Difference: <b>7.5°</b>.</li>\n</ol>",
-  "key": "The hour hand moves 0.5° per minute, so it is never exactly on the hour mark except on the hour."
- },
- {
-  "id": "brain-014",
-  "cat": "brainteasers",
-  "diff": 2,
-  "title": "25 horses, 5 tracks",
-  "tags": [
-   "tournament",
-   "elimination",
-   "ordering"
-  ],
-  "prompt": "<p>You have 25 horses and a track that races 5 at a time. Races give only the finishing order (no times), and each horse runs at a fixed speed. What is the minimum number of races needed to find the <b>3 fastest</b> horses, in order?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 7.0,
-   "display": "7"
-  },
-  "hints": [
-   "Race 5 groups of 5, then race the 5 group winners.",
-   "After 6 races, only a handful of horses can still be in the top 3. Count them."
-  ],
-  "solution": "<ol>\n<li><b>Races 1–5:</b> split into groups A–E and race each group. Label horses A1…A5 by finish within group A, and so on.</li>\n<li><b>Race 6:</b> race the five winners A1…E1. Relabel groups so the finish order is A1 &gt; B1 &gt; C1 &gt; D1 &gt; E1. A1 is the fastest overall.</li>\n<li>Eliminate: groups D and E entirely (D1 already has 3 faster horses ahead of it); C2 and lower (behind C1, B1, A1); B3 and lower (behind B2, B1, A1); A4 and lower.</li>\n<li>Candidates for 2nd and 3rd: A2, A3, B1, B2, C1. That is exactly 5 horses. <b>Race 7</b> them; the top two are 2nd and 3rd overall.</li>\n<li><b>Why not 6?</b> Every horse must race at least once (5 races), and certifying the overall winner needs the group winners compared (a 6th race). In the worst case 5 candidates for 2nd/3rd still remain after that, so a 7th race is unavoidable.</li>\n</ol>\n<p><b>Answer: 7 races.</b></p>",
-  "key": "After group races and a winners' race, prune with a 'how many horses are provably faster' argument — only 5 candidates remain."
- },
- {
-  "id": "brain-015",
-  "cat": "brainteasers",
-  "diff": 2,
-  "title": "Poisoned wine",
-  "tags": [
-   "binary",
-   "encoding",
-   "information"
-  ],
-  "prompt": "<p>A king has 1000 bottles of wine; exactly one is poisoned. The poison kills exactly 24 hours after even a drop is drunk, and the party starts in a little over 24 hours, so there is time for only one round of tasting. Each prisoner may sip from any number of bottles. What is the minimum number of prisoners needed to identify the poisoned bottle with certainty?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 10.0,
-   "display": "10"
-  },
-  "hints": [
-   "Each prisoner's outcome is one bit: dies or survives.",
-   "Number the bottles in binary."
-  ],
-  "solution": "<ol>\n<li>With one round, each prisoner yields one bit (alive/dead), so k prisoners give at most 2<sup>k</sup> distinguishable outcomes. We need 2<sup>k</sup> ≥ 1000, so k ≥ 10 (2<sup>9</sup> = 512 &lt; 1000 ≤ 1024 = 2<sup>10</sup>).</li>\n<li>10 suffice: write bottle numbers 0–999 in 10-bit binary. Prisoner j sips from every bottle whose j-th bit is 1.</li>\n<li>After 24 h, the set of dead prisoners spells the poisoned bottle's binary number.</li>\n</ol>\n<p><b>Answer: 10 prisoners.</b></p>",
-  "key": "Each taster is one bit of information; binary-encode the bottles."
- },
- {
-  "id": "brain-016",
-  "cat": "brainteasers",
-  "diff": 1,
-  "title": "Water jugs: 3 L and 5 L",
-  "tags": [
-   "jugs",
-   "bfs",
-   "number-theory"
-  ],
-  "prompt": "<p>You have a 3-litre jug, a 5-litre jug (no markings) and an unlimited tap. Each <b>step</b> is one of: fill a jug completely, empty a jug, or pour from one jug into the other until the source is empty or the target is full. What is the minimum number of steps to have exactly 4 litres in a jug?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 6.0,
-   "display": "6 steps"
-  },
-  "hints": [
-   "Try filling the 5 L jug first and pouring into the 3 L jug.",
-   "4 = 2·5 − 2·3: fill the 5 twice, empty the 3 twice."
-  ],
-  "solution": "<p>Track (3 L jug, 5 L jug):</p>\n<ol>\n<li>Fill 5 → (0, 5)</li>\n<li>Pour 5 → 3 → (3, 2)</li>\n<li>Empty 3 → (0, 2)</li>\n<li>Pour 5 → 3 → (2, 0)</li>\n<li>Fill 5 → (2, 5)</li>\n<li>Pour 5 → 3 until full (1 L moves) → (3, <b>4</b>)</li>\n</ol>\n<p>Starting with the 3 L jug takes 8 steps instead; a breadth-first search over all states confirms 6 is minimal.</p>\n<p><b>Answer: 6 steps.</b></p>",
-  "key": "Reachable amounts are combinations of 5 and 3 (gcd 1); BFS over (a, b) states gives the shortest sequence."
- },
- {
-  "id": "brain-017",
-  "cat": "brainteasers",
-  "diff": 2,
-  "title": "Two guards, two doors",
-  "tags": [
-   "logic",
-   "liars",
-   "self-reference"
-  ],
-  "prompt": "<p>Two doors: one leads to freedom, the other to doom. Each door has a guard. One guard always tells the truth, the other always lies, and you don't know which is which. You may ask <b>one</b> yes/no question to <b>one</b> guard. What do you ask to find the door to freedom?</p>",
-  "answer": {
-   "type": "self",
-   "display": "Point at a door and ask: 'If I asked the other guard whether this door leads to freedom, would he say yes?' Then do the opposite of the answer (or ask 'Which door would the other guard say leads to freedom?' and take the other door)."
-  },
-  "hints": [
-   "Make the answer pass through both guards, so exactly one lie is applied either way.",
-   "Ask about what the other guard would say."
-  ],
-  "solution": "<ol>\n<li>Ask either guard: “Which door would the <i>other</i> guard say leads to freedom?”</li>\n<li>If you asked the truth-teller, he truthfully reports the liar's false answer → the doom door.</li>\n<li>If you asked the liar, he lies about the truth-teller's correct answer → the doom door.</li>\n<li>Either way you are pointed at doom, so take the <b>other</b> door.</li>\n</ol>\n<p>An alternative: “If I asked you whether the left door leads to freedom, would you say yes?” A double negation makes both guards answer truthfully.</p>",
-  "key": "Route the question through both guards (or through the same liar twice) so the lies cancel or compose predictably."
- },
- {
-  "id": "brain-018",
-  "cat": "brainteasers",
-  "diff": 1,
-  "title": "Mutilated chessboard",
-  "tags": [
-   "invariant",
-   "coloring",
-   "tiling"
-  ],
-  "prompt": "<p>Two diagonally opposite corner squares are removed from an 8×8 chessboard, leaving 62 squares. Can the remaining board be tiled exactly by 31 dominoes (each covering two adjacent squares)?</p>",
-  "answer": {
-   "type": "choice",
-   "options": [
-    "Yes",
-    "No — it is impossible",
-    "Only if dominoes may overlap the edge"
-   ],
-   "correct": 1,
-   "display": "No — a coloring argument shows it is impossible"
-  },
-  "hints": [
-   "What colors are two diagonally opposite corners?",
-   "Every domino covers one black and one white square."
-  ],
-  "solution": "<ol>\n<li>Opposite corners of a chessboard have the <b>same</b> color (say both white).</li>\n<li>After removal there are 30 white and 32 black squares.</li>\n<li>Every domino covers one white and one black square, so 31 dominoes would cover 31 of each.</li>\n<li>31 ≠ 30, so no tiling exists.</li>\n</ol>\n<p><b>Answer: No.</b></p>",
-  "key": "Find an invariant (here, color balance) that every move preserves but the target violates."
- },
- {
-  "id": "brain-019",
-  "cat": "brainteasers",
-  "diff": 3,
-  "title": "Blue-eyed islanders",
-  "tags": [
-   "common-knowledge",
-   "induction",
-   "logic"
-  ],
-  "prompt": "<p>An island has 100 blue-eyed and 100 brown-eyed people, all perfect logicians. Nobody knows their own eye color, there are no mirrors, and nobody discusses eye color. Every night a ferry comes, and anyone who <b>knows</b> their own eye color must leave on it. Everyone sees everyone else every day.</p>\n<p>One day a visitor announces publicly: “I see at least one person with blue eyes.” On which night (counting the announcement day's night as night 1) do the blue-eyed people leave?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 100.0,
-   "display": "Night 100 (all 100 blue-eyed leave together)"
-  },
-  "hints": [
-   "Solve it with 1 blue-eyed person, then 2, then 3.",
-   "With n blue-eyed people, each one sees n−1 and waits to see whether those n−1 leave on night n−1."
-  ],
-  "solution": "<ol>\n<li><b>n = 1:</b> The lone blue-eyed person sees no blue eyes, so the announcement tells him it is him. He leaves on night 1.</li>\n<li><b>n = 2:</b> Each blue-eyed person sees one other. If he were not blue, the other would be the n = 1 case and leave on night 1. When nobody leaves on night 1, each deduces he is blue. Both leave on night 2.</li>\n<li><b>Induction:</b> if n blue-eyed people would leave on night n, then with n+1 blue-eyed people each sees n and expects them to leave on night n. When they don't, each concludes he is also blue, and all n+1 leave on night n+1.</li>\n<li>With 100 blue-eyed people they all leave on <b>night 100</b>. (The brown-eyed people then know they are not blue, though without further information they cannot deduce “brown” itself.)</li>\n</ol>\n<p>The announcement seems to add nothing (everyone already sees blue eyes), but it makes the fact <i>common knowledge</i>, which starts the countdown.</p>",
-  "key": "A public announcement creates common knowledge; induction on the number of blue-eyed people gives a countdown of n nights."
- },
- {
-  "id": "brain-020",
-  "cat": "brainteasers",
-  "diff": 1,
-  "title": "Three switches, one bulb",
-  "tags": [
-   "logic",
-   "information",
-   "lateral-thinking"
-  ],
-  "prompt": "<p>Outside a closed room are three light switches; exactly one controls an incandescent bulb inside. You may set the switches however you like, but you may enter the room only <b>once</b>. How do you determine which switch controls the bulb?</p>",
-  "answer": {
-   "type": "self",
-   "display": "Turn switch 1 on for ~10 minutes, turn it off, turn switch 2 on, enter: on → 2; off and warm → 1; off and cold → 3."
-  },
-  "hints": [
-   "A bulb has more observable states than on/off.",
-   "Incandescent bulbs get hot."
-  ],
-  "solution": "<ol>\n<li>Turn switch 1 on and wait about 10 minutes.</li>\n<li>Turn switch 1 off and turn switch 2 on, then enter the room.</li>\n<li>Bulb on → switch 2. Bulb off but warm → switch 1. Bulb off and cold → switch 3.</li>\n</ol>\n<p>A single observation gives three outcomes only because heat adds a second dimension of information.</p>",
-  "key": "Find a second observable (heat) so one observation can distinguish three cases."
- },
- {
-  "id": "brain-021",
-  "cat": "brainteasers",
-  "diff": 2,
-  "title": "Blindfolded coin split",
-  "tags": [
-   "invariant",
-   "parity",
-   "construction"
-  ],
-  "prompt": "<p>You are blindfolded at a table with 100 coins; exactly 10 show heads. You can't see or feel which side is up, but you can move and flip coins. Split the coins into two piles with the <b>same number of heads</b>.</p>",
-  "answer": {
-   "type": "self",
-   "display": "Take any 10 coins as pile A and flip all of them; the other 90 are pile B. Both piles then have the same number of heads."
-  },
-  "hints": [
-   "Choose the size of one pile cleverly: it should match the number of heads.",
-   "If pile A has k heads among its 10 coins, how many heads does pile B have?"
-  ],
-  "solution": "<ol>\n<li>Take any 10 coins as pile A; the remaining 90 form pile B.</li>\n<li>Suppose pile A contains k heads. Then pile B contains 10 − k heads.</li>\n<li>Pile A has 10 − k tails. Flip every coin in pile A: it now has 10 − k heads.</li>\n<li>Both piles have 10 − k heads.</li>\n</ol>",
-  "key": "Size one pile equal to the total head count; flipping it converts its tails count into exactly the other pile's heads count."
- },
- {
-  "id": "brain-022",
-  "cat": "brainteasers",
-  "diff": 3,
-  "title": "Hats in a line",
-  "tags": [
-   "parity",
-   "strategy",
-   "prisoners",
-   "hats"
-  ],
-  "prompt": "<p>100 prisoners stand in a line, each wearing a black or white hat assigned arbitrarily. Each sees all hats <b>in front</b> of him, but not his own or those behind. Starting from the back, each prisoner in turn says “black” or “white” aloud (everyone hears). Those who say their own hat color survive.</p>\n<p>With the best pre-agreed strategy, how many prisoners can be <b>guaranteed</b> to survive?</p>",
-  "answer": {
-   "type": "numeric",
-   "value": 99.0,
-   "display": "99"
-  },
-  "hints": [
-   "The last prisoner can't learn anything about his own hat, but he can broadcast one bit to everyone else.",
-   "Use parity: say 'black' if the number of black hats you see is odd."
-  ],
-  "solution": "<ol>\n<li>The back prisoner says “black” if he sees an odd number of black hats, else “white”. He survives only by luck (50%).</li>\n<li>The next prisoner sees the hats ahead and knows the parity the back prisoner saw. If the parity he sees differs, his own hat is black; otherwise it is white. He answers correctly.</li>\n<li>Each later prisoner tracks the announced parity and all the (correct) answers spoken after it, so he can deduce his own hat. All 99 answer correctly.</li>\n<li>No strategy can guarantee the back prisoner: nobody gives him any information, and the adversary can choose his hat to defeat his answer.</li>\n</ol>\n<p><b>Answer: 99 guaranteed</b> (100 with probability 1/2).</p>",
-  "key": "One public parity bit lets everyone else decode their own hat from what they see and hear."
- },
- {
   "id": "ev-001",
   "cat": "ev",
   "diff": 1,
@@ -2832,6 +2322,516 @@ window.PROBLEMS = [
   "key": "Surjections onto k boxes: ∑(−1)ʲC(k,j)(k−j)ⁿ."
  },
  {
+  "id": "brain-001",
+  "cat": "brainteasers",
+  "diff": 2,
+  "title": "Five pirates and 100 gold coins",
+  "tags": [
+   "backward-induction",
+   "game-theory",
+   "pirates"
+  ],
+  "prompt": "<p>Five pirates of strictly ranked seniority must split 100 indivisible gold coins. The most senior pirate proposes a split; all pirates (including the proposer) vote. If <b>at least half</b> vote yes, the split is adopted. Otherwise the proposer is thrown overboard and the next most senior pirate proposes, and so on.</p>\n<p>Every pirate is perfectly rational and (1) wants to survive, (2) wants as many coins as possible, (3) given equal coins, prefers to see someone thrown overboard.</p>\n<p>How many coins does the most senior pirate keep?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 98.0,
+   "display": "98"
+  },
+  "hints": [
+   "Start from the end: what happens with only 1 pirate? With 2?",
+   "A pirate votes yes only if he gets strictly more than he would in the next round. Buy the cheapest votes with 1 coin each."
+  ],
+  "solution": "<p>Label pirates P1 (most junior) … P5 (most senior). Work backwards.</p>\n<ol>\n<li><b>1 pirate (P1):</b> P1 keeps 100.</li>\n<li><b>2 pirates (P2, P1):</b> P2 needs 1 of 2 votes — his own. Split: P2 = 100, P1 = 0.</li>\n<li><b>3 pirates:</b> P3 needs 2 votes. P1 gets 0 in the next round, so 1 coin buys him. Split: P3 = 99, P2 = 0, P1 = 1.</li>\n<li><b>4 pirates:</b> P4 needs 2 votes. P2 gets 0 in the 3-pirate round, so 1 coin buys him. Split: P4 = 99, P3 = 0, P2 = 1, P1 = 0.</li>\n<li><b>5 pirates:</b> P5 needs 3 votes, i.e. 2 besides his own. The pirates getting 0 in the 4-pirate round are P3 and P1; 1 coin each buys them. Split: P5 = 98, P4 = 0, P3 = 1, P2 = 0, P1 = 1.</li>\n</ol>\n<p><b>Answer: 98 coins.</b></p>",
+  "key": "Backward induction: each proposer bribes, at 1 coin each, exactly the pirates who would get nothing in the next round."
+ },
+ {
+  "id": "brain-002",
+  "cat": "brainteasers",
+  "diff": 1,
+  "title": "Burning ropes: measure 45 minutes",
+  "tags": [
+   "ropes",
+   "timing",
+   "construction"
+  ],
+  "prompt": "<p>You have two ropes and a lighter. Each rope takes exactly 60 minutes to burn completely, but burns <b>non-uniformly</b> (half the rope does not necessarily take 30 minutes). How do you measure exactly 45 minutes?</p>",
+  "answer": {
+   "type": "self",
+   "display": "Light rope A at both ends and rope B at one end; when A finishes (30 min), light B's other end; B finishes 15 min later (45 min total)."
+  },
+  "hints": [
+   "Lighting a rope at both ends makes it burn out in exactly half its time, whatever the burn profile.",
+   "Use one rope to mark 30 minutes while the other burns from one end only."
+  ],
+  "solution": "<p><b>Key fact:</b> a rope lit at both ends burns out in exactly 30 minutes: the two flames together consume the rope at a combined rate that always totals 60 rope-minutes, so they meet after 30 minutes regardless of where.</p>\n<ol>\n<li>At t = 0, light rope A at <b>both</b> ends and rope B at <b>one</b> end.</li>\n<li>Rope A burns out at t = 30. At that instant rope B has exactly 30 minutes of burn left.</li>\n<li>Immediately light the other end of B. Its remaining 30 minutes of burn now take 15 minutes.</li>\n<li>B burns out at t = 45.</li>\n</ol>\n<p><b>Answer:</b> 45 minutes elapse from the first lighting until B is consumed.</p>",
+  "key": "Lighting both ends halves the remaining burn time, independent of how unevenly the rope burns."
+ },
+ {
+  "id": "brain-003",
+  "cat": "brainteasers",
+  "diff": 3,
+  "title": "100 prisoners and a light bulb",
+  "tags": [
+   "prisoners",
+   "strategy",
+   "counting",
+   "protocol"
+  ],
+  "prompt": "<p>100 prisoners are in solitary cells. Each day the warden picks one prisoner uniformly at random (with replacement) and takes him to a room with a single light bulb, initially <b>off</b>. The prisoner may toggle the bulb or leave it. At any time any prisoner may declare “everyone has visited the room.” If correct, all are freed; if wrong, all are executed.</p>\n<p>The prisoners may plan once beforehand and never communicate again. Give a strategy that guarantees freedom with probability 1.</p>",
+  "answer": {
+   "type": "self",
+   "display": "Elect one counter. Every other prisoner turns the bulb ON the first time he finds it off (only once). The counter turns it OFF each time he finds it on, counting; at 99 he declares."
+  },
+  "hints": [
+   "The bulb can carry only one bit, so let one designated prisoner be the only one who ever resets it.",
+   "Each non-counter should signal exactly once."
+  ],
+  "solution": "<ol>\n<li>Designate one prisoner as the <b>counter</b>. The other 99 are <b>signalers</b>.</li>\n<li>A signaler who enters and finds the bulb <b>off</b> turns it <b>on</b> — but only the first time this happens to him. Ever after, he leaves the bulb untouched.</li>\n<li>The counter, whenever he finds the bulb <b>on</b>, turns it <b>off</b> and adds 1 to his count. If he finds it off, he does nothing.</li>\n<li>Each “on” the counter sees was produced by a distinct signaler (each signals once, and no one turns the bulb on again until the counter resets it). When his count reaches <b>99</b>, every signaler has visited, and the counter has obviously visited, so he declares.</li>\n</ol>\n<p>Because visits are random with replacement, every prisoner visits infinitely often with probability 1, so the count reaches 99 with probability 1 (expected time is roughly 10,000 days — slow but certain).</p>\n<p><b>Answer:</b> the single-counter protocol above.</p>",
+  "key": "One bit of shared memory suffices if exactly one agent is allowed to reset it and everyone else signals exactly once."
+ },
+ {
+  "id": "brain-004",
+  "cat": "brainteasers",
+  "diff": 3,
+  "title": "100 prisoners and 100 boxes",
+  "tags": [
+   "prisoners",
+   "permutations",
+   "cycles",
+   "probability"
+  ],
+  "prompt": "<p>100 prisoners are numbered 1–100. A room holds 100 closed boxes, numbered 1–100, containing the prisoners' numbers in a uniformly random arrangement (one number per box). One at a time, each prisoner enters, opens at most <b>50</b> boxes, and leaves the room exactly as found, with no communication afterwards. All are freed only if <b>every</b> prisoner finds his own number.</p>\n<p>Using the optimal strategy (each prisoner starts at the box with his own number and then follows the number he finds), what is the probability that all prisoners are freed? Give 4 decimals.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.31182782068,
+   "display": "1 − (1/51 + 1/52 + … + 1/100) ≈ 0.3118",
+   "tolAbs": 0.002
+  },
+  "hints": [
+   "Following the pointer chain from your own box traces the cycle of the permutation that contains your number.",
+   "Everyone succeeds iff the random permutation has no cycle longer than 50. Count permutations with a cycle of length k > 50."
+  ],
+  "solution": "<ol>\n<li>The box contents define a random permutation σ of {1,…,100}. Prisoner i opens box i, sees σ(i), opens box σ(i), and so on. He is walking around the cycle of σ that contains i, and he finds his number exactly when he gets back to the start, i.e. after (cycle length) boxes.</li>\n<li>So prisoner i succeeds iff his cycle has length ≤ 50, and <b>all</b> succeed iff σ has no cycle of length > 50.</li>\n<li>At most one cycle can exceed 50. The number of permutations of n = 100 with a specific cycle of length k > 50 is C(100,k)·(k−1)!·(100−k)! = 100!/k. So P(longest cycle = k) = 1/k.</li>\n<li>P(fail) = ∑<sub>k=51</sub><sup>100</sup> 1/k = H<sub>100</sub> − H<sub>50</sub> ≈ 0.6882.</li>\n<li>P(all freed) = 1 − 0.6882 ≈ <b>0.3118</b>. (As n → ∞ this tends to 1 − ln 2 ≈ 0.307.)</li>\n</ol>\n<p>Compare with independent random guessing: (1/2)<sup>100</sup> ≈ 8·10<sup>−31</sup>.</p>",
+  "key": "The pointer-chasing strategy correlates everyone's success: all win iff the permutation has no cycle longer than 50, probability 1 − (H₁₀₀ − H₅₀)."
+ },
+ {
+  "id": "brain-005",
+  "cat": "brainteasers",
+  "diff": 1,
+  "title": "Nine coins, one heavier",
+  "tags": [
+   "weighing",
+   "balance",
+   "information"
+  ],
+  "prompt": "<p>You have 9 identical-looking coins; exactly one is slightly <b>heavier</b>. Using a two-pan balance (no weights), what is the minimum number of weighings that <b>guarantees</b> you find the heavy coin?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2.0,
+   "display": "2"
+  },
+  "hints": [
+   "Each weighing has three outcomes: left heavy, right heavy, balance.",
+   "Split into three groups of three."
+  ],
+  "solution": "<ol>\n<li>Each weighing gives one of 3 outcomes, so w weighings distinguish at most 3<sup>w</sup> cases. With 9 candidates we need 3<sup>w</sup> ≥ 9, so w ≥ 2. One weighing (3 outcomes) cannot separate 9 cases.</li>\n<li>Two suffice: weigh coins {1,2,3} vs {4,5,6}. If one side is heavier, the heavy coin is among those three; if they balance, it is among {7,8,9}.</li>\n<li>From the 3 suspects, weigh one against another: the heavier one is fake; if they balance, it is the third.</li>\n</ol>\n<p><b>Answer: 2 weighings.</b></p>",
+  "key": "A balance is a ternary device: w weighings separate up to 3ʷ possibilities, so split into thirds."
+ },
+ {
+  "id": "brain-006",
+  "cat": "brainteasers",
+  "diff": 3,
+  "title": "Twelve coins, heavier or lighter",
+  "tags": [
+   "weighing",
+   "balance",
+   "information",
+   "strategy"
+  ],
+  "prompt": "<p>You have 12 coins; exactly one is counterfeit and is either <b>heavier or lighter</b> (you don't know which). With a two-pan balance and exactly <b>3 weighings</b>, identify the counterfeit coin <b>and</b> whether it is heavier or lighter. Describe a strategy.</p>",
+  "answer": {
+   "type": "self",
+   "display": "Weigh 1234 vs 5678. If balanced, fake is in 9–12: weigh 9,10,11 vs 1,2,3 (known good), then one more. If unbalanced, weigh 1,2,5 vs 3,6,G (G a known-good coin) and resolve with the third weighing."
+  },
+  "hints": [
+   "There are 24 cases (12 coins × heavy/light) and 3³ = 27 outcomes, so every weighing must split the remaining cases as evenly as possible (≤ 9, ≤ 3, ≤ 1).",
+   "After an unbalanced first weighing, move some coins across pans, swap some for known-good coins, and leave some off."
+  ],
+  "solution": "<p>Counting: 24 hypotheses ≤ 27 outcomes, so it is possible only if each weighing splits cases into groups of size ≤ 9, then ≤ 3, then ≤ 1.</p>\n<p><b>Weighing 1:</b> {1,2,3,4} vs {5,6,7,8}.</p>\n<p><b>Case A — balance.</b> Coins 1–8 are genuine; fake is in 9–12 (8 cases). Weigh {9,10,11} vs {1,2,3}.</p>\n<ul>\n<li>Balance → coin 12 is fake; weigh 12 vs 1 to learn heavy/light.</li>\n<li>Left heavy → one of 9,10,11 is heavy; weigh 9 vs 10: the heavier is fake, or 11 if balanced.</li>\n<li>Left light → same with “lighter”.</li>\n</ul>\n<p><b>Case B — left side heavy</b> (so either one of 1–4 is heavy or one of 5–8 is light; 8 cases). Weigh {1,2,5} vs {3,6,9} (9 is genuine).</p>\n<ul>\n<li>Left heavy → 1 heavy, 2 heavy, or 6 light. Weigh 1 vs 2: heavier one is fake (heavy); balance → 6 is light.</li>\n<li>Right heavy → 3 heavy or 5 light. Weigh 3 vs 9: if heavy, 3 is heavy; if balanced, 5 is light.</li>\n<li>Balance → 4 heavy, 7 light, or 8 light. Weigh 7 vs 8: the lighter is fake; balance → 4 is heavy.</li>\n</ul>\n<p><b>Case C — right side heavy:</b> symmetric to B with roles swapped.</p>\n<p>In every branch, after 3 weighings exactly one hypothesis remains. In fact (3<sup>w</sup> − 3)/2 = 12 is the largest number of coins solvable this way with w = 3.</p>",
+  "key": "Count hypotheses vs outcomes (24 ≤ 27) and design each weighing to split the remaining cases into thirds, using rotation and known-good coins."
+ },
+ {
+  "id": "brain-007",
+  "cat": "brainteasers",
+  "diff": 2,
+  "title": "Ants on a stick",
+  "tags": [
+   "ants",
+   "symmetry",
+   "relabeling"
+  ],
+  "prompt": "<p>100 ants are placed at arbitrary positions on a 1-metre stick (endpoints allowed), each facing left or right arbitrarily. All walk at 1 cm/s. When two ants meet, both instantly reverse direction. An ant falls off when it walks past an end.</p>\n<p>Over all possible starting configurations, what is the longest time (in seconds) you might have to wait until every ant has fallen off?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 100.0,
+   "display": "100 s"
+  },
+  "hints": [
+   "Two ants bouncing off each other looks exactly like two ants passing through each other — if you ignore their names.",
+   "So each 'ghost' ant walks straight to the end it faces."
+  ],
+  "solution": "<ol>\n<li>When two ants collide and reverse, the set of positions and directions is identical to what it would be if they had simply walked through each other. Only the labels differ.</li>\n<li>So treat the ants as ghosts that pass through one another. Each ghost walks straight off the end it faces, taking (distance to that end)/1 cm/s.</li>\n<li>The stick is empty when the last ghost falls off, after max over ants of distance-to-facing-end, which is at most 100 cm → 100 s.</li>\n<li>This is attained: an ant at the left end facing right needs 100 s.</li>\n</ol>\n<p><b>Answer: 100 seconds</b>, no matter how many ants or collisions.</p>",
+  "key": "Collisions that swap directions are equivalent to ants passing through each other; relabeling removes the interactions."
+ },
+ {
+  "id": "brain-008",
+  "cat": "brainteasers",
+  "diff": 2,
+  "title": "Bridge and torch",
+  "tags": [
+   "river-crossing",
+   "optimization",
+   "greedy"
+  ],
+  "prompt": "<p>Four people must cross a rickety bridge at night. At most <b>two</b> can be on the bridge at once, and any crossing needs the single torch, which must be walked back (it cannot be thrown). They take 1, 2, 5 and 10 minutes to cross individually; a pair moves at the slower person's pace.</p>\n<p>What is the minimum total time (in minutes) for all four to cross?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 17.0,
+   "display": "17 minutes"
+  },
+  "hints": [
+   "The obvious plan — 1 escorts everyone — costs 10 + 1 + 5 + 1 + 2 = 19. Can the two slowest cross together?",
+   "Send the two fastest first, so a fast person is waiting on the far side to bring the torch back."
+  ],
+  "solution": "<ol>\n<li>1 and 2 cross: 2 min.</li>\n<li>1 returns with the torch: 1 min (total 3).</li>\n<li>5 and 10 cross together: 10 min (total 13).</li>\n<li>2 returns: 2 min (total 15).</li>\n<li>1 and 2 cross: 2 min (total 17).</li>\n</ol>\n<p>Pairing the two slowest saves 5 minutes versus having 1 escort each (19 min). An exhaustive search confirms nothing beats 17.</p>\n<p><b>Answer: 17 minutes.</b></p>",
+  "key": "Make the two slowest cross together, with the two fastest acting as torch shuttles."
+ },
+ {
+  "id": "brain-009",
+  "cat": "brainteasers",
+  "diff": 1,
+  "title": "100 lockers",
+  "tags": [
+   "divisors",
+   "perfect-squares",
+   "number-theory"
+  ],
+  "prompt": "<p>A hallway has 100 closed lockers numbered 1–100. Student 1 opens every locker. Student 2 toggles every 2nd locker (2, 4, 6, …). Student 3 toggles every 3rd locker, and so on, until student 100 toggles locker 100.</p>\n<p>How many lockers are open at the end?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 10.0,
+   "display": "10"
+  },
+  "hints": [
+   "Locker n is toggled once for each divisor of n.",
+   "Which numbers have an odd number of divisors?"
+  ],
+  "solution": "<ol>\n<li>Locker n is toggled by student d exactly when d divides n, so it is toggled d(n) times, where d(n) is its number of divisors.</li>\n<li>It ends open iff d(n) is odd.</li>\n<li>Divisors come in pairs (d, n/d). The pair collapses to a single divisor only when d = n/d, i.e. n is a perfect square. So d(n) is odd iff n is a perfect square.</li>\n<li>Perfect squares ≤ 100: 1, 4, 9, …, 100. That is <b>10</b> lockers.</li>\n</ol>",
+  "key": "Divisors pair up except at √n, so only perfect squares are toggled an odd number of times."
+ },
+ {
+  "id": "brain-010",
+  "cat": "brainteasers",
+  "diff": 2,
+  "title": "Two eggs, 100 floors",
+  "tags": [
+   "dynamic-programming",
+   "optimization",
+   "worst-case"
+  ],
+  "prompt": "<p>You have 2 identical eggs and a 100-floor building. There is a critical floor F (0 ≤ F ≤ 100): an egg dropped from a floor above F breaks, and one dropped from floor F or below survives (and can be reused). What is the minimum number of drops that guarantees you determine F in the worst case?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 14.0,
+   "display": "14"
+  },
+  "hints": [
+   "Once the first egg breaks, the second must scan linearly from the last safe floor upward.",
+   "If you allow d drops in total, the first drop should be from floor d, the next from d + (d−1), and so on. You need d + (d−1) + … + 1 ≥ 100."
+  ],
+  "solution": "<ol>\n<li>Suppose you can afford at most d drops. Drop egg 1 from floor d: if it breaks, egg 2 checks floors 1…d−1 one by one, which is d−1 more drops. Total ≤ d.</li>\n<li>If it survives, you have d−1 drops left, so the next drop of egg 1 can go up d−1 more floors, then d−2, and so on.</li>\n<li>So d drops cover d + (d−1) + … + 1 = d(d+1)/2 floors. We need d(d+1)/2 ≥ 100.</li>\n<li>13·14/2 = 91 &lt; 100 and 14·15/2 = 105 ≥ 100, so d = <b>14</b>. One schedule: floors 14, 27, 39, 50, 60, 69, 77, 84, 90, 95, 99, 100.</li>\n</ol>",
+  "key": "Balance the worst case: decrease the jump by one after each safe drop, so d drops cover d(d+1)/2 floors."
+ },
+ {
+  "id": "brain-011",
+  "cat": "brainteasers",
+  "diff": 2,
+  "title": "Clock hands overlapping",
+  "tags": [
+   "clock",
+   "relative-speed",
+   "counting"
+  ],
+  "prompt": "<p>On an analog clock, how many times do the hour and minute hands exactly overlap during a 12-hour period (count the times t in [12:00, 12:00 + 12 h), so 12:00 is counted once)?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 11.0,
+   "display": "11"
+  },
+  "hints": [
+   "The minute hand gains on the hour hand at 360° − 30° = 330° per hour.",
+   "How many full laps does it gain in 12 hours?"
+  ],
+  "solution": "<ol>\n<li>The minute hand moves 360°/h and the hour hand 30°/h, so the minute hand gains 330°/h on the hour hand.</li>\n<li>The hands overlap each time the gain is a multiple of 360°, i.e. every 360/330 = 12/11 h ≈ 1 h 5 min 27 s.</li>\n<li>In 12 hours the gain is 12·330 = 3960° = 11 full laps, so overlaps occur at t = 0, 12/11, 24/11, …, 120/11 h: <b>11</b> times. (There is no overlap between 11:00 and 12:00 except at 12:00 itself.)</li>\n</ol>",
+  "key": "Use relative speed: the minute hand laps the hour hand 11 times every 12 hours."
+ },
+ {
+  "id": "brain-012",
+  "cat": "brainteasers",
+  "diff": 2,
+  "title": "Right angles in a day",
+  "tags": [
+   "clock",
+   "relative-speed",
+   "counting"
+  ],
+  "prompt": "<p>How many times in a full 24-hour day (from midnight inclusive to the next midnight exclusive) do the hour and minute hands of a clock form an exact right angle (90°)?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 44.0,
+   "display": "44"
+  },
+  "hints": [
+   "The relative angle grows at 330° per hour. Every lap it passes 90° once and 270° once.",
+   "How many relative laps happen in 24 hours?"
+  ],
+  "solution": "<ol>\n<li>The relative angle (minute − hour) increases at 330°/h. It is a right angle when it equals 90° or 270° (mod 360°).</li>\n<li>In 24 h the relative angle increases by 24·330 = 7920° = 22 full laps.</li>\n<li>Each lap passes 90° once and 270° once, and at midnight the angle is 0, which is not a right angle. So there are 2·22 = <b>44</b> right angles.</li>\n<li>Note that it is not 48: 3:00 and 9:00 are right angles, but the hands lose slots around them because the hour hand moves.</li>\n</ol>",
+  "key": "Two right angles per relative lap, 22 relative laps per day → 44."
+ },
+ {
+  "id": "brain-013",
+  "cat": "brainteasers",
+  "diff": 1,
+  "title": "Angle at 3:15",
+  "tags": [
+   "clock",
+   "angles",
+   "mental-math"
+  ],
+  "prompt": "<p>What is the angle, in degrees, between the hour and minute hands of a clock at exactly 3:15?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 7.5,
+   "display": "7.5°"
+  },
+  "hints": [
+   "At 3:15 the minute hand is exactly on the 3. Where is the hour hand?",
+   "The hour hand moves 0.5° per minute."
+  ],
+  "solution": "<ol>\n<li>Minute hand at 15 min: 15·6° = 90°.</li>\n<li>Hour hand: 3·30° + 15·0.5° = 90° + 7.5° = 97.5°.</li>\n<li>Difference: <b>7.5°</b>.</li>\n</ol>",
+  "key": "The hour hand moves 0.5° per minute, so it is never exactly on the hour mark except on the hour."
+ },
+ {
+  "id": "brain-014",
+  "cat": "brainteasers",
+  "diff": 2,
+  "title": "25 horses, 5 tracks",
+  "tags": [
+   "tournament",
+   "elimination",
+   "ordering"
+  ],
+  "prompt": "<p>You have 25 horses and a track that races 5 at a time. Races give only the finishing order (no times), and each horse runs at a fixed speed. What is the minimum number of races needed to find the <b>3 fastest</b> horses, in order?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 7.0,
+   "display": "7"
+  },
+  "hints": [
+   "Race 5 groups of 5, then race the 5 group winners.",
+   "After 6 races, only a handful of horses can still be in the top 3. Count them."
+  ],
+  "solution": "<ol>\n<li><b>Races 1–5:</b> split into groups A–E and race each group. Label horses A1…A5 by finish within group A, and so on.</li>\n<li><b>Race 6:</b> race the five winners A1…E1. Relabel groups so the finish order is A1 &gt; B1 &gt; C1 &gt; D1 &gt; E1. A1 is the fastest overall.</li>\n<li>Eliminate: groups D and E entirely (D1 already has 3 faster horses ahead of it); C2 and lower (behind C1, B1, A1); B3 and lower (behind B2, B1, A1); A4 and lower.</li>\n<li>Candidates for 2nd and 3rd: A2, A3, B1, B2, C1. That is exactly 5 horses. <b>Race 7</b> them; the top two are 2nd and 3rd overall.</li>\n<li><b>Why not 6?</b> Every horse must race at least once (5 races), and certifying the overall winner needs the group winners compared (a 6th race). In the worst case 5 candidates for 2nd/3rd still remain after that, so a 7th race is unavoidable.</li>\n</ol>\n<p><b>Answer: 7 races.</b></p>",
+  "key": "After group races and a winners' race, prune with a 'how many horses are provably faster' argument — only 5 candidates remain."
+ },
+ {
+  "id": "brain-015",
+  "cat": "brainteasers",
+  "diff": 2,
+  "title": "Poisoned wine",
+  "tags": [
+   "binary",
+   "encoding",
+   "information"
+  ],
+  "prompt": "<p>A king has 1000 bottles of wine; exactly one is poisoned. The poison kills exactly 24 hours after even a drop is drunk, and the party starts in a little over 24 hours, so there is time for only one round of tasting. Each prisoner may sip from any number of bottles. What is the minimum number of prisoners needed to identify the poisoned bottle with certainty?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 10.0,
+   "display": "10"
+  },
+  "hints": [
+   "Each prisoner's outcome is one bit: dies or survives.",
+   "Number the bottles in binary."
+  ],
+  "solution": "<ol>\n<li>With one round, each prisoner yields one bit (alive/dead), so k prisoners give at most 2<sup>k</sup> distinguishable outcomes. We need 2<sup>k</sup> ≥ 1000, so k ≥ 10 (2<sup>9</sup> = 512 &lt; 1000 ≤ 1024 = 2<sup>10</sup>).</li>\n<li>10 suffice: write bottle numbers 0–999 in 10-bit binary. Prisoner j sips from every bottle whose j-th bit is 1.</li>\n<li>After 24 h, the set of dead prisoners spells the poisoned bottle's binary number.</li>\n</ol>\n<p><b>Answer: 10 prisoners.</b></p>",
+  "key": "Each taster is one bit of information; binary-encode the bottles."
+ },
+ {
+  "id": "brain-016",
+  "cat": "brainteasers",
+  "diff": 1,
+  "title": "Water jugs: 3 L and 5 L",
+  "tags": [
+   "jugs",
+   "bfs",
+   "number-theory"
+  ],
+  "prompt": "<p>You have a 3-litre jug, a 5-litre jug (no markings) and an unlimited tap. Each <b>step</b> is one of: fill a jug completely, empty a jug, or pour from one jug into the other until the source is empty or the target is full. What is the minimum number of steps to have exactly 4 litres in a jug?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 6.0,
+   "display": "6 steps"
+  },
+  "hints": [
+   "Try filling the 5 L jug first and pouring into the 3 L jug.",
+   "4 = 2·5 − 2·3: fill the 5 twice, empty the 3 twice."
+  ],
+  "solution": "<p>Track (3 L jug, 5 L jug):</p>\n<ol>\n<li>Fill 5 → (0, 5)</li>\n<li>Pour 5 → 3 → (3, 2)</li>\n<li>Empty 3 → (0, 2)</li>\n<li>Pour 5 → 3 → (2, 0)</li>\n<li>Fill 5 → (2, 5)</li>\n<li>Pour 5 → 3 until full (1 L moves) → (3, <b>4</b>)</li>\n</ol>\n<p>Starting with the 3 L jug takes 8 steps instead; a breadth-first search over all states confirms 6 is minimal.</p>\n<p><b>Answer: 6 steps.</b></p>",
+  "key": "Reachable amounts are combinations of 5 and 3 (gcd 1); BFS over (a, b) states gives the shortest sequence."
+ },
+ {
+  "id": "brain-017",
+  "cat": "brainteasers",
+  "diff": 2,
+  "title": "Two guards, two doors",
+  "tags": [
+   "logic",
+   "liars",
+   "self-reference"
+  ],
+  "prompt": "<p>Two doors: one leads to freedom, the other to doom. Each door has a guard. One guard always tells the truth, the other always lies, and you don't know which is which. You may ask <b>one</b> yes/no question to <b>one</b> guard. What do you ask to find the door to freedom?</p>",
+  "answer": {
+   "type": "self",
+   "display": "Point at a door and ask: 'If I asked the other guard whether this door leads to freedom, would he say yes?' Then do the opposite of the answer (or ask 'Which door would the other guard say leads to freedom?' and take the other door)."
+  },
+  "hints": [
+   "Make the answer pass through both guards, so exactly one lie is applied either way.",
+   "Ask about what the other guard would say."
+  ],
+  "solution": "<ol>\n<li>Ask either guard: “Which door would the <i>other</i> guard say leads to freedom?”</li>\n<li>If you asked the truth-teller, he truthfully reports the liar's false answer → the doom door.</li>\n<li>If you asked the liar, he lies about the truth-teller's correct answer → the doom door.</li>\n<li>Either way you are pointed at doom, so take the <b>other</b> door.</li>\n</ol>\n<p>An alternative: “If I asked you whether the left door leads to freedom, would you say yes?” A double negation makes both guards answer truthfully.</p>",
+  "key": "Route the question through both guards (or through the same liar twice) so the lies cancel or compose predictably."
+ },
+ {
+  "id": "brain-018",
+  "cat": "brainteasers",
+  "diff": 1,
+  "title": "Mutilated chessboard",
+  "tags": [
+   "invariant",
+   "coloring",
+   "tiling"
+  ],
+  "prompt": "<p>Two diagonally opposite corner squares are removed from an 8×8 chessboard, leaving 62 squares. Can the remaining board be tiled exactly by 31 dominoes (each covering two adjacent squares)?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "Yes",
+    "No — it is impossible",
+    "Only if dominoes may overlap the edge"
+   ],
+   "correct": 1,
+   "display": "No — a coloring argument shows it is impossible"
+  },
+  "hints": [
+   "What colors are two diagonally opposite corners?",
+   "Every domino covers one black and one white square."
+  ],
+  "solution": "<ol>\n<li>Opposite corners of a chessboard have the <b>same</b> color (say both white).</li>\n<li>After removal there are 30 white and 32 black squares.</li>\n<li>Every domino covers one white and one black square, so 31 dominoes would cover 31 of each.</li>\n<li>31 ≠ 30, so no tiling exists.</li>\n</ol>\n<p><b>Answer: No.</b></p>",
+  "key": "Find an invariant (here, color balance) that every move preserves but the target violates."
+ },
+ {
+  "id": "brain-019",
+  "cat": "brainteasers",
+  "diff": 3,
+  "title": "Blue-eyed islanders",
+  "tags": [
+   "common-knowledge",
+   "induction",
+   "logic"
+  ],
+  "prompt": "<p>An island has 100 blue-eyed and 100 brown-eyed people, all perfect logicians. Nobody knows their own eye color, there are no mirrors, and nobody discusses eye color. Every night a ferry comes, and anyone who <b>knows</b> their own eye color must leave on it. Everyone sees everyone else every day.</p>\n<p>One day a visitor announces publicly: “I see at least one person with blue eyes.” On which night (counting the announcement day's night as night 1) do the blue-eyed people leave?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 100.0,
+   "display": "Night 100 (all 100 blue-eyed leave together)"
+  },
+  "hints": [
+   "Solve it with 1 blue-eyed person, then 2, then 3.",
+   "With n blue-eyed people, each one sees n−1 and waits to see whether those n−1 leave on night n−1."
+  ],
+  "solution": "<ol>\n<li><b>n = 1:</b> The lone blue-eyed person sees no blue eyes, so the announcement tells him it is him. He leaves on night 1.</li>\n<li><b>n = 2:</b> Each blue-eyed person sees one other. If he were not blue, the other would be the n = 1 case and leave on night 1. When nobody leaves on night 1, each deduces he is blue. Both leave on night 2.</li>\n<li><b>Induction:</b> if n blue-eyed people would leave on night n, then with n+1 blue-eyed people each sees n and expects them to leave on night n. When they don't, each concludes he is also blue, and all n+1 leave on night n+1.</li>\n<li>With 100 blue-eyed people they all leave on <b>night 100</b>. (The brown-eyed people then know they are not blue, though without further information they cannot deduce “brown” itself.)</li>\n</ol>\n<p>The announcement seems to add nothing (everyone already sees blue eyes), but it makes the fact <i>common knowledge</i>, which starts the countdown.</p>",
+  "key": "A public announcement creates common knowledge; induction on the number of blue-eyed people gives a countdown of n nights."
+ },
+ {
+  "id": "brain-020",
+  "cat": "brainteasers",
+  "diff": 1,
+  "title": "Three switches, one bulb",
+  "tags": [
+   "logic",
+   "information",
+   "lateral-thinking"
+  ],
+  "prompt": "<p>Outside a closed room are three light switches; exactly one controls an incandescent bulb inside. You may set the switches however you like, but you may enter the room only <b>once</b>. How do you determine which switch controls the bulb?</p>",
+  "answer": {
+   "type": "self",
+   "display": "Turn switch 1 on for ~10 minutes, turn it off, turn switch 2 on, enter: on → 2; off and warm → 1; off and cold → 3."
+  },
+  "hints": [
+   "A bulb has more observable states than on/off.",
+   "Incandescent bulbs get hot."
+  ],
+  "solution": "<ol>\n<li>Turn switch 1 on and wait about 10 minutes.</li>\n<li>Turn switch 1 off and turn switch 2 on, then enter the room.</li>\n<li>Bulb on → switch 2. Bulb off but warm → switch 1. Bulb off and cold → switch 3.</li>\n</ol>\n<p>A single observation gives three outcomes only because heat adds a second dimension of information.</p>",
+  "key": "Find a second observable (heat) so one observation can distinguish three cases."
+ },
+ {
+  "id": "brain-021",
+  "cat": "brainteasers",
+  "diff": 2,
+  "title": "Blindfolded coin split",
+  "tags": [
+   "invariant",
+   "parity",
+   "construction"
+  ],
+  "prompt": "<p>You are blindfolded at a table with 100 coins; exactly 10 show heads. You can't see or feel which side is up, but you can move and flip coins. Split the coins into two piles with the <b>same number of heads</b>.</p>",
+  "answer": {
+   "type": "self",
+   "display": "Take any 10 coins as pile A and flip all of them; the other 90 are pile B. Both piles then have the same number of heads."
+  },
+  "hints": [
+   "Choose the size of one pile cleverly: it should match the number of heads.",
+   "If pile A has k heads among its 10 coins, how many heads does pile B have?"
+  ],
+  "solution": "<ol>\n<li>Take any 10 coins as pile A; the remaining 90 form pile B.</li>\n<li>Suppose pile A contains k heads. Then pile B contains 10 − k heads.</li>\n<li>Pile A has 10 − k tails. Flip every coin in pile A: it now has 10 − k heads.</li>\n<li>Both piles have 10 − k heads.</li>\n</ol>",
+  "key": "Size one pile equal to the total head count; flipping it converts its tails count into exactly the other pile's heads count."
+ },
+ {
+  "id": "brain-022",
+  "cat": "brainteasers",
+  "diff": 3,
+  "title": "Hats in a line",
+  "tags": [
+   "parity",
+   "strategy",
+   "prisoners",
+   "hats"
+  ],
+  "prompt": "<p>100 prisoners stand in a line, each wearing a black or white hat assigned arbitrarily. Each sees all hats <b>in front</b> of him, but not his own or those behind. Starting from the back, each prisoner in turn says “black” or “white” aloud (everyone hears). Those who say their own hat color survive.</p>\n<p>With the best pre-agreed strategy, how many prisoners can be <b>guaranteed</b> to survive?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 99.0,
+   "display": "99"
+  },
+  "hints": [
+   "The last prisoner can't learn anything about his own hat, but he can broadcast one bit to everyone else.",
+   "Use parity: say 'black' if the number of black hats you see is odd."
+  ],
+  "solution": "<ol>\n<li>The back prisoner says “black” if he sees an odd number of black hats, else “white”. He survives only by luck (50%).</li>\n<li>The next prisoner sees the hats ahead and knows the parity the back prisoner saw. If the parity he sees differs, his own hat is black; otherwise it is white. He answers correctly.</li>\n<li>Each later prisoner tracks the announced parity and all the (correct) answers spoken after it, so he can deduce his own hat. All 99 answer correctly.</li>\n<li>No strategy can guarantee the back prisoner: nobody gives him any information, and the adversary can choose his hat to defeat his answer.</li>\n</ol>\n<p><b>Answer: 99 guaranteed</b> (100 with probability 1/2).</p>",
+  "key": "One public parity bit lets everyone else decode their own hat from what they see and hear."
+ },
+ {
   "id": "fermi-001",
   "cat": "fermi",
   "diff": 2,
@@ -3155,5 +3155,1809 @@ window.PROBLEMS = [
   ],
   "solution": "<ol>\n<li>Active commercial fleet (mainline jets, regional jets and turboprops) ≈ 25,000 aircraft.</li>\n<li>Short-haul aircraft fly 5–7 legs per day, long-haul 1–2; a blended average ≈ 4 flights per aircraft per day.</li>\n<li>25,000 × 4 = <b>100,000 flights per day</b>.</li>\n</ol>\n<p>The commonly cited figure is roughly 100,000 flights per day.</p>",
   "key": "Throughput = fleet × utilization (legs per aircraft per day)."
+ },
+ {
+  "id": "py-001",
+  "cat": "python",
+  "diff": 1,
+  "title": "Mutable default argument",
+  "tags": [
+   "mutability",
+   "functions"
+  ],
+  "prompt": "<p>A helper that collects values:</p><pre><code>def add(x, lst=[]):\n    lst.append(x)\n    return lst\n\nadd(1)\nadd(2)\nprint(add(3))</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "[1, 2, 3]",
+    "[1,2,3]"
+   ],
+   "display": "[1, 2, 3]"
+  },
+  "hints": [
+   "Default values are evaluated once, when the <code>def</code> statement runs, not on every call.",
+   "All three calls share the very same list object."
+  ],
+  "solution": "<p>The default <code>lst=[]</code> is created a single time when the function is defined and stored on the function object (<code>add.__defaults__</code>).</p><p>Each call without a second argument appends to that same list: after <code>add(1)</code> it is <code>[1]</code>, after <code>add(2)</code> it is <code>[1, 2]</code>, and <code>add(3)</code> returns <code>[1, 2, 3]</code>.</p><p>The idiomatic fix is <code>def add(x, lst=None):</code> followed by <code>if lst is None: lst = []</code>.</p><p>Answer: <code>[1, 2, 3]</code>.</p>",
+  "key": "Default arguments are evaluated once at definition time; mutable defaults are shared across calls."
+ },
+ {
+  "id": "py-002",
+  "cat": "python",
+  "diff": 1,
+  "title": "A 3×3 grid gone wrong",
+  "tags": [
+   "aliasing",
+   "lists"
+  ],
+  "prompt": "<p>Building a grid with list multiplication:</p><pre><code>grid = [[0] * 3] * 3\ngrid[0][0] = 1\nprint(grid)</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "[[1, 0, 0], [1, 0, 0], [1, 0, 0]]"
+   ],
+   "display": "[[1, 0, 0], [1, 0, 0], [1, 0, 0]]"
+  },
+  "hints": [
+   "<code>[row] * 3</code> repeats the <i>reference</i> to <code>row</code>, it does not copy it.",
+   "How many distinct inner list objects exist?"
+  ],
+  "solution": "<p><code>[0] * 3</code> creates one list <code>[0, 0, 0]</code>. Multiplying the outer list by 3 puts <b>three references to that same inner list</b> into <code>grid</code>.</p><p>Setting <code>grid[0][0] = 1</code> mutates the shared inner list, so every \"row\" shows the change.</p><p>Correct construction: <code>grid = [[0] * 3 for _ in range(3)]</code> (a new inner list per iteration).</p><p>Answer: <code>[[1, 0, 0], [1, 0, 0], [1, 0, 0]]</code>.</p>",
+  "key": "Sequence multiplication copies references; use a comprehension to create independent rows."
+ },
+ {
+  "id": "py-003",
+  "cat": "python",
+  "diff": 2,
+  "title": "copy vs deepcopy",
+  "tags": [
+   "copy",
+   "aliasing",
+   "mutability"
+  ],
+  "prompt": "<p>Shallow and deep copies of a nested list:</p><pre><code>import copy\na = [[1, 2], [3, 4]]\nb = copy.copy(a)\nc = copy.deepcopy(a)\na[0].append(9)\na.append([5])\nprint(len(b), b[0], c[0])</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "2 [1, 2, 9] [1, 2]",
+    "2 [1,2,9] [1,2]"
+   ],
+   "display": "2 [1, 2, 9] [1, 2]"
+  },
+  "hints": [
+   "A shallow copy is a new outer list holding the same inner lists.",
+   "Appending to <code>a</code> itself changes only <code>a</code>; mutating <code>a[0]</code> changes an object that <code>b</code> also holds."
+  ],
+  "solution": "<p><code>b = copy.copy(a)</code> makes a new outer list whose elements are the <i>same</i> inner list objects as <code>a</code>. <code>c = copy.deepcopy(a)</code> recursively copies the inner lists too.</p><p><code>a[0].append(9)</code> mutates the inner list shared by <code>a</code> and <code>b</code>, so <code>b[0]</code> becomes <code>[1, 2, 9]</code>; <code>c[0]</code> is an independent copy and stays <code>[1, 2]</code>.</p><p><code>a.append([5])</code> changes only the outer list of <code>a</code>, so <code>len(b)</code> is still 2.</p><p>Answer: <code>2 [1, 2, 9] [1, 2]</code>.</p>",
+  "key": "Shallow copy = new container, shared elements; deepcopy duplicates the whole object graph."
+ },
+ {
+  "id": "py-004",
+  "cat": "python",
+  "diff": 1,
+  "title": "Floor division with negatives",
+  "tags": [
+   "integer-division",
+   "operators"
+  ],
+  "prompt": "<p>Python's integer division and modulo on a negative number:</p><pre><code>print(-7 // 2, -7 % 2, int(-7 / 2))</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "-4 1 -3"
+   ],
+   "display": "-4 1 -3"
+  },
+  "hints": [
+   "<code>//</code> rounds toward negative infinity (floor), not toward zero.",
+   "Python keeps the identity <code>a == (a // b) * b + a % b</code>, and <code>int()</code> truncates toward zero."
+  ],
+  "solution": "<p><code>-7 / 2 = -3.5</code>. Floor division takes the floor: <code>-7 // 2 = -4</code>.</p><p>The remainder must satisfy <code>-7 = (-4)·2 + r</code>, so <code>r = 1</code>; in Python the result of <code>%</code> has the sign of the divisor.</p><p><code>int(-3.5)</code> truncates toward zero, giving <code>-3</code>. (C, C++ and Java integer division also truncate toward zero, which is a classic porting bug.)</p><p>Answer: <code>-4 1 -3</code>.</p>",
+  "key": "// floors toward −∞ and % takes the divisor's sign; int() truncates toward 0."
+ },
+ {
+  "id": "py-005",
+  "cat": "python",
+  "diff": 3,
+  "title": "round() surprises",
+  "tags": [
+   "floats",
+   "rounding"
+  ],
+  "prompt": "<p>Rounding halves:</p><pre><code>print(round(0.5), round(1.5), round(2.5),\n      round(2.675, 2))</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "0 2 2 2.67"
+   ],
+   "display": "0 2 2 2.67"
+  },
+  "hints": [
+   "Python 3 uses round-half-to-even (\"banker's rounding\").",
+   "2.675 cannot be stored exactly in binary floating point; is the stored value slightly above or below 2.675?"
+  ],
+  "solution": "<p><code>round()</code> on an exact tie rounds to the nearest <b>even</b> integer: <code>round(0.5) = 0</code>, <code>round(1.5) = 2</code>, <code>round(2.5) = 2</code>. This avoids the upward bias of always rounding halves up.</p><p>The literal <code>2.675</code> is stored as the nearest double, which is 2.67499999999999982236431605997495353221893310546875 — slightly <i>below</i> 2.675 — so it rounds down to <code>2.67</code>. It is not a tie at all.</p><p>For money, use <code>decimal.Decimal</code> with an explicit rounding mode.</p><p>Answer: <code>0 2 2 2.67</code>.</p>",
+  "key": "round() is half-to-even, and decimal literals are not exact in binary floating point."
+ },
+ {
+  "id": "py-006",
+  "cat": "python",
+  "diff": 2,
+  "title": "Lambdas in a loop",
+  "tags": [
+   "closures",
+   "late-binding"
+  ],
+  "prompt": "<p>A list of callbacks:</p><pre><code>fs = [lambda: i for i in range(3)]\nprint([f() for f in fs])</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "[2, 2, 2]",
+    "[2,2,2]"
+   ],
+   "display": "[2, 2, 2]"
+  },
+  "hints": [
+   "A closure captures the <i>variable</i> <code>i</code>, not its value at creation time.",
+   "What is the value of <code>i</code> when the lambdas are finally called?"
+  ],
+  "solution": "<p>Each lambda refers to the name <code>i</code> in the comprehension's scope. The lookup happens when the lambda is <b>called</b> (late binding).</p><p>By the time we call them, the loop has finished and <code>i == 2</code>, so all three return 2.</p><p>Fix: bind the current value as a default, <code>lambda i=i: i</code>, or use <code>functools.partial</code>.</p><p>Answer: <code>[2, 2, 2]</code>.</p>",
+  "key": "Closures look variables up at call time (late binding); freeze values with default arguments."
+ },
+ {
+  "id": "py-007",
+  "cat": "python",
+  "diff": 2,
+  "title": "Summing a generator twice",
+  "tags": [
+   "generators",
+   "iterators"
+  ],
+  "prompt": "<p>A generator expression consumed twice:</p><pre><code>g = (x * x for x in range(4))\nprint(sum(g), sum(g))</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "14 0"
+   ],
+   "display": "14 0"
+  },
+  "hints": [
+   "A generator can be iterated only once.",
+   "0² + 1² + 2² + 3² = ?"
+  ],
+  "solution": "<p>The first <code>sum(g)</code> consumes the generator: 0 + 1 + 4 + 9 = 14.</p><p>The generator is now exhausted; iterating it again yields nothing, and the sum of an empty iterable is 0.</p><p>If you need several passes, materialise it (<code>list(...)</code>) or recreate the generator.</p><p>Answer: <code>14 0</code>.</p>",
+  "key": "Generators are single-pass iterators; a second pass sees nothing."
+ },
+ {
+  "id": "py-008",
+  "cat": "python",
+  "diff": 2,
+  "title": "Dict ordering and update",
+  "tags": [
+   "dicts",
+   "ordering"
+  ],
+  "prompt": "<p>Dictionaries preserve insertion order (Python 3.7+):</p><pre><code>d = {\"b\": 1, \"a\": 2}\nd[\"c\"] = 3\nd[\"b\"] = 10\nd.update({\"a\": 0, \"d\": 4})\nprint(list(d), sum(d.values()))</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "['b', 'a', 'c', 'd'] 17",
+    "[b, a, c, d] 17"
+   ],
+   "display": "['b', 'a', 'c', 'd'] 17"
+  },
+  "hints": [
+   "Overwriting an existing key keeps its original position.",
+   "Final values: b=10, a=0, c=3, d=4."
+  ],
+  "solution": "<p>Keys are ordered by <b>first insertion</b>: b, a, then c, then d (added by <code>update</code>).</p><p>Reassigning <code>d[\"b\"]</code> and updating <code>\"a\"</code> change values but not positions.</p><p>Values: 10 + 0 + 3 + 4 = 17.</p><p>Answer: <code>['b', 'a', 'c', 'd'] 17</code>.</p>",
+  "key": "dict keeps first-insertion order; updating a key's value does not move it."
+ },
+ {
+  "id": "py-009",
+  "cat": "python",
+  "diff": 1,
+  "title": "is vs ==",
+  "tags": [
+   "identity",
+   "aliasing"
+  ],
+  "prompt": "<p>Equality versus identity:</p><pre><code>a = [1, 2]\nb = a\nc = a[:]\nprint(a == c, a is c, b is a)</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "True False True"
+   ],
+   "display": "True False True"
+  },
+  "hints": [
+   "<code>==</code> compares values; <code>is</code> compares object identity.",
+   "A full slice <code>a[:]</code> creates a new list."
+  ],
+  "solution": "<p><code>c = a[:]</code> is a new list with equal contents, so <code>a == c</code> is True but <code>a is c</code> is False.</p><p><code>b = a</code> just binds a second name to the same object, so <code>b is a</code> is True.</p><p>Use <code>is</code> only for identity checks such as <code>x is None</code>.</p><p>Answer: <code>True False True</code>.</p>",
+  "key": "== is value equality; is is identity. Slicing copies, assignment aliases."
+ },
+ {
+  "id": "py-010",
+  "cat": "python",
+  "diff": 2,
+  "title": "Slicing with steps",
+  "tags": [
+   "slicing",
+   "strings"
+  ],
+  "prompt": "<p>Index carefully (0-based):</p><pre><code>s = \"quantitative\"\nprint(s[::-3], s[-4:-1], s[1:8:2])</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "etia tiv unia"
+   ],
+   "display": "etia tiv unia"
+  },
+  "hints": [
+   "Write the indices: q0 u1 a2 n3 t4 i5 t6 a7 t8 i9 v10 e11.",
+   "<code>[::-3]</code> starts at the last character; the stop index of a slice is excluded."
+  ],
+  "solution": "<p>Indices: q0 u1 a2 n3 t4 i5 t6 a7 t8 i9 v10 e11 (length 12).</p><p><code>s[::-3]</code>: start at 11 and step −3 → indices 11, 8, 5, 2 → e, t, i, a = <code>etia</code>.</p><p><code>s[-4:-1]</code>: −4 is index 8, −1 is index 11 (excluded) → indices 8, 9, 10 → <code>tiv</code>.</p><p><code>s[1:8:2]</code>: indices 1, 3, 5, 7 → u, n, i, a = <code>unia</code>.</p><p>Answer: <code>etia tiv unia</code>.</p>",
+  "key": "Slices are start-inclusive, stop-exclusive; a negative step with no start begins at the end."
+ },
+ {
+  "id": "py-011",
+  "cat": "python",
+  "diff": 2,
+  "title": "zip, all and any edge cases",
+  "tags": [
+   "iterators",
+   "builtins"
+  ],
+  "prompt": "<p>Three built-ins on awkward inputs:</p><pre><code>print(list(zip([1, 2, 3], \"ab\")),\n      all([]), any([]))</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "[(1, 'a'), (2, 'b')] True False",
+    "[(1, a), (2, b)] True False"
+   ],
+   "display": "[(1, 'a'), (2, 'b')] True False"
+  },
+  "hints": [
+   "<code>zip</code> stops at the shortest input.",
+   "<code>all</code> asks \"is there no falsy element?\"; <code>any</code> asks \"is there at least one truthy element?\""
+  ],
+  "solution": "<p><code>zip</code> pairs elements until the shortest iterable (the 2-character string) runs out: <code>[(1, 'a'), (2, 'b')]</code>. The extra 3 is silently dropped — use <code>zip(..., strict=True)</code> (3.10+) to catch length mismatches.</p><p><code>all([])</code> is True (vacuous truth: no counterexample), <code>any([])</code> is False (no witness).</p><p>Answer: <code>[(1, 'a'), (2, 'b')] True False</code>.</p>",
+  "key": "zip truncates silently; all() of empty is True, any() of empty is False."
+ },
+ {
+  "id": "py-012",
+  "cat": "python",
+  "diff": 2,
+  "title": "Big-O of a duplicate check",
+  "tags": [
+   "complexity",
+   "lists"
+  ],
+  "prompt": "<p>What is the worst-case time complexity of this function for a list of length n?</p><pre><code>def has_dup(xs):\n    for i in range(len(xs)):\n        if xs[i] in xs[i + 1:]:\n            return True\n    return False</code></pre><p>And what is the standard fix?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "O(n) — one loop over the list",
+    "O(n log n) — like sorting",
+    "O(n²) — the slice and the <code>in</code> test are both linear; fix with a set",
+    "O(n³) — slice, membership and loop multiply"
+   ],
+   "correct": 2,
+   "display": "O(n²); use a set for O(n) expected time"
+  },
+  "hints": [
+   "Both <code>xs[i+1:]</code> (copies n−i−1 items) and <code>in</code> on a list (scans) are linear.",
+   "Those two linear steps happen one after the other inside the loop — they add, not multiply."
+  ],
+  "solution": "<p>In iteration i, the slice copies n−i−1 elements (O(n)) and the membership test scans up to n−i−1 elements (O(n)). Those are sequential, so each iteration costs O(n).</p><p>With n iterations in the worst case (no duplicates), total work is ∑(n−i) ≈ n²/2 → <b>O(n²)</b>, not O(n³).</p><p>Fix: <code>return len(set(xs)) != len(xs)</code>, or insert into a set while scanning — O(n) expected time, since set membership is O(1) on average.</p>",
+  "key": "Sequential linear steps add; only nested loops multiply. Sets give O(1) average membership."
+ },
+ {
+  "id": "py-013",
+  "cat": "python",
+  "diff": 2,
+  "title": "Building a big string",
+  "tags": [
+   "complexity",
+   "strings"
+  ],
+  "prompt": "<p>You must concatenate 1,000,000 short strings stored in a list <code>pieces</code>. Which approach is guaranteed linear time across Python implementations?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "<code>s = \"\"</code> then <code>for p in pieces: s += p</code>",
+    "<code>s = \"\".join(pieces)</code>",
+    "<code>s = functools.reduce(operator.add, pieces)</code>",
+    "<code>s = sum(pieces, \"\")</code>"
+   ],
+   "correct": 1,
+   "display": "\"\".join(pieces)"
+  },
+  "hints": [
+   "Strings are immutable: <code>a + b</code> builds a brand-new string of length |a| + |b|.",
+   "One option computes the total length once and copies each piece exactly once."
+  ],
+  "solution": "<p>Because strings are immutable, repeated <code>+</code> copies the growing prefix every time: 1 + 2 + … + n pieces copied → O(n²) characters in the worst case. <code>reduce(operator.add, …)</code> is the same thing, and <code>sum()</code> on strings is explicitly rejected by Python (<code>TypeError</code>, it tells you to use join).</p><p><code>\"\".join(pieces)</code> sizes the result once and copies each piece once: O(total length).</p><p>CPython sometimes optimises <code>s += p</code> in place when the string has a single reference, but that is an implementation detail (not in PyPy, and easily defeated), so don't rely on it.</p>",
+  "key": "Repeated string + is quadratic; str.join is linear."
+ },
+ {
+  "id": "py-014",
+  "cat": "python",
+  "diff": 2,
+  "title": "Broadcasting shapes",
+  "tags": [
+   "numpy",
+   "broadcasting"
+  ],
+  "prompt": "<p>Adding arrays of different shapes:</p><pre><code>import numpy as np\na = np.ones((4, 1, 3))\nb = np.ones((5, 1))\nprint((a + b).shape)</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "(4, 5, 3)",
+    "(4,5,3)"
+   ],
+   "display": "(4, 5, 3)"
+  },
+  "hints": [
+   "Align shapes from the right; pad the shorter one with 1s on the left.",
+   "Each dimension pair must be equal or contain a 1; the result takes the larger size."
+  ],
+  "solution": "<p>Right-align the shapes: a = (4, 1, 3), b = (1, 5, 1) after left-padding with a 1.</p><p>Dimension by dimension: max(4, 1) = 4, max(1, 5) = 5, max(3, 1) = 3. Every pair is equal or contains a 1, so broadcasting succeeds.</p><p>Answer: <code>(4, 5, 3)</code>.</p>",
+  "key": "Broadcasting: right-align shapes; sizes must match or be 1; result takes the max."
+ },
+ {
+  "id": "py-015",
+  "cat": "python",
+  "diff": 1,
+  "title": "Which axis?",
+  "tags": [
+   "numpy",
+   "axis"
+  ],
+  "prompt": "<p>Reductions along an axis:</p><pre><code>import numpy as np\na = np.arange(6).reshape(2, 3)\nprint(a.sum(axis=0), a.mean(axis=1))</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "[3 5 7] [1. 4.]",
+    "[3, 5, 7] [1.0, 4.0]",
+    "[3 5 7] [1.0 4.0]"
+   ],
+   "display": "[3 5 7] [1. 4.]"
+  },
+  "hints": [
+   "<code>a</code> is [[0, 1, 2], [3, 4, 5]].",
+   "<code>axis=0</code> collapses the rows (one result per column); <code>axis=1</code> collapses the columns (one result per row)."
+  ],
+  "solution": "<p><code>a = [[0, 1, 2], [3, 4, 5]]</code>, shape (2, 3).</p><p><code>sum(axis=0)</code> removes axis 0 (rows) → column sums: [0+3, 1+4, 2+5] = <code>[3 5 7]</code>.</p><p><code>mean(axis=1)</code> removes axis 1 (columns) → row means: [1.0, 4.0], printed by NumPy as <code>[1. 4.]</code>.</p><p>Answer: <code>[3 5 7] [1. 4.]</code>.</p>",
+  "key": "The axis you pass is the one that disappears."
+ },
+ {
+  "id": "py-016",
+  "cat": "python",
+  "diff": 2,
+  "title": "NaN in NumPy",
+  "tags": [
+   "numpy",
+   "nan"
+  ],
+  "prompt": "<p>Missing values in a NumPy array:</p><pre><code>import numpy as np\nx = np.array([1.0, np.nan, 3.0])\nprint(np.mean(x), np.nanmean(x), (x &gt; 0).sum())</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "nan 2.0 2"
+   ],
+   "display": "nan 2.0 2"
+  },
+  "hints": [
+   "NaN propagates through arithmetic in plain NumPy reductions.",
+   "Every comparison with NaN is False."
+  ],
+  "solution": "<p><code>np.mean</code> sums 1 + NaN + 3 = NaN, so the mean is <code>nan</code>.</p><p><code>np.nanmean</code> ignores NaNs: (1 + 3)/2 = <code>2.0</code>.</p><p><code>x &gt; 0</code> is [True, False, True] because <code>nan &gt; 0</code> is False; the sum counts 2.</p><p>(Contrast with pandas, whose <code>mean()</code> skips NaN by default.)</p><p>Answer: <code>nan 2.0 2</code>.</p>",
+  "key": "NumPy reductions propagate NaN (use nan* functions); comparisons with NaN are False."
+ },
+ {
+  "id": "py-017",
+  "cat": "python",
+  "diff": 3,
+  "title": "Views vs copies",
+  "tags": [
+   "numpy",
+   "views",
+   "aliasing"
+  ],
+  "prompt": "<p>Basic slicing versus fancy indexing:</p><pre><code>import numpy as np\na = np.arange(5)\nb = a[1:4]\nc = a[[1, 2, 3]]\nb[0] = 100\nc[1] = 200\nprint(a.tolist())</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "[0, 100, 2, 3, 4]",
+    "[0,100,2,3,4]"
+   ],
+   "display": "[0, 100, 2, 3, 4]"
+  },
+  "hints": [
+   "A basic slice like <code>a[1:4]</code> returns a <i>view</i> sharing memory with <code>a</code>.",
+   "Indexing with a list of integers (\"fancy indexing\") always returns a copy."
+  ],
+  "solution": "<p><code>b = a[1:4]</code> is a view onto a[1], a[2], a[3]. Writing <code>b[0] = 100</code> writes to <code>a[1]</code>.</p><p><code>c = a[[1, 2, 3]]</code> uses advanced indexing, which allocates a new array. Writing <code>c[1] = 200</code> leaves <code>a</code> untouched.</p><p>So a = [0, 100, 2, 3, 4]. (Check with <code>np.shares_memory(a, b)</code>; call <code>.copy()</code> when you need independence.)</p><p>Answer: <code>[0, 100, 2, 3, 4]</code>.</p>",
+  "key": "Basic slices are views (writes propagate); fancy/boolean indexing returns copies."
+ },
+ {
+  "id": "py-018",
+  "cat": "python",
+  "diff": 1,
+  "title": "NaN in pandas",
+  "tags": [
+   "pandas",
+   "nan"
+  ],
+  "prompt": "<p>pandas aggregation with missing data:</p><pre><code>import numpy as np\nimport pandas as pd\ns = pd.Series([1, np.nan, 3, np.nan])\nprint(s.count(), s.mean(), s.sum(), len(s))</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "2 2.0 4.0 4"
+   ],
+   "display": "2 2.0 4.0 4"
+  },
+  "hints": [
+   "pandas reductions use <code>skipna=True</code> by default.",
+   "<code>count()</code> counts non-missing values; <code>len()</code> counts rows."
+  ],
+  "solution": "<p><code>count()</code> = number of non-NaN values = 2.</p><p><code>mean()</code> skips NaN: (1 + 3)/2 = 2.0. <code>sum()</code> skips NaN: 4.0 (float, because NaN forced the dtype to float64).</p><p><code>len(s)</code> counts all rows including missing ones: 4.</p><p>Answer: <code>2 2.0 4.0 4</code>.</p>",
+  "key": "pandas skips NaN by default (unlike NumPy); count() ≠ len()."
+ },
+ {
+  "id": "py-019",
+  "cat": "python",
+  "diff": 2,
+  "title": "groupby + agg",
+  "tags": [
+   "pandas",
+   "groupby"
+  ],
+  "prompt": "<p>Per-ticker statistics:</p><pre><code>import pandas as pd\ndf = pd.DataFrame({\n    \"tk\": [\"A\", \"B\", \"A\", \"B\", \"A\"],\n    \"px\": [10, 20, 30, 40, 50]})\ng = df.groupby(\"tk\")[\"px\"].agg([\"mean\", \"max\"])\nprint(g.loc[\"A\", \"mean\"], g.loc[\"B\", \"max\"])</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "30.0 40",
+    "30 40"
+   ],
+   "display": "30.0 40"
+  },
+  "hints": [
+   "Group A has prices 10, 30, 50; group B has 20, 40.",
+   "The mean is a float; the max of an integer column stays an integer."
+  ],
+  "solution": "<p><code>groupby(\"tk\")</code> splits rows by ticker: A → [10, 30, 50], B → [20, 40].</p><p><code>agg([\"mean\", \"max\"])</code> returns a DataFrame indexed by ticker with columns mean and max.</p><p>A's mean = 90/3 = 30.0 (float); B's max = 40 (integer dtype preserved).</p><p>Answer: <code>30.0 40</code>.</p>",
+  "key": "groupby → split by key, apply each aggregation, combine into a frame indexed by the key."
+ },
+ {
+  "id": "py-020",
+  "cat": "python",
+  "diff": 3,
+  "title": "Merge row counts with duplicate keys",
+  "tags": [
+   "pandas",
+   "merge",
+   "joins"
+  ],
+  "prompt": "<p>Joining on a key that repeats on both sides:</p><pre><code>import pandas as pd\nL = pd.DataFrame({\"k\": [1, 1, 2, 3]})\nR = pd.DataFrame({\"k\": [1, 1, 1, 2, 4]})\nprint(len(L.merge(R, on=\"k\")),\n      len(L.merge(R, on=\"k\", how=\"left\")),\n      len(L.merge(R, on=\"k\", how=\"outer\")))</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "7 8 9"
+   ],
+   "display": "7 8 9"
+  },
+  "hints": [
+   "For each key, an inner join produces (count in L) × (count in R) rows.",
+   "Left join adds unmatched left rows once; outer join also adds unmatched right rows."
+  ],
+  "solution": "<p>Key 1: 2 rows in L × 3 rows in R = 6 rows. Key 2: 1 × 1 = 1. Keys 3 (only L) and 4 (only R) don't match.</p><p>Inner: 6 + 1 = <b>7</b>. Left: 7 + 1 (key 3 with NaN) = <b>8</b>. Outer: 8 + 1 (key 4) = <b>9</b>.</p><p>This many-to-many blow-up is a common data bug; <code>merge(..., validate=\"one_to_one\")</code> catches it.</p><p>Answer: <code>7 8 9</code>.</p>",
+  "key": "Join size per key = left count × right count; outer/left joins add unmatched rows once."
+ },
+ {
+  "id": "py-021",
+  "cat": "python",
+  "diff": 3,
+  "title": "loc vs iloc slicing",
+  "tags": [
+   "pandas",
+   "indexing",
+   "slicing"
+  ],
+  "prompt": "<p>Label-based versus position-based slices:</p><pre><code>import pandas as pd\ndf = pd.DataFrame({\"x\": [10, 11, 12, 13, 14, 15]})\nr = df.iloc[::-1]\nprint(len(df.loc[1:3]), len(df.iloc[1:3]),\n      r.loc[3:1, \"x\"].tolist())</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "3 2 [13, 12, 11]",
+    "3 2 [13,12,11]"
+   ],
+   "display": "3 2 [13, 12, 11]"
+  },
+  "hints": [
+   "<code>.loc</code> slices by label and includes the end label; <code>.iloc</code> slices by position and excludes the end.",
+   "In the reversed frame <code>r</code>, label 3 comes before label 1."
+  ],
+  "solution": "<p><code>df.loc[1:3]</code> selects labels 1, 2, 3 — <b>inclusive</b> → 3 rows.</p><p><code>df.iloc[1:3]</code> selects positions 1 and 2 — end exclusive like Python → 2 rows.</p><p><code>r</code> has index order 5, 4, 3, 2, 1, 0. A label slice <code>3:1</code> walks that order from label 3 to label 1 inclusive: labels 3, 2, 1 → x = [13, 12, 11].</p><p>Answer: <code>3 2 [13, 12, 11]</code>.</p>",
+  "key": ".loc slices by label inclusive of the end, following index order; .iloc slices by position, end exclusive."
+ },
+ {
+  "id": "py-022",
+  "cat": "python",
+  "diff": 1,
+  "title": "Fastest way to compute log returns",
+  "tags": [
+   "pandas",
+   "vectorization",
+   "finance"
+  ],
+  "prompt": "<p><code>p</code> is a pandas Series of 1,000,000 daily prices. Which computes log returns fastest (and correctly)?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "A Python <code>for</code> loop over <code>range(1, len(p))</code> using <code>math.log(p.iloc[i] / p.iloc[i-1])</code>",
+    "<code>p.to_frame().apply(lambda row: ..., axis=1)</code> row by row",
+    "<code>np.log(p).diff()</code>",
+    "Iterating with <code>p.items()</code> and appending to a list"
+   ],
+   "correct": 2,
+   "display": "np.log(p).diff()"
+  },
+  "hints": [
+   "Avoid anything that executes Python bytecode once per element.",
+   "log(pₜ/pₜ₋₁) = log pₜ − log pₜ₋₁."
+  ],
+  "solution": "<p>log(pₜ / pₜ₋₁) = log pₜ − log pₜ₋₁, so take the log of the whole series once and difference it: <code>np.log(p).diff()</code> (equivalently <code>np.log(p / p.shift(1))</code>).</p><p>Both operations run in compiled loops over contiguous memory — typically 100× or more faster than a Python-level loop, <code>apply(axis=1)</code> or <code>items()</code>, each of which pays interpreter overhead per element (and <code>.iloc</code> per access).</p><p>The first value is NaN (no previous price), which is the correct behaviour.</p>",
+  "key": "Vectorize: express the computation as whole-array operations instead of per-element Python."
+ },
+ {
+  "id": "py-023",
+  "cat": "python",
+  "diff": 3,
+  "title": "A rolling z-score without look-ahead",
+  "tags": [
+   "pandas",
+   "leakage",
+   "finance",
+   "rolling"
+  ],
+  "prompt": "<p><code>s</code> is a daily price Series. You want a 20-day z-score signal that, at each date t, uses only information available at the close of day t. Which is correct?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "<code>(s - s.mean()) / s.std()</code>",
+    "<code>(s - s.rolling(20, center=True).mean()) / s.rolling(20, center=True).std()</code>",
+    "<code>(s - s.rolling(20).mean()) / s.rolling(20).std()</code>",
+    "<code>(s - s.shift(-20).rolling(20).mean()) / s.rolling(20).std()</code>"
+   ],
+   "correct": 2,
+   "display": "(s - s.rolling(20).mean()) / s.rolling(20).std()"
+  },
+  "hints": [
+   "Ask of each option: does the value at date t change if you edit a price after t?",
+   "Full-sample statistics, centered windows and negative shifts all peek into the future."
+  ],
+  "solution": "<p>Option A uses the mean and std of the <b>whole</b> sample, including future prices — classic look-ahead bias that makes backtests look great and live trading disappointing.</p><p>Option B's centered window at t covers about t−10 … t+9 — it uses future data.</p><p>Option D's <code>shift(-20)</code> pulls prices from 20 days ahead.</p><p>Option C's trailing window covers t−19 … t only. The first 19 values are NaN, which is honest. (If the trade is executed at the same close, you would additionally <code>shift(1)</code> the signal.)</p>",
+  "key": "Use trailing windows only; full-sample stats, centered windows and negative shifts leak the future."
+ },
+ {
+  "id": "py-024",
+  "cat": "python",
+  "diff": 3,
+  "title": "Removing items while iterating",
+  "tags": [
+   "mutability",
+   "lists",
+   "iterators"
+  ],
+  "prompt": "<p>Trying to drop the even numbers:</p><pre><code>xs = [2, 4, 5, 6, 8]\nfor x in xs:\n    if x % 2 == 0:\n        xs.remove(x)\nprint(xs)</code></pre><p>What does this print? Type the output exactly as printed (on one line).</p>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "[4, 5, 8]",
+    "[4,5,8]"
+   ],
+   "display": "[4, 5, 8]"
+  },
+  "hints": [
+   "The <code>for</code> loop walks an internal index 0, 1, 2, … over the <i>live</i> list.",
+   "After removing the element at the current index, the next element slides into that index and gets skipped."
+  ],
+  "solution": "<p>Index 0: x = 2 is even → remove it; list = [4, 5, 6, 8].</p><p>Index 1: x = 5 (4 was skipped because it slid to index 0) → keep.</p><p>Index 2: x = 6 → remove; list = [4, 5, 8].</p><p>Index 3: past the end → loop stops. Result <code>[4, 5, 8]</code>.</p><p>Correct approach: build a new list, <code>xs = [x for x in xs if x % 2]</code>, or iterate over a copy <code>for x in xs[:]</code>.</p><p>Answer: <code>[4, 5, 8]</code>.</p>",
+  "key": "Never mutate a list while iterating over it; filter into a new list instead."
+ },
+ {
+  "id": "sql-001",
+  "cat": "sql",
+  "diff": 1,
+  "title": "Inner join with duplicate keys",
+  "tags": [
+   "joins",
+   "inner-join",
+   "nulls",
+   "count"
+  ],
+  "prompt": "<p><b>a</b></p><table><thead><tr><th>k</th></tr></thead><tbody><tr><td>1</td></tr><tr><td>1</td></tr><tr><td>2</td></tr><tr><td><i>NULL</i></td></tr></tbody></table><p><b>b</b></p><table><thead><tr><th>k</th><th>v</th></tr></thead><tbody><tr><td>1</td><td>x</td></tr><tr><td>1</td><td>y</td></tr><tr><td>2</td><td>z</td></tr><tr><td><i>NULL</i></td><td>w</td></tr><tr><td>3</td><td>q</td></tr></tbody></table><p>How many rows does this query return?</p><pre><code>SELECT a.k, b.v\nFROM a\nJOIN b ON a.k = b.k;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 5,
+   "display": "5"
+  },
+  "hints": [
+   "An inner join emits one row for every matching (a-row, b-row) pair — duplicates multiply.",
+   "Does NULL = NULL count as a match?"
+  ],
+  "solution": "<p><b>Key 1:</b> a has two rows with k = 1 and b has two (x, y), so 2 × 2 = 4 rows.</p><p><b>Key 2:</b> one row in a × one row in b = 1 row.</p><p><b>NULL:</b> <code>NULL = NULL</code> is UNKNOWN, not TRUE, so the NULL rows never match. Key 3 exists only in b, so it is dropped by the inner join.</p><p>Answer: 4 + 1 = <b>5</b> rows.</p>",
+  "key": "Join row count = Σ over keys of (count in left × count in right); NULL keys never match."
+ },
+ {
+  "id": "sql-002",
+  "cat": "sql",
+  "diff": 1,
+  "title": "Left join row count",
+  "tags": [
+   "joins",
+   "left-join",
+   "nulls",
+   "count"
+  ],
+  "prompt": "<p><b>a</b></p><table><thead><tr><th>k</th></tr></thead><tbody><tr><td>1</td></tr><tr><td>1</td></tr><tr><td>2</td></tr><tr><td><i>NULL</i></td></tr></tbody></table><p><b>b</b></p><table><thead><tr><th>k</th><th>v</th></tr></thead><tbody><tr><td>1</td><td>x</td></tr><tr><td>1</td><td>y</td></tr><tr><td>2</td><td>z</td></tr><tr><td><i>NULL</i></td><td>w</td></tr><tr><td>3</td><td>q</td></tr></tbody></table><p>Same tables as before. How many rows does this LEFT JOIN return?</p><pre><code>SELECT a.k, b.v\nFROM a\nLEFT JOIN b ON a.k = b.k;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 6,
+   "display": "6"
+  },
+  "hints": [
+   "Start from the inner-join rows, then add back every row of a that matched nothing.",
+   "Which rows of a have no match in b?"
+  ],
+  "solution": "<p>Matched rows (as in the inner join): 4 for k = 1 and 1 for k = 2, so 5.</p><p>A LEFT JOIN keeps every row of the left table. The row of a with k = NULL matches nothing, so it is kept once with b.v = NULL.</p><p>The b-only key 3 is not added (it is on the right side).</p><p>Answer: 5 + 1 = <b>6</b> rows.</p>",
+  "key": "LEFT JOIN rows = matched pairs + one row per unmatched left row."
+ },
+ {
+  "id": "sql-003",
+  "cat": "sql",
+  "diff": 2,
+  "title": "LEFT JOIN quietly becomes INNER",
+  "tags": [
+   "joins",
+   "left-join",
+   "where",
+   "nulls"
+  ],
+  "prompt": "<p><b>customers</b></p><table><thead><tr><th>id</th><th>name</th></tr></thead><tbody><tr><td>1</td><td>Ana</td></tr><tr><td>2</td><td>Ben</td></tr><tr><td>3</td><td>Cy</td></tr><tr><td>4</td><td>Dee</td></tr></tbody></table><p><b>orders</b></p><table><thead><tr><th>id</th><th>cust_id</th><th>amount</th></tr></thead><tbody><tr><td>10</td><td>1</td><td>50</td></tr><tr><td>11</td><td>1</td><td>20</td></tr><tr><td>12</td><td>2</td><td>70</td></tr><tr><td>13</td><td>3</td><td>5</td></tr></tbody></table><p>An analyst wants every customer, with their orders over 10 if any. How many rows does this return?</p><pre><code>SELECT c.name, o.amount\nFROM customers c\nLEFT JOIN orders o ON o.cust_id = c.id\nWHERE o.amount &gt; 10;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 3,
+   "display": "3"
+  },
+  "hints": [
+   "Do the LEFT JOIN first, then apply WHERE to its rows.",
+   "What is NULL > 10 for customers with no order?"
+  ],
+  "solution": "<p><b>Step 1, the LEFT JOIN</b> gives 5 rows: (Ana, 50), (Ana, 20), (Ben, 70), (Cy, 5), (Dee, NULL).</p><p><b>Step 2, the WHERE filter</b> keeps rows with amount &gt; 10. (Cy, 5) fails, and (Dee, NULL) gives NULL &gt; 10 = UNKNOWN, which is filtered out too.</p><p>So the result is Ana 50, Ana 20, Ben 70: <b>3</b> rows. That is exactly what an inner join would give. A WHERE condition on the right table undoes the LEFT JOIN. To keep every customer, put the condition in the ON clause (see the next problem).</p>",
+  "key": "Filtering the right-hand table in WHERE removes the NULL-extended rows, turning a LEFT JOIN into an INNER JOIN."
+ },
+ {
+  "id": "sql-004",
+  "cat": "sql",
+  "diff": 2,
+  "title": "Filter in ON instead",
+  "tags": [
+   "joins",
+   "left-join",
+   "nulls"
+  ],
+  "prompt": "<p><b>customers</b></p><table><thead><tr><th>id</th><th>name</th></tr></thead><tbody><tr><td>1</td><td>Ana</td></tr><tr><td>2</td><td>Ben</td></tr><tr><td>3</td><td>Cy</td></tr><tr><td>4</td><td>Dee</td></tr></tbody></table><p><b>orders</b></p><table><thead><tr><th>id</th><th>cust_id</th><th>amount</th></tr></thead><tbody><tr><td>10</td><td>1</td><td>50</td></tr><tr><td>11</td><td>1</td><td>20</td></tr><tr><td>12</td><td>2</td><td>70</td></tr><tr><td>13</td><td>3</td><td>5</td></tr></tbody></table><p>Same tables. The condition is moved into the ON clause. How many rows now?</p><pre><code>SELECT c.name, o.amount\nFROM customers c\nLEFT JOIN orders o\n  ON o.cust_id = c.id AND o.amount &gt; 10;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 5,
+   "display": "5"
+  },
+  "hints": [
+   "The ON condition only decides which orders match. It never removes a customer.",
+   "Cy's only order fails the condition. What happens to Cy?"
+  ],
+  "solution": "<p>Matches that satisfy both conditions: Ana–50, Ana–20, Ben–70 (3 rows).</p><p>Cy has an order, but it fails amount &gt; 10, so Cy has no match and is kept with amount NULL. Dee has no orders and is kept with amount NULL too.</p><p>Answer: 3 + 2 = <b>5</b> rows, and every customer appears.</p>",
+  "key": "In a LEFT JOIN, conditions in ON filter the matches; conditions in WHERE filter the result."
+ },
+ {
+  "id": "sql-005",
+  "cat": "sql",
+  "diff": 1,
+  "title": "COUNT(*) vs COUNT(col) vs COUNT(DISTINCT)",
+  "tags": [
+   "count",
+   "nulls",
+   "distinct"
+  ],
+  "prompt": "<p><b>t</b></p><table><thead><tr><th>x</th></tr></thead><tbody><tr><td>1</td></tr><tr><td>2</td></tr><tr><td>2</td></tr><tr><td><i>NULL</i></td></tr><tr><td><i>NULL</i></td></tr><tr><td>3</td></tr></tbody></table><p>What does this return? Give the three numbers in order, comma-separated.</p><pre><code>SELECT COUNT(*), COUNT(x), COUNT(DISTINCT x)\nFROM t;</code></pre>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "6, 4, 3",
+    "6,4,3",
+    "6 4 3"
+   ],
+   "display": "6, 4, 3"
+  },
+  "hints": [
+   "COUNT(*) counts rows. COUNT(x) counts rows where x is not NULL."
+  ],
+  "solution": "<p><code>COUNT(*)</code> counts all 6 rows, NULLs included.</p><p><code>COUNT(x)</code> skips NULLs: 1, 2, 2, 3, so 4.</p><p><code>COUNT(DISTINCT x)</code> counts distinct non-NULL values {1, 2, 3}, so 3.</p><p>Answer: <b>6, 4, 3</b>.</p>",
+  "key": "Aggregates other than COUNT(*) ignore NULLs."
+ },
+ {
+  "id": "sql-006",
+  "cat": "sql",
+  "diff": 1,
+  "title": "AVG and NULL",
+  "tags": [
+   "nulls",
+   "aggregates"
+  ],
+  "prompt": "<p><b>scores</b></p><table><thead><tr><th>student</th><th>score</th></tr></thead><tbody><tr><td>A</td><td>80</td></tr><tr><td>B</td><td><i>NULL</i></td></tr><tr><td>C</td><td>70</td></tr><tr><td>D</td><td>90</td></tr></tbody></table><p>What does this return?</p><pre><code>SELECT AVG(score) FROM scores;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 80,
+   "display": "80"
+  },
+  "hints": [
+   "Is the NULL treated as 0, or skipped?"
+  ],
+  "solution": "<p>AVG ignores NULLs, so it averages 80, 70 and 90 over 3 rows: 240 / 3 = <b>80</b>.</p><p>If you want missing scores to count as 0, write <code>AVG(COALESCE(score, 0))</code>, which gives 240 / 4 = 60. In finance data this choice matters, e.g. missing returns versus zero returns.</p>",
+  "key": "AVG(col) = SUM(col) / COUNT(col): NULLs are dropped from both."
+ },
+ {
+  "id": "sql-007",
+  "cat": "sql",
+  "diff": 2,
+  "title": "NULL = NULL",
+  "tags": [
+   "nulls",
+   "where"
+  ],
+  "prompt": "<p><b>t</b></p><table><thead><tr><th>id</th><th>a</th><th>b</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>1</td></tr><tr><td>2</td><td><i>NULL</i></td><td><i>NULL</i></td></tr><tr><td>3</td><td>2</td><td><i>NULL</i></td></tr><tr><td>4</td><td>3</td><td>4</td></tr></tbody></table><p>How many rows does this count?</p><pre><code>SELECT COUNT(*) FROM t WHERE a = b;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 1,
+   "display": "1"
+  },
+  "hints": [
+   "SQL uses three-valued logic: TRUE, FALSE, UNKNOWN. WHERE keeps only TRUE.",
+   "What is NULL = NULL?"
+  ],
+  "solution": "<p>Row 1: 1 = 1 is TRUE.</p><p>Row 2: NULL = NULL is UNKNOWN, so the row is dropped.</p><p>Row 3: 2 = NULL is UNKNOWN. Row 4: 3 = 4 is FALSE.</p><p>Answer: <b>1</b>. To treat two NULLs as equal, use <code>a IS b</code> (SQLite) or <code>a IS NOT DISTINCT FROM b</code> (standard SQL / Postgres).</p>",
+  "key": "Any comparison with NULL is UNKNOWN, and WHERE drops UNKNOWN."
+ },
+ {
+  "id": "sql-008",
+  "cat": "sql",
+  "diff": 3,
+  "title": "NOT IN and a sneaky NULL",
+  "tags": [
+   "nulls",
+   "subquery",
+   "not-in"
+  ],
+  "prompt": "<p><b>employees</b></p><table><thead><tr><th>id</th><th>name</th><th>manager_id</th></tr></thead><tbody><tr><td>1</td><td>Ana</td><td><i>NULL</i></td></tr><tr><td>2</td><td>Ben</td><td>1</td></tr><tr><td>3</td><td>Cy</td><td>1</td></tr><tr><td>4</td><td>Dee</td><td>2</td></tr></tbody></table><p>The goal is to find employees who manage nobody. How many rows does this query count?</p><pre><code>SELECT COUNT(*)\nFROM employees\nWHERE id NOT IN (\n  SELECT manager_id FROM employees\n);</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 0,
+   "display": "0"
+  },
+  "hints": [
+   "The subquery returns (NULL, 1, 1, 2).",
+   "x NOT IN (…, NULL) means x &lt;&gt; … AND x &lt;&gt; NULL. What is x &lt;&gt; NULL?"
+  ],
+  "solution": "<p>The subquery returns {NULL, 1, 1, 2}, because Ana has no manager.</p><p>For Cy (id 3): 3 NOT IN (NULL, 1, 2) expands to 3 &lt;&gt; NULL AND 3 &lt;&gt; 1 AND 3 &lt;&gt; 2, which is UNKNOWN AND TRUE AND TRUE = UNKNOWN. The row is dropped. The same happens for every row.</p><p>Answer: <b>0</b> rows, although Cy and Dee really manage nobody.</p><p><b>Fix:</b> use <code>NOT EXISTS (SELECT 1 FROM employees m WHERE m.manager_id = e.id)</code>, or add <code>WHERE manager_id IS NOT NULL</code> to the subquery. Either gives 2.</p>",
+  "key": "A single NULL in a NOT IN list makes the predicate UNKNOWN for every row. Prefer NOT EXISTS."
+ },
+ {
+  "id": "sql-009",
+  "cat": "sql",
+  "diff": 1,
+  "title": "GROUP BY and ORDER BY",
+  "tags": [
+   "group-by",
+   "aggregates",
+   "order-by"
+  ],
+  "prompt": "<p><b>trades</b></p><table><thead><tr><th>trader</th><th>qty</th></tr></thead><tbody><tr><td>A</td><td>10</td></tr><tr><td>B</td><td>5</td></tr><tr><td>A</td><td>7</td></tr><tr><td>C</td><td>3</td></tr><tr><td>B</td><td>8</td></tr><tr><td>C</td><td>20</td></tr><tr><td>D</td><td>4</td></tr></tbody></table><p>List the <b>trader</b> column of the result in output order, comma-separated (e.g. X, Y, Z).</p><pre><code>SELECT trader, SUM(qty) AS total\nFROM trades\nGROUP BY trader\nORDER BY total DESC;</code></pre>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "C, A, B, D",
+    "C,A,B,D",
+    "C A B D"
+   ],
+   "display": "C, A, B, D"
+  },
+  "hints": [
+   "Compute each trader's total first."
+  ],
+  "solution": "<p>Totals: A = 10 + 7 = 17, B = 5 + 8 = 13, C = 3 + 20 = 23, D = 4.</p><p>Sorted descending: C (23), A (17), B (13), D (4).</p><p>Answer: <b>C, A, B, D</b>.</p>",
+  "key": "GROUP BY collapses rows into one per group; ORDER BY can use the SELECT alias."
+ },
+ {
+  "id": "sql-010",
+  "cat": "sql",
+  "diff": 2,
+  "title": "HAVING with two conditions",
+  "tags": [
+   "group-by",
+   "having",
+   "aggregates"
+  ],
+  "prompt": "<p><b>trades</b></p><table><thead><tr><th>trader</th><th>qty</th></tr></thead><tbody><tr><td>A</td><td>10</td></tr><tr><td>B</td><td>5</td></tr><tr><td>A</td><td>7</td></tr><tr><td>C</td><td>3</td></tr><tr><td>B</td><td>8</td></tr><tr><td>C</td><td>20</td></tr><tr><td>D</td><td>4</td></tr></tbody></table><p>Which traders are returned? List them comma-separated in output order.</p><pre><code>SELECT trader\nFROM trades\nGROUP BY trader\nHAVING COUNT(*) &gt;= 2 AND SUM(qty) &gt; 15\nORDER BY trader;</code></pre>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "A, C",
+    "A,C",
+    "A C"
+   ],
+   "display": "A, C"
+  },
+  "hints": [
+   "Make a small table per trader: number of trades and total qty."
+  ],
+  "solution": "<p>A: 2 trades, total 17, passes. B: 2 trades, total 13, fails the sum condition.</p><p>C: 2 trades, total 23, passes. D: 1 trade, fails the count condition.</p><p>Answer: <b>A, C</b>.</p>",
+  "key": "HAVING filters groups after aggregation, so it can use COUNT/SUM."
+ },
+ {
+  "id": "sql-011",
+  "cat": "sql",
+  "diff": 1,
+  "title": "WHERE or HAVING?",
+  "tags": [
+   "where-vs-having",
+   "group-by",
+   "having"
+  ],
+  "prompt": "<p>Table <code>trades(trader, qty)</code>. You want traders whose <b>total</b> qty exceeds 100. Which query is correct?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "SELECT trader FROM trades WHERE SUM(qty) > 100 GROUP BY trader;",
+    "SELECT trader FROM trades GROUP BY trader HAVING SUM(qty) > 100;",
+    "SELECT trader FROM trades WHERE qty > 100 GROUP BY trader;",
+    "SELECT trader FROM trades GROUP BY trader ORDER BY SUM(qty) > 100;"
+   ],
+   "correct": 1,
+   "display": "SELECT trader FROM trades GROUP BY trader HAVING SUM(qty) > 100;"
+  },
+  "hints": [
+   "WHERE runs before grouping, so aggregates don't exist yet."
+  ],
+  "solution": "<p>WHERE filters <i>individual rows</i> before GROUP BY, so an aggregate like SUM can't appear there. Option A is a syntax error.</p><p>Option C answers a different question: traders with at least one single trade over 100.</p><p>Option D only sorts. It filters nothing.</p><p>HAVING filters <i>groups</i> after aggregation, so the answer is <b>option B</b>.</p>",
+  "key": "WHERE filters rows before grouping; HAVING filters groups after aggregation."
+ },
+ {
+  "id": "sql-012",
+  "cat": "sql",
+  "diff": 2,
+  "title": "Logical order of evaluation",
+  "tags": [
+   "query-order",
+   "where-vs-having"
+  ],
+  "prompt": "<p>In what <b>logical</b> order does SQL evaluate the clauses of a SELECT statement? (This is why a SELECT alias usually can't be used in WHERE.)</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY",
+    "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY",
+    "FROM → GROUP BY → WHERE → HAVING → SELECT → ORDER BY",
+    "FROM → WHERE → SELECT → GROUP BY → HAVING → ORDER BY"
+   ],
+   "correct": 1,
+   "display": "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY"
+  },
+  "hints": [
+   "Rows must exist before you can filter them, and groups must exist before you can filter groups."
+  ],
+  "solution": "<p><b>FROM/JOIN</b> builds the rows. <b>WHERE</b> filters rows. <b>GROUP BY</b> forms groups. <b>HAVING</b> filters groups. <b>SELECT</b> computes output columns and aliases (window functions run here). Then DISTINCT, then <b>ORDER BY</b> (which can see aliases), then LIMIT.</p><p>WHERE runs before SELECT, so it cannot see <code>SELECT qty*px AS notional</code>'s alias. ORDER BY can. It also explains why you can't filter on a window function in WHERE: wrap it in a subquery or CTE.</p><p>Answer: <b>FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY</b>.</p>",
+  "key": "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT."
+ },
+ {
+  "id": "sql-013",
+  "cat": "sql",
+  "diff": 2,
+  "title": "DISTINCT and NULL",
+  "tags": [
+   "distinct",
+   "nulls",
+   "count"
+  ],
+  "prompt": "<p><b>visits</b></p><table><thead><tr><th>user</th><th>city</th></tr></thead><tbody><tr><td>u1</td><td>MTL</td></tr><tr><td>u2</td><td>TOR</td></tr><tr><td>u3</td><td>MTL</td></tr><tr><td>u4</td><td><i>NULL</i></td></tr><tr><td>u5</td><td>NYC</td></tr><tr><td>u6</td><td>TOR</td></tr></tbody></table><p>How many rows does this return?</p><pre><code>SELECT DISTINCT city FROM visits;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 4,
+   "display": "4"
+  },
+  "hints": [
+   "COUNT(DISTINCT city) would ignore NULL. Does SELECT DISTINCT?"
+  ],
+  "solution": "<p>The distinct values are MTL, TOR and NYC, and NULL also forms one row of its own. DISTINCT treats all NULLs as duplicates of each other.</p><p>Answer: <b>4</b> rows. By contrast, <code>COUNT(DISTINCT city)</code> = 3 because aggregates skip NULL.</p>",
+  "key": "SELECT DISTINCT keeps one NULL row; COUNT(DISTINCT col) ignores NULL."
+ },
+ {
+  "id": "sql-014",
+  "cat": "sql",
+  "diff": 1,
+  "title": "RANK with ties",
+  "tags": [
+   "window-functions",
+   "rank"
+  ],
+  "prompt": "<p><b>scores</b></p><table><thead><tr><th>name</th><th>score</th></tr></thead><tbody><tr><td>Ana</td><td>95</td></tr><tr><td>Ben</td><td>90</td></tr><tr><td>Cy</td><td>90</td></tr><tr><td>Dee</td><td>85</td></tr><tr><td>Eve</td><td>80</td></tr></tbody></table><p>What is Dee's value of <code>r</code>?</p><pre><code>SELECT name,\n       RANK() OVER (ORDER BY score DESC) AS r\nFROM scores;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 4,
+   "display": "4"
+  },
+  "hints": [
+   "Ben and Cy tie for second place. How many people are ahead of Dee?"
+  ],
+  "solution": "<p>Ana is 1. Ben and Cy tie, so both are 2. RANK then <i>skips</i>: the next rank is 1 + (number of rows ahead) = 4.</p><p>Answer: Dee has <b>4</b> (Eve has 5). With DENSE_RANK Dee would be 3; with ROW_NUMBER, 4, but Ben and Cy would get 2 and 3 in arbitrary order.</p>",
+  "key": "RANK leaves gaps after ties; DENSE_RANK doesn't; ROW_NUMBER breaks ties arbitrarily."
+ },
+ {
+  "id": "sql-015",
+  "cat": "sql",
+  "diff": 2,
+  "title": "DENSE_RANK sequence",
+  "tags": [
+   "window-functions",
+   "dense-rank",
+   "rank"
+  ],
+  "prompt": "<p><b>scores</b></p><table><thead><tr><th>name</th><th>score</th></tr></thead><tbody><tr><td>Ana</td><td>95</td></tr><tr><td>Ben</td><td>90</td></tr><tr><td>Cy</td><td>90</td></tr><tr><td>Dee</td><td>85</td></tr><tr><td>Eve</td><td>80</td></tr><tr><td>Fay</td><td>80</td></tr></tbody></table><p>List the column <code>d</code> in output order, comma-separated.</p><pre><code>SELECT DENSE_RANK() OVER (ORDER BY score DESC) AS d\nFROM scores\nORDER BY score DESC, name;</code></pre>",
+  "answer": {
+   "type": "text",
+   "accept": [
+    "1, 2, 2, 3, 4, 4",
+    "1,2,2,3,4,4",
+    "1 2 2 3 4 4"
+   ],
+   "display": "1, 2, 2, 3, 4, 4"
+  },
+  "hints": [
+   "DENSE_RANK = number of distinct scores strictly higher, plus 1."
+  ],
+  "solution": "<p>Scores in descending order: 95, 90, 90, 85, 80, 80.</p><p>DENSE_RANK gives each distinct value the next consecutive integer: 95 gets 1, 90 gets 2, 85 gets 3, 80 gets 4.</p><p>Answer: <b>1, 2, 2, 3, 4, 4</b>. RANK would give 1, 2, 2, 4, 5, 5, and ROW_NUMBER 1, 2, 3, 4, 5, 6.</p>",
+  "key": "DENSE_RANK counts distinct values above you; RANK counts rows above you."
+ },
+ {
+  "id": "sql-016",
+  "cat": "sql",
+  "diff": 2,
+  "title": "Running PnL",
+  "tags": [
+   "window-functions",
+   "running-sum",
+   "subquery"
+  ],
+  "prompt": "<p><b>pnl</b></p><table><thead><tr><th>day</th><th>pnl</th></tr></thead><tbody><tr><td>1</td><td>100</td></tr><tr><td>2</td><td>-50</td></tr><tr><td>3</td><td>30</td></tr><tr><td>4</td><td>-80</td></tr><tr><td>5</td><td>120</td></tr></tbody></table><p>What does this return?</p><pre><code>SELECT MIN(cum)\nFROM (\n  SELECT day,\n         SUM(pnl) OVER (ORDER BY day) AS cum\n  FROM pnl\n) AS t;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 0,
+   "display": "0"
+  },
+  "hints": [
+   "Write out the cumulative sum day by day."
+  ],
+  "solution": "<p><code>SUM(...) OVER (ORDER BY day)</code> is a running total: 100, 50, 80, 0, 120.</p><p>The minimum is <b>0</b> (on day 4).</p><p>Note that the window function must sit in the inner query: an aggregate cannot wrap a window function directly in the same SELECT.</p>",
+  "key": "SUM() OVER (ORDER BY t) = cumulative sum; aggregate over it in an outer query."
+ },
+ {
+  "id": "sql-017",
+  "cat": "sql",
+  "diff": 3,
+  "title": "Max drawdown in SQL",
+  "tags": [
+   "window-functions",
+   "running-sum",
+   "cte",
+   "drawdown"
+  ],
+  "prompt": "<p><b>pnl</b></p><table><thead><tr><th>day</th><th>pnl</th></tr></thead><tbody><tr><td>1</td><td>100</td></tr><tr><td>2</td><td>-50</td></tr><tr><td>3</td><td>30</td></tr><tr><td>4</td><td>-80</td></tr><tr><td>5</td><td>120</td></tr></tbody></table><p>This computes the maximum drawdown of cumulative PnL (the largest drop from a running peak). What does it return?</p><pre><code>WITH c AS (\n  SELECT day,\n         SUM(pnl) OVER (ORDER BY day) AS cum\n  FROM pnl\n),\np AS (\n  SELECT day, cum,\n         MAX(cum) OVER (ORDER BY day) AS peak\n  FROM c\n)\nSELECT MAX(peak - cum) FROM p;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 100,
+   "display": "100"
+  },
+  "hints": [
+   "First cum: 100, 50, 80, 0, 120. Then the running maximum of cum.",
+   "Drawdown each day = peak − cum."
+  ],
+  "solution": "<p>Cumulative PnL: 100, 50, 80, 0, 120.</p><p>Running peak: 100, 100, 100, 100, 120.</p><p>Drawdown (peak − cum): 0, 50, 20, 100, 0.</p><p>Maximum drawdown = <b>100</b> (from the 100 peak to 0 on day 4).</p><p>Chaining CTEs keeps each window step readable. A window function can't be nested directly inside another.</p>",
+  "key": "Drawdown = running max of the equity curve minus the curve; stack window functions with CTEs."
+ },
+ {
+  "id": "sql-018",
+  "cat": "sql",
+  "diff": 2,
+  "title": "Daily returns with LAG",
+  "tags": [
+   "window-functions",
+   "lag",
+   "returns"
+  ],
+  "prompt": "<p><b>prices</b></p><table><thead><tr><th>day</th><th>px</th></tr></thead><tbody><tr><td>1</td><td>100</td></tr><tr><td>2</td><td>104</td></tr><tr><td>3</td><td>101.4</td></tr><tr><td>4</td><td>106.47</td></tr></tbody></table><p>What is <code>ret</code> on day 3? Give a decimal.</p><pre><code>SELECT day,\n       ROUND(px / LAG(px) OVER (ORDER BY day)\n             - 1, 4) AS ret\nFROM prices;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": -0.025,
+   "display": "-0.025",
+   "tolAbs": 5e-05
+  },
+  "hints": [
+   "LAG(px) is the previous day's price.",
+   "Day 3 return = 101.4 / 104 − 1."
+  ],
+  "solution": "<p><code>LAG(px) OVER (ORDER BY day)</code> returns the previous row's price (NULL on day 1, so day 1's return is NULL).</p><p>Day 3: 101.4 / 104 = 0.975, so the return is 0.975 − 1 = <b>−0.025</b> (−2.5%).</p><p>For reference, day 2 is +0.04 and day 4 is 106.47 / 101.4 − 1 = +0.05.</p>",
+  "key": "Simple return = px / LAG(px) − 1; the first row is NULL."
+ },
+ {
+  "id": "sql-019",
+  "cat": "sql",
+  "diff": 2,
+  "title": "Moving average edge effect",
+  "tags": [
+   "window-functions",
+   "moving-average",
+   "rows-between"
+  ],
+  "prompt": "<p><b>px</b></p><table><thead><tr><th>day</th><th>close</th></tr></thead><tbody><tr><td>1</td><td>10</td></tr><tr><td>2</td><td>12</td></tr><tr><td>3</td><td>14</td></tr><tr><td>4</td><td>13</td></tr><tr><td>5</td><td>16</td></tr></tbody></table><p>What is <code>ma3</code> on day 2?</p><pre><code>SELECT day,\n       AVG(close) OVER (\n         ORDER BY day\n         ROWS BETWEEN 2 PRECEDING\n              AND CURRENT ROW\n       ) AS ma3\nFROM px;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 11,
+   "display": "11"
+  },
+  "hints": [
+   "On day 2, how many rows are actually in the frame?"
+  ],
+  "solution": "<p>The frame is the current row plus up to 2 earlier rows. On day 2 only days 1 and 2 exist, so the average is (10 + 12) / 2 = <b>11</b>. It is <i>not</i> NULL, and it is not divided by 3.</p><p>From day 3 on it is a true 3-day average: 12, 13, 14.33. In backtests, either drop the warm-up rows or require <code>COUNT(*) OVER (same frame) = 3</code>. Otherwise early signals use fewer observations.</p>",
+  "key": "ROWS BETWEEN n PRECEDING frames are partial at the start; AVG divides by rows present."
+ },
+ {
+  "id": "sql-020",
+  "cat": "sql",
+  "diff": 2,
+  "title": "Second-highest salary",
+  "tags": [
+   "subquery",
+   "aggregates",
+   "ties"
+  ],
+  "prompt": "<p><b>salaries</b></p><table><thead><tr><th>name</th><th>salary</th></tr></thead><tbody><tr><td>A</td><td>100</td></tr><tr><td>B</td><td>120</td></tr><tr><td>C</td><td>120</td></tr><tr><td>D</td><td>90</td></tr><tr><td>E</td><td>110</td></tr></tbody></table><p>What does this return?</p><pre><code>SELECT MAX(salary)\nFROM salaries\nWHERE salary &lt; (SELECT MAX(salary)\n                FROM salaries);</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 110,
+   "display": "110"
+  },
+  "hints": [
+   "The inner query gives 120. What is the largest salary strictly below it?"
+  ],
+  "solution": "<p>The inner query returns 120. Among salaries &lt; 120 (100, 90, 110) the maximum is <b>110</b>.</p><p>A common trap: <code>ORDER BY salary DESC LIMIT 1 OFFSET 1</code> returns 120 here, because B and C tie at the top. Use the subquery, <code>DENSE_RANK() = 2</code>, or <code>SELECT DISTINCT salary … OFFSET 1</code>.</p>",
+  "key": "\"Second highest\" means second distinct value; watch ties at the top."
+ },
+ {
+  "id": "sql-021",
+  "cat": "sql",
+  "diff": 3,
+  "title": "Top 2 per desk",
+  "tags": [
+   "top-n-per-group",
+   "row-number",
+   "cte",
+   "window-functions"
+  ],
+  "prompt": "<p><b>pnl</b></p><table><thead><tr><th>desk</th><th>trader</th><th>pnl</th></tr></thead><tbody><tr><td>FX</td><td>ann</td><td>50</td></tr><tr><td>FX</td><td>bob</td><td>80</td></tr><tr><td>FX</td><td>cat</td><td>80</td></tr><tr><td>FX</td><td>dan</td><td>10</td></tr><tr><td>EQ</td><td>eve</td><td>30</td></tr><tr><td>EQ</td><td>fay</td><td>70</td></tr><tr><td>EQ</td><td>gus</td><td>-20</td></tr><tr><td>RT</td><td>hal</td><td>40</td></tr></tbody></table><p>What does this return?</p><pre><code>WITH r AS (\n  SELECT desk, trader, pnl,\n         ROW_NUMBER() OVER (\n           PARTITION BY desk\n           ORDER BY pnl DESC) AS rn\n  FROM pnl\n)\nSELECT SUM(pnl) FROM r WHERE rn &lt;= 2;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 300,
+   "display": "300"
+  },
+  "hints": [
+   "PARTITION BY restarts the numbering for each desk.",
+   "The RT desk has only one trader. Is it still included?"
+  ],
+  "solution": "<p>FX: bob 80 and cat 80 get rn 1 and 2 (in either order), summing to 160.</p><p>EQ: fay 70 and eve 30, summing to 100. RT: hal 40 is the only row, with rn = 1, so 40.</p><p>Total = 160 + 100 + 40 = <b>300</b>.</p><p>The filter must go in an outer query or CTE, because WHERE is evaluated before window functions. Because of the FX tie, which two FX rows are picked is arbitrary, but here the sum is the same either way.</p>",
+  "key": "Top-N per group = ROW_NUMBER() OVER (PARTITION BY g ORDER BY x DESC) in a CTE, then WHERE rn ≤ N."
+ },
+ {
+  "id": "sql-022",
+  "cat": "sql",
+  "diff": 3,
+  "title": "Top 2 with ties",
+  "tags": [
+   "top-n-per-group",
+   "dense-rank",
+   "rank",
+   "row-number"
+  ],
+  "prompt": "<p>Table <code>pnl(desk, trader, pnl)</code>. You want <b>every trader whose PnL is among the two highest distinct PnL values on their desk</b> (ties included). Inside a CTE you compute <code>x</code> <code>OVER (PARTITION BY desk ORDER BY pnl DESC)</code> and keep <code>x &lt;= 2</code>. Which function should x be?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "ROW_NUMBER()",
+    "RANK()",
+    "DENSE_RANK()",
+    "NTILE(2)"
+   ],
+   "correct": 2,
+   "display": "DENSE_RANK()"
+  },
+  "hints": [
+   "Try it on PnLs 80, 80, 50, 10. You want 80, 80 and 50."
+  ],
+  "solution": "<p>On desk PnLs 80, 80, 50, 10:</p><ul><li>ROW_NUMBER gives 1, 2, 3, 4. Keeping ≤ 2 returns only the two 80s, so the 50 is lost.</li><li>RANK gives 1, 1, 3, 4. Keeping ≤ 2 also loses the 50.</li><li>DENSE_RANK gives 1, 1, 2, 3. Keeping ≤ 2 returns 80, 80, 50. Correct.</li><li>NTILE(2) splits rows into halves, which is unrelated to distinct values.</li></ul><p>Answer: <b>DENSE_RANK()</b>. Use ROW_NUMBER when you need exactly N rows, and RANK when you want 'top N positions, including ties for the last place'.</p>",
+  "key": "Exactly N rows → ROW_NUMBER; top N distinct values → DENSE_RANK; ties at the cutoff → RANK."
+ },
+ {
+  "id": "sql-023",
+  "cat": "sql",
+  "diff": 3,
+  "title": "Counting orders per customer",
+  "tags": [
+   "left-join",
+   "count",
+   "nulls",
+   "group-by"
+  ],
+  "prompt": "<p><b>customers</b></p><table><thead><tr><th>id</th><th>name</th></tr></thead><tbody><tr><td>1</td><td>Ana</td></tr><tr><td>2</td><td>Ben</td></tr><tr><td>3</td><td>Cy</td></tr><tr><td>4</td><td>Dee</td></tr></tbody></table><p><b>orders</b></p><table><thead><tr><th>id</th><th>cust_id</th><th>amount</th></tr></thead><tbody><tr><td>10</td><td>1</td><td>50</td></tr><tr><td>11</td><td>1</td><td>20</td></tr><tr><td>12</td><td>2</td><td>70</td></tr><tr><td>13</td><td>3</td><td>5</td></tr></tbody></table><p>What value of <code>n</code> does this report for <b>Dee</b>, who has never ordered?</p><pre><code>SELECT c.name, COUNT(*) AS n\nFROM customers c\nLEFT JOIN orders o ON o.cust_id = c.id\nGROUP BY c.name;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 1,
+   "display": "1"
+  },
+  "hints": [
+   "How many rows does Dee have after the LEFT JOIN?",
+   "Does COUNT(*) care that o.id is NULL in that row?"
+  ],
+  "solution": "<p>After the LEFT JOIN, Dee has one row with all order columns NULL.</p><p><code>COUNT(*)</code> counts rows, so Dee gets <b>1</b>. That's a classic bug.</p><p>Fix: <code>COUNT(o.id)</code>, which ignores the NULL and gives 0.</p>",
+  "key": "After a LEFT JOIN count a right-table column (COUNT(o.id)), not COUNT(*)."
+ },
+ {
+  "id": "sql-024",
+  "cat": "sql",
+  "diff": 3,
+  "title": "Join fan-out inflates sums",
+  "tags": [
+   "joins",
+   "fan-out",
+   "aggregates"
+  ],
+  "prompt": "<p><b>orders</b></p><table><thead><tr><th>order_id</th><th>amount</th></tr></thead><tbody><tr><td>1</td><td>100</td></tr><tr><td>2</td><td>50</td></tr></tbody></table><p><b>shipments</b></p><table><thead><tr><th>order_id</th><th>ship_id</th></tr></thead><tbody><tr><td>1</td><td>a</td></tr><tr><td>1</td><td>b</td></tr><tr><td>2</td><td>c</td></tr></tbody></table><p>The true revenue is 150. What does this query return?</p><pre><code>SELECT SUM(o.amount)\nFROM orders o\nJOIN shipments s\n  ON s.order_id = o.order_id;</code></pre>",
+  "answer": {
+   "type": "numeric",
+   "value": 250,
+   "display": "250"
+  },
+  "hints": [
+   "How many times does order 1 appear after the join?"
+  ],
+  "solution": "<p>Order 1 has two shipments, so it appears twice after the join. Order 2 appears once.</p><p>SUM = 100 + 100 + 50 = <b>250</b>, so revenue is overstated by 100.</p><p>Fix: aggregate each table to the join grain <i>before</i> joining (e.g. count shipments per order in a CTE), or use <code>EXISTS</code> when you only need to filter. Checking row counts before and after a join is a good habit.</p>",
+  "key": "Joining to a one-to-many table duplicates the 'one' side; aggregate to the right grain before joining."
+ },
+ {
+  "id": "ml-001",
+  "cat": "ml",
+  "diff": 1,
+  "title": "Precision from a confusion matrix",
+  "tags": [
+   "metrics",
+   "precision",
+   "confusion-matrix"
+  ],
+  "prompt": "<p>A fraud classifier is evaluated on 1,000 transactions:</p><table><thead><tr><th></th><th>Pred +</th><th>Pred −</th></tr></thead><tbody><tr><th>Actual +</th><td>40</td><td>20</td></tr><tr><th>Actual −</th><td>10</td><td>930</td></tr></tbody></table><p>What is its <b>precision</b>? Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.8,
+   "display": "40/50 = 0.8"
+  },
+  "hints": [
+   "Precision asks: of everything flagged positive, how much really was positive?",
+   "Precision = TP / (TP + FP)."
+  ],
+  "solution": "<p>TP = 40 (actual +, predicted +). FP = 10 (actual −, predicted +).</p><p>Precision = TP / (TP + FP) = 40 / 50 = 0.8.</p><p>Answer: 0.8 — 80% of the alerts are real fraud.</p>",
+  "key": "Precision = TP/(TP+FP): the quality of the positive predictions."
+ },
+ {
+  "id": "ml-002",
+  "cat": "ml",
+  "diff": 2,
+  "title": "Recall and F1",
+  "tags": [
+   "metrics",
+   "recall",
+   "f1",
+   "confusion-matrix"
+  ],
+  "prompt": "<p>Same classifier as before:</p><table><thead><tr><th></th><th>Pred +</th><th>Pred −</th></tr></thead><tbody><tr><th>Actual +</th><td>40</td><td>20</td></tr><tr><th>Actual −</th><td>10</td><td>930</td></tr></tbody></table><p>What is its <b>F1 score</b>? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.7272727272727273,
+   "display": "8/11 ≈ 0.727"
+  },
+  "hints": [
+   "First get recall = TP / (TP + FN).",
+   "F1 is the harmonic mean: 2PR / (P + R)."
+  ],
+  "solution": "<p>Precision P = 40/50 = 0.8. Recall R = TP/(TP+FN) = 40/60 = 2/3.</p><p>F1 = 2PR/(P+R) = 2·0.8·(2/3) / (0.8 + 2/3) = (16/15)/(22/15) = 16/22 = 8/11.</p><p>Shortcut: F1 = 2TP / (2TP + FP + FN) = 80 / (80 + 10 + 20) = 80/110 = 8/11.</p><p>Answer: 8/11 ≈ 0.727.</p>",
+  "key": "F1 = 2TP/(2TP+FP+FN), the harmonic mean of precision and recall; it ignores TN."
+ },
+ {
+  "id": "ml-003",
+  "cat": "ml",
+  "diff": 1,
+  "title": "The accuracy paradox",
+  "tags": [
+   "metrics",
+   "class-imbalance",
+   "accuracy"
+  ],
+  "prompt": "<p>A dataset has 1,000 card transactions, of which 10 are fraudulent. A lazy model always predicts “not fraud”.</p><p>What is its <b>accuracy</b>? Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.99,
+   "display": "0.99"
+  },
+  "hints": [
+   "Accuracy = correct predictions / all predictions.",
+   "It gets every legitimate transaction right and every fraud wrong."
+  ],
+  "solution": "<p>It is right on the 990 legitimate transactions and wrong on the 10 frauds: accuracy = 990/1000 = 0.99.</p><p>Yet its recall on fraud is 0 — it catches nothing. With heavy class imbalance, accuracy is dominated by the majority class. Use precision/recall, F1, PR-AUC, or cost-weighted metrics, and consider class weights or resampling.</p><p>Answer: 0.99.</p>",
+  "key": "Under class imbalance a trivial majority-class model gets high accuracy; look at recall/precision instead."
+ },
+ {
+  "id": "ml-004",
+  "cat": "ml",
+  "diff": 3,
+  "title": "ROC-AUC by counting pairs",
+  "tags": [
+   "metrics",
+   "roc-auc",
+   "ranking"
+  ],
+  "prompt": "<p>A model outputs scores for 3 positives and 4 negatives:</p><ul><li>Positives: 0.9, 0.8, 0.4</li><li>Negatives: 0.8, 0.3, 0.2, 0.1</li></ul><p>Using the interpretation AUC = P(random positive scores higher than random negative), with ties counting ½, what is the <b>ROC-AUC</b>? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.875,
+   "display": "10.5/12 = 7/8 = 0.875"
+  },
+  "hints": [
+   "There are 3 × 4 = 12 (positive, negative) pairs. Count the ones ranked correctly.",
+   "The positive 0.8 ties with the negative 0.8: that pair counts ½."
+  ],
+  "solution": "<p>All 12 pairs:</p><ul><li>Positive 0.9 beats all 4 negatives → 4.</li><li>Positive 0.8 ties 0.8 (½) and beats 0.3, 0.2, 0.1 → 3.5.</li><li>Positive 0.4 loses to 0.8, beats 0.3, 0.2, 0.1 → 3.</li></ul><p>AUC = (4 + 3.5 + 3)/12 = 10.5/12 = 0.875.</p><p>This equals the area under the ROC curve (it is the Mann–Whitney U statistic divided by n₊n₋). AUC only depends on the <i>ranking</i> of scores, not on their calibration.</p><p>Answer: 0.875.</p>",
+  "key": "AUC = probability a random positive is scored above a random negative (ties ½) — a pure ranking metric."
+ },
+ {
+  "id": "ml-005",
+  "cat": "ml",
+  "diff": 2,
+  "title": "Log-loss of three predictions",
+  "tags": [
+   "metrics",
+   "log-loss",
+   "cross-entropy"
+  ],
+  "prompt": "<p>Labels y = (1, 0, 1) and predicted probabilities of class 1 are p = (0.9, 0.2, 0.6).</p><p>What is the average <b>log-loss</b> (binary cross-entropy, natural log)? Round to 3 decimals.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.2797765635793423,
+   "display": "≈ 0.280"
+  },
+  "hints": [
+   "Each example contributes −ln(probability assigned to the true class).",
+   "The true-class probabilities are 0.9, 0.8 (= 1 − 0.2) and 0.6."
+  ],
+  "solution": "<p>Log-loss = −(1/n) Σ [y ln p + (1−y) ln(1−p)].</p><p>Example 1 (y=1): −ln 0.9 ≈ 0.1054. Example 2 (y=0): −ln 0.8 ≈ 0.2231. Example 3 (y=1): −ln 0.6 ≈ 0.5108.</p><p>Average = (0.1054 + 0.2231 + 0.5108)/3 ≈ 0.8393/3 ≈ 0.280.</p><p>Note how the least confident correct prediction (0.6) contributes most; a confident wrong prediction (say p = 0.01 for a positive) would add −ln 0.01 ≈ 4.6 on its own.</p><p>Answer: ≈ 0.280.</p>",
+  "key": "Log-loss averages −ln(probability given to the true class); it punishes confident mistakes heavily."
+ },
+ {
+  "id": "ml-006",
+  "cat": "ml",
+  "diff": 1,
+  "title": "R² from predictions",
+  "tags": [
+   "metrics",
+   "r-squared",
+   "regression"
+  ],
+  "prompt": "<p>True values y = (2, 4, 6, 8); a model predicts ŷ = (3, 4, 5, 9).</p><p>What is R² = 1 − SSE/SST? Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.85,
+   "display": "1 − 3/20 = 0.85"
+  },
+  "hints": [
+   "SSE = Σ(y − ŷ)². SST = Σ(y − ȳ)² with ȳ = 5.",
+   "SSE = 1 + 0 + 1 + 1 = 3."
+  ],
+  "solution": "<p>Residuals: −1, 0, 1, −1, so SSE = 1 + 0 + 1 + 1 = 3.</p><p>ȳ = 5, deviations −3, −1, 1, 3, so SST = 9 + 1 + 1 + 9 = 20.</p><p>R² = 1 − 3/20 = 0.85: the model explains 85% of the variance around the mean. (R² can be negative out of sample, when the model is worse than predicting ȳ.)</p><p>Answer: 0.85.</p>",
+  "key": "R² = 1 − SSE/SST compares the model's squared error to that of always predicting the mean."
+ },
+ {
+  "id": "ml-007",
+  "cat": "ml",
+  "diff": 3,
+  "title": "Bias–variance decomposition of a shrunk mean",
+  "tags": [
+   "bias-variance",
+   "shrinkage",
+   "mse"
+  ],
+  "prompt": "<p>Y ~ N(μ, σ²) with μ = 2, σ² = 4. You observe n = 10 i.i.d. training values and predict a <i>new</i> independent Y with the shrunk estimator ŷ = 0.8·Ȳ.</p><p>What is the expected squared prediction error E[(Y<sub>new</sub> − ŷ)²]? Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 4.416,
+   "display": "0.16 + 0.256 + 4 = 4.416"
+  },
+  "hints": [
+   "Expected prediction error = bias² + variance of ŷ + irreducible noise σ².",
+   "Bias = 0.8μ − μ = −0.4; Var(ŷ) = 0.64 · σ²/n."
+  ],
+  "solution": "<p>Decompose: E[(Y<sub>new</sub> − ŷ)²] = Var(Y<sub>new</sub>) + (E[ŷ] − μ)² + Var(ŷ), since Y<sub>new</sub> is independent of ŷ.</p><p>Noise: σ² = 4.</p><p>Bias: E[ŷ] = 0.8 · 2 = 1.6, so bias = −0.4 and bias² = 0.16.</p><p>Variance: Var(ŷ) = 0.8² · σ²/n = 0.64 · 0.4 = 0.256.</p><p>Total = 4 + 0.16 + 0.256 = 4.416. For comparison, the unbiased Ȳ gives 4 + 0 + 0.4 = 4.4 — here shrinkage's variance reduction (0.4 → 0.256) is not quite worth the added bias² (0.16). With a smaller μ or noisier data it would be.</p><p>Answer: 4.416.</p>",
+  "key": "Expected test MSE = bias² + variance + irreducible noise; shrinkage trades bias for variance."
+ },
+ {
+  "id": "ml-008",
+  "cat": "ml",
+  "diff": 2,
+  "title": "L1 vs L2: who zeroes coefficients?",
+  "tags": [
+   "regularization",
+   "lasso",
+   "ridge",
+   "sparsity"
+  ],
+  "prompt": "<p>You fit a linear model on 200 features, many of them irrelevant, with a strong penalty. Which statement is correct?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "Ridge (L2) sets many coefficients exactly to zero; Lasso (L1) only shrinks them.",
+    "Lasso (L1) tends to set many coefficients exactly to zero; Ridge (L2) shrinks them toward zero but rarely to exactly zero.",
+    "Both produce exactly the same coefficients for a large enough penalty.",
+    "Neither penalty changes the coefficients if the features are standardized."
+   ],
+   "correct": 1,
+   "display": "Lasso gives sparse solutions; Ridge shrinks smoothly."
+  },
+  "hints": [
+   "Picture the constraint regions: |β₁| + |β₂| ≤ t versus β₁² + β₂² ≤ t.",
+   "The L1 diamond has corners on the axes; the loss contours tend to touch it there."
+  ],
+  "solution": "<p>Penalized least squares = minimize the loss subject to a budget on ‖β‖. The L1 ball is a diamond with corners on the axes, so the first contact of the elliptical loss contours is often at a corner, where some coordinates are exactly 0 → sparse model (built-in feature selection).</p><p>The L2 ball is round: contact happens at a generic point, so coefficients shrink proportionally (in an orthonormal design, β<sub>ridge</sub> = β<sub>OLS</sub>/(1+λ)) but are not exactly zero. In the orthonormal case Lasso is soft-thresholding: sign(β)·max(|β| − λ/2, 0).</p><p>Ridge is preferable with many correlated, all-somewhat-useful features; Lasso when you believe only a few matter. Elastic net mixes both. Always standardize features first, since both penalties are scale-dependent.</p>",
+  "key": "L1 (Lasso) → exact zeros/sparsity via corners of the diamond; L2 (Ridge) → smooth shrinkage."
+ },
+ {
+  "id": "ml-009",
+  "cat": "ml",
+  "diff": 2,
+  "title": "One-dimensional ridge regression",
+  "tags": [
+   "regularization",
+   "ridge",
+   "closed-form"
+  ],
+  "prompt": "<p>Fit y ≈ βx with no intercept by minimizing Σ(yᵢ − βxᵢ)² + λβ², with λ = 2, on the data x = (1, 2, 3), y = (2, 3, 5).</p><p>What is the ridge estimate β̂? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 1.4375,
+   "display": "23/16 = 1.4375"
+  },
+  "hints": [
+   "Differentiate with respect to β and set to zero.",
+   "β̂ = Σxy / (Σx² + λ)."
+  ],
+  "solution": "<p>d/dβ: −2Σxᵢ(yᵢ − βxᵢ) + 2λβ = 0 ⇒ β̂ = Σxᵢyᵢ / (Σxᵢ² + λ).</p><p>Σxy = 2 + 6 + 15 = 23. Σx² = 1 + 4 + 9 = 14.</p><p>β̂ = 23/(14 + 2) = 23/16 = 1.4375, versus OLS 23/14 ≈ 1.643: the penalty shrinks the slope toward 0. In matrix form this is β̂ = (XᵀX + λI)⁻¹Xᵀy.</p><p>Answer: 23/16 = 1.4375.</p>",
+  "key": "Ridge adds λ to the diagonal of XᵀX: β̂ = (XᵀX + λI)⁻¹Xᵀy, shrinking toward zero."
+ },
+ {
+  "id": "ml-010",
+  "cat": "ml",
+  "diff": 1,
+  "title": "How many model fits?",
+  "tags": [
+   "cross-validation",
+   "hyperparameters",
+   "grid-search"
+  ],
+  "prompt": "<p>You tune one hyperparameter over 10 candidate values using 5-fold cross-validation, then refit the chosen model once on all the training data.</p><p>How many times is the model trained in total?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 51,
+   "display": "5 × 10 + 1 = 51"
+  },
+  "hints": [
+   "Each candidate value is trained once per fold.",
+   "Don't forget the final refit."
+  ],
+  "solution": "<p>Each of the 10 candidates is fit on 5 different training folds: 10 × 5 = 50 fits. Then one final fit on the full training set with the best value: 50 + 1 = 51.</p><p>(This is exactly what scikit-learn's GridSearchCV does with refit=True.) The held-out test set is touched only once, after all of this.</p><p>Answer: 51.</p>",
+  "key": "Grid search cost = (#candidates) × (#folds) + 1 refit."
+ },
+ {
+  "id": "ml-011",
+  "cat": "ml",
+  "diff": 3,
+  "title": "Cross-validating a return predictor",
+  "tags": [
+   "cross-validation",
+   "time-series",
+   "leakage",
+   "finance"
+  ],
+  "prompt": "<p>You predict next-day returns of a stock from features built on rolling 20-day windows of past prices, using 10 years of daily data. Which validation setup gives an honest estimate of live performance?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "Shuffle all days, standardize features using the mean/std of the whole dataset, then run 10-fold random K-fold CV.",
+    "Random K-fold is fine because each prediction only uses past prices in its features.",
+    "Walk-forward (expanding or rolling) validation: train on the past, test on the following block, fit any scaler on the training window only, and leave a gap (embargo) between train and test.",
+    "Use the last year as the test set, but choose hyperparameters by checking which value scores best on that last year."
+   ],
+   "correct": 2,
+   "display": "Walk-forward validation with train-only preprocessing and an embargo gap."
+  },
+  "hints": [
+   "Ask: could information from the test period reach the model during training?",
+   "Overlapping rolling windows and full-sample scaling both leak; so does tuning on the test set."
+  ],
+  "solution": "<p><b>Random K-fold</b> puts days from the future in the training set and the day before them in the test set. Because features use overlapping 20-day windows (and returns are autocorrelated / regime-dependent), neighbouring train and test rows share information → optimistic scores. Each row's features using only past data does not fix this: the <i>model</i> still learns from the future.</p><p><b>Full-sample standardization</b> leaks the future mean and volatility into training features. Fit scalers, imputers and feature selection inside each training window only (a pipeline).</p><p><b>Tuning on the test year</b> turns the test set into a validation set; its score is no longer an unbiased estimate.</p><p><b>Walk-forward</b> respects time order, mirrors how the model is used live, and an embargo/purge gap of about the window length removes overlap between train labels and test features.</p>",
+  "key": "In time series, validate forward in time, fit all preprocessing on the training window only, and purge/embargo overlapping samples."
+ },
+ {
+  "id": "ml-012",
+  "cat": "ml",
+  "diff": 1,
+  "title": "Roles of train, validation and test",
+  "tags": [
+   "train-val-test",
+   "model-selection",
+   "overfitting"
+  ],
+  "prompt": "<p>A student compares 50 model variants and reports the best one's score on the <b>test</b> set — the same test set used to pick the winner. What is the main problem?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "None; the test set is meant for choosing between models.",
+    "The reported score is optimistically biased: selecting the best of many on the test set overfits to it, so it no longer estimates performance on new data.",
+    "The test set is too small to train on.",
+    "The model will underfit because it never saw the test data."
+   ],
+   "correct": 1,
+   "display": "Selection on the test set makes its score optimistic."
+  },
+  "hints": [
+   "If you try 50 variants, one will look good partly by luck.",
+   "Which split should be used for selection, and which only once at the very end?"
+  ],
+  "solution": "<p>Training set: fit parameters. Validation set (or CV): choose hyperparameters/models. Test set: evaluate <i>once</i> at the end.</p><p>Picking the maximum of 50 noisy test scores selects partly on noise (a winner's curse), so the reported number is biased upward — the test set has become a validation set. The fix: select with validation/CV and keep a pristine test set, or use nested CV.</p><p>This is the ML version of p-hacking / backtest overfitting in quant research.</p>",
+  "key": "Train fits, validation selects, test evaluates once; reusing the test set for selection makes it optimistic."
+ },
+ {
+  "id": "ml-013",
+  "cat": "ml",
+  "diff": 1,
+  "title": "Two steps of gradient descent",
+  "tags": [
+   "optimization",
+   "gradient-descent",
+   "learning-rate"
+  ],
+  "prompt": "<p>Minimize f(w) = (w − 3)² by gradient descent from w₀ = 0 with learning rate η = 0.1.</p><p>What is w₂ (after two updates)? Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 1.08,
+   "display": "1.08"
+  },
+  "hints": [
+   "f′(w) = 2(w − 3); update w ← w − η f′(w).",
+   "w₁ = 0 − 0.1·(−6) = 0.6."
+  ],
+  "solution": "<p>f′(w) = 2(w − 3).</p><p>Step 1: f′(0) = −6, w₁ = 0 + 0.6 = 0.6.</p><p>Step 2: f′(0.6) = −4.8, w₂ = 0.6 + 0.48 = 1.08.</p><p>In general w<sub>t</sub> − 3 = (1 − 2η)<sup>t</sup>(w₀ − 3) = 0.8<sup>t</sup> · (−3); for t = 2: 3 − 3·0.64 = 1.08. The error shrinks geometrically by a factor 0.8 per step.</p><p>Answer: 1.08.</p>",
+  "key": "On a quadratic, gradient descent contracts the error by a constant factor (1 − ηf″) each step."
+ },
+ {
+  "id": "ml-014",
+  "cat": "ml",
+  "diff": 3,
+  "title": "When does gradient descent blow up?",
+  "tags": [
+   "optimization",
+   "gradient-descent",
+   "learning-rate",
+   "convergence"
+  ],
+  "prompt": "<p>Gradient descent on f(w) = 5(w − 1)² with a fixed learning rate η &gt; 0.</p><p>What is the critical learning rate η* such that the iterates converge to the minimum from any start for 0 &lt; η &lt; η*, and fail to converge for η ≥ η*?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.2,
+   "display": "η* = 0.2 (= 2/f″)"
+  },
+  "hints": [
+   "Write the update in terms of e = w − 1.",
+   "e ← (1 − 10η)e; you need |1 − 10η| &lt; 1."
+  ],
+  "solution": "<p>f′(w) = 10(w − 1), so with e = w − 1: e<sub>t+1</sub> = e<sub>t</sub> − 10η e<sub>t</sub> = (1 − 10η)e<sub>t</sub>.</p><p>Convergence ⇔ |1 − 10η| &lt; 1 ⇔ 0 &lt; η &lt; 0.2. At η = 0.2 the factor is −1 (oscillates forever between ±e₀); above it, the iterates oscillate with growing amplitude and diverge.</p><p>General rule: for a quadratic with curvature L = f″ (largest Hessian eigenvalue in many dimensions), GD converges iff η &lt; 2/L; η = 1/L is the one-step optimum here (factor 0). Ill-conditioned problems (large L/μ) force a small η and slow progress along flat directions — one reason to scale features.</p><p>Answer: η* = 0.2.</p>",
+  "key": "GD on a quadratic converges iff η < 2/L where L is the largest curvature; too large a step oscillates and diverges."
+ },
+ {
+  "id": "ml-015",
+  "cat": "ml",
+  "diff": 1,
+  "title": "Reading a logistic coefficient",
+  "tags": [
+   "logistic-regression",
+   "odds",
+   "interpretation"
+  ],
+  "prompt": "<p>In a logistic regression for default, the coefficient on “number of late payments” is 0.7.</p><p>By what factor are the <b>odds</b> of default multiplied for each extra late payment (holding everything else fixed)? Round to 2 decimals.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2.0137527074704766,
+   "display": "e^0.7 ≈ 2.01"
+  },
+  "hints": [
+   "The model is linear in the log-odds: ln(p/(1−p)) = β₀ + βx.",
+   "Increasing x by 1 adds β to the log-odds."
+  ],
+  "solution": "<p>ln(odds) = β₀ + 0.7x + …. Raising x by 1 adds 0.7 to the log-odds, i.e. multiplies the odds by e<sup>0.7</sup> ≈ 2.01.</p><p>So each extra late payment roughly doubles the odds of default. Note this is the <i>odds</i>, not the probability: the change in probability depends on the starting level (largest near p = 0.5, where dp/dx = β·p(1−p)).</p><p>Answer: ≈ 2.01.</p>",
+  "key": "A logistic coefficient β multiplies the odds by e^β per unit increase of its feature."
+ },
+ {
+  "id": "ml-016",
+  "cat": "ml",
+  "diff": 1,
+  "title": "From logit to probability",
+  "tags": [
+   "logistic-regression",
+   "sigmoid"
+  ],
+  "prompt": "<p>A logistic model has intercept β₀ = −1 and slope β₁ = 0.5. For x = 4, what probability does it predict? Round to 3 decimals.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.7310585786300049,
+   "display": "σ(1) ≈ 0.731"
+  },
+  "hints": [
+   "Compute the logit z = β₀ + β₁x first.",
+   "p = σ(z) = 1/(1 + e^(−z)); here z = 1."
+  ],
+  "solution": "<p>z = −1 + 0.5·4 = 1.</p><p>p = 1/(1 + e<sup>−1</sup>) = 1/(1 + 0.3679) ≈ 0.731.</p><p>Handy values: σ(0) = 0.5, σ(1) ≈ 0.73, σ(2) ≈ 0.88, σ(−z) = 1 − σ(z).</p><p>Answer: ≈ 0.731.</p>",
+  "key": "Logistic regression: probability = sigmoid(linear score), σ(z) = 1/(1+e^(−z))."
+ },
+ {
+  "id": "ml-017",
+  "cat": "ml",
+  "diff": 1,
+  "title": "Gini impurity of a node",
+  "tags": [
+   "decision-trees",
+   "gini",
+   "impurity"
+  ],
+  "prompt": "<p>A decision-tree node contains 30 positive and 10 negative examples. What is its <b>Gini impurity</b> 1 − Σ p<sub>k</sub>²? Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.375,
+   "display": "1 − (0.75² + 0.25²) = 0.375"
+  },
+  "hints": [
+   "Class proportions are 0.75 and 0.25.",
+   "1 − (0.5625 + 0.0625)."
+  ],
+  "solution": "<p>p₊ = 30/40 = 0.75, p₋ = 0.25.</p><p>Gini = 1 − (0.75² + 0.25²) = 1 − (0.5625 + 0.0625) = 0.375. Equivalently 2p(1−p) = 2·0.75·0.25.</p><p>Gini is 0 for a pure node and maximal (0.5 for two classes) at a 50/50 split. Trees choose the split that most reduces the weighted impurity of the children.</p><p>Answer: 0.375.</p>",
+  "key": "Gini = 1 − Σp_k² (= 2p(1−p) for two classes): the chance two random draws from the node disagree."
+ },
+ {
+  "id": "ml-018",
+  "cat": "ml",
+  "diff": 3,
+  "title": "Information gain of a split",
+  "tags": [
+   "decision-trees",
+   "entropy",
+   "information-gain"
+  ],
+  "prompt": "<p>A node has 8 positives and 8 negatives. A split sends 6 positives + 2 negatives left, and 2 positives + 6 negatives right.</p><p>What is the <b>information gain</b> (entropy in bits, parent entropy minus weighted child entropy)? Round to 3 decimals.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.18872187554086717,
+   "display": "1 − H(0.25) ≈ 0.189"
+  },
+  "hints": [
+   "Parent entropy of a 50/50 node is 1 bit.",
+   "Both children have class proportions 3/4 and 1/4: H = −(¾ log₂ ¾ + ¼ log₂ ¼) ≈ 0.811."
+  ],
+  "solution": "<p>Parent: H(½) = 1 bit.</p><p>Each child has proportions ¾/¼: H = ¼·log₂4 + ¾·log₂(4/3) = 0.5 + 0.75·0.415 ≈ 0.811 bits.</p><p>Weighted child entropy = ½·0.811 + ½·0.811 = 0.811.</p><p>Gain = 1 − 0.811 ≈ 0.189 bits.</p><p>Answer: ≈ 0.189.</p>",
+  "key": "Information gain = H(parent) − Σ (n_child/n) H(child); trees greedily pick the split maximizing it."
+ },
+ {
+  "id": "ml-019",
+  "cat": "ml",
+  "diff": 2,
+  "title": "Random forest vs gradient boosting",
+  "tags": [
+   "ensembles",
+   "random-forest",
+   "boosting",
+   "bias-variance"
+  ],
+  "prompt": "<p>Which statement best contrasts random forests and gradient boosting?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "Random forests fit trees sequentially to the residuals; boosting averages independent trees.",
+    "Random forests average many deep, decorrelated trees trained on bootstrap samples (mainly reducing variance); boosting adds shallow trees sequentially, each fitting the current errors (mainly reducing bias).",
+    "Both are identical except that boosting uses more trees.",
+    "Boosting cannot overfit, no matter how many trees are added."
+   ],
+   "correct": 1,
+   "display": "RF: parallel averaging of deep trees → variance reduction. Boosting: sequential weak learners → bias reduction."
+  },
+  "hints": [
+   "One method is parallel (bagging), the other sequential.",
+   "Which one keeps fitting what is still wrong?"
+  ],
+  "solution": "<p><b>Random forest</b> = bagging + random feature subsets. Deep trees have low bias but high variance; averaging B decorrelated trees cuts the variance. Adding more trees doesn't overfit (it just converges); it is robust with little tuning.</p><p><b>Gradient boosting</b> builds shallow trees one after another, each fit to the negative gradient of the loss (the residuals for MSE), scaled by a learning rate. It steadily reduces bias and is often the most accurate on tabular data, but it <i>can</i> overfit with too many trees or too high a learning rate — use early stopping on a validation set.</p>",
+  "key": "Bagging/RF averages deep trees to cut variance; boosting adds shallow trees sequentially to cut bias (needs early stopping)."
+ },
+ {
+  "id": "ml-020",
+  "cat": "ml",
+  "diff": 2,
+  "title": "One k-means iteration",
+  "tags": [
+   "clustering",
+   "k-means",
+   "unsupervised"
+  ],
+  "prompt": "<p>Points: (0,0), (2,0), (0,2), (3,3), (8,8). k-means with k = 2 starts from centroids c₁ = (0,0) and c₂ = (4,4).</p><p>After one assignment step and one update step, what is the <b>x-coordinate of c₂</b>?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 5.5,
+   "display": "5.5 (c₂ = (5.5, 5.5))"
+  },
+  "hints": [
+   "Assign each point to its nearest centroid (Euclidean distance).",
+   "(3,3) is √18 ≈ 4.24 from c₁ but √2 from c₂."
+  ],
+  "solution": "<p>Assignment: (0,0), (2,0), (0,2) are closer to c₁ (e.g. (2,0): distance 2 vs √20). (3,3) is √2 from c₂ vs √18 from c₁, and (8,8) is clearly closer to c₂.</p><p>Update: c₁ = mean of (0,0),(2,0),(0,2) = (⅔, ⅔); c₂ = mean of (3,3),(8,8) = (5.5, 5.5).</p><p>k-means alternates these two steps; each step can only decrease the within-cluster sum of squares, so it converges — but only to a local optimum that depends on initialization (hence k-means++ and multiple restarts).</p><p>Answer: 5.5.</p>",
+  "key": "k-means alternates: assign to nearest centroid, move each centroid to the mean of its points."
+ },
+ {
+  "id": "ml-021",
+  "cat": "ml",
+  "diff": 2,
+  "title": "How many principal components?",
+  "tags": [
+   "pca",
+   "dimensionality-reduction",
+   "explained-variance"
+  ],
+  "prompt": "<p>The covariance matrix of 5 standardized features has eigenvalues 5, 2.5, 1.5, 0.6, 0.4.</p><p>What is the smallest number of principal components that explains at least 90% of the variance?</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 3,
+   "display": "3"
+  },
+  "hints": [
+   "Total variance = sum of eigenvalues.",
+   "Cumulative ratios: 50%, 75%, 90%, …"
+  ],
+  "solution": "<p>Total variance = 5 + 2.5 + 1.5 + 0.6 + 0.4 = 10 (it equals the number of standardized features).</p><p>Explained variance ratios: 0.50, 0.25, 0.15, 0.06, 0.04. Cumulative: 0.50, 0.75, 0.90 ✓.</p><p>So 3 components reach 90%. In finance, the first PC of a stock-return or yield-curve covariance matrix is typically the 'market' or 'level' factor.</p><p>Answer: 3.</p>",
+  "key": "PC k explains λ_k / Σλ of the variance; keep components until the cumulative ratio reaches your target."
+ },
+ {
+  "id": "ml-022",
+  "cat": "ml",
+  "diff": 2,
+  "title": "Curse of dimensionality: everything is near the edge",
+  "tags": [
+   "curse-of-dimensionality",
+   "geometry",
+   "knn"
+  ],
+  "prompt": "<p>Points are uniform in the unit hypercube [0,1]<sup>10</sup>. What fraction of them lie within distance 0.05 of the boundary (i.e. at least one coordinate is in [0, 0.05) or (0.95, 1])? Round to 3 decimals.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6513215599,
+   "display": "1 − 0.9¹⁰ ≈ 0.651"
+  },
+  "hints": [
+   "The 'interior' is the cube [0.05, 0.95]¹⁰.",
+   "Its volume is 0.9¹⁰."
+  ],
+  "solution": "<p>A point is in the interior iff every coordinate is in [0.05, 0.95], probability 0.9 each, independently: 0.9¹⁰ ≈ 0.349.</p><p>So ≈ 1 − 0.349 = 0.651 of the points are within 0.05 of the boundary. In d = 100 it is 1 − 0.9¹⁰⁰ ≈ 99.997%.</p><p>In high dimensions volume concentrates near the boundary, distances between random points become similar, and neighbourhoods must be huge to contain any data — which is why k-NN and kernel methods degrade and why feature selection/regularization matter.</p><p>Answer: ≈ 0.651.</p>",
+  "key": "In d dimensions the interior fraction is (1−2ε)^d → 0: almost all volume is near the edge."
+ },
+ {
+  "id": "ml-023",
+  "cat": "ml",
+  "diff": 2,
+  "title": "Losses as likelihoods",
+  "tags": [
+   "mle",
+   "loss-functions",
+   "cross-entropy",
+   "mse"
+  ],
+  "prompt": "<p>Which pairing of loss function and probabilistic model is correct (minimizing the loss = maximizing the likelihood)?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "Mean squared error ↔ Bernoulli labels; cross-entropy ↔ Gaussian noise.",
+    "Mean squared error ↔ Gaussian noise with constant variance; binary cross-entropy (log-loss) ↔ Bernoulli labels.",
+    "Mean absolute error ↔ Gaussian noise; MSE ↔ Laplace noise.",
+    "Loss functions have no connection to likelihoods."
+   ],
+   "correct": 1,
+   "display": "MSE ↔ Gaussian; cross-entropy ↔ Bernoulli (and MAE ↔ Laplace)."
+  },
+  "hints": [
+   "Write the Gaussian log-density: −(y − f(x))²/(2σ²) + const.",
+   "The Bernoulli log-likelihood is y ln p + (1−y) ln(1−p)."
+  ],
+  "solution": "<p>Gaussian: y = f(x) + ε, ε ~ N(0, σ²). The negative log-likelihood is Σ(yᵢ − f(xᵢ))²/(2σ²) + const, so maximizing likelihood = minimizing squared error.</p><p>Bernoulli: y ∈ {0,1} with P(y=1) = p(x). The negative log-likelihood is −Σ[yᵢ ln pᵢ + (1−yᵢ) ln(1−pᵢ)] — exactly binary cross-entropy (log-loss).</p><p>Likewise Laplace noise ↔ mean absolute error (median regression), and a Gaussian prior on weights ↔ L2 penalty (MAP = ridge), Laplace prior ↔ L1 (Lasso).</p>",
+  "key": "Loss = negative log-likelihood: MSE ↔ Gaussian, log-loss ↔ Bernoulli, MAE ↔ Laplace; L2/L1 penalties ↔ Gaussian/Laplace priors."
+ },
+ {
+  "id": "ml-024",
+  "cat": "ml",
+  "diff": 2,
+  "title": "Softmax by hand",
+  "tags": [
+   "softmax",
+   "classification",
+   "neural-networks"
+  ],
+  "prompt": "<p>A 3-class model outputs logits z = (2, 1, 0). What softmax probability does it assign to the first class? Round to 3 decimals.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6652409557748219,
+   "display": "e²/(e² + e + 1) ≈ 0.665"
+  },
+  "hints": [
+   "softmax(z)ᵢ = e^{zᵢ} / Σⱼ e^{zⱼ}.",
+   "e² ≈ 7.389, e ≈ 2.718, e⁰ = 1."
+  ],
+  "solution": "<p>Exponentiate: e² ≈ 7.389, e¹ ≈ 2.718, e⁰ = 1; sum ≈ 11.107.</p><p>p₁ = 7.389/11.107 ≈ 0.665 (the others: ≈ 0.245 and ≈ 0.090).</p><p>Softmax is invariant to adding a constant to all logits — implementations subtract max(z) for numerical stability. With two classes it reduces to the sigmoid of the logit difference.</p><p>Answer: ≈ 0.665.</p>",
+  "key": "softmax(z)_i = e^{z_i}/Σe^{z_j}; shift-invariant, and the 2-class case is the sigmoid."
+ },
+ {
+  "id": "ml-025",
+  "cat": "ml",
+  "diff": 1,
+  "title": "Which model doesn't care about scaling?",
+  "tags": [
+   "feature-scaling",
+   "preprocessing",
+   "decision-trees"
+  ],
+  "prompt": "<p>One feature is annual income in dollars (≈ 10⁴–10⁶), another is age in years. If you do <b>not</b> standardize them, which model's predictions are essentially unaffected?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "k-nearest neighbours",
+    "Ridge or Lasso regression",
+    "A decision tree / random forest",
+    "An SVM with an RBF kernel"
+   ],
+   "correct": 2,
+   "display": "Tree-based models are invariant to monotone rescaling of features."
+  },
+  "hints": [
+   "Which models compute distances, or penalize coefficient sizes?",
+   "A tree only asks questions like “income < 52,000?”."
+  ],
+  "solution": "<p>Trees split on thresholds of one feature at a time; any monotone transformation (rescaling, log) leaves the possible partitions unchanged, so trees and forests (and gradient-boosted trees) don't need scaling.</p><p>k-NN and RBF-SVMs use distances, which income would completely dominate. Ridge/Lasso penalize coefficient magnitudes, which depend on feature units, so the penalty would hit features unequally. Gradient-descent-trained models (neural nets, logistic regression via SGD) also converge much faster on standardized features.</p>",
+  "key": "Distance-, penalty- and gradient-based models need scaling; tree-based models are invariant to it."
  }
 ];

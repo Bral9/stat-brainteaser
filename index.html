@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Stat Brainteaser</title>
-  <meta name="description" content="Offline trainer for quant trading and research interviews: probability, statistics, brainteasers, expected value, combinatorics, Fermi estimates and mental math.">
+  <meta name="description" content="Offline trainer for quant, data and ML internship interviews: probability, statistics, brainteasers, EV games, combinatorics, Fermi estimates, Python, SQL, machine learning and mental math.">
   <meta name="theme-color" content="#f5f6fa">
   <meta name="color-scheme" content="light dark">
   <meta name="mobile-web-app-capable" content="yes">
@@ -34,46 +34,45 @@
   </script>
 </head>
 <body>
-  <a class="sr-only" href="#view">Skip to content</a>
+  <a class="skip-link" href="#view">Skip to content</a>
   <div id="errBanner" class="err-banner hidden" role="alert"></div>
   <header class="topbar">
     <a class="brand" href="#home" aria-label="Stat Brainteaser home">
-      <img src="icons/icon-192.png" alt="" width="30" height="30">
+      <img src="icons/icon-192.png" alt="" width="32" height="32">
       <span>Stat Brainteaser</span>
     </a>
     <nav class="tabbar" aria-label="Main">
-      <a href="#home" data-view="home">
+      <a href="#home" data-tab="home">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
         <span>Home</span></a>
-      <a href="#practice" data-view="practice">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>
+      <a href="#practice" data-tab="practice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
         <span>Practice</span></a>
-      <a href="#review" data-view="review">
+      <a href="#review" data-tab="review">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 2"/></svg>
-        <span>Review</span><span class="tab-badge hidden" data-due-badge aria-label="due today"></span></a>
-      <a href="#sprint" data-view="sprint">
+        <span>Review</span><span class="tab-badge hidden" data-due-badge></span></a>
+      <a href="#train" data-tab="train">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
-        <span>Sprint</span></a>
-      <a href="#drills" data-view="drills" class="desk-only">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
-        <span>Drills</span></a>
-      <a href="#interview" data-view="interview" class="desk-only">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
-        <span>Interview</span></a>
-      <a href="#stats" data-view="stats">
+        <span>Train</span></a>
+      <a href="#stats" data-tab="stats">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-6"/></svg>
         <span>Stats</span></a>
+      <a href="#settings" data-tab="settings" class="desk-only">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
+        <span>Settings</span></a>
     </nav>
-    <button id="installBtn" class="icon-btn hidden" type="button" aria-label="Install app">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span>Install</span>
-    </button>
-    <button id="themeBtn" class="icon-btn" type="button" aria-label="Toggle theme"></button>
-    <a class="icon-btn" href="#settings" aria-label="Settings and data" title="Settings, export/import">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
-    </a>
+    <div class="top-actions">
+      <button class="icon-btn hidden" type="button" data-install aria-label="Install app">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span class="lbl">Install app</span>
+      </button>
+      <button class="icon-btn" type="button" data-theme-btn aria-label="Toggle theme"></button>
+      <a class="icon-btn mobile-only" href="#settings" aria-label="Settings and data" title="Settings, export/import">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
+      </a>
+    </div>
   </header>
 
-  <main id="view" tabindex="-1" aria-live="off">
+  <main id="view" tabindex="-1">
     <noscript><div class="card"><p>Stat Brainteaser needs JavaScript enabled.</p></div></noscript>
   </main>
 
