@@ -124,7 +124,44 @@ Answer types:
 
 Progress is saved under a stable key with a schema version (`state.v`). If you change its shape, add a step to `migrate()` in `app.js`.
 
-**After editing any file, bump `VERSION` in `sw.js`** (and `APP_VERSION` in `app.js`). Installed copies will then show an "Update available" prompt. If you add a new file, also add it to the `PRECACHE` list in `sw.js`.
+You don't have to bump anything for an update to reach users: every push gets a unique build id (see below). Bump `APP_VERSION` in `app.js` and `VERSION` in `sw.js` together, and only for releases you want a human-readable version number for. If you add a new file, also add it to the `PRECACHE` list in `sw.js`.
+
+## Updates & notifications
+
+### How a deploy works
+1. You push to `main`.
+2. `.github/workflows/deploy.yml` runs. It copies the site, stamps a unique build id (`<short sha>-<run number>`) into `sw.js` by replacing `var BUILD = 'dev';`, and writes a `version.json`:
+   ```json
+   {"version": "1.2.0", "build": "abc1234-17", "date": "2026-10-21T16:00:00Z", "notes": "first line of the commit message"}
+   ```
+3. The workflow publishes the result to GitHub Pages.
+4. Because `sw.js` changes on every deploy, browsers detect a new service worker. Its cache name includes the build id, so old caches are deleted when it activates.
+5. Locally (no Action), `BUILD` stays `'dev'`, there is no `version.json`, and everything still works.
+
+> **One-time setup:** in the repo, go to **Settings → Pages → Build and deployment** and set **Source: GitHub Actions**.
+
+### In the app
+- **Update prompt:** the app checks for a new version when it opens, whenever you come back to the tab, and every 30 minutes while it is open. When one is ready, you get an **"Update available"** prompt showing the version, build, date and the commit message. Tap **Update** and the app reloads into the new version. Your progress is kept, because it lives in localStorage and not in the cache.
+- **Settings → Updates** shows:
+  - the current version, build and deploy date
+  - a **Check for updates now** button ("You're up to date · v1.2.0 · build abc1234-17 · 21 Oct 2026")
+  - the **Update notifications** toggle (off by default; the Home screen offers it once)
+
+### Notifications when the app is closed
+Turning notifications on asks for permission. On browsers that support **Periodic Background Sync**, it also registers a background check about every 12 hours. That means **Chrome or Edge, with the app installed**.
+
+The background check reads `version.json`, which is never cached. If the build differs from the one you are running, it shows one notification per new build: "Stat Brainteaser update available", with the commit message. Tapping the notification opens the app, where the Update prompt is waiting. If the app is open in a background tab when an update is found, you also get a system notification.
+
+| Platform | What you get |
+| --- | --- |
+| Chrome / Edge, installed app (Windows, Android) | Background checks about every 12 h, plus a system notification |
+| Chrome / Edge in a normal tab | Notification while the app is open (including a background tab) |
+| iPhone / iPad, Firefox | No background checks; the update prompt appears when you open the app |
+
+The browser decides when periodic sync actually runs, based on how much you use the app, so it can be less frequent than 12 hours.
+
+### Alternative: get notified by GitHub
+On https://github.com/bral9/stat-brainteaser, click **Watch → Custom**, then tick **Releases**, or choose **All activity** to hear about every push. GitHub then emails you and notifies you in the GitHub mobile app whenever something is added.
 
 ## Project layout
 
@@ -134,8 +171,10 @@ styles.css            all styles (light/dark tokens)
 app.js                router, views, sessions, parser, SRS, sprint, drills, stats, migration
 problems.js           problem bank
 manifest.webmanifest  PWA manifest (relative paths, scope "./")
-sw.js                 cache-first service worker, versioned cache
+sw.js                 cache-first service worker; cache name = version + build; periodic update check
 icons/                192/512 icons, maskable variants, apple-touch-icon, favicon
+.github/workflows/    deploy.yml: stamps the build id, writes version.json, deploys to Pages
+version.json          generated at deploy time only (not in the repo, never cached)
 .nojekyll             serve files as-is on GitHub Pages
 ```
 

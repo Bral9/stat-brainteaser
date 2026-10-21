@@ -1,0 +1,76 @@
+# Deploys the app to GitHub Pages on every push to main.
+# Each deploy stamps a unique BUILD id into sw.js (so browsers see a new service worker
+# and show the in-app "Update available" prompt) and writes version.json, which the app
+# and the service worker read to show release notes and send update notifications.
+#
+# One-time setup: repo Settings → Pages → Build and deployment → Source: "GitHub Actions".
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Stamp build id and write version.json
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          BUILD="${GITHUB_SHA::7}-${GITHUB_RUN_NUMBER}"
+          APP_VERSION="$(grep -oP "var APP_VERSION = '\K[^']+" app.js)"
+          SW_VERSION="$(grep -oP "^var VERSION = '\K[^']+" sw.js)"
+          if [ "$APP_VERSION" != "$SW_VERSION" ]; then
+            echo "::warning::APP_VERSION ($APP_VERSION) and sw.js VERSION ($SW_VERSION) differ"
+          fi
+          # Fall back to the last commit subject (e.g. for workflow_dispatch runs).
+          NOTES="$(printf '%s' "${COMMIT_MSG:-$(git log -1 --pretty=%s)}" | head -n 1)"
+
+          mkdir -p _site
+          rsync -a --exclude '.git' --exclude '.github' --exclude '_site' ./ _site/
+
+          sed -i "s/^var BUILD = 'dev';$/var BUILD = '${BUILD}';/" _site/sw.js
+          grep -q "^var BUILD = '${BUILD}';$" _site/sw.js || { echo "::error::BUILD placeholder not found in sw.js"; exit 1; }
+
+          BUILD="$BUILD" APP_VERSION="$APP_VERSION" NOTES="$NOTES" python3 - <<'PY'
+          import json, os, datetime
+          info = {
+              "version": os.environ["APP_VERSION"],
+              "build": os.environ["BUILD"],
+              "date": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+              "notes": os.environ.get("NOTES", "")[:200],
+          }
+          with open("_site/version.json", "w", encoding="utf-8") as f:
+              json.dump(info, f, ensure_ascii=False)
+          print(json.dumps(info))
+          PY
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

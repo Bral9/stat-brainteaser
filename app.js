@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.1.0';
+  var APP_VERSION = '1.2.0';
   var STORE_KEY = 'statbt.progress.v1'; // key kept stable across versions; schema version lives in state.v
   var SCHEMA = 2;
   var PROBLEMS = Array.isArray(window.PROBLEMS) ? window.PROBLEMS : [];
@@ -122,9 +122,10 @@
         sprint: { mode: 'classic', dur: 120, ops: { add: true, sub: true, mul: true, div: true }, addA: [2, 100], addB: [2, 100], mulA: [2, 12], mulB: [2, 100] },
         filters: { cats: [], diffs: [], status: 'all', q: '' },
         drillTypes: [],
-        ivDiff: 'mixed'
+        ivDiff: 'mixed',
+        notify: false
       },
-      ui: { iosHintDismissed: false, onboarded: false }
+      ui: { iosHintDismissed: false, onboarded: false, notifyOffered: false }
     };
   }
   function isPlainObj(o) { return !!o && typeof o === 'object' && !Array.isArray(o); }
@@ -413,6 +414,7 @@
     el.appendChild(x);
     wrap.appendChild(el);
     if (!actionLabel || ms) setTimeout(function () { el.remove(); }, ms || 4500);
+    return el;
   }
 
   function applyTheme() {
@@ -460,40 +462,164 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /* Service worker: offline-ready toast + update prompt                 */
+  /* Service worker: offline-ready toast, update detection & prompt,      */
+  /* optional update notifications (periodic background sync).            */
   /* ------------------------------------------------------------------ */
-  var swReg = null, updateRequested = false;
+  var swReg = null, updateRequested = false, promptedWorker = null;
+  var UPDATE_EVERY_MS = 30 * 60 * 1000;
+  function fetchVersionInfo() {
+    // version.json is written by the deploy workflow; the SW never caches it. Missing locally (dev) → null.
+    return fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+  }
+  function swInfo(worker) {
+    // Ask a service worker for its {version, build}.
+    return new Promise(function (resolve) {
+      worker = worker || (navigator.serviceWorker && navigator.serviceWorker.controller);
+      if (!worker || typeof MessageChannel === 'undefined') { resolve(null); return; }
+      var ch = new MessageChannel();
+      var done = false;
+      ch.port1.onmessage = function (e) { done = true; resolve(e.data); };
+      try { worker.postMessage({ type: 'GET_VERSION' }, [ch.port2]); } catch (e) { resolve(null); return; }
+      setTimeout(function () { if (!done) resolve(null); }, 1500);
+    });
+  }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    return isNaN(d) ? '' : d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
   function promptUpdate(worker) {
-    toast('A new version is available.', 'Update', function () {
-      updateRequested = true;
-      worker.postMessage({ type: 'SKIP_WAITING' });
+    if (promptedWorker === worker) return;
+    promptedWorker = worker;
+    Promise.all([fetchVersionInfo(), swInfo(worker)]).then(function (res) {
+      var info = res[0] || {}, w = res[1] || {};
+      var build = w.build || info.build;
+      var meta = [];
+      if (w.version || info.version) meta.push('v' + (w.version || info.version));
+      if (build && build !== 'dev') meta.push('build ' + build);
+      if (info.date) meta.push(fmtDate(info.date));
+      var msg = 'Update available' + (meta.length ? ' (' + meta.join(' · ') + ')' : '') +
+        (info.notes ? ': “' + info.notes + '”.' : '.') + ' Your progress is kept.';
+      var el = toast(msg, 'Update', function () {
+        updateRequested = true;
+        worker.postMessage({ type: 'SKIP_WAITING' });
+      });
+      if (el) el.classList.add('toast-update');
+      // App open in a background tab: also raise a system notification (if allowed).
+      if (document.visibilityState === 'hidden' && S.settings.notify && window.Notification && Notification.permission === 'granted' && swReg) {
+        swReg.showNotification('Stat Brainteaser update available', {
+          body: (info.notes ? info.notes + '\n' : '') + 'Open the app and tap Update.',
+          icon: 'icons/icon-192.png', badge: 'icons/favicon-32.png', tag: 'update', data: { url: './' }
+        }).catch(function () {});
+        if (build) worker.postMessage({ type: 'MARK_NOTIFIED', build: build });
+      }
+    });
+  }
+  function watchRegistration(reg) {
+    if (reg.waiting && navigator.serviceWorker.controller) promptUpdate(reg.waiting);
+    reg.addEventListener('updatefound', function () {
+      var nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener('statechange', function () {
+        if (nw.state === 'installed') {
+          if (navigator.serviceWorker.controller) promptUpdate(nw);
+          else toast('Offline ready — everything is cached and works without internet.');
+        }
+      });
+    });
+  }
+  function pollUpdate() {
+    if (!swReg) return Promise.resolve();
+    return swReg.update().catch(function () {}).then(function () {
+      if (swReg.waiting && navigator.serviceWorker.controller) promptUpdate(swReg.waiting);
     });
   }
   function registerSW() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
     navigator.serviceWorker.register('./sw.js', { scope: './' }).then(function (reg) {
       swReg = reg;
-      if (reg.waiting && navigator.serviceWorker.controller) promptUpdate(reg.waiting);
-      reg.addEventListener('updatefound', function () {
-        var nw = reg.installing;
-        if (!nw) return;
-        nw.addEventListener('statechange', function () {
-          if (nw.state === 'installed') {
-            if (navigator.serviceWorker.controller) promptUpdate(nw);
-            else toast('Offline ready — everything is cached and works without internet.');
-          }
-        });
-      });
+      watchRegistration(reg);
+      pollUpdate(); // on load
+      setInterval(pollUpdate, UPDATE_EVERY_MS); // every 30 min while open
+      document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') pollUpdate(); });
+      if (S.settings.notify) ensurePeriodicSync(); // keep the background registration alive
     }).catch(function (err) { console.warn('SW registration failed', err); });
     navigator.serviceWorker.addEventListener('controllerchange', function () {
       if (updateRequested) { updateRequested = false; location.reload(); }
     });
   }
-  function checkForUpdate() {
-    if (!swReg) { toast('Updates are handled by the service worker (not available here).'); return; }
-    swReg.update().then(function () {
-      if (!swReg.waiting && !swReg.installing) toast('You have the latest version (' + APP_VERSION + ').');
-    }).catch(function () { toast('Could not check for updates (offline?).'); });
+  function checkForUpdate(outEl) {
+    function say(t) { if (outEl) outEl.textContent = t; else toast(t); }
+    if (!swReg) { say('Update checks need the service worker (not available here).'); return Promise.resolve(); }
+    say('Checking…');
+    return swReg.update().then(function () {
+      return new Promise(function (r) { setTimeout(r, 600); });
+    }).then(function () {
+      if (swReg.waiting || swReg.installing) {
+        say('Update found — tap Update in the message that just appeared.');
+        if (swReg.waiting) promptUpdate(swReg.waiting);
+        return;
+      }
+      return Promise.all([fetchVersionInfo(), swInfo()]).then(function (res) {
+        var info = res[0] || {}, w = res[1] || {};
+        var build = w.build || info.build || 'dev';
+        say('You’re up to date · v' + (w.version || APP_VERSION) + ' · build ' + build + (info.date ? ' · ' + fmtDate(info.date) : ''));
+      });
+    }).catch(function () { say('Could not check for updates (offline?).'); });
+  }
+
+  /* Background update notifications */
+  function notifySupport() {
+    var hasNotif = 'Notification' in window;
+    var hasPeriodic = !!(swReg && 'periodicSync' in swReg);
+    return { notif: hasNotif, periodic: hasPeriodic, perm: hasNotif ? Notification.permission : 'unsupported' };
+  }
+  function ensurePeriodicSync() {
+    // Resolves to 'on' | 'needs-install' | 'unsupported' | 'error'
+    if (!swReg || !('periodicSync' in swReg)) return Promise.resolve('unsupported');
+    var q = (navigator.permissions && navigator.permissions.query)
+      ? navigator.permissions.query({ name: 'periodic-background-sync' }).then(function (st) { return st.state; }).catch(function () { return 'prompt'; })
+      : Promise.resolve('prompt');
+    return q.then(function (state) {
+      if (state === 'denied') return 'needs-install';
+      return swReg.periodicSync.register('check-update', { minInterval: 12 * 60 * 60 * 1000 })
+        .then(function () { return 'on'; })
+        .catch(function () { return 'needs-install'; });
+    }).catch(function () { return 'error'; });
+  }
+  function enableNotifications() {
+    if (!('Notification' in window)) { toast('Notifications are not supported in this browser.'); return Promise.resolve(false); }
+    return Promise.resolve(Notification.requestPermission()).then(function (perm) {
+      if (perm !== 'granted') {
+        S.settings.notify = false; save();
+        toast(perm === 'denied' ? 'Notifications are blocked for this site — allow them in your browser settings.' : 'Notifications not enabled.');
+        return false;
+      }
+      S.settings.notify = true; save();
+      return ensurePeriodicSync().then(function (st) {
+        toast(st === 'on' ? 'Update notifications on — checked about twice a day, even when the app is closed.'
+          : 'Notifications on while the app is open. Background checks need the installed app in Chrome/Edge.');
+        return true;
+      });
+    }).catch(function () { toast('Could not enable notifications.'); return false; });
+  }
+  function disableNotifications() {
+    S.settings.notify = false; save();
+    if (swReg && swReg.periodicSync) return swReg.periodicSync.unregister('check-update').catch(function () {});
+    return Promise.resolve();
+  }
+  function notifyStatusText() {
+    var ns = notifySupport();
+    if (!ns.notif) return Promise.resolve('Not supported on this browser — you’ll see updates when you open the app.');
+    if (ns.perm === 'denied') return Promise.resolve('Notifications are blocked for this site in your browser settings. You’ll still see updates when you open the app.');
+    if (!S.settings.notify) return Promise.resolve(ns.periodic ? 'Off. Turn on to hear about new problems even when the app is closed (installed Chrome/Edge app).' : 'Off. On this browser updates can only appear while the app is open.');
+    if (!ns.periodic) return Promise.resolve('Background checks: not supported on this browser — you’ll see updates when you open the app.');
+    return swReg.periodicSync.getTags().then(function (tags) {
+      return tags.indexOf('check-update') >= 0 ? 'Background checks: on (Chrome/Edge installed app), about every 12 hours.'
+        : 'Background checks need the installed app (Chrome/Edge). Until then you’re notified while the app is open.';
+    }).catch(function () { return 'Background checks unavailable — you’ll see updates when you open the app.'; });
   }
 
   /* ------------------------------------------------------------------ */
@@ -912,7 +1038,19 @@
       html += '<div class="banner"><p><b>Suggested focus: ' + esc(catName(weak.id)) + '</b> — ' + (weak.score !== null ? 'your lowest accuracy so far (' + pct(weak.score) + ').' : 'the topic you’ve practiced least.') + '</p>' +
         '<button class="btn sm primary" type="button" data-topic="' + weak.id + '">Start</button></div>';
     }
+    // One-time, dismissible offer for update notifications (after onboarding).
+    if (S.ui.onboarded && !S.ui.notifyOffered && !S.settings.notify && 'Notification' in window && Notification.permission !== 'denied') {
+      var offer = '<div class="banner offer" id="notifyOffer"><p><b>Want to know when new problems land?</b> Turn on update notifications — you can change this anytime in Settings.</p>' +
+        '<div class="row"><button class="btn sm primary" type="button" id="offerYes">Turn on</button><button class="btn sm ghost" type="button" id="offerNo">No thanks</button></div></div>';
+      html = html.replace('<section class="group">', offer + '<section class="group">');
+    }
     main.innerHTML = html;
+    var oy = $('#offerYes');
+    if (oy) {
+      var closeOffer = function () { S.ui.notifyOffered = true; save(); var o = $('#notifyOffer'); if (o) o.remove(); };
+      oy.addEventListener('click', function () { closeOffer(); enableNotifications(); });
+      $('#offerNo').addEventListener('click', closeOffer);
+    }
     var x = $('#iosHintX');
     if (x) x.addEventListener('click', function () { S.ui.iosHintDismissed = true; save(); $('#iosHint').remove(); });
     var cb = $('#contBtn'); if (cb) cb.addEventListener('click', function () { go('#play/' + S.session.idx); });
@@ -1770,7 +1908,13 @@
       '<label class="btn" for="impMerge">Import (merge)</label><input class="sr-only" type="file" id="impMerge" accept=".json,application/json">' +
       '<label class="btn" for="impReplace">Import (replace)</label><input class="sr-only" type="file" id="impReplace" accept=".json,application/json"></div>' +
       '<div><button class="btn danger" type="button" id="resetBtn">Reset all progress</button></div></div>' +
-      '<div class="card stack"><h2>App</h2><div class="row"><button class="btn" type="button" id="updBtn">Check for updates</button>' +
+      '<div class="card stack" id="updCard"><h2>Updates</h2>' +
+      '<dl class="about"><dt>Version</dt><dd id="abVer">' + APP_VERSION + '</dd><dt>Build</dt><dd class="mono" id="abBuild">…</dd><dt>Deployed</dt><dd id="abDate">—</dd></dl>' +
+      '<div class="row"><button class="btn" type="button" id="updBtn">Check for updates now</button></div>' +
+      '<p class="small" id="updOut" role="status" aria-live="polite" style="margin:0"></p>' +
+      '<label class="switch"><input type="checkbox" id="notifyToggle"' + (S.settings.notify ? ' checked' : '') + '><span class="track" aria-hidden="true"></span><span><b>Update notifications</b><br><span class="muted small">Get a system notification when new problems or features are published.</span></span></label>' +
+      '<p class="muted small" id="notifyStatus" style="margin:0"></p></div>' +
+      '<div class="card stack"><h2>App</h2><div class="row">' +
       '<button class="btn' + (deferredInstall ? '' : ' hidden') + '" type="button" data-install id="instBtn2">' + ICONS.download + ' Install app</button>' +
       '<button class="btn" type="button" id="obBtn">Show intro again</button></div>' +
       '<p class="muted small" style="margin:0">' + (isStandalone() ? 'Running as an installed app.' : isIOS() ? 'On iPhone/iPad: Share → Add to Home Screen.' : 'In Chrome/Edge use the install icon in the address bar, or the Install button when it appears.') + '</p></div>' +
@@ -1788,7 +1932,23 @@
       if (!confirm('Delete all progress on this device? Consider exporting first.')) return;
       var theme = S.settings.theme; S = defaultState(); S.settings.theme = theme; S.ui.onboarded = true; save(); updateBadges(); toast('Progress reset.'); route();
     });
-    $('#updBtn').addEventListener('click', checkForUpdate);
+    $('#updBtn').addEventListener('click', function () { checkForUpdate($('#updOut')); });
+    function refreshNotifyStatus() { notifyStatusText().then(function (t) { var el = $('#notifyStatus'); if (el) el.textContent = t; }); }
+    var nt = $('#notifyToggle');
+    if (!('Notification' in window)) nt.disabled = true;
+    nt.addEventListener('change', function () {
+      S.ui.notifyOffered = true;
+      (nt.checked ? enableNotifications() : disableNotifications().then(function () { return false; })).then(function (on) {
+        nt.checked = !!S.settings.notify; save(); refreshNotifyStatus();
+      });
+    });
+    refreshNotifyStatus();
+    Promise.all([fetchVersionInfo(), swInfo()]).then(function (res) {
+      var info = res[0] || {}, w = res[1] || {};
+      var b = $('#abBuild'); if (!b) return;
+      b.textContent = w.build || info.build || 'dev (local)';
+      if (info.date) $('#abDate').textContent = fmtDate(info.date) + (info.notes ? ' — ' + info.notes : '');
+    });
     $('#instBtn2').addEventListener('click', doInstall);
     $('#obBtn').addEventListener('click', showOnboarding);
   };
