@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var APP_VERSION = '2.1.0';
+  var APP_VERSION = '2.2.0';
   var STORE_KEY = 'statbt.progress.v1'; // key kept stable across versions; schema version lives in state.v
   var SCHEMA = 4;
   var PROBLEMS = Array.isArray(window.PROBLEMS) ? window.PROBLEMS : [];

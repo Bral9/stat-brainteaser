@@ -718,6 +718,7 @@
   var GROUPS = [
     { id: 'speed', name: 'Speed & online tests', desc: 'The timed screens that come before any interview.' },
     { id: 'market', name: 'Market making', desc: 'Quote, trade and size against flow that may know more than you.' },
+    { id: 'versus', name: 'Strategy games vs bots', desc: 'Poker, bluffing, game theory, search and market games. Play solo or against easy, medium and hard bots; the skills transfer.' },
     { id: 'decide', name: 'Decisions & sizing', desc: 'When to stop, how much to bet.' },
     { id: 'estimate', name: 'Estimation', desc: 'Numbers you can’t look up, with honest error bars.' }
   ];
@@ -2264,7 +2265,7 @@
       var week = all.filter(function (r) { return r.t >= Date.now() - 7 * 864e5; }).length;
       var days = {}; all.forEach(function (r) { days[r.d] = 1; });
       var dt = dailyToday(), pk = E.dailyPick(core.today());
-      main.innerHTML = '<div class="page-head"><div><a class="back-link" href="#train">' + ICONS.left + ' Train</a><h1>Arcade</h1><p class="muted">Interview-format games: mental-math screens, sequences, market making, sizing, estimation. All offline, all seeded.</p></div></div>' +
+      main.innerHTML = '<div class="page-head"><div><a class="back-link" href="#train">' + ICONS.left + ' Train</a><h1>Arcade</h1><p class="muted">Interview-format games: mental-math screens, market making, sizing, estimation — and strategy games against bots. All offline, all seeded.</p></div></div>' +
         '<div class="card ar-dailyset"><div class="row"><span class="ticon" style="--cat: var(--accent)">' + IC.daily + '</span><div style="flex:1;min-width:0"><b>Daily set</b> <span class="muted small">· ' + nDone + ' / 3 done today</span><p class="muted small" style="margin:0">One estimate, one speed screen, one decision game — about 15 minutes.</p></div></div>' +
         '<div class="ar-setlist">' + set.map(function (x) { var g = GAME[x.g]; return '<a class="ar-setitem' + (x.done ? ' done' : '') + '" href="#arcade/' + x.g + '" style="--gc:' + g.color + '"><span class="ar-gic">' + (x.done ? ICONS.check : IC[g.icon]) + '</span><span><b>' + esc(g.name) + '</b><small>' + (x.g === 'daily-fermi' ? (dt ? 'Fermi #' + pk.n + ' · ' + dt.score + '/1000' : 'Fermi #' + pk.n + ' · not played') : x.done ? 'done today' : esc(g.skills[0])) + '</small></span></a>'; }).join('') + '</div></div>' +
         '<div class="tiles">' +
@@ -2930,6 +2931,2461 @@
         '<div class="ar-panel"><h3>Debrief</h3><ul class="qp-debrief small">' + db.map(function (x) { return '<li class="' + x.k + '">' + esc(x.t) + '</li>'; }).join('') + '</ul>' +
         '<p class="muted small" style="margin:.4rem 0 0">Toy model of a promotional idea: real books have hidden orders, many venues, queue-position games and fee tiers. <a href="#learn/ms-rule-risk">Rule risk: the Hide Not Slide story</a>.</p></div>' +
         '<details class="reveal"><summary>' + ICONS.book + '<span>Trade by trade</span><span class="chev" aria-hidden="true">▾</span></summary><div class="rbody table-scroll"><table class="simple"><thead><tr><th>#</th><th>Entry</th><th>Queue</th><th>Fill</th><th>Outcome</th><th>Gross</th><th>Net</th></tr></thead><tbody>' + rows + '</tbody></table></div></details>';
+    }
+  });
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ================================================================== */
+/* Part 8 (v2.2): "Strategy games vs bots" — shared helpers plus three */
+/* compact games: Make 24, Code Breaker and Winner's Curse.            */
+/* Every game: a pure engine on SBT_ARCADE.<id>.engine (no DOM, seeded) */
+/* and a UI plugin that registers GDEF.<id> through SBT_ARCADE._ui.     */
+/* Variants are the opponent: solo, or a bot at easy / medium / hard.   */
+/* ================================================================== */
+(function (root) {
+  'use strict';
+  var AR = root.SBT_ARCADE;
+  if (!AR || !AR._engine) return;
+  var E = AR._engine;
+  var VS = AR.versus = AR.versus || { metas: [] };
+
+  VS.LEVEL_NAMES = { solo: 'Solo', easy: 'Easy bot', medium: 'Medium bot', hard: 'Hard bot', field: 'Tournament' };
+  VS.add = function (META) {
+    VS.metas.push(META);
+    AR[META.id] = AR[META.id] || {};
+    AR[META.id].meta = META;
+    if (Array.isArray(AR.games) && !AR.games.some(function (g) { return g.id === META.id; })) {
+      AR.games.push({ id: META.id, name: META.name, desc: META.desc, skills: META.skills.slice(), firms: META.firms.slice(), why: META.why, href: '#arcade/' + META.id,
+        variants: META.variants.map(function (v) { return { id: v.id, name: v.name, href: '#arcade/' + META.id + '/' + v.id }; }) });
+    }
+  };
+  /* rec-variant helpers: "<level>[-<extra>…][-coach]" */
+  VS.rec = function (v, extra, coach) { return v + (extra ? '-' + extra : '') + (coach ? '-coach' : ''); };
+  VS.parseRec = function (rv) {
+    var parts = String(rv).split('-'), coach = parts[parts.length - 1] === 'coach';
+    if (coach) parts.pop();
+    return { v: parts[0], extra: parts.slice(1), coach: coach };
+  };
+  /* binomial helpers (used by Liar's Dice and the coach panels) */
+  VS.binomPmf = function (n, p) {
+    var out = [], q = 1 - p, c = 1;
+    for (var k = 0; k <= n; k++) { out.push(c * Math.pow(p, k) * Math.pow(q, n - k)); c = c * (n - k) / (k + 1); }
+    return out;
+  };
+  VS.binomAtLeast = function (n, p, k) {
+    if (k <= 0) return 1;
+    if (k > n) return 0;
+    var pm = VS.binomPmf(n, p), s = 0;
+    for (var i = k; i <= n; i++) s += pm[i];
+    return Math.min(1, s);
+  };
+  /* playing cards: 0..51, rank = c >> 2 (0 = deuce … 12 = ace), suit = c & 3 */
+  VS.RANKS = '23456789TJQKA';
+  VS.SUITS = ['♠', '♥', '♦', '♣'];
+  VS.cardRank = function (c) { return c >> 2; };
+  VS.cardSuit = function (c) { return c & 3; };
+  VS.cardTxt = function (c) { return VS.RANKS.charAt(c >> 2).replace('T', '10') + VS.SUITS[c & 3]; };
+  VS.deck = function (r) { var d = []; for (var i = 0; i < 52; i++) d.push(i); return r.shuffle(d); };
+
+  /* ================================================================== */
+  /* Make 24 — exact rational solver                                     */
+  /* ================================================================== */
+  function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a || 1; }
+  function frac(n, d) { if (d < 0) { n = -n; d = -d; } var g = gcd(n, d); return { n: n / g, d: d / g }; }
+  function fracTxt(f) { return f.d === 1 ? String(f.n) : f.n + '/' + f.d; }
+  var OPS24 = ['+', '−', '×', '÷'];
+  function applyOp(a, op, b) {
+    if (op === '+') return frac(a.n * b.d + b.n * a.d, a.d * b.d);
+    if (op === '−') return frac(a.n * b.d - b.n * a.d, a.d * b.d);
+    if (op === '×') return frac(a.n * b.n, a.d * b.d);
+    if (op === '÷') return b.n === 0 ? null : frac(a.n * b.d, a.d * b.n);
+    return null;
+  }
+  var PREC = { '+': 1, '−': 1, '×': 2, '÷': 2 };
+  function wrap(node, need) { return node.p < need ? '(' + node.e + ')' : node.e; }
+  function combineExpr(a, op, b) {
+    var p = PREC[op];
+    var left = wrap(a, p), right = wrap(b, (op === '−' || op === '÷') ? p + 1 : p);
+    return { e: left + ' ' + op + ' ' + right, p: p };
+  }
+  /* All solutions as expression strings (deduplicated by a commutativity-normalised key). */
+  function solve24(nums, target, cap) {
+    target = target == null ? 24 : target; cap = cap || 400;
+    var sols = {}, list = [], keys = 0;
+    function key(node) { return node.k; }
+    function rec(items) {
+      if (list.length >= cap) return;
+      if (items.length === 1) {
+        var it = items[0];
+        if (it.v.d === 1 && it.v.n === target && !sols[it.k]) { sols[it.k] = 1; list.push(it.e); keys++; }
+        return;
+      }
+      for (var i = 0; i < items.length; i++) for (var j = 0; j < items.length; j++) {
+        if (i === j) continue;
+        var a = items[i], b = items[j], rest = items.filter(function (_, k) { return k !== i && k !== j; });
+        for (var o = 0; o < 4; o++) {
+          var op = OPS24[o];
+          if ((op === '+' || op === '×') && i > j) continue;     // commutative: one order is enough
+          var v = applyOp(a.v, op, b.v);
+          if (!v) continue;
+          var ex = combineExpr(a, op, b);
+          var k = (op === '+' || op === '×') ? '(' + [key(a), key(b)].sort().join(op) + ')' : '(' + key(a) + op + key(b) + ')';
+          rec(rest.concat([{ v: v, e: ex.e, p: ex.p, k: k }]));
+        }
+      }
+    }
+    rec(nums.map(function (x) { return { v: frac(x, 1), e: String(x), p: 9, k: String(x) }; }));
+    return list;
+  }
+  /* Deals are drawn from 1..13 (a card deck without suits) and kept only if solvable. */
+  function deal24(r, minSol) {
+    for (var tries = 0; tries < 400; tries++) {
+      var d = [r.int(1, 13), r.int(1, 13), r.int(1, 13), r.int(1, 13)];
+      var s = solve24(d);
+      if (s.length >= (minSol || 1)) return { nums: d, sols: s, nsol: s.length };
+    }
+    return { nums: [1, 2, 3, 4], sols: solve24([1, 2, 3, 4]), nsol: solve24([1, 2, 3, 4]).length };
+  }
+  var BOT24 = { easy: { base: 30, name: 'Easy bot', desc: 'about half a minute on a typical deal' }, medium: { base: 15, name: 'Medium bot', desc: 'about 15 seconds on a typical deal' }, hard: { base: 7, name: 'Hard bot', desc: 'about 7 seconds; hard deals still slow it down' } };
+  /* Bot solve time: slower when the deal has few solutions (a proxy for difficulty), log-normal noise. */
+  function botTime24(level, nsol, r) {
+    var b = (BOT24[level] || BOT24.medium).base, f = 0.7 + 1.6 / Math.sqrt(Math.max(1, nsol));
+    return Math.max(2.5, b * f * Math.exp(0.35 * r.normal()));
+  }
+  var M24 = { frac: frac, fracTxt: fracTxt, applyOp: applyOp, combineExpr: combineExpr, solve24: solve24, deal24: deal24, botTime24: botTime24, BOT: BOT24, OPS: OPS24, ROUNDS: 10, SOLO_SEC: 180 };
+  VS.add({ id: 'make24', name: 'Make 24', icon: 'make24', group: 'versus', color: 'var(--c-probability)',
+    desc: 'Combine four numbers with + − × ÷ to make exactly 24. Solo against the clock, or race a bot deal by deal.',
+    skills: ['Mental math', 'Search', 'vs bots'], firms: ['Optiver', 'Jane Street', 'Akuna', 'SIG'],
+    why: 'Fast, exact arithmetic and a systematic search when the obvious route fails — the mental engine behind every trading game.',
+    variants: [{ id: 'solo', name: 'Solo · 3 min' }, { id: 'easy', name: 'Easy bot' }, { id: 'medium', name: 'Medium bot' }, { id: 'hard', name: 'Hard bot' }] });
+  AR.make24.engine = M24;
+
+  /* ================================================================== */
+  /* Code Breaker — Mastermind, 4 pegs × 6 colours, repeats allowed       */
+  /* ================================================================== */
+  var CB_P = 4, CB_C = 6, CB_N = 1296, CB_MAX = 10;
+  function cbCode(i) { var a = []; for (var k = 0; k < CB_P; k++) { a.unshift(i % CB_C); i = Math.floor(i / CB_C); } return a; }
+  function cbIndex(a) { var i = 0; for (var k = 0; k < CB_P; k++) i = i * CB_C + a[k]; return i; }
+  var CODES = []; for (var ci = 0; ci < CB_N; ci++) CODES.push(cbCode(ci));
+  /* feedback: blacks = right colour, right place; whites = right colour, wrong place. Encoded b*5 + w. */
+  function cbFeedback(g, s) {
+    var b = 0, cg = [0, 0, 0, 0, 0, 0], cs = [0, 0, 0, 0, 0, 0];
+    for (var k = 0; k < CB_P; k++) { if (g[k] === s[k]) b++; else { cg[g[k]]++; cs[s[k]]++; } }
+    var w = 0; for (var c = 0; c < CB_C; c++) w += Math.min(cg[c], cs[c]);
+    return b * 5 + w;
+  }
+  function fbParts(f) { return { b: Math.floor(f / 5), w: f % 5 }; }
+  function consistent(set, guess, fb) { var g = CODES[guess]; return set.filter(function (i) { return cbFeedback(g, CODES[i]) === fb; }); }
+  /* Expected information (Shannon entropy of the feedback partition, in bits) of a guess over a candidate set. */
+  function cbEntropy(guess, set) {
+    var cnt = {}, g = CODES[guess], n = set.length, h = 0;
+    for (var i = 0; i < n; i++) { var f = cbFeedback(g, CODES[set[i]]); cnt[f] = (cnt[f] || 0) + 1; }
+    Object.keys(cnt).forEach(function (k) { var p = cnt[k] / n; h -= p * Math.log2(p); });
+    return h;
+  }
+  var bestFirst = null;
+  /* Best guess by expected information; ties go to a guess that is still a possible answer. */
+  function cbBestGuess(set) {
+    if (set.length === 1) return { g: set[0], h: 0 };
+    if (set.length === CB_N && bestFirst) return bestFirst;
+    var inSet = {}; set.forEach(function (i) { inSet[i] = 1; });
+    var pool = set.length <= 2 ? set : CODES.map(function (_, i) { return i; }), best = -1, bh = -1;
+    for (var k = 0; k < pool.length; k++) {
+      var h = cbEntropy(pool[k], set);
+      if (h > bh + 1e-9 || (Math.abs(h - bh) <= 1e-9 && inSet[pool[k]] && !inSet[best])) { bh = h; best = pool[k]; }
+    }
+    var out = { g: best, h: bh };
+    if (set.length === CB_N) bestFirst = out;
+    return out;
+  }
+  var CB_BOTS = {
+    easy: { name: 'Easy bot', desc: 'guesses a random code that fits every clue so far' },
+    medium: { name: 'Medium bot', desc: 'opens with a classic two-pair guess, then plays random consistent codes' },
+    hard: { name: 'Hard bot', desc: 'picks the guess with the most expected information (entropy) every turn' }
+  };
+  function cbAll() { return CODES.map(function (_, i) { return i; }); }
+  /* Play a whole game for a bot on a secret; returns the guess list. Deterministic given the rng. */
+  function cbBotGame(level, secret, r) {
+    var set = cbAll(), guesses = [], sc = CODES[secret];
+    for (var t = 0; t < CB_MAX; t++) {
+      var g;
+      if (level === 'hard') g = cbBestGuess(set).g;
+      else if (level === 'medium' && t === 0) g = cbIndex([0, 0, 1, 1]);
+      else g = set[Math.floor(r.next() * set.length)];
+      var f = cbFeedback(CODES[g], sc);
+      guesses.push({ g: g, f: f, before: set.length });
+      if (f === CB_P * 5) break;
+      set = consistent(set, g, f);
+    }
+    return guesses;
+  }
+  var CBE = { P: CB_P, C: CB_C, N: CB_N, MAX: CB_MAX, CODES: CODES, code: cbCode, index: cbIndex, feedback: cbFeedback, fbParts: fbParts, consistent: consistent, entropy: cbEntropy, bestGuess: cbBestGuess, botGame: cbBotGame, all: cbAll, BOTS: CB_BOTS };
+  VS.add({ id: 'codebreak', name: 'Code Breaker', icon: 'codebreak', group: 'versus', color: 'var(--c-combinatorics)',
+    desc: 'Crack a 4-peg, 6-colour code from black/white clues. See how many bits each guess earned — or race a bot on the same code.',
+    skills: ['Information theory', 'Hypothesis testing', 'vs bots'], firms: ['Jane Street', 'Two Sigma', 'HRT', 'Citadel'],
+    why: 'Choosing the question that splits the possibilities best is how researchers design experiments and how traders ask for information.',
+    variants: [{ id: 'solo', name: 'Solo' }, { id: 'easy', name: 'Easy bot' }, { id: 'medium', name: 'Medium bot' }, { id: 'hard', name: 'Hard bot' }] });
+  AR.codebreak.engine = CBE;
+
+  /* ================================================================== */
+  /* Winner's Curse — common-value sealed-bid auction                     */
+  /* ================================================================== */
+  var AU = { ROUNDS: 12, EPS: 10, LO: 30, HI: 130 };
+  var AU_BOTS = {
+    easy: { name: 'Easy bots', desc: 'bid their signal (minus a little) — they fall for the winner’s curse' },
+    medium: { name: 'Medium bots', desc: 'shade half the noise off their signal' },
+    hard: { name: 'Hard bots', desc: 'bid the symmetric-equilibrium amount for this auction' }
+  };
+  /* E[V | my signal is the highest of n], for an interior signal: s − ε(n−1)/(n+1). */
+  function auCondValue(s, n, eps) { return s - eps * (n - 1) / (n + 1); }
+  /* Symmetric equilibrium bids (interior signals): second price s − ε(n−2)/n (Milgrom–Weber),
+   * first price ≈ s − ε (the exponential boundary term is negligible away from the bounds). */
+  function auEqBid(s, n, eps, kind) { return kind === 'second' ? s - eps * (n - 2) / n : s - eps; }
+  function auBotBid(level, s, n, eps, kind, r) {
+    var b;
+    if (level === 'easy') b = s - r.next() * 2;
+    else if (level === 'medium') b = s - eps * 0.5 + (r.next() - 0.5) * 2;
+    else b = auEqBid(s, n, eps, kind) + (r.next() - 0.5) * 1.2;
+    return E.round(Math.max(0, b), 1);
+  }
+  function auRound(seed, i, nBots, level, kind) {
+    var r = E.makeRng(E.deriveSeed(seed, 'au-' + i)), n = nBots + 1;
+    var V = E.round(AU.LO + r.next() * (AU.HI - AU.LO), 1), sig = [];
+    for (var k = 0; k < n; k++) sig.push(E.round(V + (r.next() * 2 - 1) * AU.EPS, 1));
+    var bots = []; for (k = 1; k < n; k++) bots.push(auBotBid(level, sig[k], n, AU.EPS, kind, r));
+    return { V: V, sig: sig, you: sig[0], bots: bots, n: n, tie: r.next() };
+  }
+  /* Settle a round given your bid. Ties between you and a bot go to the bot (it bid first). */
+  function auSettle(rd, bid, kind) {
+    var bids = [bid].concat(rd.bots), hi = -1, w = -1;
+    for (var k = 0; k < bids.length; k++) if (bids[k] > hi || (bids[k] === hi && k > 0 && w === 0)) { hi = bids[k]; w = k; }
+    var sorted = bids.slice().sort(function (a, b) { return b - a; });
+    var price = kind === 'second' ? sorted[1] : hi;
+    var prof = E.round(rd.V - price, 1);
+    return { winner: w, price: price, profit: w === 0 ? prof : 0, winnerProfit: prof, bids: bids };
+  }
+  var AUE = { P: AU, BOTS: AU_BOTS, condValue: auCondValue, eqBid: auEqBid, botBid: auBotBid, round: auRound, settle: auSettle };
+  VS.add({ id: 'auction', name: 'Winner’s Curse', icon: 'auction', group: 'versus', color: 'var(--c-ev)',
+    desc: 'Bid for an item whose value nobody knows; each bidder sees a noisy signal. Win too often and you overpay — learn how far to shade.',
+    skills: ['Adverse selection', 'Bayesian updating', 'vs bots'], firms: ['SIG', 'Jane Street', 'Optiver', 'Citadel Securities', 'IMC'],
+    why: 'Getting filled is information: the trades you win are the ones where you were most wrong. The same logic prices every quote you make.',
+    variants: [{ id: 'easy', name: 'Easy bots' }, { id: 'medium', name: 'Medium bots' }, { id: 'hard', name: 'Hard bots' }] });
+  AR.auction.engine = AUE;
+
+  /* ================================================================== */
+  /* UI: shared helpers + the three games                                */
+  /* ================================================================== */
+  (root.SBT_PLUGINS = root.SBT_PLUGINS || []).push(function (core) {
+    var U = AR._ui;
+    if (!U || !U.Shell || !U.GDEF || !U.GAMES) return;
+    var esc = core.esc, $all = core.$all, ICONS = core.ICONS;
+
+    function num(x, dp) { if (x === null || x === undefined || !isFinite(x)) return '—'; var s = E.fmtNum(x, dp == null ? 2 : dp); return s.charAt(0) === '-' ? '−' + s.slice(1) : s; }
+    function signed(x, dp) { if (!isFinite(x)) return '—'; var v = E.round(x, dp == null ? 2 : dp); return (v > 0 ? '+' : v < 0 ? '−' : '') + E.fmtNum(Math.abs(v), dp == null ? 2 : dp); }
+    function pct(x) { return isFinite(x) ? Math.round(100 * x) + '%' : '—'; }
+    function tiles(items) { return '<div class="ar-tiles">' + items.map(function (t) { return '<div class="stat-tile"><div class="v' + (t.cls ? ' ' + t.cls : '') + '">' + t.v + '</div><div class="l">' + esc(t.l) + '</div></div>'; }).join('') + '</div>'; }
+    function base(ctx, extra) { var o = { g: ctx.g, rv: ctx.rv, routeV: ctx.v, seed: ctx.seed, challenge: ctx.challenge, ghost: null, settings: ctx.settings || {} }; Object.keys(extra).forEach(function (k) { o[k] = extra[k]; }); return o; }
+    function panel(title, body) { return '<div class="ar-panel"><h3>' + esc(title) + '</h3>' + body + '</div>'; }
+    function reveal(title, body) { return '<details class="reveal"><summary>' + ICONS.book + '<span>' + esc(title) + '</span><span class="chev" aria-hidden="true">▾</span></summary><div class="rbody">' + body + '</div></details>'; }
+    function segRow(label, key, opts, cur, note) {
+      return '<div class="frow"><span class="label">' + esc(label) + '</span><div class="seg" role="group" aria-label="' + esc(label) + '">' + opts.map(function (o) {
+        return '<button type="button" data-setv="' + key + '" data-val="' + esc(String(o[0])) + '" aria-pressed="' + (String(o[0]) === String(cur)) + '">' + esc(o[1]) + '</button>';
+      }).join('') + '</div>' + (note ? '<span class="muted small">' + note + '</span>' : '') + '</div>';
+    }
+    function coachRow(p, what) {
+      return '<label class="vs-check"><input type="checkbox" data-set="coach"' + (p.coach ? ' checked' : '') + '><span><b>Coach</b> <span class="muted small">— ' + esc(what) + ' Coached runs keep their own personal bests.</span></span></label>';
+    }
+    function botLine(level, bots) {
+      var b = bots[level];
+      return b ? '<p class="muted small vs-botline"><b>' + esc(b.name) + ':</b> ' + esc(b.desc) + '.</p>' : '';
+    }
+    function lvl(v) { return VS.LEVEL_NAMES[v] || v; }
+    function mount(META, iconInner, def) {
+      if (!U.GAME[META.id]) { U.GAMES.push(META); U.GAME[META.id] = META; }
+      U.IC[META.id] = core.svg(iconInner);
+      U.GDEF[META.id] = def;
+    }
+    /* A turn-based game's log: newest first, at most n lines. */
+    function feed(list, n) { return list.slice(-(n || 4)).reverse().map(function (e) { return '<li class="k-' + (e.k || 'info') + '">' + e.html + '</li>'; }).join(''); }
+    VS.h = { num: num, signed: signed, pct: pct, tiles: tiles, base: base, panel: panel, reveal: reveal, segRow: segRow, coachRow: coachRow, botLine: botLine, lvl: lvl, mount: mount, feed: feed };
+
+    /* ------------------------------ Make 24 ------------------------------ */
+    mount(AR.make24.meta, '<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><path d="M15 17h4M17 15v4"/>', {
+      rules: ['Each deal is four numbers from 1 to 13. Combine two of them with + − × ÷ into a new number; repeat until one number is left. Make it exactly 24 (fractions along the way are fine).',
+        'Tap a number, an operator, then another number. Undo steps back; Reset restores the deal. Every deal has at least one solution.',
+        'Solo: as many deals as you can in 3 minutes; Skip moves on with no penalty. Against a bot: 10 deals, whoever makes 24 first takes the point. Score = your points − the bot’s.'],
+      recVariant: function (v) { return v; },
+      variantLabel: function (rv) { return rv === 'solo' ? 'Solo · 3 minutes' : lvl(rv); },
+      fmt: function (v) { return String(E.round(v, 0)); }, ghost: false,
+      settings: function (v) { return v === 'solo' ? '<p class="muted small">3 minutes. Keyboard: 1–4 pick a number, + − * / pick an operator, Backspace undoes, S skips.</p>' : botLine(v, BOT24) + '<p class="muted small">Bot speed depends on the deal: deals with few solutions take it longer, like they take you longer.</p>'; },
+      start: function (main, ctx) { start24(main, ctx); }
+    });
+
+    function start24(main, ctx) {
+      var solo = ctx.v === 'solo', r = E.makeRng(E.deriveSeed(ctx.seed, 'm24')), rb = E.makeRng(E.deriveSeed(ctx.seed, 'm24-bot'));
+      var st = { i: -1, deal: null, items: [], hist: [], sel: null, op: null, you: 0, bot: 0, log: [], t0: 0, tb: null, rounds: [] };
+      var sh = U.Shell(main, base(ctx, { title: 'Make 24', scoreLabel: solo ? 'solved' : 'you − bot', scoreText: function (v) { return solo ? String(v) : signed(v, 0); },
+        limit: solo ? M24.SOLO_SEC : null, rounds: !solo,
+        rightText: function () { return solo ? '' : 'deal ' + Math.max(1, st.i + 1) + ' / ' + M24.ROUNDS; },
+        hint: 'Tap a number, an operator, then a number.',
+        onStart: function () { next(); if (!solo) sh.later(watch, 200); },
+        result: function () {
+          if (st.deal && !st.deal.done) st.rounds.push({ nums: st.deal.nums, sol: st.deal.sols[0], nsol: st.deal.nsol, who: solo ? 'skip' : 'none', t: null });
+          var sc = solo ? st.you : st.you - st.bot;
+          return { score: sc, scoreText: solo ? st.you + ' solved' : signed(sc, 0), scoreLabel: solo ? 'deals made into 24 in 3 minutes' : 'you ' + st.you + ' · ' + lvl(ctx.v) + ' ' + st.bot,
+            x: { you: st.you, bot: st.bot, n: st.rounds.length }, details: details() };
+        } }));
+      sh.body.innerHTML = '<div class="vs-wrap m24">' + (solo ? '' : '<div class="vs-score small" id="mScore"></div>') +
+        '<div class="m24-tiles" id="mTiles" role="group" aria-label="Numbers"></div>' +
+        '<div class="m24-ops" role="group" aria-label="Operators">' + OPS24.map(function (o) { return '<button type="button" class="btn" data-op="' + o + '">' + o + '</button>'; }).join('') + '</div>' +
+        '<div class="row m24-ctl"><button type="button" class="btn ghost" data-ctl="undo">Undo</button><button type="button" class="btn ghost" data-ctl="reset">Reset</button><span class="spacer"></span><button type="button" class="btn" data-ctl="skip">' + (solo ? 'Skip' : 'Concede deal') + '</button></div>' +
+        '<p class="small m24-work" id="mWork" aria-live="polite"></p><ul class="vs-feed small" id="mFeed"></ul></div>';
+      $all('[data-op]', sh.body).forEach(function (b) { b.addEventListener('click', function () { pickOp(b.getAttribute('data-op')); }); });
+      $all('[data-ctl]', sh.body).forEach(function (b) { b.addEventListener('click', function () { ctl(b.getAttribute('data-ctl')); }); });
+      function next() {
+        if (!solo && st.i + 1 >= M24.ROUNDS) { sh.finish(false); return; }
+        st.i++;
+        var d = deal24(r);
+        st.deal = { nums: d.nums, sols: d.sols, nsol: d.nsol, done: false };
+        st.items = d.nums.map(function (x, k) { return { v: frac(x, 1), e: String(x), p: 9, id: 'n' + k }; });
+        st.hist = []; st.sel = null; st.op = null; st.t0 = sh.elapsed();
+        st.tb = solo ? null : botTime24(ctx.v, d.nsol, rb);
+        render();
+      }
+      function watch() {
+        if (sh.ended) return;
+        if (sh.running && st.deal && !st.deal.done && st.tb != null && (sh.elapsed() - st.t0) / 1000 >= st.tb) {
+          st.deal.done = true; st.bot++;
+          st.rounds.push({ nums: st.deal.nums, sol: st.deal.sols[0], nsol: st.deal.nsol, who: 'bot', t: st.tb });
+          st.log.push({ k: 'bad', html: 'Deal ' + (st.i + 1) + ': the bot made 24 in ' + num(st.tb, 1) + ' s — <span class="mono">' + esc(st.deal.sols[0]) + '</span>' });
+          sh.setScore(st.you - st.bot);
+          sh.later(next, 1400); render(true);
+        }
+        sh.later(watch, 200);
+      }
+      function pickTile(k) {
+        if (!st.deal || st.deal.done || k >= st.items.length) return;
+        if (st.sel === null || st.op === null) { st.sel = st.sel === k ? null : k; render(); return; }
+        if (k === st.sel) { st.op = null; render(); return; }
+        var a = st.items[st.sel], b = st.items[k], v = applyOp(a.v, st.op, b.v);
+        if (!v) { core.toast('Division by zero.'); return; }
+        var ex = combineExpr(a, st.op, b);
+        st.hist.push(st.items.slice());
+        var rest = st.items.filter(function (_, j) { return j !== st.sel && j !== k; });
+        rest.splice(Math.min(st.sel, k), 0, { v: v, e: ex.e, p: ex.p, id: 'x' + st.hist.length });
+        st.items = rest; st.sel = null; st.op = null;
+        if (st.items.length === 1) {
+          var f = st.items[0].v;
+          if (f.d === 1 && f.n === 24) { solved(st.items[0].e); return; }
+          sh.$('#mWork').textContent = st.items[0].e + ' = ' + fracTxt(f) + ' — not 24. Undo and try again.';
+        }
+        render();
+      }
+      function pickOp(o) { if (st.sel === null || !st.deal || st.deal.done) return; st.op = st.op === o ? null : o; render(); }
+      function ctl(c) {
+        if (!st.deal || st.deal.done || !sh.running) return;
+        if (c === 'undo') { if (st.hist.length) { st.items = st.hist.pop(); st.sel = null; st.op = null; } }
+        else if (c === 'reset') { if (st.hist.length) { st.items = st.hist[0]; st.hist = []; st.sel = null; st.op = null; } }
+        else if (c === 'skip') {
+          st.deal.done = true;
+          st.rounds.push({ nums: st.deal.nums, sol: st.deal.sols[0], nsol: st.deal.nsol, who: solo ? 'skip' : 'bot', t: null });
+          if (!solo) { st.bot++; sh.setScore(st.you - st.bot); }
+          st.log.push({ k: 'info', html: 'Skipped ' + st.deal.nums.join(' ') + ' — one way: <span class="mono">' + esc(st.deal.sols[0]) + '</span>' });
+          next(); return;
+        }
+        render();
+      }
+      function solved(expr) {
+        var t = (sh.elapsed() - st.t0) / 1000;
+        st.deal.done = true; st.you++;
+        st.rounds.push({ nums: st.deal.nums, sol: st.deal.sols[0], yours: expr, nsol: st.deal.nsol, who: 'you', t: t, bt: st.tb });
+        st.log.push({ k: 'ok', html: 'Made 24 in ' + num(t, 1) + ' s: <span class="mono">' + esc(expr) + '</span>' + (st.tb != null ? ' <span class="muted">(bot needed ' + num(st.tb, 1) + ' s)</span>' : '') });
+        sh.setScore(solo ? st.you : st.you - st.bot);
+        render(true);
+        sh.later(next, solo ? 450 : 1100);
+      }
+      function render(frozen) {
+        var lock = frozen || !st.deal || st.deal.done;
+        sh.$('#mTiles').innerHTML = st.items.map(function (it, k) {
+          return '<button type="button" class="m24-tile' + (st.sel === k ? ' sel' : '') + (it.id.charAt(0) === 'x' ? ' made' : '') + '" data-t="' + k + '"' + (lock ? ' disabled' : '') + '><b class="mono">' + esc(fracTxt(it.v)) + '</b>' + (it.id.charAt(0) === 'x' ? '<small class="mono">' + esc(it.e) + '</small>' : '') + '</button>';
+        }).join('');
+        $all('[data-t]', sh.body).forEach(function (b) { b.addEventListener('click', function () { pickTile(+b.getAttribute('data-t')); }); });
+        $all('[data-op]', sh.body).forEach(function (b) { b.disabled = lock || st.sel === null; b.setAttribute('aria-pressed', String(st.op === b.getAttribute('data-op'))); });
+        if (!lock && st.items.length > 1) sh.$('#mWork').textContent = st.sel === null ? 'Pick a number.' : st.op === null ? 'Pick an operator.' : 'Pick the second number.';
+        if (!solo) sh.$('#mScore').innerHTML = '<span>You <b>' + st.you + '</b></span><span>' + esc(lvl(ctx.v)) + ' <b>' + st.bot + '</b></span><span class="muted">deal ' + (st.i + 1) + ' of ' + M24.ROUNDS + '</span>';
+        sh.$('#mFeed').innerHTML = feed(st.log, 4);
+      }
+      sh.keys(function (e) {
+        var k = e.key;
+        if (k >= '1' && k <= '4') { e.preventDefault(); pickTile(+k - 1); }
+        else if (k === '+' || k === '-' || k === '*' || k === '/' || k === 'x') { e.preventDefault(); pickOp({ '+': '+', '-': '−', '*': '×', x: '×', '/': '÷' }[k]); }
+        else if (k === 'Backspace') { e.preventDefault(); ctl('undo'); }
+        else if (k === 's' || k === 'S') { e.preventDefault(); ctl('skip'); }
+        else if (k === 'r' || k === 'R') { e.preventDefault(); ctl('reset'); }
+      });
+      function details() {
+        var mine = st.rounds.filter(function (x) { return x.who === 'you'; }), times = mine.map(function (x) { return x.t; });
+        var hard = st.rounds.filter(function (x) { return x.nsol <= 3; }), hardWon = hard.filter(function (x) { return x.who === 'you'; }).length;
+        var rows = st.rounds.map(function (x, j) {
+          return '<tr><td>' + (j + 1) + '</td><td class="mono">' + x.nums.join(' ') + '</td><td>' + x.nsol + '</td><td>' + (x.who === 'you' ? '<span class="res-ok">you</span>' : x.who === 'bot' ? '<span class="res-bad">bot</span>' : '<span class="muted">' + x.who + '</span>') + '</td><td class="mono">' + (x.t != null ? num(x.t, 1) + ' s' : '—') + '</td><td class="mono small">' + esc(x.yours || x.sol) + '</td></tr>';
+        }).join('');
+        return tiles([{ v: mine.length, l: 'deals solved' }, { v: times.length ? num(E.mean(times), 1) + ' s' : '—', l: 'mean time' }, { v: hard.length ? hardWon + ' / ' + hard.length : '—', l: 'hard deals (≤ 3 solutions)' }, { v: st.rounds.length, l: 'deals seen' }]) +
+          panel('How to search', '<p class="small">When nothing jumps out, work backwards from 24 = 3 × 8, 4 × 6, 2 × 12, 12 + 12, 30 − 6, 48 ÷ 2: ask which pair of your numbers can make one factor and which can make the other. Fractions are legal mid-way — 8 ÷ (3 − 8 ÷ 3) = 24 is the classic.</p>') +
+          reveal('Deal by deal', '<div class="table-scroll"><table class="simple"><thead><tr><th>#</th><th>Deal</th><th>Solutions</th><th>Point</th><th>Time</th><th>Expression</th></tr></thead><tbody>' + rows + '</tbody></table></div>');
+      }
+    }
+
+    /* ---------------------------- Code Breaker ---------------------------- */
+    mount(AR.codebreak.meta, '<circle cx="6" cy="7" r="2.2"/><circle cx="12" cy="7" r="2.2"/><circle cx="18" cy="7" r="2.2"/><path d="M4 14h16M4 18h10"/><circle cx="18" cy="18" r="1.3" fill="currentColor"/>', {
+      rules: ['The secret is 4 pegs, each one of 6 colours (numbered 1–6); colours can repeat — 1,296 possible codes. You have 10 guesses.',
+        'After each guess: ● black = right colour in the right place; ○ white = right colour, wrong place.',
+        'Every guess comes with its information: how many codes are still possible, and how many bits the clue gave you (log₂ before / after). The coach also shows the expected bits of a guess before you send it.',
+        'Solo score = 11 − guesses used. Against a bot you both crack the same secret; score = bot guesses − your guesses (not cracking counts as 11).'],
+      recVariant: function (v, p) { return VS.rec(v, '', !!p.coach); },
+      fromRec: function (rv, p) { var q = VS.parseRec(rv); p.coach = q.coach; return q.v; },
+      variantLabel: function (rv) { var q = VS.parseRec(rv); return lvl(q.v) + (q.coach ? ' · coach' : ''); },
+      fmt: function (v) { return signed(v, 0); }, ghost: false,
+      settings: function (v, p) { return (v === 'solo' ? '' : botLine(v, CB_BOTS)) + coachRow(p, 'shows how many codes are still possible and the expected bits of your next guess.'); },
+      start: function (main, ctx) { startCB(main, ctx); }
+    });
+    U.GDEF.codebreak.fmt = function (v) { return String(E.round(v, 0)); };
+
+    function pegs(code, cls) { return '<span class="cb-pegs ' + (cls || '') + '">' + code.map(function (c) { return '<i class="cb-peg c' + c + '">' + (c + 1) + '</i>'; }).join('') + '</span>'; }
+    function fbHtml(f) { var p = fbParts(f), s = ''; for (var i = 0; i < p.b; i++) s += '<i class="cb-k b" title="black"></i>'; for (i = 0; i < p.w; i++) s += '<i class="cb-k w" title="white"></i>'; for (i = p.b + p.w; i < CB_P; i++) s += '<i class="cb-k e"></i>'; return '<span class="cb-fb" aria-label="' + p.b + ' black, ' + p.w + ' white">' + s + '</span>'; }
+    function startCB(main, ctx) {
+      var solo = ctx.v === 'solo', coach = !!ctx.prefs.coach, r = E.makeRng(E.deriveSeed(ctx.seed, 'cb'));
+      var secret = Math.floor(r.next() * CB_N), bot = solo ? null : cbBotGame(ctx.v, secret, E.makeRng(E.deriveSeed(ctx.seed, 'cb-bot')));
+      var st = { set: cbAll(), rows: [], cur: [], done: false, won: false };
+      ctx.settings = { coach: coach };
+      var sh = U.Shell(main, base(ctx, { title: 'Code Breaker', scoreLabel: 'guesses', scoreText: function () { return String(st.rows.length); },
+        rightText: function () { return st.rows.length + ' / ' + CB_MAX + ' guesses'; }, hint: 'Pick four colours, then Guess.',
+        onStart: function () { render(); },
+        result: function () {
+          var n = st.won ? st.rows.length : 11, botN = bot ? (bot[bot.length - 1].f === 20 ? bot.length : 11) : null;
+          var sc = solo ? 11 - n : botN - n;
+          return { score: sc, scoreText: solo ? (st.won ? n + ' guesses' : 'not cracked') : signed(sc, 0), scoreLabel: solo ? 'score ' + sc + ' (11 − guesses)' : 'you ' + (st.won ? n : '✗') + ' · ' + lvl(ctx.v) + ' ' + (botN === 11 ? '✗' : botN) + ' guesses',
+            x: { n: n, bot: botN, won: st.won }, details: details(n, botN) };
+        } }));
+      sh.body.innerHTML = '<div class="vs-wrap cb">' + (solo ? '' : '<div class="vs-score small" id="cbBot"></div>') +
+        '<ol class="cb-board" id="cbBoard"></ol>' +
+        '<div class="cb-entry"><div class="cb-cur" id="cbCur" aria-live="polite"></div>' +
+        '<div class="cb-pal" role="group" aria-label="Colours">' + [0, 1, 2, 3, 4, 5].map(function (c) { return '<button type="button" class="cb-peg c' + c + ' btnpeg" data-c="' + c + '" aria-label="Colour ' + (c + 1) + '">' + (c + 1) + '</button>'; }).join('') + '</div>' +
+        '<div class="row"><button type="button" class="btn ghost" id="cbDel">Delete</button><span class="spacer"></span><button type="button" class="btn primary" id="cbGo">Guess <span class="kbd">Enter</span></button></div></div>' +
+        '<div class="vs-coach small" id="cbCoach"></div></div>';
+      $all('[data-c]', sh.body).forEach(function (b) { b.addEventListener('click', function () { add(+b.getAttribute('data-c')); }); });
+      sh.$('#cbDel').addEventListener('click', del); sh.$('#cbGo').addEventListener('click', go);
+      function add(c) { if (st.done || st.cur.length >= CB_P) return; st.cur.push(c); render(); }
+      function del() { if (st.done) return; st.cur.pop(); render(); }
+      function go() {
+        if (st.done || st.cur.length !== CB_P || !sh.running) return;
+        var g = cbIndex(st.cur), f = cbFeedback(st.cur, CODES[secret]), before = st.set.length;
+        var eh = cbEntropy(g, st.set), best = cbBestGuess(st.set), possible = st.set.indexOf(g) >= 0;
+        st.set = consistent(st.set, g, f);
+        st.rows.push({ g: g, f: f, before: before, after: st.set.length, bits: Math.log2(before / Math.max(1, st.set.length)), eh: eh, bh: best.h, best: best.g, possible: possible });
+        st.cur = [];
+        if (f === CB_P * 5) { st.done = true; st.won = true; }
+        else if (st.rows.length >= CB_MAX) st.done = true;
+        sh.setScore(st.rows.length);
+        render();
+        if (st.done) sh.later(function () { sh.finish(false); }, 1200);
+      }
+      function render() {
+        sh.$('#cbBoard').innerHTML = st.rows.map(function (x, i) {
+          return '<li class="cb-row"><span class="muted mono">' + (i + 1) + '</span>' + pegs(CODES[x.g]) + fbHtml(x.f) + '<span class="cb-info small">' + x.after + ' left · <b>' + num(x.bits, 2) + ' bits</b>' + (coach ? ' <span class="muted">(expected ' + num(x.eh, 2) + ', best ' + num(x.bh, 2) + ')</span>' : '') + '</span></li>';
+        }).join('') + (st.done ? '<li class="cb-row reveal-row"><span class="muted">=</span>' + pegs(CODES[secret], 'secret') + '<span class="small ' + (st.won ? 'res-ok' : 'res-bad') + '">' + (st.won ? 'Cracked in ' + st.rows.length : 'The code') + '</span></li>' : '');
+        var cur = st.cur.slice(); while (cur.length < CB_P) cur.push(-1);
+        sh.$('#cbCur').innerHTML = '<span class="cb-pegs">' + cur.map(function (c) { return c < 0 ? '<i class="cb-peg empty"></i>' : '<i class="cb-peg c' + c + '">' + (c + 1) + '</i>'; }).join('') + '</span>';
+        sh.$('#cbGo').disabled = st.done || st.cur.length !== CB_P;
+        var co = '';
+        if (coach && !st.done) {
+          co = '<b>' + st.set.length + '</b> code' + (st.set.length === 1 ? '' : 's') + ' still possible (' + num(Math.log2(st.set.length), 2) + ' bits of uncertainty).';
+          if (st.cur.length === CB_P) { var g = cbIndex(st.cur); co += ' This guess: expected <b>' + num(cbEntropy(g, st.set), 2) + ' bits</b>' + (st.set.indexOf(g) < 0 ? ' · <span class="muted">it cannot be the answer</span>' : ' · it could be the answer') + '.'; }
+          if (st.set.length <= 6) co += '<br>Candidates: ' + st.set.map(function (i) { return pegs(CODES[i], 'sm'); }).join(' ');
+        }
+        sh.$('#cbCoach').innerHTML = co;
+        if (!solo) {
+          var k = Math.min(bot.length, st.rows.length), cracked = bot[bot.length - 1].f === 20 && st.rows.length >= bot.length;
+          sh.$('#cbBot').innerHTML = '<span>' + esc(lvl(ctx.v)) + ': <b>' + k + '</b> guess' + (k === 1 ? '' : 'es') + ' so far</span>' + (cracked ? '<span class="res-bad">cracked it on guess ' + bot.length + '</span>' : st.rows.length >= bot.length ? '<span class="muted">did not crack it</span>' : '<span class="muted">still searching</span>');
+        }
+      }
+      sh.keys(function (e) {
+        var k = e.key;
+        if (k >= '1' && k <= '6') { e.preventDefault(); add(+k - 1); }
+        else if (k === 'Backspace') { e.preventDefault(); del(); }
+        else if (k === 'Enter') { e.preventDefault(); go(); }
+      });
+      function details(n, botN) {
+        var bits = st.rows.map(function (x) { return x.bits; }), eff = st.rows.length ? E.sum(st.rows.map(function (x) { return x.eh; })) / Math.max(1e-9, E.sum(st.rows.map(function (x) { return x.bh; }))) : 0;
+        var wasted = st.rows.filter(function (x) { return x.before > 1 && x.eh < 0.5 * x.bh; }).length;
+        var rows = st.rows.map(function (x, i) {
+          return '<tr><td>' + (i + 1) + '</td><td>' + pegs(CODES[x.g], 'sm') + '</td><td>' + fbHtml(x.f) + '</td><td class="mono">' + x.before + ' → ' + x.after + '</td><td class="mono">' + num(x.bits, 2) + '</td><td class="mono">' + num(x.eh, 2) + '</td><td class="mono">' + num(x.bh, 2) + ' ' + pegs(CODES[x.best], 'sm') + '</td></tr>';
+        }).join('');
+        var botRows = bot ? '<p class="small">' + esc(lvl(ctx.v)) + ' (' + esc(CB_BOTS[ctx.v].desc) + '): ' + bot.map(function (x) { return pegs(CODES[x.g], 'sm') + ' ' + fbHtml(x.f); }).join(' · ') + '</p>' : '';
+        return tiles([{ v: st.won ? n : '✗', l: 'your guesses' }, { v: bits.length ? num(E.sum(bits), 1) : '—', l: 'bits gained (of ' + num(Math.log2(CB_N), 1) + ')' }, { v: st.rows.length ? pct(eff) : '—', l: 'expected-information efficiency' }, { v: wasted, l: 'low-information guesses' }]) +
+          panel('Information, guess by guess', '<p class="small">1,296 codes = ' + num(Math.log2(CB_N), 2) + ' bits of uncertainty. A clue that cuts the possibilities from N to M gives log₂(N/M) bits. The best possible first guess expects about ' + num(cbBestGuess(cbAll()).h, 2) + ' bits; an entropy-maximising player averages about 4.4 guesses. "Efficiency" compares the expected bits of your guesses with the best available guess at each turn.</p>' +
+            (wasted ? '<p class="small">' + wasted + ' guess' + (wasted === 1 ? '' : 'es') + ' expected less than half of the best available information — often a guess that repeats what you already know.</p>' : '')) +
+          (botRows ? panel('The bot’s game', botRows) : '') +
+          reveal('Guess by guess', '<div class="table-scroll"><table class="simple"><thead><tr><th>#</th><th>Guess</th><th>Clue</th><th>Possible</th><th>Bits got</th><th>Expected</th><th>Best expected</th></tr></thead><tbody>' + rows + '</tbody></table></div>');
+      }
+    }
+
+    /* --------------------------- Winner's Curse --------------------------- */
+    mount(AR.auction.meta, '<path d="M14 4l6 6M11 7l6 6M12.5 5.5l-7 7 3 3 7-7"/><path d="M3 21h10M7 15l-4 4"/>', {
+      rules: ['12 rounds. Each round an item has a hidden value V between 30 and 130. Every bidder (you and the bots) privately sees a signal = V ± up to 10, uniformly.',
+        'Everyone bids once, sealed. The highest bid wins and pays its own bid (first price) or the second-highest bid (second price). Profit = V − price for the winner, 0 for everyone else.',
+        'The trap: if you win, your signal was probably one of the highest — so it probably overstated V. With n bidders, E[V | your signal is the highest] = signal − 10·(n − 1)/(n + 1).',
+        'Score = your total profit over the 12 rounds. Results compare your bids with bidding your signal and with the equilibrium bid, on the same draws.'],
+      recVariant: function (v, p) { return VS.rec(v, (p.kind === 'second' ? 'second' : 'first') + '-' + (+p.nb === 5 ? 5 : 3), !!p.coach); },
+      fromRec: function (rv, p) { var q = VS.parseRec(rv); p.coach = q.coach; p.kind = q.extra[0] === 'second' ? 'second' : 'first'; p.nb = q.extra[1] === '5' ? 5 : 3; return q.v; },
+      variantLabel: function (rv) { var q = VS.parseRec(rv); return lvl(q.v) + ' · ' + (q.extra[0] === 'second' ? 'second price' : 'first price') + ' · ' + (q.extra[1] || 3) + ' bots' + (q.coach ? ' · coach' : ''); },
+      fmt: function (v) { return signed(v, 1); }, ghost: false,
+      settings: function (v, p) {
+        return botLine(v, AU_BOTS) + segRow('Auction', 'kind', [['first', 'First price'], ['second', 'Second price']], p.kind === 'second' ? 'second' : 'first', p.kind === 'second' ? 'The winner pays the second-highest bid.' : 'The winner pays its own bid.') +
+          segRow('Opponents', 'nb', [[3, '3 bots'], [5, '5 bots']], +p.nb === 5 ? 5 : 3, 'More bidders = a worse curse for whoever wins.') + coachRow(p, 'shows E[V | you win] and the equilibrium bid each round.');
+      },
+      start: function (main, ctx) { startAU(main, ctx); }
+    });
+    function startAU(main, ctx) {
+      var p = ctx.prefs, kind = p.kind === 'second' ? 'second' : 'first', nb = +p.nb === 5 ? 5 : 3, coach = !!p.coach;
+      var st = { i: 0, rd: null, res: [], total: 0, phase: 'bid' };
+      ctx.settings = { kind: kind, nb: nb, coach: coach };
+      var sh = U.Shell(main, base(ctx, { title: 'Winner’s Curse', scoreLabel: 'profit', scoreText: function (v) { return signed(v, 1); }, rounds: true,
+        rightText: function () { return 'round ' + Math.min(AU.ROUNDS, st.i + 1) + ' / ' + AU.ROUNDS; }, hint: 'Type a bid, press Enter.',
+        onStart: function () { load(); },
+        result: function () { return { score: E.round(st.total, 1), scoreText: signed(st.total, 1), scoreLabel: 'total profit over ' + st.res.length + ' rounds', x: { n: st.res.length, wins: st.res.filter(function (x) { return x.s.winner === 0; }).length }, details: details() }; } }));
+      sh.body.innerHTML = '<div class="vs-wrap au"><div class="au-sig" id="auSig"></div>' +
+        '<form class="row au-form" id="auForm"><label class="sr-only" for="auBid">Your bid</label><input id="auBid" type="number" inputmode="decimal" step="0.1" min="0" max="200" placeholder="Your bid" autocomplete="off"><button type="submit" class="btn primary">Bid <span class="kbd">Enter</span></button></form>' +
+        '<div class="row au-quick" id="auQuick"></div><div class="vs-coach small" id="auCoach"></div><div id="auOut" aria-live="polite"></div></div>';
+      sh.$('#auForm').addEventListener('submit', function (e) { e.preventDefault(); if (st.phase === 'bid') submit(); else nextRound(); });
+      function load() {
+        st.rd = auRound(ctx.seed, st.i, nb, ctx.v, kind); st.phase = 'bid';
+        var s = st.rd.you, n = st.rd.n;
+        sh.$('#auSig').innerHTML = '<span class="muted small">Round ' + (st.i + 1) + ' · ' + n + ' bidders · ' + (kind === 'second' ? 'second price' : 'first price') + '</span><div class="au-big">Your signal <b class="mono">' + num(s, 1) + '</b></div><span class="muted small">V is within ±' + AU.EPS + ' of it, and between ' + AU.LO + ' and ' + AU.HI + '.</span>';
+        sh.$('#auQuick').innerHTML = [0, -2, -5, -8, -10].map(function (d) { return '<button type="button" class="btn sm ghost" data-d="' + d + '">' + (d === 0 ? 'signal' : '−' + (-d)) + '</button>'; }).join('') + '<button type="button" class="btn sm ghost" data-d="pass">Pass (bid 0)</button>';
+        $all('[data-d]', sh.body).forEach(function (b) { b.addEventListener('click', function () { var d = b.getAttribute('data-d'); sh.$('#auBid').value = d === 'pass' ? '0' : String(E.round(s + (+d), 1)); sh.$('#auBid').focus(); }); });
+        sh.$('#auCoach').innerHTML = coach ? 'E[V | your signal] ≈ <b>' + num(s, 1) + '</b>. But if you win, your signal was likely the highest of ' + n + ': E[V | highest] ≈ ' + num(s, 1) + ' − 10·' + (n - 1) + '/' + (n + 1) + ' = <b>' + num(auCondValue(s, n, AU.EPS), 1) + '</b>. Equilibrium bid here: <b>' + num(auEqBid(s, n, AU.EPS, kind), 1) + '</b>' + (kind === 'first' ? ' (first price: shade for the curse and keep a margin).' : ' (second price: bid your value conditional on tying for the win).') : '';
+        sh.$('#auOut').innerHTML = '';
+        var inp = sh.$('#auBid'); inp.value = ''; inp.disabled = false; try { inp.focus({ preventScroll: true }); } catch (e) { }
+      }
+      function submit() {
+        if (!sh.running) return;
+        var raw = sh.$('#auBid').value.trim(), b = raw === '' ? NaN : +raw;
+        if (!isFinite(b) || b < 0 || b > 200) { core.toast('Enter a bid between 0 and 200.'); return; }
+        b = E.round(b, 1);
+        var s = auSettle(st.rd, b, kind), rd = st.rd;
+        var naive = auSettle(rd, rd.you, kind).profit, eq = auSettle(rd, E.round(auEqBid(rd.you, rd.n, AU.EPS, kind), 1), kind).profit;
+        st.res.push({ rd: rd, bid: b, s: s, naive: naive, eq: eq });
+        st.total = E.round(st.total + s.profit, 1); sh.setScore(st.total);
+        st.phase = 'show';
+        var ord = s.bids.map(function (x, k) { return { b: x, k: k, sig: rd.sig[k] }; }).sort(function (a, c) { return c.b - a.b; });
+        sh.$('#auBid').disabled = true;
+        sh.$('#auOut').innerHTML = '<div class="au-reveal"><p><b>V = ' + num(rd.V, 1) + '</b> · ' + (s.winner === 0 ? 'You won and paid ' + num(s.price, 1) + ': <b class="' + (s.profit >= 0 ? 'res-ok' : 'res-bad') + '">' + signed(s.profit, 1) + '</b>' : 'Bot ' + s.winner + ' won and paid ' + num(s.price, 1) + ' (' + signed(s.winnerProfit, 1) + ' for it).') + '</p>' +
+          '<div class="table-scroll"><table class="simple small"><thead><tr><th>Bidder</th><th>Signal</th><th>Bid</th><th>Signal − V</th></tr></thead><tbody>' + ord.map(function (x) {
+            return '<tr' + (x.k === s.winner ? ' class="win"' : '') + '><td>' + (x.k === 0 ? '<b>You</b>' : 'Bot ' + x.k) + '</td><td class="mono">' + num(x.sig, 1) + '</td><td class="mono">' + num(x.b, 1) + '</td><td class="mono">' + signed(x.sig - rd.V, 1) + '</td></tr>';
+          }).join('') + '</tbody></table></div>' +
+          '<button type="button" class="btn primary" id="auNext">' + (st.i + 1 >= AU.ROUNDS ? 'See results' : 'Next round') + ' <span class="kbd">Enter</span></button></div>';
+        sh.$('#auNext').addEventListener('click', nextRound);
+        try { sh.$('#auNext').focus({ preventScroll: true }); } catch (e) { }
+      }
+      function nextRound() { if (st.phase !== 'show') return; st.i++; if (st.i >= AU.ROUNDS) { sh.finish(false); return; } load(); }
+      function details() {
+        var won = st.res.filter(function (x) { return x.s.winner === 0; }), n = st.res.length;
+        var curse = won.length ? E.mean(won.map(function (x) { return x.rd.you - x.rd.V; })) : null;
+        var shade = n ? E.mean(st.res.map(function (x) { return x.rd.you - x.bid; })) : 0;
+        var naive = E.sum(st.res.map(function (x) { return x.naive; })), eq = E.sum(st.res.map(function (x) { return x.eq; }));
+        var botWins = st.res.filter(function (x) { return x.s.winner > 0; }), botProf = botWins.length ? E.mean(botWins.map(function (x) { return x.s.winnerProfit; })) : null;
+        var rows = st.res.map(function (x, j) {
+          return '<tr><td>' + (j + 1) + '</td><td class="mono">' + num(x.rd.V, 1) + '</td><td class="mono">' + num(x.rd.you, 1) + '</td><td class="mono">' + num(x.bid, 1) + '</td><td>' + (x.s.winner === 0 ? 'you' : 'bot ' + x.s.winner) + '</td><td class="mono">' + num(x.s.price, 1) + '</td><td class="mono">' + signed(x.s.profit, 1) + '</td><td class="mono muted">' + signed(x.naive, 1) + ' / ' + signed(x.eq, 1) + '</td></tr>';
+        }).join('');
+        var nb1 = st.res.length ? st.res[0].rd.n : nb + 1;
+        return tiles([{ v: won.length + ' / ' + n, l: 'rounds won' }, { v: signed(st.total, 1), l: 'your profit', cls: st.total >= 0 ? 'res-ok' : 'res-bad' }, { v: signed(naive, 1), l: 'if you bid your signal' }, { v: signed(eq, 1), l: 'if you bid the equilibrium' }]) +
+          panel('The winner’s curse in your numbers', '<p class="small">' + (curse != null ? 'In the rounds you won, your signal overstated V by <b>' + signed(curse, 2) + '</b> on average (theory for the highest of ' + nb1 + ' signals: +' + num(AU.EPS * (nb1 - 1) / (nb1 + 1), 2) + '). ' : 'You never won a round — too much shading also costs: you give up the profitable wins. ') +
+            'You shaded your bids by ' + num(shade, 2) + ' below your signal on average; the equilibrium shades ' + num(kind === 'second' ? AU.EPS * (nb1 - 2) / nb1 : AU.EPS, 2) + '.</p>' +
+            (botProf != null ? '<p class="small">The bots’ average profit when they won: <b>' + signed(botProf, 2) + '</b>' + (ctx.v === 'easy' ? ' — bidding the signal is the textbook winner’s curse.' : '.') + '</p>' : '') +
+            '<p class="small muted">Trading version: if your quote is the one that gets hit, the counterparty probably knew something. Size and shade your quotes for the fills you will actually get, not for the average fill.</p>') +
+          reveal('Round by round', '<div class="table-scroll"><table class="simple"><thead><tr><th>#</th><th>V</th><th>Signal</th><th>Your bid</th><th>Winner</th><th>Price</th><th>Profit</th><th>Signal / Eq.</th></tr></thead><tbody>' + rows + '</tbody></table></div>');
+      }
+    }
+  });
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ================================================================== */
+/* Part 9 (v2.2): Heads-up limit Hold'em against a bot.                */
+/* Engine: 5–7 card evaluator, Monte Carlo equity, a hand state machine */
+/* and three bot policies. The hard bot weights your range by how you  */
+/* bet and remembers your tendencies across matches (aggregate counts). */
+/* ================================================================== */
+(function (root) {
+  'use strict';
+  var AR = root.SBT_ARCADE;
+  if (!AR || !AR._engine || !AR.versus) return;
+  var E = AR._engine, VS = AR.versus;
+
+  /* ---------------- evaluator ---------------- */
+  var P13 = [1, 13, 169, 2197, 28561, 371293];
+  function val(cat, a) { var v = cat; for (var i = 0; i < 5; i++) v = v * 13 + (a[i] || 0); return v; }
+  function straightHigh(m) {
+    for (var hi = 12; hi >= 4; hi--) if (((m >> (hi - 4)) & 31) === 31) return hi;
+    if ((m & 15) === 15 && (m & 4096)) return 3;           // A-2-3-4-5 (five-high)
+    return -1;
+  }
+  function topBits(m, n, skip) { var out = []; for (var r = 12; r >= 0 && out.length < n; r--) if ((m & (1 << r)) && skip.indexOf(r) < 0) out.push(r); return out; }
+  /* Best five-card value of 5–7 cards; larger is better. Category = floor(v / 13^5): 0 high … 8 straight flush. */
+  function evalHand(cs) {
+    var rc = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], sc = [0, 0, 0, 0], sm = [0, 0, 0, 0], mask = 0, i, r;
+    for (i = 0; i < cs.length; i++) { r = cs[i] >> 2; var s = cs[i] & 3; rc[r]++; sc[s]++; sm[s] |= 1 << r; mask |= 1 << r; }
+    var fs = -1;
+    for (i = 0; i < 4; i++) if (sc[i] >= 5) { fs = i; var sf = straightHigh(sm[i]); if (sf >= 0) return val(8, [sf]); }
+    var quads = -1, trips = [], pairs = [];
+    for (r = 12; r >= 0; r--) { if (rc[r] === 4) quads = r; else if (rc[r] === 3) trips.push(r); else if (rc[r] === 2) pairs.push(r); }
+    if (quads >= 0) return val(7, [quads].concat(topBits(mask, 1, [quads])));
+    if (trips.length && (trips.length > 1 || pairs.length)) return val(6, [trips[0], Math.max(trips.length > 1 ? trips[1] : -1, pairs.length ? pairs[0] : -1)]);
+    if (fs >= 0) return val(5, topBits(sm[fs], 5, []));
+    var st = straightHigh(mask);
+    if (st >= 0) return val(4, [st]);
+    if (trips.length) return val(3, [trips[0]].concat(topBits(mask, 2, [trips[0]])));
+    if (pairs.length >= 2) return val(2, [pairs[0], pairs[1]].concat(topBits(mask, 1, [pairs[0], pairs[1]])));
+    if (pairs.length === 1) return val(1, [pairs[0]].concat(topBits(mask, 3, [pairs[0]])));
+    return val(0, topBits(mask, 5, []));
+  }
+  function category(v) { return Math.floor(v / P13[5]); }
+  var CAT_NAMES = ['High card', 'Pair', 'Two pair', 'Three of a kind', 'Straight', 'Flush', 'Full house', 'Four of a kind', 'Straight flush'];
+
+  /* Chen-style preflop score, normalised to 0..1. */
+  function preStrength(h) {
+    var a = h[0] >> 2, b = h[1] >> 2, hi = Math.max(a, b), lo = Math.min(a, b), suited = (h[0] & 3) === (h[1] & 3);
+    function pts(r) { return r === 12 ? 10 : r === 11 ? 8 : r === 10 ? 7 : r === 9 ? 6 : (r + 2) / 2; }
+    var s = pts(hi);
+    if (a === b) s = Math.max(5, s * 2);
+    else {
+      if (suited) s += 2;
+      var gap = hi - lo - 1;
+      s -= gap <= 0 ? 0 : gap === 1 ? 1 : gap === 2 ? 2 : gap === 3 ? 4 : 5;
+      if (gap <= 1 && hi < 10) s += 1;
+    }
+    return E.clamp((Math.ceil(s) + 1) / 21, 0, 1);
+  }
+  /* Cheap made-hand + draw strength of a holding on a board (0..1), for range weighting. */
+  function postStrength(h, board) {
+    if (board.length < 3) return preStrength(h);
+    var v = evalHand(h.concat(board)), c = category(v);
+    var base = [0.12, 0.42, 0.7, 0.8, 0.86, 0.88, 0.94, 0.98, 0.995][c];
+    if (c === 1) {
+      var pr = Math.floor(v / P13[4]) % 13, bmax = 0, onBoard = false;
+      board.forEach(function (x) { bmax = Math.max(bmax, x >> 2); });
+      var bc = 0; board.forEach(function (x) { if ((x >> 2) === pr) bc++; }); onBoard = bc >= 2;
+      base = onBoard ? 0.18 + 0.1 * Math.max(h[0] >> 2, h[1] >> 2) / 12 : 0.3 + 0.32 * pr / 12 + (pr >= bmax ? 0.12 : 0);
+    } else if (c === 0) base = 0.04 + 0.12 * Math.max(h[0] >> 2, h[1] >> 2) / 12;
+    if (board.length < 5 && c < 4) {
+      var all = h.concat(board), suits = [0, 0, 0, 0], m = 0;
+      all.forEach(function (x) { suits[x & 3]++; m |= 1 << (x >> 2); });
+      var fd = suits.some(function (n, s) { return n === 4 && ((h[0] & 3) === s || (h[1] & 3) === s); });
+      var oe = false; for (var lo = 0; lo <= 9; lo++) if (((m >> lo) & 15) === 15) oe = true;
+      base = Math.min(0.9, base + (fd ? 0.25 : 0) + (oe ? 0.15 : 0));
+    }
+    return base;
+  }
+
+  /* ---------------- Monte Carlo equity ---------------- */
+  function remaining(dead) { var used = {}, out = []; dead.forEach(function (c) { used[c] = 1; }); for (var i = 0; i < 52; i++) if (!used[i]) out.push(i); return out; }
+  /* Equity of `hole` on `board` against an opponent drawn by `sampleOpp(rest, r)` (default: a random hand). */
+  function equity(hole, board, n, r, sampleOpp) {
+    var rest = remaining(hole.concat(board)), need = 5 - board.length, w = 0, cnt = 0;
+    for (var t = 0; t < n; t++) {
+      var opp = sampleOpp ? sampleOpp(rest, r) : null, pool = rest;
+      if (!opp) { var i1 = Math.floor(r.next() * rest.length), i2 = Math.floor(r.next() * (rest.length - 1)); if (i2 >= i1) i2++; opp = [rest[i1], rest[i2]]; }
+      if (sampleOpp) pool = rest.filter(function (c) { return c !== opp[0] && c !== opp[1]; });
+      var b = board.slice(), taken = {}; taken[opp[0]] = 1; taken[opp[1]] = 1;
+      while (b.length < 5) { var c = pool[Math.floor(r.next() * pool.length)]; if (!taken[c]) { taken[c] = 1; b.push(c); } }
+      var me = evalHand(hole.concat(b)), op = evalHand(opp.concat(b));
+      w += me > op ? 1 : me === op ? 0.5 : 0; cnt++;
+    }
+    return cnt ? w / cnt : 0.5;
+  }
+  /* Exact equity against a known hand (for the hindsight review), enumerating the rest of the board. */
+  function equityVs(hole, opp, board, r) {
+    var rest = remaining(hole.concat(opp, board)), need = 5 - board.length, w = 0, n = 0;
+    if (need === 0) { var a = evalHand(hole.concat(board)), b = evalHand(opp.concat(board)); return a > b ? 1 : a === b ? 0.5 : 0; }
+    if (need === 1 || need === 2) {
+      for (var i = 0; i < rest.length; i++) {
+        if (need === 1) { var bb = board.concat([rest[i]]), x = evalHand(hole.concat(bb)), y = evalHand(opp.concat(bb)); w += x > y ? 1 : x === y ? 0.5 : 0; n++; }
+        else for (var j = i + 1; j < rest.length; j++) { var b2 = board.concat([rest[i], rest[j]]), x2 = evalHand(hole.concat(b2)), y2 = evalHand(opp.concat(b2)); w += x2 > y2 ? 1 : x2 === y2 ? 0.5 : 0; n++; }
+      }
+      return w / n;
+    }
+    for (var t = 0; t < 1500; t++) {
+      var pick = r.shuffle(rest).slice(0, need), b3 = board.concat(pick), x3 = evalHand(hole.concat(b3)), y3 = evalHand(opp.concat(b3));
+      w += x3 > y3 ? 1 : x3 === y3 ? 0.5 : 0; n++;
+    }
+    return w / n;
+  }
+
+  /* ---------------- hand state machine ---------------- */
+  var SB = 1, BB = 2, CAP = 4;
+  function betSize(street) { return street < 2 ? 2 : 4; }
+  /* players: 0 = you, 1 = bot. btn = the button, who posts the small blind and acts first preflop. */
+  function newHand(seed, h, btn) {
+    var r = E.makeRng(E.deriveSeed(seed, 'he-' + h)), deck = VS.deck(r);
+    var H = { h: h, btn: btn, hole: [[deck[0], deck[2]], [deck[1], deck[3]]], deck: deck.slice(4), board: [], street: 0, pot: SB + BB,
+      put: [0, 0], contrib: [0, 0], bets: 1, acted: [false, false], toAct: btn, folded: -1, done: false, acts: [], winner: null, showdown: false };
+    H.put[btn] = SB; H.put[1 - btn] = BB; H.contrib[btn] = SB; H.contrib[1 - btn] = BB;
+    return H;
+  }
+  function toCall(H, p) { return Math.max(0, H.contrib[1 - p] - H.contrib[p]); }
+  function legal(H) {
+    if (H.done) return [];
+    var p = H.toAct, tc = toCall(H, p), out = [];
+    if (tc > 0) { out.push('fold'); out.push('call'); if (H.bets < CAP) out.push('raise'); }
+    else { out.push('check'); if (H.bets < CAP) out.push('bet'); }
+    return out;
+  }
+  function act(H, a) {
+    var p = H.toAct, tc = toCall(H, p), L = legal(H);
+    if (L.indexOf(a) < 0) {
+      if (a === 'check' && L.indexOf('call') >= 0) a = 'call';
+      else if (a === 'call' && L.indexOf('check') >= 0) a = 'check';
+      else if (a === 'bet' && L.indexOf('raise') >= 0) a = 'raise';
+      else if (a === 'raise' && L.indexOf('bet') >= 0) a = 'bet';
+      else if ((a === 'raise' || a === 'bet') && L.indexOf('call') >= 0) a = 'call';
+      else if ((a === 'raise' || a === 'bet') && L.indexOf('check') >= 0) a = 'check';
+      else return false;
+    }
+    var rec = { p: p, a: a, street: H.street, toCall: tc, pot: H.pot, board: H.board.length };
+    if (a === 'fold') { H.folded = p; H.acts.push(rec); finishHand(H); return true; }
+    var add = 0;
+    if (a === 'call') add = tc;
+    else if (a === 'bet' || a === 'raise') { add = tc + betSize(H.street); H.bets++; }
+    H.contrib[p] += add; H.put[p] += add; H.pot += add; rec.add = add;
+    H.acted[p] = true; H.acts.push(rec);
+    if ((a === 'call' || a === 'check') && H.acted[1 - p] && H.contrib[0] === H.contrib[1]) nextStreet(H);
+    else H.toAct = 1 - p;
+    return true;
+  }
+  function nextStreet(H) {
+    if (H.street === 3) { H.showdown = true; finishHand(H); return; }
+    H.street++;
+    var n = H.street === 1 ? 3 : 1;
+    for (var i = 0; i < n; i++) H.board.push(H.deck.shift());
+    H.contrib = [0, 0]; H.bets = 0; H.acted = [false, false]; H.toAct = 1 - H.btn;
+  }
+  function finishHand(H) {
+    H.done = true;
+    if (H.folded >= 0) H.winner = 1 - H.folded;
+    else {
+      var a = evalHand(H.hole[0].concat(H.board)), b = evalHand(H.hole[1].concat(H.board));
+      H.vals = [a, b]; H.winner = a > b ? 0 : b > a ? 1 : -1;
+    }
+    var share = H.winner === -1 ? [H.pot / 2, H.pot / 2] : H.winner === 0 ? [H.pot, 0] : [0, H.pot];
+    H.net = [share[0] - H.put[0], share[1] - H.put[1]];
+  }
+
+  /* ---------------- player model (used and updated by the hard bot) ---------------- */
+  function newModel() { return { hands: 0, vpip: 0, pfr: 0, aggr: 0, pass: 0, faced: 0, foldFaced: 0, sdAggr: 0, sdBluff: 0 }; }
+  function cleanModel(m) { var o = newModel(); if (m && typeof m === 'object') Object.keys(o).forEach(function (k) { if (isFinite(m[k]) && m[k] >= 0) o[k] = Math.min(1e6, +m[k]); }); return o; }
+  function addModel(m, d) { var o = cleanModel(m); Object.keys(d).forEach(function (k) { o[k] += d[k]; }); return o; }
+  /* Stats of player 0 in one finished hand. */
+  function handStats(H) {
+    var d = newModel(); d.hands = 1;
+    var pre = H.acts.filter(function (x) { return x.p === 0 && x.street === 0; });
+    d.vpip = pre.some(function (x) { return x.a === 'call' || x.a === 'raise' || x.a === 'bet'; }) ? 1 : 0;
+    d.pfr = pre.some(function (x) { return x.a === 'raise' || x.a === 'bet'; }) ? 1 : 0;
+    H.acts.forEach(function (x) {
+      if (x.p !== 0) return;
+      if (x.a === 'bet' || x.a === 'raise') d.aggr++; else if (x.a === 'call') d.pass++;
+      if (x.toCall > 0) { d.faced++; if (x.a === 'fold') d.foldFaced++; }
+    });
+    if (H.showdown) {
+      var riverAggr = H.acts.some(function (x) { return x.p === 0 && x.street === 3 && (x.a === 'bet' || x.a === 'raise'); });
+      if (riverAggr) { d.sdAggr = 1; if (postStrength(H.hole[0], H.board) < 0.35) d.sdBluff = 1; }
+    }
+    return d;
+  }
+  function rates(m) {
+    m = cleanModel(m);
+    var k = 6;   // prior pseudo-counts towards a "typical" player
+    return { vpip: (m.vpip + 0.75 * k) / (m.hands + k), foldToBet: (m.foldFaced + 0.4 * k) / (m.faced + k), af: (m.aggr + k) / (m.pass + k), bluff: (m.sdBluff + 0.3 * k) / (m.sdAggr + k) };
+  }
+
+  /* ---------------- bots ---------------- */
+  var BOTS = {
+    easy: { name: 'Calling station', desc: 'plays almost every hand, calls far too much, rarely raises and never bluffs. Value-bet it relentlessly' },
+    medium: { name: 'Tight-aggressive', desc: 'plays solid hands hard, folds weak ones, compares its equity against a random hand with the pot odds; bluffs a little' },
+    hard: { name: 'Adaptive shark', desc: 'reads your range from how you bet, bluffs at a balanced rate scaled to how often you fold, and remembers your tendencies from earlier matches' }
+  };
+  /* Opponent-range sampler for the hard bot: rejection-sample hands for player 0, weighting by their actions this hand. */
+  function rangeSampler(H, model) {
+    var R = rates(model), floor = E.clamp(R.bluff, 0.12, 0.6), loose = E.clamp(R.vpip, 0.3, 1);
+    var callK = E.clamp(R.foldToBet * 1.6, 0.15, 0.65);    // a player who rarely folds calls with almost anything
+    var mine = H.acts.filter(function (x) { return x.p === 0; });
+    return function (rest, r) {
+      for (var tries = 0; tries < 40; tries++) {
+        var i1 = Math.floor(r.next() * rest.length), i2 = Math.floor(r.next() * (rest.length - 1)); if (i2 >= i1) i2++;
+        var h = [rest[i1], rest[i2]], w = 1, pre = preStrength(h);
+        for (var k = 0; k < mine.length; k++) {
+          var x = mine[k], s = x.street === 0 ? pre : postStrength(h, H.board.slice(0, x.street === 1 ? 3 : x.street === 2 ? 4 : 5));
+          if (x.a === 'bet' || x.a === 'raise') w *= floor + (1 - floor) * Math.pow(s, 1.4);
+          else if (x.a === 'call') w *= x.street === 0 ? Math.min(1, (1 - loose) * 2 * pre + loose) : 1 - callK * (1 - s);
+          else if (x.a === 'check') w *= 1 - 0.45 * Math.pow(s, 3);
+        }
+        if (r.next() < w) return h;
+      }
+      return null;    // fall back to a random hand
+    };
+  }
+  /* Decide the bot's action. Returns {a, eq}. */
+  function botDecide(H, level, r, model) {
+    var p = 1, hole = H.hole[1], tc = toCall(H, p), L = legal(H), pot = H.pot, st = H.street;
+    var n = level === 'easy' ? 120 : 260;
+    var eq = level === 'hard' && H.acts.some(function (x) { return x.p === 0; }) ? equity(hole, H.board, n, r, rangeSampler(H, model)) : equity(hole, H.board, n, r);
+    var odds = tc > 0 ? tc / (pot + tc) : 0, can = function (a) { return L.indexOf(a) >= 0; }, u = r.next(), a;
+    if (level === 'easy') {
+      if (tc === 0) a = eq > 0.72 && u < 0.6 && can('bet') ? 'bet' : 'check';
+      else a = eq > 0.86 && can('raise') ? 'raise' : (eq > 0.22 || u < 0.8) ? 'call' : 'fold';
+    } else if (level === 'medium') {
+      if (st === 0) {
+        if (tc === 0) a = eq > 0.57 && can('bet') ? 'bet' : 'check';
+        else a = eq > 0.6 && can('raise') ? 'raise' : (eq > 0.46 || (tc <= 1 && eq > 0.36)) ? 'call' : 'fold';
+      } else if (tc === 0) a = eq > 0.62 && can('bet') ? 'bet' : (st >= 2 && u < 0.1 && can('bet')) ? 'bet' : 'check';
+      else a = eq > 0.8 && can('raise') ? 'raise' : eq > odds + 0.08 ? 'call' : 'fold';
+    } else {
+      var R = rates(model), bet = betSize(st);
+      if (st === 0) {
+        if (tc === 0) a = eq > 0.52 && can('bet') ? 'bet' : 'check';
+        else if (tc <= 1) a = eq > 0.58 && can('raise') ? 'raise' : eq > 0.34 ? 'call' : 'fold';
+        else a = eq > 0.64 && can('raise') ? 'raise' : eq > 0.4 - 0.08 * (R.af > 2 ? 1 : 0) ? 'call' : 'fold';
+      } else if (tc === 0) {
+        var bluffF = E.clamp((bet / (pot + bet)) * (R.foldToBet / 0.4) * 0.9, 0.04, 0.5), station = R.foldToBet < 0.3;
+        if (eq > (station ? 0.52 : 0.6) && can('bet')) a = u < (station ? 0.98 : 0.9) ? 'bet' : 'check';   // value-bet thinner into players who never fold
+        else if (station && eq < 0.33) a = 'check';                               // never bluff a calling station
+        else if (eq < 0.33 && st >= 1 && u < bluffF && can('bet')) a = 'bet';       // balanced-ish bluff, scaled to your fold rate
+        else a = 'check';
+      } else {
+        var implied = st === 1 ? 0.05 : st === 2 ? 0.02 : 0;
+        if (eq > 0.74 && can('raise')) a = 'raise';
+        else if (eq > odds - implied) a = 'call';
+        else a = (st === 3 && R.bluff > 0.45 && eq > odds - 0.1) ? 'call' : 'fold';      // hero-call players who bluff a lot
+      }
+    }
+    if (!can(a)) a = can('check') ? 'check' : 'call';
+    return { a: a, eq: eq, odds: odds };
+  }
+  /* Bot-vs-bot (or policy-vs-bot) simulation for tests: player 0 uses `pol(H, r)`. Returns big blinds won by player 0. */
+  function simMatch(seed, hands, level0, level1) {
+    var tot = 0, m0 = newModel(), m1 = newModel();     // m0: what seat 1 knows about seat 0, and vice versa
+    for (var h = 0; h < hands; h++) {
+      var H = newHand(seed, h, h % 2), r = E.makeRng(E.deriveSeed(seed, 'sim-' + h)), guard = 0;
+      while (!H.done && guard++ < 60) {
+        if (H.toAct === 1) act(H, botDecide(H, level1, r, m0).a);
+        else { var M = mirror(H), d = botDecide(M, level0, r, m1); act(H, d.a); }
+      }
+      tot += H.net[0]; m0 = addModel(m0, handStats(H)); m1 = addModel(m1, handStats(mirror(H)));
+    }
+    return tot / BB;
+  }
+  /* View the hand from player 0's seat as if they were player 1 (for running a bot policy as player 0). */
+  function mirror(H) {
+    var M = JSON.parse(JSON.stringify(H));
+    M.hole = [H.hole[1], H.hole[0]]; M.put = [H.put[1], H.put[0]]; M.contrib = [H.contrib[1], H.contrib[0]]; M.acted = [H.acted[1], H.acted[0]];
+    M.toAct = 1 - H.toAct; M.btn = 1 - H.btn;
+    M.acts = H.acts.map(function (x) { var y = {}; Object.keys(x).forEach(function (k) { y[k] = x[k]; }); y.p = 1 - x.p; return y; });
+    return M;
+  }
+
+  var HE = { evalHand: evalHand, category: category, CAT_NAMES: CAT_NAMES, straightHigh: straightHigh, preStrength: preStrength, postStrength: postStrength, equity: equity, equityVs: equityVs,
+    newHand: newHand, legal: legal, act: act, toCall: toCall, betSize: betSize, SB: SB, BB: BB, CAP: CAP, BOTS: BOTS, botDecide: botDecide, rangeSampler: rangeSampler,
+    newModel: newModel, cleanModel: cleanModel, addModel: addModel, handStats: handStats, rates: rates, simMatch: simMatch, mirror: mirror };
+  VS.add({ id: 'holdem', name: 'Heads-Up Hold’em', icon: 'holdem', group: 'versus', color: 'var(--c-brainteasers)',
+    desc: 'Limit Texas Hold’em, one on one against a bot. Pot odds against equity on every decision; the hard bot reads your betting.',
+    skills: ['Pot odds', 'Equity', 'Opponent modelling', 'vs bots'], firms: ['SIG', 'Jane Street', 'Optiver', 'HRT', 'Citadel Securities'],
+    why: 'Poker is the classic trader training game: decisions under uncertainty, EV versus price, reading what an opponent’s actions say about their hand. SIG teaches it to new hires.',
+    variants: [{ id: 'easy', name: 'Easy bot' }, { id: 'medium', name: 'Medium bot' }, { id: 'hard', name: 'Hard bot' }] });
+  AR.holdem.engine = HE;
+
+  /* ================================================================== */
+  /* UI                                                                  */
+  /* ================================================================== */
+  (root.SBT_PLUGINS = root.SBT_PLUGINS || []).push(function (core) {
+    var U = AR._ui, h = VS.h;
+    if (!U || !U.Shell || !h) return;
+    var esc = core.esc, $all = core.$all;
+    var num = h.num, signed = h.signed, pct = h.pct;
+    var HANDS = [20, 40];
+    function nHands(p) { return +p.hands === 40 ? 40 : 20; }
+
+    h.mount(AR.holdem.meta, '<rect x="3" y="6" width="10" height="14" rx="2"/><path d="M9 4.5 15.5 3l4 12.5-6 1.6"/><path d="M8 11.5l-1.6 1.8L8 15l1.6-1.7z" fill="currentColor"/>', {
+      rules: ['Heads-up fixed-limit Hold’em. Blinds 1 / 2; bets and raises are 2 before the turn and 4 on the turn and river; at most 4 bets per street. The button posts the small blind, acts first before the flop and last after it; the button alternates.',
+        'You get two private cards; five shared cards come out over the flop (3), turn (1) and river (1). Best five-card hand wins at showdown; a fold gives the pot to the other player.',
+        'The key number: pot odds. If you must call c into a pot of P, you need equity above c / (P + c) to profit in the long run. The coach shows your equity against a random hand next to that price.',
+        'Score = big blinds won over the match (each hand is a fresh deal; stacks are not limited).'],
+      recVariant: function (v, p) { return VS.rec(v, String(nHands(p)), !!p.coach); },
+      fromRec: function (rv, p) { var q = VS.parseRec(rv); p.coach = q.coach; p.hands = q.extra[0] === '40' ? 40 : 20; return q.v; },
+      variantLabel: function (rv) { var q = VS.parseRec(rv); return h.lvl(q.v) + ' · ' + (q.extra[0] || 20) + ' hands' + (q.coach ? ' · coach' : ''); },
+      fmt: function (v) { return signed(v, 1) + ' bb'; }, ghost: false,
+      settings: function (v, p) {
+        var m = cleanModel(p.mem), R = rates(m);
+        return h.botLine(v, BOTS) + h.segRow('Match length', 'hands', HANDS.map(function (x) { return [x, x + ' hands']; }), nHands(p)) +
+          h.coachRow(p, 'shows your equity against a random hand and the pot odds at every decision.') +
+          (v === 'hard' && m.hands ? '<p class="muted small">The shark has seen ' + m.hands + ' of your hands: plays ' + pct(R.vpip) + ' of hands, folds ' + pct(R.foldToBet) + ' to a bet, aggression ' + num(R.af, 1) + '. <button type="button" class="btn sm ghost" id="heForget">Forget me</button></p>' : '');
+      },
+      bindLanding: function (main) { var b = main.querySelector('#heForget'); if (b) b.addEventListener('click', function () { var p = U.A().prefs.holdem; if (p) { delete p.mem; core.save(); core.toast('The shark forgot your history.'); b.parentNode.textContent = 'History cleared.'; } }); },
+      start: function (main, ctx) { startHE(main, ctx); }
+    });
+
+    function cardHtml(c, cls) {
+      if (c == null) return '<span class="pc back' + (cls ? ' ' + cls : '') + '" aria-label="hidden card"></span>';
+      var s = c & 3;
+      return '<span class="pc s' + s + (s === 1 || s === 2 ? ' red' : '') + (cls ? ' ' + cls : '') + '" aria-label="' + esc(VS.cardTxt(c)) + '"><b>' + VS.RANKS.charAt(c >> 2).replace('T', '10') + '</b><i>' + VS.SUITS[s] + '</i></span>';
+    }
+    h.card = cardHtml;
+    var VERB = { fold: 'folds', check: 'checks', call: 'calls', bet: 'bets', raise: 'raises' };
+    var STREET = ['Preflop', 'Flop', 'Turn', 'River'];
+
+    function startHE(main, ctx) {
+      var p = ctx.prefs, N = nHands(p), coach = !!p.coach, model = cleanModel(p.mem), lvl = ctx.v;
+      var st = { i: -1, H: null, net: 0, botNet: 0, hands: [], dec: [], log: [], wait: false, stats: newModel(), fresh: newModel() };
+      var rb = E.makeRng(E.deriveSeed(ctx.seed, 'he-bot')), rc = E.makeRng(E.deriveSeed(ctx.seed, 'he-coach'));
+      ctx.settings = { hands: N, coach: coach };
+      var sh = U.Shell(main, h.base(ctx, { title: 'Heads-Up Hold’em', scoreLabel: 'big blinds', scoreText: function (v) { return signed(v, 1); }, rounds: true,
+        rightText: function () { return 'hand ' + Math.max(1, st.i + 1) + ' / ' + N; }, hint: 'F fold · C check/call · R bet/raise · Enter next hand.',
+        onStart: function () { nextHand(); },
+        result: function () {
+          p.mem = cleanModel(model); core.save();
+          var bb = E.round(st.net / BB, 1);
+          return { score: bb, scoreText: signed(bb, 1) + ' bb', scoreLabel: 'over ' + st.hands.length + ' hands vs ' + BOTS[lvl].name.toLowerCase(), x: { hands: st.hands.length, bb: bb }, details: details() };
+        } }));
+      sh.body.innerHTML = '<div class="vs-wrap he">' +
+        '<div class="he-seat bot"><div class="he-who"><b>' + esc(BOTS[lvl].name) + '</b><span class="muted small" id="heBotNet"></span></div><div class="he-cards" id="heBotCards"></div><div class="he-bub small" id="heBotSay"></div></div>' +
+        '<div class="he-mid"><div class="he-board" id="heBoard"></div><div class="he-pot small" id="hePot"></div></div>' +
+        '<div class="he-seat you"><div class="he-who"><b>You</b><span class="muted small" id="heYouNet"></span></div><div class="he-cards" id="heYouCards"></div><div class="he-bub small" id="heYouSay"></div></div>' +
+        '<div class="he-actions" id="heAct">' +
+        '<button type="button" class="btn" data-ha="fold">Fold <span class="kbd">F</span></button>' +
+        '<button type="button" class="btn" data-ha="call">Call <span class="kbd">C</span></button>' +
+        '<button type="button" class="btn primary" data-ha="raise">Raise <span class="kbd">R</span></button></div>' +
+        '<div class="he-next hidden" id="heNextWrap"><button type="button" class="btn primary block" id="heNext">Next hand <span class="kbd">Enter</span></button></div>' +
+        '<div class="vs-coach small" id="heCoach"></div><ul class="vs-feed small" id="heFeed"></ul></div>';
+      $all('[data-ha]', sh.body).forEach(function (b) { b.addEventListener('click', function () { you(b.getAttribute('data-ha')); }); });
+      sh.$('#heNext').addEventListener('click', function () { if (st.H && st.H.done) nextHand(); });
+
+      function say(who, txt) { sh.$(who === 0 ? '#heYouSay' : '#heBotSay').textContent = txt; }
+      function nextHand() {
+        if (st.i + 1 >= N) { sh.finish(false); return; }
+        st.i++;
+        st.H = newHand(ctx.seed, st.i, st.i % 2 === 0 ? 0 : 1);
+        say(0, ''); say(1, '');
+        st.log.push({ k: 'info', html: '<b>Hand ' + (st.i + 1) + '</b> · ' + (st.H.btn === 0 ? 'you are the button (small blind)' : 'the bot is the button; you post the big blind') });
+        sh.$('#heNextWrap').classList.add('hidden');
+        step();
+      }
+      function step() {
+        var H = st.H;
+        render();
+        if (H.done) { endHand(); return; }
+        if (H.toAct === 1) { st.wait = true; sh.later(botTurn, 650); }
+        else st.wait = false;
+      }
+      function botTurn() {
+        var H = st.H;
+        if (!H || H.done || H.toAct !== 1) return;
+        if (!sh.running) { sh.later(botTurn, 300); return; }
+        var d = botDecide(H, lvl, rb, model), tc = toCall(H, 1);
+        act(H, d.a);
+        var last = H.acts[H.acts.length - 1];
+        say(1, VERB[last.a] + (last.add ? ' ' + last.add : ''));
+        st.log.push({ k: last.a === 'fold' ? 'ok' : last.a === 'raise' || last.a === 'bet' ? 'bad' : 'info', html: esc(STREET[last.street]) + ': bot ' + VERB[last.a] + (last.add ? ' (' + last.add + ')' : '') });
+        step();
+      }
+      function you(a) {
+        var H = st.H;
+        if (!H || H.done || H.toAct !== 0 || st.wait || !sh.running) return;
+        var L = legal(H);
+        if (a === 'call' && L.indexOf('check') >= 0) a = 'check';
+        if (a === 'raise' && L.indexOf('bet') >= 0) a = 'bet';
+        if (L.indexOf(a) < 0) return;
+        var tc = toCall(H, 0), eqR = equity(H.hole[0], H.board, 500, rc);
+        st.dec.push({ hand: st.i, street: H.street, a: a, tc: tc, pot: H.pot, odds: tc > 0 ? tc / (H.pot + tc) : 0, eq: eqR, board: H.board.slice(), hole: H.hole[0], opp: H.hole[1] });
+        act(H, a);
+        var last = H.acts[H.acts.length - 1];
+        say(0, VERB[last.a] + (last.add ? ' ' + last.add : ''));
+        st.log.push({ k: 'you', html: esc(STREET[last.street]) + ': you ' + VERB[last.a].replace(/s$/, '') + (last.add ? ' (' + last.add + ')' : '') });
+        step();
+      }
+      function endHand() {
+        var H = st.H, net = H.net[0];
+        st.net += net; st.botNet += H.net[1];
+        var hs = handStats(H);
+        st.fresh = addModel(st.fresh, hs);
+        model = addModel(model, hs);           // the hard bot adapts within the match too
+        var msg;
+        if (H.folded === 1) msg = 'Bot folds — you take the pot of ' + H.pot + ' (net ' + signed(net, 0) + ').';
+        else if (H.folded === 0) msg = 'You fold (net ' + signed(net, 0) + ').';
+        else msg = 'Showdown: you ' + CAT_NAMES[category(H.vals[0])].toLowerCase() + ', bot ' + CAT_NAMES[category(H.vals[1])].toLowerCase() + ' — ' + (H.winner === 0 ? 'you win' : H.winner === 1 ? 'bot wins' : 'split pot') + ' (net ' + signed(net, 0) + ').';
+        st.hands.push({ i: st.i, net: net, H: H, msg: msg });
+        st.log.push({ k: net > 0 ? 'ok' : net < 0 ? 'bad' : 'info', html: esc(msg) });
+        sh.setScore(E.round(st.net / BB, 1));
+        render();
+        sh.$('#heNextWrap').classList.remove('hidden');
+        sh.$('#heNext').textContent = st.i + 1 >= N ? 'See results' : 'Next hand';
+      }
+      function render() {
+        var H = st.H, show = H.done && H.folded < 0;
+        sh.$('#heBotCards').innerHTML = cardHtml(show ? H.hole[1][0] : null) + cardHtml(show ? H.hole[1][1] : null);
+        sh.$('#heYouCards').innerHTML = cardHtml(H.hole[0][0]) + cardHtml(H.hole[0][1]);
+        var b = ''; for (var k = 0; k < 5; k++) b += k < H.board.length ? cardHtml(H.board[k]) : '<span class="pc slot"></span>';
+        sh.$('#heBoard').innerHTML = b;
+        sh.$('#hePot').innerHTML = '<span>Pot <b class="mono">' + H.pot + '</b></span><span class="muted">' + STREET[H.street] + (H.btn === 0 ? ' · you: button' : ' · bot: button') + '</span>';
+        sh.$('#heYouNet').textContent = signed(st.net / BB, 1) + ' bb';
+        sh.$('#heBotNet').textContent = signed(st.botNet / BB, 1) + ' bb';
+        var mine = !H.done && H.toAct === 0, L = mine ? legal(H) : [], tc = toCall(H, 0);
+        $all('[data-ha]', sh.body).forEach(function (bt) {
+          var a = bt.getAttribute('data-ha');
+          if (a === 'call') bt.innerHTML = (tc > 0 ? 'Call ' + tc : 'Check') + ' <span class="kbd">C</span>';
+          if (a === 'raise') bt.innerHTML = (tc > 0 ? 'Raise to ' + (tc + betSize(H.street)) : 'Bet ' + betSize(H.street)) + ' <span class="kbd">R</span>';
+          var ok = a === 'fold' ? L.indexOf('fold') >= 0 : a === 'call' ? (L.indexOf('call') >= 0 || L.indexOf('check') >= 0) : (L.indexOf('raise') >= 0 || L.indexOf('bet') >= 0);
+          bt.disabled = !mine || !ok;
+        });
+        var co = '';
+        if (mine) {
+          var made = H.board.length >= 3 ? CAT_NAMES[category(evalHand(H.hole[0].concat(H.board)))] : null;
+          if (coach) {
+            var eq = equity(H.hole[0], H.board, 600, rc);
+            co = '<b>Your equity vs a random hand: ' + pct(eq) + '</b>' + (made ? ' · you have ' + esc(made.toLowerCase()) : ' · preflop strength ' + Math.round(100 * preStrength(H.hole[0])) + '/100') +
+              (tc > 0 ? '<br>Price: call ' + tc + ' to win ' + H.pot + ' → need ' + pct(tc / (H.pot + tc)) + '. ' + (eq > tc / (H.pot + tc) ? 'Calling beats the price against a random hand; a bet usually means a stronger range than random.' : 'Below the price even against a random hand.') : '<br>No bet to you: check, or bet ' + betSize(H.street) + ' — bet when you are ahead of the hands that will call.');
+          } else co = made ? 'You have ' + esc(made.toLowerCase()) + '.' : '';
+        }
+        sh.$('#heCoach').innerHTML = co;
+        sh.$('#heFeed').innerHTML = h.feed(st.log, 5);
+      }
+      sh.keys(function (e) {
+        var k = (e.key || '').toLowerCase();
+        if (k === 'f') { e.preventDefault(); you('fold'); }
+        else if (k === 'c' || k === 'k') { e.preventDefault(); you('call'); }
+        else if (k === 'r' || k === 'b') { e.preventDefault(); you('raise'); }
+        else if (k === 'enter' && st.H && st.H.done) { e.preventDefault(); nextHand(); }
+      });
+
+      function details() {
+        var S = st.fresh, R = { vpip: S.hands ? S.vpip / S.hands : 0, pfr: S.hands ? S.pfr / S.hands : 0, f2b: S.faced ? S.foldFaced / S.faced : 0, af: S.pass ? S.aggr / S.pass : S.aggr };
+        var won = st.hands.filter(function (x) { return x.net > 0; }).length, sd = st.hands.filter(function (x) { return x.H.showdown; }), sdw = sd.filter(function (x) { return x.H.winner === 0; }).length;
+        var facing = st.dec.filter(function (d) { return d.tc > 0; });
+        facing.forEach(function (d) { d.hind = equityVs(d.hole, d.opp, d.board, rc); });
+        var looseCalls = facing.filter(function (d) { return d.a !== 'fold' && d.eq < d.odds - 0.1; }).length;
+        var tightFolds = facing.filter(function (d) { return d.a === 'fold' && d.eq > d.odds + 0.2; }).length;
+        var advice = [];
+        if (S.faced >= 5 && R.f2b > 0.55) advice.push('You folded ' + pct(R.f2b) + ' of the time you faced a bet. In limit poker the pot is usually big relative to one bet, so folding that often lets any bot that bluffs print money (the hard bot raises its bluff rate when it sees this).');
+        if (S.hands >= 8 && R.vpip < 0.45) advice.push('You played only ' + pct(R.vpip) + ' of hands. Heads-up, the blinds come round every hand — most hands are worth playing, especially on the button.');
+        if (S.pass >= 4 && R.af < 0.6) advice.push('Aggression ' + num(R.af, 2) + ' (bets + raises per call) is passive. Betting your strong hands gets paid by the calling station and puts the decision on the tight bots.');
+        if (looseCalls) advice.push(looseCalls + ' call' + (looseCalls === 1 ? '' : 's') + ' had less equity than the price even against a random hand — those are losing calls in the long run.');
+        if (tightFolds) advice.push(tightFolds + ' fold' + (tightFolds === 1 ? '' : 's') + ' had at least 20 points more equity than the price against a random hand. Against a bet the range is stronger than random, but that is a big margin to give up.');
+        if (lvl === 'easy') advice.push('Versus a calling station the exploit is simple: bet every decent hand for value and almost never bluff.');
+        if (lvl === 'hard') advice.push('The shark weights your hand by your actions: big bets look strong unless your showdowns proved you bluff. Mixing a few river bluffs keeps its folds honest.');
+        if (!advice.length) advice.push('Solid session. Review the decisions below: any call well below the price, or fold well above it, is where money leaks.');
+        var rows = facing.map(function (d) {
+          var bad = d.a !== 'fold' && d.eq < d.odds - 0.1, tight = d.a === 'fold' && d.eq > d.odds + 0.2;
+          return '<tr' + (bad || tight ? ' class="flag"' : '') + '><td>' + (d.hand + 1) + '</td><td>' + STREET[d.street] + '</td><td>' + cardHtml(d.hole[0], 'sm') + cardHtml(d.hole[1], 'sm') + '</td><td class="mono">' + d.tc + ' / ' + d.pot + '</td><td class="mono">' + pct(d.odds) + '</td><td class="mono">' + pct(d.eq) + '</td><td class="mono">' + pct(d.hind) + '</td><td>' + d.a + '</td></tr>';
+        }).join('');
+        var hrows = st.hands.map(function (x) {
+          var H = x.H;
+          return '<tr><td>' + (x.i + 1) + '</td><td>' + cardHtml(H.hole[0][0], 'sm') + cardHtml(H.hole[0][1], 'sm') + '</td><td>' + (H.folded === 0 ? '<span class="muted">—</span>' : cardHtml(H.hole[1][0], 'sm') + cardHtml(H.hole[1][1], 'sm')) + '</td><td>' + H.board.map(function (c) { return cardHtml(c, 'sm'); }).join('') + '</td><td class="mono ' + (x.net > 0 ? 'res-ok' : x.net < 0 ? 'res-bad' : '') + '">' + signed(x.net, 0) + '</td></tr>';
+        }).join('');
+        var bb = st.net / BB;
+        return h.tiles([{ v: signed(bb, 1), l: 'big blinds won', cls: bb > 0 ? 'res-ok' : bb < 0 ? 'res-bad' : '' }, { v: st.hands.length ? num(100 * bb / st.hands.length, 0) : '—', l: 'bb / 100 hands' },
+          { v: won + ' / ' + st.hands.length, l: 'hands won' }, { v: sd.length ? sdw + ' / ' + sd.length : '—', l: 'showdowns won' }]) +
+          h.tiles([{ v: pct(R.vpip), l: 'hands played (VPIP)' }, { v: pct(R.pfr), l: 'preflop raise' }, { v: S.faced ? pct(R.f2b) : '—', l: 'fold to a bet' }, { v: num(R.af, 2), l: 'aggression (bets+raises / calls)' }]) +
+          h.panel('Debrief', '<ul class="vs-debrief small">' + advice.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
+            '<p class="muted small">Variance is large: ' + st.hands.length + ' hands is a small sample — a ±' + num(Math.sqrt(st.hands.length) * 6, 0) + ' bb swing is normal. Judge the decisions, not the result.</p>') +
+          h.reveal('Every decision facing a bet', '<p class="small muted">Price = call ÷ (pot + call). "vs random" is what the coach shows; "vs their hand" is hindsight against the bot’s actual cards.</p><div class="table-scroll"><table class="simple small"><thead><tr><th>Hand</th><th>Street</th><th>You</th><th>Call / pot</th><th>Price</th><th>vs random</th><th>vs their hand</th><th>Action</th></tr></thead><tbody>' + (rows || '<tr><td colspan="8" class="muted">You never faced a bet.</td></tr>') + '</tbody></table></div>') +
+          h.reveal('Hand history', '<div class="table-scroll"><table class="simple small"><thead><tr><th>#</th><th>You</th><th>Bot</th><th>Board</th><th>Net</th></tr></thead><tbody>' + hrows + '</tbody></table></div>');
+      }
+    }
+  });
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ================================================================== */
+/* Part 10 (v2.2): Liar's Dice and Colonel Blotto against bots.        */
+/* ================================================================== */
+(function (root) {
+  'use strict';
+  var AR = root.SBT_ARCADE;
+  if (!AR || !AR._engine || !AR.versus) return;
+  var E = AR._engine, VS = AR.versus;
+
+  /* ================================================================== */
+  /* Liar's Dice                                                         */
+  /* ================================================================== */
+  var LD_DICE = 5;
+  function ldFaces(wild) { return wild ? [2, 3, 4, 5, 6] : [1, 2, 3, 4, 5, 6]; }
+  function ldNewGame(seed, nBots, wild) {
+    var n = nBots + 1, G = { seed: seed, n: n, wild: !!wild, dice: [], hands: [], round: -1, bid: null, bids: [], toAct: 0, starter: 0, over: false, place: null, elim: [], lastLoser: null,
+      belief: [] };
+    for (var i = 0; i < n; i++) { G.dice.push(LD_DICE); G.hands.push([]); G.belief.push([1, 1, 1, 1, 1, 1, 1]); }
+    ldRoll(G);
+    return G;
+  }
+  function ldAlive(G, p) { return G.dice[p] > 0; }
+  function ldNext(G, p) { for (var k = 1; k <= G.n; k++) { var q = (p + k) % G.n; if (ldAlive(G, q)) return q; } return p; }
+  function ldTotal(G) { return E.sum(G.dice); }
+  function ldRoll(G) {
+    G.round++;
+    var r = E.makeRng(E.deriveSeed(G.seed, 'ld-' + G.round));
+    for (var i = 0; i < G.n; i++) { var h = []; for (var k = 0; k < G.dice[i]; k++) h.push(r.int(1, 6)); G.hands[i] = h.sort(); G.belief[i] = [1, 1, 1, 1, 1, 1, 1]; }
+    G.bid = null; G.bids = []; G.toAct = G.starter;
+    if (!ldAlive(G, G.toAct)) G.toAct = ldNext(G, G.toAct);
+  }
+  function ldMatches(hand, f, wild) { var c = 0; hand.forEach(function (d) { if (d === f || (wild && d === 1)) c++; }); return c; }
+  function ldCount(G, f) { var c = 0; G.hands.forEach(function (h) { c += ldMatches(h, f, G.wild); }); return c; }
+  function ldHigher(a, q, f) { return !a || q > a.q || (q === a.q && f > a.f); }
+  function ldValid(G, q, f) { return ldFaces(G.wild).indexOf(f) >= 0 && q >= 1 && q <= ldTotal(G) && ldHigher(G.bid, q, f); }
+  function ldPFace(wild) { return wild ? 1 / 3 : 1 / 6; }
+  /* P(at least q dice show f) from player p's point of view, treating every unseen die as independent and fair. */
+  function ldProbSimple(G, p, q, f) {
+    var own = ldMatches(G.hands[p], f, G.wild), unknown = ldTotal(G) - G.dice[p];
+    return VS.binomAtLeast(unknown, ldPFace(G.wild), q - own);
+  }
+  /* Belief-weighted version: each opponent's dice follow face weights updated by what they bid (a bid on f raises
+   * the weight of f). Total = sum of independent binomials (Poisson-binomial by convolution). */
+  function ldMatchProb(w, f, wild) { var s = 0; for (var g = 1; g <= 6; g++) s += w[g]; var pf = w[f] / s; if (wild && f !== 1) pf += w[1] / s; return Math.min(0.95, pf); }
+  function ldProbBayes(G, p, q, f) {
+    var need = q - ldMatches(G.hands[p], f, G.wild);
+    if (need <= 0) return 1;
+    var dist = [1];
+    for (var j = 0; j < G.n; j++) {
+      if (j === p || !G.dice[j]) continue;
+      var pm = VS.binomPmf(G.dice[j], ldMatchProb(G.belief[j], f, G.wild)), nd = [];
+      for (var a = 0; a < dist.length; a++) for (var b = 0; b < pm.length; b++) nd[a + b] = (nd[a + b] || 0) + dist[a] * pm[b];
+      dist = nd;
+    }
+    var s = 0; for (var k = need; k < dist.length; k++) s += dist[k] || 0;
+    return Math.min(1, s);
+  }
+  function ldBid(G, q, f) {
+    if (!ldValid(G, q, f)) return false;
+    var p = G.toAct;
+    G.bid = { q: q, f: f, p: p }; G.bids.push({ q: q, f: f, p: p });
+    var w = G.belief[p]; w[f] = Math.min(6, w[f] * 1.8);
+    G.toAct = ldNext(G, p);
+    return true;
+  }
+  /* Challenge the standing bid. Returns the reveal; the loser loses a die and starts the next round. */
+  function ldCall(G) {
+    if (!G.bid) return null;
+    var c = G.toAct, b = G.bid, total = ldCount(G, b.f), stands = total >= b.q, loser = stands ? c : b.p;
+    var res = { caller: c, bidder: b.p, bid: { q: b.q, f: b.f }, total: total, stands: stands, loser: loser, hands: G.hands.map(function (h) { return h.slice(); }), round: G.round };
+    G.dice[loser]--;
+    if (!G.dice[loser]) G.elim.push(loser);
+    G.lastLoser = loser;
+    G.starter = G.dice[loser] ? loser : ldNext(G, loser);
+    var alive = G.dice.filter(function (d) { return d > 0; }).length;
+    if (!G.dice[0]) { G.over = true; G.place = alive + 1; }
+    else if (alive === 1) { G.over = true; G.place = 1; }
+    return res;
+  }
+  /* All legal raises worth considering: the minimum quantity on each face, and one more. */
+  function ldCandidates(G) {
+    var out = [], fs = ldFaces(G.wild), b = G.bid, tot = ldTotal(G);
+    fs.forEach(function (f) {
+      var q = !b ? 1 : f > b.f ? b.q : b.q + 1;
+      for (var k = 0; k < 3; k++) if (q + k <= tot) out.push({ q: q + k, f: f });
+    });
+    return out;
+  }
+  var LD_BOTS = {
+    easy: { name: 'Easy bots', desc: 'count only their own dice, use rough thresholds and bluff at random' },
+    medium: { name: 'Medium bots', desc: 'use the exact binomial probability from their own dice and pick whichever is likelier: the bid is false, or their raise is true' },
+    hard: { name: 'Hard bots', desc: 'also read the table: every bid on a face makes them believe the bidder holds that face (Bayesian update), and they mix in bluffs' }
+  };
+  function ldBotMove(G, level, r) {
+    var p = G.toAct, prob = level === 'hard' ? function (q, f) { return ldProbBayes(G, p, q, f); } : function (q, f) { return ldProbSimple(G, p, q, f); };
+    var cands = ldCandidates(G).map(function (c) { c.P = prob(c.q, c.f); c.own = ldMatches(G.hands[p], c.f, G.wild); return c; });
+    var pBid = G.bid ? prob(G.bid.q, G.bid.f) : 1;
+    if (level === 'easy') {
+      if (G.bid) { var own = ldMatches(G.hands[p], G.bid.f, G.wild), exp = own + (ldTotal(G) - G.dice[p]) * ldPFace(G.wild); if (G.bid.q > exp + 0.6 + (r.next() - 0.5) * 2) return { call: true, P: pBid }; }
+      if (!cands.length) return { call: true, P: pBid };
+      cands.sort(function (a, b) { return b.own - a.own || a.q - b.q; });
+      var pick = r.next() < 0.25 ? cands[Math.floor(r.next() * cands.length)] : cands[0];
+      return { q: pick.q, f: pick.f, P: pick.P };
+    }
+    cands.sort(function (a, b) { return b.P - a.P || a.q - b.q || b.own - a.own; });
+    var best = cands[0];
+    if (!best) return { call: true, P: pBid };
+    var survive = level === 'hard' ? best.P + (1 - best.P) * 0.25 : best.P;
+    if (G.bid && 1 - pBid > survive) return { call: true, P: pBid };
+    var bluff = level === 'hard' ? 0.1 : 0.12;
+    if (r.next() < bluff) {
+      var alt = cands.filter(function (c) { return c.P > 0.3 && c !== best; });
+      if (alt.length) best = alt[Math.floor(r.next() * Math.min(3, alt.length))];
+    }
+    return { q: best.q, f: best.f, P: best.P };
+  }
+  /* Bot-only game for tests and sanity checks: returns the finishing order of seat 0 using `level0`. */
+  function ldSim(seed, nBots, wild, level0, levelBots) {
+    var G = ldNewGame(seed, nBots, wild), r = E.makeRng(E.deriveSeed(seed, 'ld-sim')), guard = 0;
+    while (!G.over && guard++ < 2000) {
+      var lv = G.toAct === 0 ? level0 : levelBots, m = ldBotMove(G, lv, r);
+      if (m.call && G.bid) { ldCall(G); if (!G.over) ldRoll(G); }
+      else if (!m.call) { if (!ldBid(G, m.q, m.f)) { var c = ldCandidates(G)[0]; ldBid(G, c.q, c.f); } }
+      else { var c2 = ldCandidates(G)[0]; ldBid(G, c2.q, c2.f); }
+    }
+    return G.place;
+  }
+  function ldScore(G) { var beaten = G.n - (G.place || G.n); return 10 * beaten + (G.place === 1 ? 5 + 2 * G.dice[0] : 0); }
+  var LDE = { DICE: LD_DICE, faces: ldFaces, newGame: ldNewGame, roll: ldRoll, next: ldNext, total: ldTotal, matches: ldMatches, count: ldCount, valid: ldValid, bid: ldBid, call: ldCall,
+    probSimple: ldProbSimple, probBayes: ldProbBayes, candidates: ldCandidates, botMove: ldBotMove, sim: ldSim, score: ldScore, BOTS: LD_BOTS };
+  VS.add({ id: 'liars', name: 'Liar’s Dice', icon: 'liars', group: 'versus', color: 'var(--c-statistics)',
+    desc: 'Everyone hides five dice and bids on how many of a face are on the table — or calls the last bid a lie. Binomial odds, bluffs and reads.',
+    skills: ['Binomial probability', 'Bluffing', 'Bayesian updating', 'vs bots'], firms: ['SIG', 'Jane Street', 'Optiver', 'Akuna'],
+    why: 'Pricing a claim from partial information, then updating on what others are willing to bid: the core of trading against informed flow. A SIG favourite.',
+    variants: [{ id: 'easy', name: 'Easy bots' }, { id: 'medium', name: 'Medium bots' }, { id: 'hard', name: 'Hard bots' }] });
+  AR.liars.engine = LDE;
+
+  /* ================================================================== */
+  /* Colonel Blotto                                                       */
+  /* ================================================================== */
+  var BL_N = 10, BL_T = 100, BL_ROUNDS = 7, BL_VAL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], BL_TOTAL = 55, BL_FIELD = 60;
+  function blScore(a, b) { var x = 0, y = 0; for (var i = 0; i < BL_N; i++) { if (a[i] > b[i]) x += BL_VAL[i]; else if (b[i] > a[i]) y += BL_VAL[i]; } return { a: x, b: y }; }
+  /* Round to integers summing to BL_T (largest remainder). */
+  function blNormalize(w) {
+    var s = E.sum(w) || 1, raw = w.map(function (x) { return Math.max(0, x) * BL_T / s; }), out = raw.map(Math.floor), left = BL_T - E.sum(out);
+    var order = raw.map(function (x, i) { return { i: i, f: x - Math.floor(x) }; }).sort(function (a, b) { return b.f - a.f || a.i - b.i; });
+    for (var k = 0; k < left; k++) out[order[k % BL_N].i]++;
+    return out;
+  }
+  function blValid(a) { return Array.isArray(a) && a.length === BL_N && a.every(function (x) { return x >= 0 && Math.floor(x) === x; }) && E.sum(a) === BL_T; }
+  var ARCH = {
+    even: { name: 'Even spread', make: function () { return BL_VAL.map(function () { return 1; }); } },
+    prop: { name: 'Proportional to value', make: function () { return BL_VAL.slice(); } },
+    top: { name: 'Big castles only', make: function () { return BL_VAL.map(function (v) { return v >= 6 ? v : 0; }); } },
+    set: { name: 'Minimal winning set', make: function (r) {
+      for (var t = 0; t < 50; t++) { var pick = BL_VAL.map(function () { return r.next() < 0.45; }), s = 0; pick.forEach(function (x, i) { if (x) s += BL_VAL[i]; }); if (s >= 28 && s <= 34) return BL_VAL.map(function (v, i) { return pick[i] ? v + 2 : 0; }); }
+      return [0, 0, 0, 0, 0, 0, 7, 8, 9, 10]; } },
+    cheap: { name: 'Cheap castles + a few big', make: function () { return [3, 3, 4, 4, 1, 1, 1, 9, 10, 11]; } },
+    random: { name: 'Random', make: function (r) { return BL_VAL.map(function () { return -Math.log(1 - r.next() * 0.999); }); } },
+    middle: { name: 'Middle castles', make: function () { return [0, 1, 2, 6, 8, 9, 9, 9, 8, 2]; } }
+  };
+  var ARCH_IDS = Object.keys(ARCH);
+  function blArch(id, r, noise) {
+    var w = ARCH[id].make(r).map(function (x) { return Math.max(0, x * (1 + (noise || 0) * (r.next() * 2 - 1))); });
+    return blNormalize(w);
+  }
+  /* Expected points of `a` against weighted samples of the opponent. */
+  function blExpect(a, samples) { var s = 0, wt = 0; samples.forEach(function (x) { var sc = blScore(a, x.a); s += x.w * (sc.a - sc.b); wt += x.w; }); return wt ? s / wt : 0; }
+  /* Best response by hill climbing from several starts: move 1–6 troops between two castles if it helps. */
+  function blBestResponse(samples, r, iters) {
+    iters = iters || 600;
+    var starts = [blArch('prop', r, 0.2), blArch('set', r, 0.1), blArch('top', r, 0.2)];
+    samples.slice(-2).forEach(function (x) { var b = x.a.map(function (v) { return v + 1; }); starts.push(blNormalize(b)); });
+    var best = null, bv = -1e9;
+    starts.forEach(function (a) {
+      var cur = a.slice(), cv = blExpect(cur, samples);
+      for (var t = 0; t < iters; t++) {
+        var i = Math.floor(r.next() * BL_N), j = Math.floor(r.next() * BL_N), d = 1 + Math.floor(r.next() * 6);
+        if (i === j || cur[i] < d) continue;
+        cur[i] -= d; cur[j] += d;
+        var v = blExpect(cur, samples);
+        if (v >= cv) cv = v; else { cur[i] += d; cur[j] -= d; }
+      }
+      if (cv > bv) { bv = cv; best = cur.slice(); }
+    });
+    return { a: best, ev: bv };
+  }
+  var BL_BOTS = {
+    easy: { name: 'Easy bot', desc: 'spreads troops evenly, proportionally or at random, with a lot of noise' },
+    medium: { name: 'Medium bot', desc: 'plays a different named strategy each round (big castles, minimal winning set, cheap castles…)' },
+    hard: { name: 'Hard bot', desc: 'computes a best response to everything you have played — this match and remembered past matches — so a predictable pattern gets punished' },
+    field: { name: 'Tournament', desc: 'one allocation against a field of ' + BL_FIELD + ' bots built from every strategy type' }
+  };
+  /* Bot allocation for a duel round. hist = your earlier allocations this match; mem = remembered average {n, avg}. */
+  function blBot(level, round, hist, mem, r) {
+    if (level === 'easy') return blArch(r.pick(['even', 'prop', 'random', 'random']), r, 0.6);
+    if (level === 'medium') return blArch(ARCH_IDS[(round + Math.floor(r.next() * 3)) % ARCH_IDS.length], r, 0.15);
+    var samples = hist.map(function (a, i) { return { a: a, w: 1 + i }; });
+    if (mem && mem.n > 0 && Array.isArray(mem.avg) && mem.avg.length === BL_N) samples.push({ a: blNormalize(mem.avg), w: Math.min(3, mem.n / 3) });
+    if (!samples.length) return blArch(r.pick(['set', 'prop', 'cheap']), r, 0.15);
+    var br = blBestResponse(samples, r, 500).a;
+    return r.next() < 0.15 ? blNormalize(br.map(function (x) { return x * (0.8 + 0.4 * r.next()); })) : br;   // a little randomness so it is not fully predictable
+  }
+  function blField(seed) {
+    var r = E.makeRng(E.deriveSeed(seed, 'bl-field')), out = [];
+    for (var i = 0; i < BL_FIELD; i++) { var id = ARCH_IDS[i % ARCH_IDS.length]; out.push({ id: id, a: blArch(id, r, 0.25) }); }
+    return out;
+  }
+  function blFieldScore(a, field) { var w = 0; field.forEach(function (f) { var s = blScore(a, f.a); w += s.a > s.b ? 1 : s.a === s.b ? 0.5 : 0; }); return field.length ? w / field.length : 0; }
+  var BLE = { N: BL_N, T: BL_T, ROUNDS: BL_ROUNDS, VAL: BL_VAL, TOTAL: BL_TOTAL, FIELD: BL_FIELD, score: blScore, normalize: blNormalize, valid: blValid, ARCH: ARCH, ARCH_IDS: ARCH_IDS, arch: blArch,
+    expect: blExpect, bestResponse: blBestResponse, bot: blBot, field: blField, fieldScore: blFieldScore, BOTS: BL_BOTS };
+  VS.add({ id: 'blotto', name: 'Colonel Blotto', icon: 'blotto', group: 'versus', color: 'var(--c-sql)',
+    desc: 'Split 100 troops over 10 castles worth 1–10; the bigger army takes each castle. Out-think a bot over 7 rounds, or submit one plan against a field.',
+    skills: ['Game theory', 'Opponent modelling', 'Mixed strategies', 'vs bots'], firms: ['Jane Street', 'SIG', 'Citadel', 'Two Sigma'],
+    why: 'No allocation beats every other — the best plan depends on what you expect the others to do. That level-k reasoning is how traders think about crowded positions.',
+    variants: [{ id: 'easy', name: 'Easy bot' }, { id: 'medium', name: 'Medium bot' }, { id: 'hard', name: 'Hard bot' }, { id: 'field', name: 'Tournament' }] });
+  AR.blotto.engine = BLE;
+
+  /* ================================================================== */
+  /* UI                                                                  */
+  /* ================================================================== */
+  (root.SBT_PLUGINS = root.SBT_PLUGINS || []).push(function (core) {
+    var U = AR._ui, h = VS.h;
+    if (!U || !U.Shell || !h) return;
+    var esc = core.esc, $all = core.$all, num = h.num, signed = h.signed, pct = h.pct;
+    var PIPS = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+    function die(d, cls) { return '<span class="ld-die' + (cls ? ' ' + cls : '') + '" aria-label="' + d + '">' + d + '</span>'; }
+    function bidTxt(b) { return b.q + ' × ' + b.f + (b.q === 1 ? '' : 's'); }
+
+    /* ----------------------------- Liar's Dice ----------------------------- */
+    function nb(p) { return [1, 2, 3].indexOf(+p.nb) >= 0 ? +p.nb : 2; }
+    h.mount(AR.liars.meta, '<rect x="3" y="9" width="10" height="10" rx="2"/><circle cx="6.5" cy="12.5" r="1" fill="currentColor"/><circle cx="9.5" cy="15.5" r="1" fill="currentColor"/><path d="M14 6a3.5 3.5 0 1 1 5 3.2c-.8.4-1.5 1-1.5 2v.8"/><circle cx="17.5" cy="15" r=".6" fill="currentColor"/>', {
+      rules: ['Everyone starts with 5 hidden dice. Each round all dice are re-rolled; you see only your own.',
+        'Players take turns bidding “at least q dice on the table show face f”. Each bid must be higher: more dice, or the same number on a higher face. Instead of bidding you can call the last bid a lie.',
+        'On a call every die is revealed. If the bid was right the caller loses a die; if not, the bidder does. The loser starts the next round. Lose all your dice and you are out.',
+        'Ones are wild by default: a 1 counts as every face, so each unseen die matches a face with probability 1/3 (1/6 with exact faces). P(bid true) = P(Binomial(unseen, p) ≥ q − your matches).',
+        'Score = 10 per opponent you outlast, plus 5 + 2 per die left if you win.'],
+      recVariant: function (v, p) { return VS.rec(v, nb(p) + 'b' + (p.exact ? '-exact' : ''), !!p.coach); },
+      fromRec: function (rv, p) { var q = VS.parseRec(rv); p.coach = q.coach; p.nb = parseInt(q.extra[0], 10) || 2; p.exact = q.extra[1] === 'exact'; return q.v; },
+      variantLabel: function (rv) { var q = VS.parseRec(rv); return h.lvl(q.v).replace('bot', 'bots') + ' · ' + (parseInt(q.extra[0], 10) || 2) + ' opponents' + (q.extra[1] === 'exact' ? ' · no wilds' : '') + (q.coach ? ' · coach' : ''); },
+      fmt: function (v) { return String(E.round(v, 0)); }, ghost: false,
+      settings: function (v, p) {
+        return h.botLine(v, LD_BOTS) + h.segRow('Opponents', 'nb', [[1, '1'], [2, '2'], [3, '3']], nb(p)) +
+          '<label class="vs-check"><input type="checkbox" data-set="exact"' + (p.exact ? ' checked' : '') + '><span><b>No wilds</b> <span class="muted small">— ones count only as ones.</span></span></label>' +
+          h.coachRow(p, 'shows the probability that the standing bid, and your raise, are true given your dice.');
+      },
+      start: function (main, ctx) { startLD(main, ctx); }
+    });
+    function startLD(main, ctx) {
+      var p = ctx.prefs, k = nb(p), wild = !p.exact, coach = !!p.coach, lvl = ctx.v;
+      var G = ldNewGame(ctx.seed, k, wild), rb = E.makeRng(E.deriveSeed(ctx.seed, 'ld-bot'));
+      var st = { q: 1, f: wild ? 2 : 1, reveal: null, log: [], dec: [], calls: [], rounds: [] };
+      ctx.settings = { nb: k, wild: wild, coach: coach };
+      var names = ['You']; for (var i = 1; i <= k; i++) names.push('Bot ' + i);
+      var sh = U.Shell(main, h.base(ctx, { title: 'Liar’s Dice', scoreLabel: 'dice left', scoreText: function () { return String(G.dice[0]); }, rounds: true,
+        rightText: function () { return 'round ' + (G.round + 1); }, hint: 'Pick quantity and face, then Bid — or call Liar.',
+        onStart: function () { resetPick(); step(); },
+        result: function () {
+          if (!G.over) { G.place = G.dice.filter(function (d, j) { return j > 0 && d > G.dice[0]; }).length + 1; }
+          var sc = ldScore(G);
+          return { score: sc, scoreText: G.place === 1 ? 'Won' : ordinal(G.place) + ' of ' + G.n, scoreLabel: 'score ' + sc + ' · ' + G.round + ' rounds', x: { place: G.place, n: G.n, dice: G.dice[0] }, details: details() };
+        } }));
+      function ordinal(n) { return n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'); }
+      sh.body.innerHTML = '<div class="vs-wrap ld"><div class="ld-seats" id="ldSeats"></div><div class="ld-bid" id="ldBid" aria-live="polite"></div>' +
+        '<div class="ld-you"><span class="label">Your dice</span><div class="ld-dice" id="ldMine"></div></div>' +
+        '<div class="ld-pick" id="ldPick"><div class="ld-qty"><button type="button" class="btn ghost" data-dq="-1" aria-label="Fewer">−</button><b class="mono" id="ldQ">1</b><button type="button" class="btn ghost" data-dq="1" aria-label="More">+</button><span class="muted small">dice showing</span></div>' +
+        '<div class="ld-faces" role="group" aria-label="Face">' + ldFaces(wild).map(function (f) { return '<button type="button" class="ld-face" data-f="' + f + '">' + die(f) + '</button>'; }).join('') + '</div>' +
+        '<div class="row"><button type="button" class="btn primary" id="ldGo">Bid <span class="kbd">Enter</span></button><button type="button" class="btn" id="ldLiar">Liar! <span class="kbd">L</span></button></div></div>' +
+        '<div class="ld-reveal" id="ldReveal"></div><div class="vs-coach small" id="ldCoach"></div><ul class="vs-feed small" id="ldFeed"></ul></div>';
+      $all('[data-dq]', sh.body).forEach(function (b) { b.addEventListener('click', function () { st.q = E.clamp(st.q + +b.getAttribute('data-dq'), 1, ldTotal(G)); render(); }); });
+      $all('[data-f]', sh.body).forEach(function (b) { b.addEventListener('click', function () { st.f = +b.getAttribute('data-f'); if (G.bid && !ldHigher(G.bid, st.q, st.f)) st.q = st.f > G.bid.f ? G.bid.q : G.bid.q + 1; render(); }); });
+      sh.$('#ldGo').addEventListener('click', youBid); sh.$('#ldLiar').addEventListener('click', youCall);
+      function ldHigher(a, q, f) { return !a || q > a.q || (q === a.q && f > a.f); }
+      function resetPick() {
+        var b = G.bid;
+        if (!b) { var best = wild ? 2 : 1, bc = -1; ldFaces(wild).forEach(function (f) { var c = ldMatches(G.hands[0], f, wild); if (c > bc) { bc = c; best = f; } }); st.f = best; st.q = Math.max(1, bc); }
+        else { st.f = b.f; st.q = b.q + 1; if (st.q > ldTotal(G)) { st.q = b.q; var up = ldFaces(wild).filter(function (f) { return f > b.f; }); st.f = up.length ? up[0] : b.f; } }
+      }
+      function step() {
+        if (G.over) { render(); sh.later(function () { sh.finish(false); }, 1600); return; }
+        render();
+        if (st.reveal) return;
+        if (G.toAct !== 0) sh.later(botTurn, 900);
+      }
+      function botTurn() {
+        if (G.over || st.reveal || G.toAct === 0) return;
+        if (!sh.running) { sh.later(botTurn, 300); return; }
+        var who = G.toAct, m = ldBotMove(G, lvl, rb);
+        if (m.call && G.bid) { callNow(who); return; }
+        if (m.call || !ldBid(G, m.q, m.f)) { var c = ldCandidates(G)[0]; ldBid(G, c.q, c.f); }
+        st.log.push({ k: 'info', html: names[who] + ' bids <b>' + bidTxt(G.bid) + '</b>' });
+        resetPick(); step();
+      }
+      function youBid() {
+        if (G.over || st.reveal || G.toAct !== 0 || !sh.running) return;
+        if (!ldValid(G, st.q, st.f)) { core.toast(G.bid ? 'Bid higher than ' + bidTxt(G.bid) + '.' : 'Pick a quantity and a face.'); return; }
+        st.dec.push({ kind: 'bid', q: st.q, f: st.f, P: ldProbSimple(G, 0, st.q, st.f), round: G.round });
+        ldBid(G, st.q, st.f);
+        st.log.push({ k: 'you', html: 'You bid <b>' + bidTxt(G.bid) + '</b>' });
+        step();
+      }
+      function youCall() { if (G.over || st.reveal || G.toAct !== 0 || !G.bid || !sh.running) return; st.dec.push({ kind: 'call', q: G.bid.q, f: G.bid.f, P: ldProbSimple(G, 0, G.bid.q, G.bid.f), round: G.round }); callNow(0); }
+      function callNow(who) {
+        var res = ldCall(G);
+        st.reveal = res; st.rounds.push(res);
+        var lastDec = st.dec[st.dec.length - 1];
+        if (who === 0 && lastDec && lastDec.kind === 'call') lastDec.right = !res.stands;
+        st.log.push({ k: res.loser === 0 ? 'bad' : 'ok', html: (who === 0 ? 'You call ' : names[who] + ' calls ') + bidTxt(res.bid) + ' a lie — there ' + (res.total === 1 ? 'is' : 'are') + ' <b>' + res.total + '</b>. ' + names[res.loser] + ' lose' + (res.loser === 0 ? '' : 's') + ' a die.' });
+        sh.setScore(G.dice[0]);
+        step();
+      }
+      function nextRound() { if (!st.reveal || G.over) return; st.reveal = null; ldRoll(G); resetPick(); step(); }
+      function render() {
+        sh.$('#ldSeats').innerHTML = names.map(function (nm, j) {
+          var last = G.bids.filter(function (b) { return b.p === j; }).slice(-1)[0];
+          return '<div class="ld-seat' + (j === G.toAct && !st.reveal && !G.over ? ' turn' : '') + (G.dice[j] ? '' : ' out') + (j === 0 ? ' me' : '') + '"><b>' + nm + '</b><span class="mono small">' + G.dice[j] + ' ' + (G.dice[j] === 1 ? 'die' : 'dice') + '</span><span class="small muted">' + (last ? bidTxt(last) : G.dice[j] ? '' : 'out') + '</span></div>';
+        }).join('');
+        sh.$('#ldBid').innerHTML = G.bid ? 'Standing bid: <b>' + bidTxt(G.bid) + '</b> by ' + names[G.bid.p] + ' · ' + ldTotal(G) + ' dice on the table' : '<span class="muted">No bid yet this round · ' + ldTotal(G) + ' dice on the table</span>';
+        sh.$('#ldMine').innerHTML = G.hands[0].map(function (d) { return die(d, wild && d === 1 ? 'wild' : ''); }).join('') || '<span class="muted">none</span>';
+        var mine = !G.over && !st.reveal && G.toAct === 0 && G.dice[0] > 0;
+        sh.$('#ldQ').textContent = st.q;
+        $all('[data-f]', sh.body).forEach(function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-f') === st.f)); b.disabled = !mine; });
+        $all('[data-dq]', sh.body).forEach(function (b) { b.disabled = !mine; });
+        sh.$('#ldGo').disabled = !mine || !ldValid(G, st.q, st.f);
+        sh.$('#ldLiar').disabled = !mine || !G.bid;
+        sh.$('#ldPick').classList.toggle('dim', !mine);
+        var rv = st.reveal;
+        if (rv) {
+          sh.$('#ldReveal').innerHTML = '<div class="ld-rv"><p class="small">Bid ' + bidTxt(rv.bid) + ' · on the table: <b>' + rv.total + '</b> ' + (rv.stands ? '— the bid stands.' : '— it was a lie.') + '</p>' +
+            rv.hands.map(function (hd, j) { return hd.length ? '<div class="ld-rrow"><span class="small">' + names[j] + '</span>' + hd.map(function (d) { return die(d, (d === rv.bid.f || (wild && d === 1)) ? 'hit' : 'dim'); }).join('') + '</div>' : ''; }).join('') +
+            (G.over ? '<p><b>' + (G.place === 1 ? 'You win!' : 'You are out — ' + ordinal(G.place) + ' of ' + G.n + '.') + '</b></p>' : '<button type="button" class="btn primary" id="ldNext">Next round <span class="kbd">Enter</span></button>') + '</div>';
+          var nx = sh.$('#ldNext'); if (nx) nx.addEventListener('click', nextRound);
+        } else sh.$('#ldReveal').innerHTML = '';
+        var co = '';
+        if (coach && mine) {
+          var unseen = ldTotal(G) - G.dice[0], pf = ldPFace(wild);
+          if (G.bid) { var own = ldMatches(G.hands[0], G.bid.f, wild); co += 'Standing bid ' + bidTxt(G.bid) + ': you hold ' + own + '; need ' + Math.max(0, G.bid.q - own) + ' more from ' + unseen + ' unseen dice (each matches with p = ' + (wild ? '1/3' : '1/6') + ', expect ' + num(unseen * pf, 1) + '). <b>P(true) = ' + pct(ldProbSimple(G, 0, G.bid.q, G.bid.f)) + '</b>. '; }
+          if (ldValid(G, st.q, st.f)) co += 'Your raise ' + bidTxt({ q: st.q, f: st.f }) + ': <b>P(true) = ' + pct(ldProbSimple(G, 0, st.q, st.f)) + '</b>.';
+          if (G.bid) co += '<br><span class="muted">Rule of thumb: call when P(bid true) is lower than the chance your own best raise is true.</span>';
+        }
+        sh.$('#ldCoach').innerHTML = co;
+        sh.$('#ldFeed').innerHTML = h.feed(st.log, 5);
+      }
+      sh.keys(function (e) {
+        var key = (e.key || '').toLowerCase();
+        if (key === 'enter') { e.preventDefault(); if (st.reveal) nextRound(); else youBid(); }
+        else if (key === 'l') { e.preventDefault(); youCall(); }
+        else if (key === '+' || key === '=' || key === 'arrowup') { e.preventDefault(); st.q = E.clamp(st.q + 1, 1, ldTotal(G)); render(); }
+        else if (key === '-' || key === 'arrowdown') { e.preventDefault(); st.q = E.clamp(st.q - 1, 1, ldTotal(G)); render(); }
+        else if (key >= '1' && key <= '6' && ldFaces(wild).indexOf(+key) >= 0) { e.preventDefault(); st.f = +key; render(); }
+      });
+      function details() {
+        var calls = st.dec.filter(function (d) { return d.kind === 'call'; }), bids = st.dec.filter(function (d) { return d.kind === 'bid'; });
+        var goodCalls = calls.filter(function (d) { return d.right; }).length, badCalls = calls.filter(function (d) { return d.P > 0.6; }).length, wild2 = bids.filter(function (d) { return d.P < 0.3; }).length;
+        var advice = [];
+        if (badCalls) advice.push(badCalls + ' of your calls were against bids that were more than 60% likely to be true from your own dice. Calling is a bet that the bid is false — make it when the odds say so.');
+        if (wild2) advice.push(wild2 + ' of your bids had under 30% chance of being true from your dice. Bluffs are fine, but the next player only needs a 50/50 call to profit.');
+        if (lvl === 'hard') advice.push('The hard bots update on bids: if you keep bidding the face you really hold, they learn it within a round. Bidding a face you do not have once in a while protects your real holdings.');
+        if (!advice.length) advice.push('Your bids and calls were consistent with the binomial odds. Next: think about what the others’ bids say about their hands.');
+        var rows = st.dec.map(function (d) { return '<tr><td>' + (d.round + 1) + '</td><td>' + (d.kind === 'call' ? 'Liar on ' : 'Bid ') + bidTxt(d) + '</td><td class="mono">' + pct(d.P) + '</td><td>' + (d.kind === 'call' ? (d.right ? '<span class="res-ok">right</span>' : '<span class="res-bad">wrong</span>') : '') + '</td></tr>'; }).join('');
+        return h.tiles([{ v: G.place === 1 ? 'Won' : ordinal(G.place || G.n), l: 'finish' }, { v: G.round + 1, l: 'rounds' }, { v: calls.length ? goodCalls + ' / ' + calls.length : '—', l: 'calls that were right' }, { v: bids.length ? pct(E.mean(bids.map(function (d) { return d.P; }))) : '—', l: 'avg P(true) of your bids' }]) +
+          h.panel('Debrief', '<ul class="vs-debrief small">' + advice.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul><p class="small muted">Probabilities are from your own dice only, treating every unseen die as fair: P = P(Binomial(unseen, ' + (wild ? '1/3' : '1/6') + ') ≥ q − yours).</p>') +
+          h.reveal('Your decisions', '<div class="table-scroll"><table class="simple small"><thead><tr><th>Round</th><th>Move</th><th>P(bid true)</th><th>Call</th></tr></thead><tbody>' + (rows || '<tr><td colspan="4" class="muted">No decisions.</td></tr>') + '</tbody></table></div>');
+      }
+    }
+
+    /* ---------------------------- Colonel Blotto ---------------------------- */
+    h.mount(AR.blotto.meta, '<path d="M4 20V10l2-2 2 2v10M10 20V7l2-3 2 3v13M16 20v-8l2-2 2 2v8"/><path d="M2 20h20"/>', {
+      rules: ['You have 100 troops and 10 castles worth 1, 2, …, 10 points (55 in total). Allocate whole troops; both sides submit at the same time.',
+        'Each castle goes to whoever sent more troops (a tie gives it to nobody). A round goes to whoever takes more points; 28 points always wins.',
+        'Duel: 7 rounds against the same bot; after each round you both see the other’s allocation. Score = your points − the bot’s, summed over the rounds.',
+        'Tournament: one allocation against a field of 60 bots of every style. Score = % of the field you beat (ties count half).'],
+      recVariant: function (v) { return v; },
+      variantLabel: function (rv) { return h.lvl(rv); },
+      fmt: function (v) { return signed(v, 0); }, ghost: false,
+      settings: function (v, p) {
+        var m = p.mem;
+        return h.botLine(v, BL_BOTS) + (v === 'hard' && m && m.n ? '<p class="muted small">The hard bot remembers your average allocation over ' + m.n + ' past rounds. <button type="button" class="btn sm ghost" id="blForget">Forget me</button></p>' : '');
+      },
+      bindLanding: function (main) { var b = main.querySelector('#blForget'); if (b) b.addEventListener('click', function () { var p = U.A().prefs.blotto; if (p) { delete p.mem; core.save(); b.parentNode.textContent = 'History cleared.'; } }); },
+      start: function (main, ctx) { startBL(main, ctx); }
+    });
+    U.GDEF.blotto.fmt = function (v) { return signed(v, 0); };
+    function startBL(main, ctx) {
+      var field = ctx.v === 'field', lvl = ctx.v, p = ctx.prefs, mem = p.mem && typeof p.mem === 'object' ? p.mem : null;
+      var rb = E.makeRng(E.deriveSeed(ctx.seed, 'bl-bot'));
+      var st = { round: 0, alloc: blNormalize(BL_VAL.slice()), hist: [], bot: [], res: [], total: 0, phase: 'plan', F: field ? blField(ctx.seed) : null };
+      var sh = U.Shell(main, h.base(ctx, { title: 'Colonel Blotto', scoreLabel: field ? 'field beaten' : 'points margin', scoreText: function (v) { return field ? Math.round(v) + '%' : signed(v, 0); }, rounds: !field,
+        rightText: function () { return field ? 'one allocation' : 'round ' + Math.min(BL_ROUNDS, st.round + 1) + ' / ' + BL_ROUNDS; }, hint: 'Allocate all 100 troops, then Submit.',
+        onStart: function () { render(); },
+        result: function () {
+          saveMem();
+          if (field) { var s = st.res.length ? st.res[0].win : 0; return { score: E.round(100 * s, 1), scoreText: num(100 * s, 1) + '%', scoreLabel: 'of the field beaten', x: { win: s }, details: details() }; }
+          var w = st.res.filter(function (x) { return x.a > x.b; }).length, l = st.res.filter(function (x) { return x.a < x.b; }).length;
+          return { score: st.total, scoreText: signed(st.total, 0), scoreLabel: 'rounds ' + w + '–' + l + ' · points margin', x: { w: w, l: l, total: st.total }, details: details() };
+        } }));
+      sh.body.innerHTML = '<div class="vs-wrap bl"><div class="bl-top"><span id="blLeft" class="small"></span><span class="spacer"></span>' +
+        '<button type="button" class="btn sm ghost" data-pre="even">Even</button><button type="button" class="btn sm ghost" data-pre="prop">Proportional</button><button type="button" class="btn sm ghost" data-pre="clear">Clear</button></div>' +
+        '<div class="bl-rows" id="blRows"></div><button type="button" class="btn primary block" id="blGo">Submit <span class="kbd">Enter</span></button>' +
+        '<div id="blOut" aria-live="polite"></div><div class="bl-hist small" id="blHist"></div></div>';
+      $all('[data-pre]', sh.body).forEach(function (b) { b.addEventListener('click', function () { if (st.phase !== 'plan') return; var k = b.getAttribute('data-pre'); st.alloc = k === 'clear' ? BL_VAL.map(function () { return 0; }) : blArch(k, rb, 0); render(); }); });
+      sh.$('#blGo').addEventListener('click', submit);
+      function saveMem() {
+        if (field || !st.hist.length) return;
+        var m = mem && mem.n > 0 && Array.isArray(mem.avg) && mem.avg.length === BL_N ? { n: mem.n, avg: mem.avg.slice() } : { n: 0, avg: BL_VAL.map(function () { return 0; }) };
+        st.hist.forEach(function (a) { m.n++; for (var i = 0; i < BL_N; i++) m.avg[i] += (a[i] - m.avg[i]) / m.n; });
+        m.avg = m.avg.map(function (x) { return E.round(x, 2); }); m.n = Math.min(m.n, 200);
+        p.mem = m; core.save();
+      }
+      function submit() {
+        if (st.phase !== 'plan' || !sh.running) return;
+        if (!blValid(st.alloc)) { core.toast('Use exactly 100 troops (' + E.sum(st.alloc) + ' now).'); return; }
+        var a = st.alloc.slice();
+        if (field) {
+          var win = blFieldScore(a, st.F), br = blBestResponse(st.F.map(function (f) { return { a: f.a, w: 1 }; }), rb, 800);
+          st.res.push({ win: win, br: br.a, brWin: blFieldScore(br.a, st.F), a: a });
+          sh.setScore(E.round(100 * win, 1)); st.phase = 'done'; render(); sh.later(function () { sh.finish(false); }, 1500); return;
+        }
+        var b = blBot(lvl, st.round, st.hist, lvl === 'hard' ? mem : null, rb), sc = blScore(a, b);
+        st.hist.push(a); st.bot.push(b); st.res.push({ a: sc.a, b: sc.b, mine: a, bot: b });
+        st.total += sc.a - sc.b; sh.setScore(st.total);
+        st.phase = 'show'; render();
+      }
+      function next() { if (st.phase !== 'show') return; st.round++; if (st.round >= BL_ROUNDS) { sh.finish(false); return; } st.phase = 'plan'; render(); }
+      function adj(i, d) { if (st.phase !== 'plan') return; var left = BL_T - E.sum(st.alloc); if (d > 0) { if (left <= 0) return; d = Math.min(d, left); } st.alloc[i] = Math.max(0, st.alloc[i] + d); render(); }
+      function render() {
+        var left = BL_T - E.sum(st.alloc), plan = st.phase === 'plan', last = st.res[st.res.length - 1];
+        sh.$('#blLeft').innerHTML = plan ? (left === 0 ? '<b class="res-ok">All 100 troops placed</b>' : '<b>' + left + '</b> troops left' + (left < 0 ? ' — too many' : '')) : '';
+        sh.$('#blRows').innerHTML = BL_VAL.map(function (v, i) {
+          var mine = st.alloc[i], show = st.phase === 'show' && last, theirs = show ? last.bot[i] : null, cls = show ? (mine > theirs ? ' won' : mine < theirs ? ' lost' : ' tie') : '';
+          return '<div class="bl-row' + cls + '"><span class="bl-v mono" title="castle worth ' + v + '">' + v + '</span>' +
+            '<button type="button" class="btn sm" data-ad="' + i + ':-5"' + (plan ? '' : ' disabled') + ' aria-label="−5 on castle ' + v + '">−5</button><button type="button" class="btn sm" data-ad="' + i + ':-1"' + (plan ? '' : ' disabled') + ' aria-label="−1 on castle ' + v + '">−</button>' +
+            '<input class="mono" type="number" inputmode="numeric" min="0" max="100" value="' + mine + '" data-in="' + i + '"' + (plan ? '' : ' disabled') + ' aria-label="Troops on castle ' + v + '">' +
+            '<button type="button" class="btn sm" data-ad="' + i + ':1"' + (plan ? '' : ' disabled') + ' aria-label="+1 on castle ' + v + '">+</button><button type="button" class="btn sm" data-ad="' + i + ':5"' + (plan ? '' : ' disabled') + ' aria-label="+5 on castle ' + v + '">+5</button>' +
+            '<span class="bl-bar"><i style="width:' + Math.min(100, mine * 2.5) + '%"></i>' + (show ? '<i class="them" style="width:' + Math.min(100, theirs * 2.5) + '%"></i>' : '') + '</span>' +
+            (show ? '<span class="bl-them mono small">' + theirs + '</span>' : '') + '</div>';
+        }).join('');
+        $all('[data-ad]', sh.body).forEach(function (b) { b.addEventListener('click', function () { var x = b.getAttribute('data-ad').split(':'); adj(+x[0], +x[1]); }); });
+        $all('[data-in]', sh.body).forEach(function (inp) { inp.addEventListener('change', function () { var i = +inp.getAttribute('data-in'), v = Math.max(0, Math.min(100, Math.floor(+inp.value || 0))); st.alloc[i] = v; render(); }); });
+        var go = sh.$('#blGo'); go.disabled = !plan || left !== 0; go.classList.toggle('hidden', !plan);
+        var out = '';
+        if (st.phase === 'show' && last) out = '<div class="bl-res"><p><b>Round ' + (st.round + 1) + ': you ' + last.a + ' – ' + last.b + ' bot</b> · ' + (last.a > last.b ? '<span class="res-ok">round won</span>' : last.a < last.b ? '<span class="res-bad">round lost</span>' : 'tie') + ' · margin so far ' + signed(st.total, 0) + '</p><button type="button" class="btn primary" id="blNext">' + (st.round + 1 >= BL_ROUNDS ? 'See results' : 'Next round') + ' <span class="kbd">Enter</span></button></div>';
+        else if (st.phase === 'done' && last) out = '<div class="bl-res"><p><b>You beat ' + num(100 * last.win, 1) + '% of the field.</b></p></div>';
+        sh.$('#blOut').innerHTML = out;
+        var nx = sh.$('#blNext'); if (nx) nx.addEventListener('click', next);
+        sh.$('#blHist').innerHTML = !field && st.bot.length ? '<span class="label">Bot’s earlier allocations</span>' + st.bot.map(function (b, j) { return '<div class="mono">R' + (j + 1) + ': ' + b.join(' · ') + '</div>'; }).join('') : '';
+      }
+      sh.keys(function (e) { if (e.key === 'Enter' && !(e.target && e.target.tagName === 'INPUT')) { e.preventDefault(); if (st.phase === 'plan') submit(); else next(); } });
+      function details() {
+        if (field) {
+          var r0 = st.res[0];
+          if (!r0) return '';
+          var byArch = ARCH_IDS.map(function (id) { var fs = st.F.filter(function (f) { return f.id === id; }); return { id: id, w: blFieldScore(r0.a, fs) }; });
+          return h.tiles([{ v: num(100 * r0.win, 1) + '%', l: 'field beaten' }, { v: num(100 * r0.brWin, 1) + '%', l: 'hindsight best response' }]) +
+            h.panel('Against each style', '<div class="table-scroll"><table class="simple small"><thead><tr><th>Style</th><th>You beat</th></tr></thead><tbody>' + byArch.map(function (x) { return '<tr><td>' + esc(ARCH[x.id].name) + '</td><td class="mono">' + pct(x.w) + '</td></tr>'; }).join('') + '</tbody></table></div>') +
+            h.panel('What the field rewarded', '<p class="small">Your allocation: <span class="mono">' + r0.a.join(' · ') + '</span><br>Hill-climbed best response to this exact field: <span class="mono">' + r0.br.join(' · ') + '</span></p><p class="small muted">There is no allocation that beats everything: each plan is beaten by one that sends one more troop to the castles it values and abandons the ones it overpays for. That is why the winners of real Blotto tournaments model the field rather than the game.</p>');
+        }
+        var w = st.res.filter(function (x) { return x.a > x.b; }).length;
+        var spread = st.hist.length > 1 ? E.mean(BL_VAL.map(function (_, i) { var col = st.hist.map(function (a) { return a[i]; }), m = E.mean(col); return Math.sqrt(E.mean(col.map(function (x) { return (x - m) * (x - m); }))); })) : 0;
+        var advice = [];
+        if (lvl === 'hard' && spread < 2.5 && st.hist.length > 2) advice.push('Your allocations barely changed from round to round (typical change ±' + num(spread, 1) + ' troops per castle). The hard bot best-responds to your history, so a fixed plan is the easiest one to beat. Mix plans.');
+        if (lvl === 'medium') advice.push('The medium bot cycles through named styles. After two or three rounds you can guess which style is next and counter it.');
+        if (lvl === 'easy') advice.push('Against noisy, spread-out allocations, concentrating on a winning set of castles (28+ points) wins most rounds.');
+        var rows = st.res.map(function (x, j) { return '<tr><td>' + (j + 1) + '</td><td class="mono small">' + x.mine.join(' ') + '</td><td class="mono small">' + x.bot.join(' ') + '</td><td class="mono">' + x.a + '–' + x.b + '</td></tr>'; }).join('');
+        return h.tiles([{ v: w + '–' + (st.res.length - w - st.res.filter(function (x) { return x.a === x.b; }).length), l: 'rounds won–lost' }, { v: signed(st.total, 0), l: 'points margin', cls: st.total > 0 ? 'res-ok' : st.total < 0 ? 'res-bad' : '' }, { v: st.hist.length > 1 ? '±' + num(spread, 1) : '—', l: 'how much you varied' }]) +
+          (advice.length ? h.panel('Debrief', '<ul class="vs-debrief small">' + advice.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>') : '') +
+          h.reveal('Round by round', '<div class="table-scroll"><table class="simple"><thead><tr><th>#</th><th>You (castles 1→10)</th><th>Bot</th><th>Points</th></tr></thead><tbody>' + rows + '</tbody></table></div>');
+      }
+    }
+  });
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ================================================================== */
+/* Part 11 (v2.2): grid games — Battleship (Bayesian search) and       */
+/* Probability Sweeper (Minesweeper with exact mine probabilities).    */
+/* ================================================================== */
+(function (root) {
+  'use strict';
+  var AR = root.SBT_ARCADE;
+  if (!AR || !AR._engine || !AR.versus) return;
+  var E = AR._engine, VS = AR.versus;
+
+  /* ================================================================== */
+  /* Battleship                                                           */
+  /* ================================================================== */
+  var BS = 10, FLEET = [{ id: 'carrier', n: 5, name: 'Carrier' }, { id: 'battleship', n: 4, name: 'Battleship' }, { id: 'cruiser', n: 3, name: 'Cruiser' }, { id: 'submarine', n: 3, name: 'Submarine' }, { id: 'destroyer', n: 2, name: 'Destroyer' }];
+  var FLEET_CELLS = 17;
+  function bsPlace(r) {
+    for (var tries = 0; tries < 200; tries++) {
+      var at = []; for (var i = 0; i < BS * BS; i++) at.push(-1);
+      var ships = [], ok = true;
+      for (var k = 0; k < FLEET.length && ok; k++) {
+        var placed = false;
+        for (var t = 0; t < 300 && !placed; t++) {
+          var hz = r.next() < 0.5, n = FLEET[k].n, x = r.int(0, hz ? BS - n : BS - 1), y = r.int(0, hz ? BS - 1 : BS - n), cells = [];
+          for (var j = 0; j < n; j++) cells.push((y + (hz ? 0 : j)) * BS + x + (hz ? j : 0));
+          if (cells.every(function (c) { return at[c] < 0; })) { cells.forEach(function (c) { at[c] = k; }); ships.push({ k: k, cells: cells, hits: 0 }); placed = true; }
+        }
+        ok = placed;
+      }
+      if (ok) return { at: at, ships: ships };
+    }
+    return null;
+  }
+  /* A view of the target board: 0 unknown, 1 miss, 2 hit (ship not yet sunk), 3 sunk. */
+  function bsNewView() { return { cell: new Array(BS * BS).fill(0), sunk: [], shots: 0 }; }
+  function bsFire(fleet, view, c) {
+    if (view.cell[c] !== 0) return { already: true };
+    view.shots++;
+    var k = fleet.at[c];
+    if (k < 0) { view.cell[c] = 1; return { hit: false }; }
+    var sh = fleet.ships[k]; sh.hits++; view.cell[c] = 2;
+    if (sh.hits === sh.cells.length) { sh.cells.forEach(function (x) { view.cell[x] = 3; }); view.sunk.push(k); return { hit: true, sunk: k }; }
+    return { hit: true };
+  }
+  function bsAllSunk(view) { return view.sunk.length === FLEET.length; }
+  function bsAlive(fleet) { return E.sum(fleet.ships.map(function (s) { return s.cells.length - s.hits; })); }
+  /* Placement-count heat map: every placement of every unsunk ship that avoids misses and sunk cells counts once,
+   * multiplied by 25^(number of unresolved hits it covers). p[cell] ≈ chance a ship occupies the cell. */
+  function bsDensity(view) {
+    var p = new Array(BS * BS).fill(0), hits = view.cell.some(function (x) { return x === 2; });
+    FLEET.forEach(function (f, k) {
+      if (view.sunk.indexOf(k) >= 0) return;
+      var acc = new Array(BS * BS).fill(0), tot = 0;
+      for (var hz = 0; hz < 2; hz++) for (var y = 0; y < (hz ? BS : BS - f.n + 1); y++) for (var x = 0; x < (hz ? BS - f.n + 1 : BS); x++) {
+        var cells = [], bad = false, nh = 0;
+        for (var j = 0; j < f.n; j++) { var c = (y + (hz ? 0 : j)) * BS + x + (hz ? j : 0), s = view.cell[c]; if (s === 1 || s === 3) { bad = true; break; } if (s === 2) nh++; cells.push(c); }
+        if (bad) continue;
+        var w = Math.pow(25, nh);
+        tot += w; cells.forEach(function (c) { if (view.cell[c] === 0) acc[c] += w; });
+      }
+      if (tot > 0) for (var i = 0; i < BS * BS; i++) p[i] += acc[i] / tot;
+    });
+    for (var i = 0; i < BS * BS; i++) p[i] = view.cell[i] === 0 ? Math.min(1, p[i]) : 0;
+    return { p: p, hits: hits };
+  }
+  function bsNeighbors(c) { var x = c % BS, y = Math.floor(c / BS), out = []; if (x > 0) out.push(c - 1); if (x < BS - 1) out.push(c + 1); if (y > 0) out.push(c - BS); if (y < BS - 1) out.push(c + BS); return out; }
+  var BS_BOTS = {
+    easy: { name: 'Easy bot', desc: 'fires at random, and only sometimes follows up next to a hit' },
+    medium: { name: 'Medium bot', desc: 'hunts on a checkerboard, then targets along the line of its hits' },
+    hard: { name: 'Hard bot', desc: 'always fires at the cell with the highest placement-count probability' }
+  };
+  function bsBotShot(view, level, r) {
+    var unk = []; for (var i = 0; i < BS * BS; i++) if (view.cell[i] === 0) unk.push(i);
+    if (!unk.length) return -1;
+    var hitCells = []; for (i = 0; i < BS * BS; i++) if (view.cell[i] === 2) hitCells.push(i);
+    if (level === 'hard') {
+      var d = bsDensity(view).p, best = -1, bv = -1;
+      unk.forEach(function (c) { var v = d[c] + r.next() * 1e-6 + (((c % BS) + Math.floor(c / BS)) % 2 === 0 ? 1e-5 : 0); if (v > bv) { bv = v; best = c; } });
+      return best;
+    }
+    var adj = [];
+    hitCells.forEach(function (h) { bsNeighbors(h).forEach(function (c) { if (view.cell[c] === 0 && adj.indexOf(c) < 0) adj.push(c); }); });
+    if (level === 'easy') return adj.length && r.next() < 0.5 ? r.pick(adj) : r.pick(unk);
+    if (hitCells.length) {
+      var line = adj.filter(function (c) {
+        return hitCells.some(function (h) { if (bsNeighbors(h).indexOf(c) < 0) return false; var dlt = c - h; return hitCells.indexOf(h - dlt) >= 0; });
+      });
+      if (line.length) return r.pick(line);
+      if (adj.length) return r.pick(adj);
+    }
+    var par = unk.filter(function (c) { return ((c % BS) + Math.floor(c / BS)) % 2 === 0; });
+    return r.pick(par.length ? par : unk);
+  }
+  /* Shots a bot needs to sink a random fleet (for tests). */
+  function bsBotGame(seed, level) {
+    var r = E.makeRng(E.deriveSeed(seed, 'bs-t')), fleet = bsPlace(r), view = bsNewView(), guard = 0;
+    while (!bsAllSunk(view) && guard++ < 200) bsFire(fleet, view, bsBotShot(view, level, r));
+    return view.shots;
+  }
+  var BSE = { SIZE: BS, FLEET: FLEET, CELLS: FLEET_CELLS, place: bsPlace, newView: bsNewView, fire: bsFire, allSunk: bsAllSunk, alive: bsAlive, density: bsDensity, botShot: bsBotShot, botGame: bsBotGame, BOTS: BS_BOTS };
+  VS.add({ id: 'battleship', name: 'Battleship', icon: 'battleship', group: 'versus', color: 'var(--c-python)',
+    desc: 'Find and sink a hidden fleet on a 10×10 grid. Learn Bayesian search with a live probability heat map — alone, or racing a bot.',
+    skills: ['Bayesian search', 'Probability', 'vs bots'], firms: ['Jane Street', 'Two Sigma', 'HRT', 'Citadel'],
+    why: 'Where should you look next given everything you have seen? The heat map is a posterior over hypotheses — the same reasoning as searching a parameter space or hunting a signal.',
+    variants: [{ id: 'solo', name: 'Solo' }, { id: 'easy', name: 'Easy bot' }, { id: 'medium', name: 'Medium bot' }, { id: 'hard', name: 'Hard bot' }] });
+  AR.battleship.engine = BSE;
+
+  /* ================================================================== */
+  /* Probability Sweeper                                                  */
+  /* ================================================================== */
+  var SW_SIZES = { small: { w: 9, h: 9, m: 10, name: '9×9 · 10 mines' }, medium: { w: 16, h: 16, m: 40, name: '16×16 · 40 mines' } };
+  /* Mines avoid the 3×3 block around the centre, which is opened for everyone at the start. */
+  function swGen(seed, size) {
+    var S = SW_SIZES[size] || SW_SIZES.small, r = E.makeRng(E.deriveSeed(seed, 'sw-' + size)), n = S.w * S.h, cx = Math.floor(S.w / 2), cy = Math.floor(S.h / 2);
+    var pool = []; for (var i = 0; i < n; i++) { var x = i % S.w, y = Math.floor(i / S.w); if (Math.abs(x - cx) > 1 || Math.abs(y - cy) > 1) pool.push(i); }
+    pool = r.shuffle(pool);
+    var mine = new Array(n).fill(0); for (i = 0; i < S.m; i++) mine[pool[i]] = 1;
+    var B = { w: S.w, h: S.h, m: S.m, n: n, mine: mine, adj: new Array(n).fill(0), start: cy * S.w + cx };
+    for (i = 0; i < n; i++) swNb(B, i).forEach(function (j) { if (mine[j]) B.adj[i]++; });
+    return B;
+  }
+  function swNb(B, i) { var x = i % B.w, y = Math.floor(i / B.w), out = []; for (var dy = -1; dy <= 1; dy++) for (var dx = -1; dx <= 1; dx++) { if (!dx && !dy) continue; var X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < B.w && Y < B.h) out.push(Y * B.w + X); } return out; }
+  /* Player/bot state on a board: rev 0 hidden, 1 open, 2 exploded mine; flag 0/1. */
+  function swState(B) { var s = { rev: new Array(B.n).fill(0), flag: new Array(B.n).fill(0), opened: 0, booms: 0, actions: 0 }; swOpen(B, s, B.start); s.actions = 0; return s; }
+  function swOpen(B, s, i) {
+    if (s.rev[i] || s.flag[i]) return { none: true };
+    s.actions++;
+    if (B.mine[i]) { s.rev[i] = 2; s.booms++; return { boom: true }; }
+    var stack = [i], n = 0;
+    while (stack.length) {
+      var c = stack.pop();
+      if (s.rev[c]) continue;
+      s.rev[c] = 1; s.flag[c] = 0; s.opened++; n++;
+      if (B.adj[c] === 0) swNb(B, c).forEach(function (j) { if (!s.rev[j] && !B.mine[j]) stack.push(j); });
+    }
+    return { opened: n };
+  }
+  function swWon(B, s) { return s.opened === B.n - B.m; }
+  function choose(n, k) { if (k < 0 || k > n) return 0; k = Math.min(k, n - k); var c = 1; for (var i = 0; i < k; i++) c = c * (n - i) / (i + 1); return c; }
+  /* Exact mine probabilities from the open numbers (flags are ignored, exploded mines are known).
+   * Frontier cells are split into independent components; each is enumerated by backtracking; components and
+   * the unconstrained cells are combined with the global mine count. Returns {p: [...], exact: bool}. */
+  function swProbs(B, s, cap) {
+    cap = cap || 250000;
+    var n = B.n, known = s.rev.map(function (x) { return x === 2; }), hidden = [], p = new Array(n).fill(null);
+    for (var i = 0; i < n; i++) if (!s.rev[i]) hidden.push(i);
+    var cons = [], inF = {};
+    for (i = 0; i < n; i++) {
+      if (s.rev[i] !== 1) continue;
+      var cells = [], need = B.adj[i];
+      swNb(B, i).forEach(function (j) { if (known[j]) need--; else if (!s.rev[j]) cells.push(j); });
+      if (cells.length) { cons.push({ cells: cells, need: need }); cells.forEach(function (c) { inF[c] = 1; }); }
+    }
+    var frontier = hidden.filter(function (c) { return inF[c]; }), others = hidden.filter(function (c) { return !inF[c]; });
+    var mLeft = B.m - known.filter(Boolean).length;
+    // components via union-find over constraints
+    var par = {}; frontier.forEach(function (c) { par[c] = c; });
+    function f(x) { while (par[x] !== x) { par[x] = par[par[x]]; x = par[x]; } return x; }
+    cons.forEach(function (k) { for (var j = 1; j < k.cells.length; j++) { var a = f(k.cells[0]), b = f(k.cells[j]); if (a !== b) par[a] = b; } });
+    var groups = {}; frontier.forEach(function (c) { var g = f(c); (groups[g] = groups[g] || []).push(c); });
+    var comps = [], exact = true, nodes = 0;
+    Object.keys(groups).forEach(function (g) {
+      var cells = groups[g], idx = {}; cells.forEach(function (c, j) { idx[c] = j; });
+      var cs = cons.filter(function (k) { return idx[k.cells[0]] !== undefined; }).map(function (k) { return { v: k.cells.map(function (c) { return idx[c]; }), need: k.need }; });
+      var byCell = cells.map(function () { return []; }); cs.forEach(function (k, j) { k.v.forEach(function (v) { byCell[v].push(j); }); });
+      var asg = new Array(cells.length).fill(-1), cnt = {}, cellCnt = {}, ok = true;
+      function feasible(ci) {
+        var list = byCell[ci];
+        for (var t = 0; t < list.length; t++) {
+          var k = cs[list[t]], mines = 0, free = 0;
+          for (var u = 0; u < k.v.length; u++) { var a = asg[k.v[u]]; if (a === 1) mines++; else if (a === -1) free++; }
+          if (mines > k.need || mines + free < k.need) return false;
+        }
+        return true;
+      }
+      function rec(ci, m) {
+        if (++nodes > cap) { ok = false; return; }
+        if (!ok) return;
+        if (ci === cells.length) {
+          cnt[m] = (cnt[m] || 0) + 1;
+          var cc = cellCnt[m] || (cellCnt[m] = new Array(cells.length).fill(0));
+          for (var q = 0; q < cells.length; q++) if (asg[q] === 1) cc[q]++;
+          return;
+        }
+        for (var val = 0; val <= 1; val++) { asg[ci] = val; if (feasible(ci)) rec(ci + 1, m + val); }
+        asg[ci] = -1;
+      }
+      rec(0, 0);
+      if (!ok) exact = false;
+      comps.push({ cells: cells, cnt: cnt, cellCnt: cellCnt, cs: cs });
+    });
+    if (!exact) {   // fallback: local averages
+      hidden.forEach(function (c) { p[c] = null; });
+      cons.forEach(function (k) { k.cells.forEach(function (c) { var v = k.cells.length ? k.need / k.cells.length : 0; p[c] = p[c] == null ? v : Math.max(p[c], v); }); });
+      var rest = mLeft / Math.max(1, hidden.length);
+      hidden.forEach(function (c) { if (p[c] == null) p[c] = rest; });
+      return { p: p, exact: false };
+    }
+    function conv(a, b) { var o = {}; Object.keys(a).forEach(function (x) { Object.keys(b).forEach(function (y) { var k = +x + +y; o[k] = (o[k] || 0) + a[x] * b[y]; }); }); return o; }
+    var total = { 0: 1 }; comps.forEach(function (c) { total = conv(total, c.cnt); });
+    var O = others.length, W = 0;
+    Object.keys(total).forEach(function (K) { W += total[K] * choose(O, mLeft - K); });
+    if (W <= 0) { hidden.forEach(function (c) { p[c] = mLeft / Math.max(1, hidden.length); }); return { p: p, exact: false }; }
+    comps.forEach(function (c, ci) {
+      var rest = { 0: 1 }; comps.forEach(function (d, di) { if (di !== ci) rest = conv(rest, d.cnt); });
+      var acc = new Array(c.cells.length).fill(0);
+      Object.keys(c.cellCnt).forEach(function (k) {
+        var wsum = 0; Object.keys(rest).forEach(function (r2) { wsum += rest[r2] * choose(O, mLeft - +k - +r2); });
+        c.cellCnt[k].forEach(function (v, j) { acc[j] += v * wsum; });
+      });
+      c.cells.forEach(function (cell, j) { p[cell] = acc[j] / W; });
+    });
+    if (O) { var eo = 0; Object.keys(total).forEach(function (K) { eo += total[K] * choose(O, mLeft - K) * (mLeft - K) / O; }); others.forEach(function (c) { p[c] = eo / W; }); }
+    hidden.forEach(function (c) { if (p[c] != null) p[c] = Math.max(0, Math.min(1, p[c])); });
+    return { p: p, exact: true };
+  }
+  /* Simple deductions only (single constraints + one subset rule), for the easy and medium bots. */
+  function swSimple(B, s, subset) {
+    var safe = {}, mines = {}, list = [];
+    for (var i = 0; i < B.n; i++) {
+      if (s.rev[i] !== 1) continue;
+      var cells = [], need = B.adj[i];
+      swNb(B, i).forEach(function (j) { if (s.rev[j] === 2 || (s.rev[j] === 0 && s.flag[j])) need--; else if (!s.rev[j]) cells.push(j); });
+      if (!cells.length) continue;
+      if (need === 0) cells.forEach(function (c) { safe[c] = 1; });
+      else if (need === cells.length) cells.forEach(function (c) { mines[c] = 1; });
+      list.push({ cells: cells, need: need });
+    }
+    if (subset && !Object.keys(safe).length) {
+      for (var a = 0; a < list.length; a++) for (var b = 0; b < list.length; b++) {
+        if (a === b) continue;
+        var A = list[a], Bc = list[b];
+        if (A.cells.length >= Bc.cells.length || !A.cells.every(function (c) { return Bc.cells.indexOf(c) >= 0; })) continue;
+        var diff = Bc.cells.filter(function (c) { return A.cells.indexOf(c) < 0; }), dn = Bc.need - A.need;
+        if (dn === 0) diff.forEach(function (c) { safe[c] = 1; });
+        else if (dn === diff.length) diff.forEach(function (c) { mines[c] = 1; });
+      }
+    }
+    return { safe: Object.keys(safe).map(Number), mines: Object.keys(mines).map(Number) };
+  }
+  var SW_BOTS = {
+    easy: { name: 'Easy bot', desc: 'slow; uses only one-number deductions and guesses at random when stuck', sec: 4.0 },
+    medium: { name: 'Medium bot', desc: 'adds the subset rule and plays faster, but still guesses at random', sec: 2.2 },
+    hard: { name: 'Hard bot', desc: 'about a click a second; computes exact mine probabilities and always guesses the safest cell', sec: 1.2 }
+  };
+  var SW_PENALTY = 8;
+  /* One bot action: flags what it knows (free), then opens one cell. Returns the cell opened or -1. */
+  function swBotStep(B, s, level, r) {
+    var hidden = []; for (var i = 0; i < B.n; i++) if (!s.rev[i] && !s.flag[i]) hidden.push(i);
+    if (!hidden.length) return -1;
+    var c;
+    if (level === 'hard') {
+      var P = swProbs(B, s).p, best = [], bv = 2;
+      hidden.forEach(function (x) { if (P[x] === 1) s.flag[x] = 1; });
+      hidden = hidden.filter(function (x) { return !s.flag[x]; });
+      hidden.forEach(function (x) { var v = P[x]; if (v < bv - 1e-12) { bv = v; best = [x]; } else if (Math.abs(v - bv) <= 1e-12) best.push(x); });
+      c = best.length ? r.pick(best) : r.pick(hidden);
+    } else {
+      var d = swSimple(B, s, level === 'medium');
+      d.mines.forEach(function (x) { s.flag[x] = 1; });
+      var safe = d.safe.filter(function (x) { return !s.rev[x]; });
+      hidden = hidden.filter(function (x) { return !s.flag[x]; });
+      c = safe.length ? safe[0] : hidden.length ? r.pick(hidden) : -1;
+    }
+    if (c >= 0) swOpen(B, s, c);
+    return c;
+  }
+  /* Whole bot game on a board: number of actions and mines hit (for tests and race pacing). */
+  function swBotGame(B, level, r) { var s = swState(B), guard = 0; while (!swWon(B, s) && guard++ < B.n * 2) if (swBotStep(B, s, level, r) < 0) break; return { actions: s.actions, booms: s.booms, won: swWon(B, s) }; }
+  var SWE = { SIZES: SW_SIZES, gen: swGen, nb: swNb, state: swState, open: swOpen, won: swWon, probs: swProbs, simple: swSimple, botStep: swBotStep, botGame: swBotGame, BOTS: SW_BOTS, PENALTY: SW_PENALTY, choose: choose };
+  VS.add({ id: 'sweeper', name: 'Probability Sweeper', icon: 'sweeper', group: 'versus', color: 'var(--c-fermi)',
+    desc: 'Minesweeper with the maths switched on: deduce what is certain, and when you must guess, take the lowest exact mine probability. Solo or race a bot.',
+    skills: ['Constraint reasoning', 'Conditional probability', 'vs bots'], firms: ['Jane Street', 'Optiver', 'SIG', 'IMC'],
+    why: 'Separate what you know from what you are guessing, then make the guess with the best odds — fast. It is the discipline of every trading decision.',
+    variants: [{ id: 'solo', name: 'Solo' }, { id: 'easy', name: 'Easy bot' }, { id: 'medium', name: 'Medium bot' }, { id: 'hard', name: 'Hard bot' }] });
+  AR.sweeper.engine = SWE;
+
+  /* ================================================================== */
+  /* UI                                                                  */
+  /* ================================================================== */
+  (root.SBT_PLUGINS = root.SBT_PLUGINS || []).push(function (core) {
+    var U = AR._ui, h = VS.h;
+    if (!U || !U.Shell || !h) return;
+    var esc = core.esc, $all = core.$all, num = h.num, signed = h.signed, pct = h.pct;
+    var COLS = 'ABCDEFGHIJ';
+    function cname(c) { return COLS.charAt(c % BS) + (Math.floor(c / BS) + 1); }
+
+    /* ------------------------------ Battleship ------------------------------ */
+    h.mount(AR.battleship.meta, '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/>', {
+      rules: ['A hidden fleet sits on a 10×10 grid: carrier (5), battleship (4), cruiser (3), submarine (3), destroyer (2) — 17 cells, straight lines, no overlaps. Tap a cell to fire; you learn hit or miss, and when a ship sinks.',
+        'Solo: sink the fleet in as few shots as you can. Score = 100 − shots (random firing needs ~95 shots, a good hunter ~45).',
+        'Against a bot: you each hunt the other’s fleet, one shot per turn, you first. Whoever sinks the whole fleet first wins. Score = win: 10 + your ship cells still afloat; loss: −(10 + the bot’s cells still afloat).',
+        'The coach shows the placement-count heat map: for every ship still afloat, count every position it could occupy given the misses, sunk ships and hits so far. Brighter = more likely to hide a ship.'],
+      recVariant: function (v, p) { return VS.rec(v, '', !!p.coach); },
+      fromRec: function (rv, p) { var q = VS.parseRec(rv); p.coach = q.coach; return q.v; },
+      variantLabel: function (rv) { var q = VS.parseRec(rv); return h.lvl(q.v) + (q.coach ? ' · coach' : ''); },
+      fmt: function (v) { return String(E.round(v, 0)); }, ghost: false,
+      settings: function (v, p) { return (v === 'solo' ? '' : h.botLine(v, BS_BOTS)) + h.coachRow(p, 'shows the probability heat map over the enemy grid.'); },
+      start: function (main, ctx) { startBS(main, ctx); }
+    });
+    function startBS(main, ctx) {
+      var solo = ctx.v === 'solo', coach = !!ctx.prefs.coach, lvl = ctx.v;
+      var r = E.makeRng(E.deriveSeed(ctx.seed, 'bs')), rb = E.makeRng(E.deriveSeed(ctx.seed, 'bs-bot')), ry = E.makeRng(E.deriveSeed(ctx.seed, 'bs-you'));
+      var enemy = bsPlace(r), mine = solo ? null : bsPlace(ry), vE = bsNewView(), vB = bsNewView();
+      var st = { turn: 'you', over: false, won: null, q: [], log: [], shuffles: 0 };
+      ctx.settings = { coach: coach };
+      var sh = U.Shell(main, h.base(ctx, { title: 'Battleship', scoreLabel: 'shots', scoreText: function () { return String(vE.shots); },
+        rightText: function () { return vE.sunk.length + ' / 5 sunk'; }, hint: 'Tap a cell on the enemy grid to fire.',
+        onStart: function () { render(); },
+        result: function () {
+          var sc = solo ? (bsAllSunk(vE) ? 100 - vE.shots : 0) : st.won === true ? 10 + bsAlive(mine) : st.won === false ? -(10 + bsAlive(enemy)) : -bsAlive(enemy);
+          return { score: sc, scoreText: solo ? (bsAllSunk(vE) ? vE.shots + ' shots' : 'unfinished') : st.won ? 'Won' : 'Lost', scoreLabel: solo ? 'score ' + sc + ' (100 − shots)' : 'score ' + signed(sc, 0) + ' · ' + vE.shots + ' shots', x: { shots: vE.shots, won: st.won }, details: details() };
+        } }));
+      sh.body.innerHTML = '<div class="vs-wrap bs"><div class="bs-status small" id="bsStatus" aria-live="polite"></div><div class="bs-boards">' +
+        '<div class="bs-col"><span class="label">Enemy waters</span><div class="bs-grid target" id="bsT" role="grid" aria-label="Enemy grid"></div><div class="bs-fleet small" id="bsFleetE"></div></div>' +
+        (solo ? '' : '<div class="bs-col mine"><span class="label">Your fleet</span><div class="bs-grid own" id="bsO" aria-label="Your grid"></div><div class="row"><button type="button" class="btn sm ghost" id="bsShuffle">Shuffle my fleet</button><span class="bs-fleet small" id="bsFleetY"></span></div></div>') +
+        '</div><div class="vs-coach small" id="bsCoach"></div><ul class="vs-feed small" id="bsFeed"></ul></div>';
+      var sb = sh.$('#bsShuffle');
+      if (sb) sb.addEventListener('click', function () { if (vE.shots || st.over) return; mine = bsPlace(ry); st.shuffles++; render(); });
+      sh.$('#bsT').addEventListener('click', function (e) { var b = e.target.closest('[data-c]'); if (b) fire(+b.getAttribute('data-c')); });
+      function fire(c) {
+        if (st.over || st.turn !== 'you' || !sh.running || vE.cell[c] !== 0) return;
+        var D = bsDensity(vE), mx = Math.max.apply(null, D.p);
+        st.q.push({ c: c, p: D.p[c], max: mx, hunting: !D.hits });
+        var res = bsFire(enemy, vE, c);
+        st.log.push({ k: res.hit ? 'ok' : 'info', html: 'You fire at ' + cname(c) + ': ' + (res.sunk != null ? '<b>sunk the ' + FLEET[res.sunk].name.toLowerCase() + '!</b>' : res.hit ? '<b>hit</b>' : 'miss') });
+        sh.setScore(vE.shots);
+        if (bsAllSunk(vE)) { st.over = true; st.won = true; render(); sh.later(function () { sh.finish(false); }, 1200); return; }
+        if (!solo) { st.turn = 'bot'; render(); sh.later(botFire, 550); } else render();
+      }
+      function botFire() {
+        if (st.over) return;
+        if (!sh.running) { sh.later(botFire, 300); return; }
+        var c = bsBotShot(vB, lvl, rb), res = bsFire(mine, vB, c);
+        st.log.push({ k: res.hit ? 'bad' : 'info', html: 'Bot fires at ' + cname(c) + ': ' + (res.sunk != null ? '<b>sank your ' + FLEET[res.sunk].name.toLowerCase() + '</b>' : res.hit ? '<b>hit</b>' : 'miss') });
+        if (bsAllSunk(vB)) { st.over = true; st.won = false; render(); sh.later(function () { sh.finish(false); }, 1400); return; }
+        st.turn = 'you'; render();
+      }
+      function render() {
+        var D = coach ? bsDensity(vE) : null, mx = D ? Math.max(1e-9, Math.max.apply(null, D.p)) : 1, endShow = st.over;
+        var t = '';
+        for (var c = 0; c < BS * BS; c++) {
+          var s = vE.cell[c], cls = s === 1 ? 'miss' : s === 2 ? 'hit' : s === 3 ? 'sunk' : (endShow && enemy.at[c] >= 0 ? 'ship ghost' : 'unk');
+          var style = D && s === 0 ? ' style="--p:' + (D.p[c] / mx).toFixed(3) + '"' : '';
+          t += '<button type="button" class="bs-c ' + cls + (D && s === 0 ? ' heat' : '') + '" data-c="' + c + '"' + style + ' aria-label="' + cname(c) + (s === 1 ? ' miss' : s >= 2 ? ' hit' : '') + '"' + (s || st.over || st.turn !== 'you' ? ' disabled' : '') + '>' + (D && s === 0 && D.p[c] / mx > 0.999 ? '<i></i>' : '') + '</button>';
+        }
+        sh.$('#bsT').innerHTML = t;
+        sh.$('#bsFleetE').innerHTML = FLEET.map(function (f, k) { return '<span class="' + (vE.sunk.indexOf(k) >= 0 ? 'gone' : '') + '">' + esc(f.name) + ' ' + f.n + '</span>'; }).join('');
+        if (!solo) {
+          var o = '';
+          for (c = 0; c < BS * BS; c++) { var s2 = vB.cell[c], ship = mine.at[c] >= 0; o += '<span class="bs-c ' + (s2 === 1 ? 'miss' : s2 >= 2 ? 'hit' : ship ? 'ship' : 'unk') + '"></span>'; }
+          sh.$('#bsO').innerHTML = o;
+          sh.$('#bsFleetY').textContent = bsAlive(mine) + ' of 17 cells afloat';
+          var sbb = sh.$('#bsShuffle'); if (sbb) sbb.disabled = vE.shots > 0 || st.over;
+        }
+        sh.$('#bsStatus').innerHTML = st.over ? (st.won ? '<b class="res-ok">Fleet destroyed in ' + vE.shots + ' shots.</b>' : '<b class="res-bad">The bot sank your fleet.</b>') : solo ? vE.shots + ' shots · ' + (17 - bsAlive(enemy)) + ' / 17 hits' : st.turn === 'you' ? '<b>Your shot.</b> ' + vE.shots + ' fired · bot ' + vB.shots : 'Bot is aiming…';
+        var co = '';
+        if (D && !st.over) {
+          var best = []; for (c = 0; c < BS * BS; c++) if (vE.cell[c] === 0 && D.p[c] >= mx - 1e-9) best.push(cname(c));
+          co = (D.hits ? '<b>Target mode:</b> a hit is not yet a sunk ship, so placements through it dominate the map.' : '<b>Hunt mode:</b> long ships fit in the open middle more ways than along edges or next to misses.') + ' Best cell' + (best.length > 1 ? 's' : '') + ': <b>' + best.slice(0, 4).join(', ') + '</b> (≈ ' + pct(mx) + ').';
+        }
+        sh.$('#bsCoach').innerHTML = co;
+        sh.$('#bsFeed').innerHTML = h.feed(st.log, 4);
+      }
+      function details() {
+        var q = st.q, qual = q.length ? E.mean(q.map(function (x) { return x.max > 0 ? x.p / x.max : 1; })) : 0;
+        var hunt = q.filter(function (x) { return x.hunting; }), huntQ = hunt.length ? E.mean(hunt.map(function (x) { return x.max > 0 ? x.p / x.max : 1; })) : null;
+        var tgt = q.filter(function (x) { return !x.hunting; }), tgtQ = tgt.length ? E.mean(tgt.map(function (x) { return x.max > 0 ? x.p / x.max : 1; })) : null;
+        var ref = { easy: 0, medium: 0, hard: 0 }; ['easy', 'medium', 'hard'].forEach(function (l) { ref[l] = bsBotGame(ctx.seed, l); });
+        var advice = [];
+        if (huntQ != null && huntQ < 0.6) advice.push('While hunting, your shots averaged ' + pct(huntQ) + ' of the best cell’s probability. Ships are longer than 1: a checkerboard pattern or the open middle covers more placements per shot.');
+        if (tgtQ != null && tgtQ < 0.7) advice.push('After a hit, your follow-ups averaged ' + pct(tgtQ) + ' of the best cell. Fire along the line of two hits, and stop once a ship is sunk.');
+        if (!advice.length) advice.push('Efficient search: your shots tracked the high-probability cells closely.');
+        return h.tiles([{ v: vE.shots, l: 'your shots' }, { v: q.length ? pct(qual) : '—', l: 'shot quality (p ÷ best p)' }, { v: huntQ != null ? pct(huntQ) : '—', l: 'hunting quality' }, { v: tgtQ != null ? pct(tgtQ) : '—', l: 'targeting quality' }]) +
+          h.panel('Debrief', '<ul class="vs-debrief small">' + advice.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
+            '<p class="small">On a fresh fleet from this seed the bots needed: easy ' + ref.easy + ', medium ' + ref.medium + ', hard ' + ref.hard + ' shots. Shot quality is the heat-map probability of the cell you chose divided by the best cell’s — 100% means you always fired at a most likely cell.</p>' +
+            '<p class="small muted">The heat map treats ships as independent and weights placements through unresolved hits by 25 — a standard approximation to the exact posterior, which would enumerate whole fleets.</p>');
+      }
+    }
+
+    /* --------------------------- Probability Sweeper --------------------------- */
+    function swSize(p) { return p.size === 'medium' ? 'medium' : 'small'; }
+    h.mount(AR.sweeper.meta, '<circle cx="12" cy="13" r="5"/><path d="M12 4v3M12 19v2M4 13H2M22 13h-2M6.3 7.3 5 6M17.7 7.3 19 6"/><circle cx="10.5" cy="11.5" r="1" fill="currentColor"/>', {
+      rules: ['Classic Minesweeper: a number tells how many of its 8 neighbours hide a mine. The centre opening is revealed for you. Tap to open, long-press or right-click to flag (or switch to Flag mode). Tap an open number whose mines are all flagged to open its other neighbours.',
+        'Solo: open every safe cell. Opening a mine ends the game. Score = 1000 − seconds if you clear it; otherwise the % of safe cells you opened.',
+        'Against a bot: you both play the same board at the same time. A mine costs ' + SW_PENALTY + ' seconds (you are frozen) instead of ending the game. First to clear wins; score = 100 + how far ahead you finished, or minus the share of the board you had left.',
+        'Every click is graded with exact probabilities computed from the numbers: a click on a provably safe cell is “safe”, a click when a safe cell existed is an “unforced guess”, and a forced guess is compared with the safest cell available.'],
+      recVariant: function (v, p) { return VS.rec(v, swSize(p), !!p.coach); },
+      fromRec: function (rv, p) { var q = VS.parseRec(rv); p.coach = q.coach; p.size = q.extra[0] === 'medium' ? 'medium' : 'small'; return q.v; },
+      variantLabel: function (rv) { var q = VS.parseRec(rv); return h.lvl(q.v) + ' · ' + (SW_SIZES[q.extra[0]] || SW_SIZES.small).name + (q.coach ? ' · coach' : ''); },
+      fmt: function (v) { return String(E.round(v, 0)); }, ghost: false,
+      settings: function (v, p) {
+        return (v === 'solo' ? '' : h.botLine(v, SW_BOTS)) + h.segRow('Board', 'size', [['small', '9×9 · 10'], ['medium', '16×16 · 40']], swSize(p), swSize(p) === 'medium' ? 'Large board: best on a wide screen.' : '') +
+          h.coachRow(p, 'shades every hidden cell by its exact mine probability.');
+      },
+      start: function (main, ctx) { startSW(main, ctx); }
+    });
+    function startSW(main, ctx) {
+      var size = swSize(ctx.prefs), solo = ctx.v === 'solo', coach = !!ctx.prefs.coach, lvl = ctx.v;
+      var B = swGen(ctx.seed, size), S = swState(B), BOT = solo ? null : swState(B), rb = E.makeRng(E.deriveSeed(ctx.seed, 'sw-bot'));
+      var safeN = B.n - B.m, st = { over: false, won: null, frozenUntil: 0, flagMode: false, clicks: [], botNext: null, botFrozen: 0, endT: null, botEnd: null };
+      ctx.settings = { size: size, coach: coach };
+      var sh = U.Shell(main, h.base(ctx, { title: 'Sweeper', scoreLabel: 'cleared', scoreText: function () { return Math.floor(100 * S.opened / safeN) + '%'; },
+        rightText: function () { return Math.floor(sh ? sh.elapsed() / 1000 : 0) + ' s'; }, hint: 'Tap to open · long-press or right-click to flag.',
+        onStart: function () { render(); if (!solo) { st.botNext = sh.elapsed() / 1000 + botDelay(); sh.later(botLoop, 150); } },
+        result: function () {
+          var t = st.endT != null ? st.endT : sh.elapsed() / 1000, cleared = S.opened / safeN, sc;
+          if (solo) sc = st.won ? Math.max(100, Math.round(1000 - t)) : Math.floor(100 * cleared);
+          else sc = st.won ? 100 + Math.round(100 * (1 - BOT.opened / safeN)) : -Math.round(100 * (1 - cleared));
+          return { score: sc, scoreText: solo ? (st.won ? Math.round(t) + ' s' : Math.floor(100 * cleared) + '% cleared') : st.won ? 'Won' : 'Lost', scoreLabel: 'score ' + sc + (solo ? '' : ' · bot ' + Math.floor(100 * BOT.opened / safeN) + '% cleared'), x: { t: Math.round(t), won: st.won, booms: S.booms }, details: details(t) };
+        } }));
+      sh.body.innerHTML = '<div class="vs-wrap sw"><div class="row sw-top small"><span id="swInfo"></span><span class="spacer"></span><button type="button" class="btn sm" id="swFlag" aria-pressed="false">Flag mode <span class="kbd">F</span></button></div>' +
+        (solo ? '' : '<div class="sw-race small"><span>You</span><span class="sw-track"><i id="swMe"></i></span><span>' + esc(SW_BOTS[lvl].name) + '</span><span class="sw-track"><i id="swBot"></i></span></div>') +
+        '<div class="sw-grid ' + size + '" id="swG" style="--w:' + B.w + '"></div><div class="vs-coach small" id="swCoach"></div></div>';
+      var G = sh.$('#swG'), pressT = null, pressed = null, longDone = false;
+      sh.$('#swFlag').addEventListener('click', function () { st.flagMode = !st.flagMode; render(); });
+      // long-press flags on touch; some browsers also fire contextmenu on a long press, so only one of the two may toggle
+      G.addEventListener('contextmenu', function (e) { var b = e.target.closest('[data-i]'); if (!b) return; e.preventDefault(); clearTimeout(pressT); if (!longDone) { longDone = true; toggleFlag(+b.getAttribute('data-i')); } });
+      G.addEventListener('pointerdown', function (e) { longDone = false; var b = e.target.closest('[data-i]'); if (!b || e.button === 2) return; pressed = +b.getAttribute('data-i'); clearTimeout(pressT); pressT = setTimeout(function () { longDone = true; toggleFlag(pressed); }, 450); });
+      G.addEventListener('pointerup', function () { clearTimeout(pressT); });
+      G.addEventListener('pointerleave', function () { clearTimeout(pressT); });
+      G.addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (!b) return; if (longDone) { longDone = false; return; } var i = +b.getAttribute('data-i'); if (st.flagMode && !S.rev[i]) toggleFlag(i); else tap(i); });
+      function botDelay() { var b = SW_BOTS[lvl]; return b.sec * Math.exp(0.25 * rb.normal()); }
+      function botLoop() {
+        if (st.over) return;
+        if (sh.running) {
+          var t = sh.elapsed() / 1000;
+          if (t >= st.botNext) {
+            var before = BOT.booms;
+            swBotStep(B, BOT, lvl, rb);
+            st.botNext = t + botDelay() + (BOT.booms > before ? SW_PENALTY : 0);
+            if (swWon(B, BOT)) { st.over = true; st.won = false; st.endT = t; render(); sh.later(function () { sh.finish(false); }, 1200); return; }
+            render();
+          }
+        }
+        sh.later(botLoop, 150);
+      }
+      function frozen() { return sh.elapsed() / 1000 < st.frozenUntil; }
+      function toggleFlag(i) { if (st.over || S.rev[i] || !sh.running) return; S.flag[i] = S.flag[i] ? 0 : 1; render(); }
+      function grade(i) {
+        var P = swProbs(B, S), hidden = []; for (var k = 0; k < B.n; k++) if (!S.rev[k]) hidden.push(k);
+        var safeExists = hidden.some(function (k) { return P.p[k] === 0; }), minP = Math.min.apply(null, hidden.map(function (k) { return P.p[k]; }));
+        var pi = P.p[i];
+        st.clicks.push({ i: i, p: pi, min: minP, kind: pi === 0 ? 'safe' : safeExists ? 'unforced' : 'forced', exact: P.exact });
+      }
+      function tap(i) {
+        if (st.over || !sh.running || frozen()) return;
+        if (S.rev[i] === 1 && B.adj[i] > 0) {      // chord
+          var nb = swNb(B, i), fl = nb.filter(function (j) { return S.flag[j] || S.rev[j] === 2; }).length;
+          if (fl !== B.adj[i]) return;
+          nb.filter(function (j) { return !S.rev[j] && !S.flag[j]; }).forEach(function (j) { if (!st.over) openCell(j); });
+          render(); return;
+        }
+        if (S.rev[i] || S.flag[i]) return;
+        openCell(i); render();
+      }
+      function openCell(i) {
+        grade(i);
+        var res = swOpen(B, S, i);
+        if (res.boom) {
+          if (solo) { st.over = true; st.won = false; st.endT = sh.elapsed() / 1000; sh.later(function () { sh.finish(false); }, 1500); }
+          else { st.frozenUntil = sh.elapsed() / 1000 + SW_PENALTY; core.toast('Mine! Frozen for ' + SW_PENALTY + ' seconds.'); sh.later(render, SW_PENALTY * 1000 + 50); }
+        } else if (swWon(B, S)) { st.over = true; st.won = true; st.endT = sh.elapsed() / 1000; sh.later(function () { sh.finish(false); }, 1000); }
+      }
+      function render() {
+        var P = coach && !st.over ? swProbs(B, S).p : null, out = '';
+        for (var i = 0; i < B.n; i++) {
+          var rv = S.rev[i], cls, inner = '';
+          if (rv === 1) { cls = 'open n' + B.adj[i]; inner = B.adj[i] ? B.adj[i] : ''; }
+          else if (rv === 2) { cls = 'boom'; inner = '✱'; }
+          else if (st.over && B.mine[i]) { cls = 'mine' + (S.flag[i] ? ' flag' : ''); inner = S.flag[i] ? '⚑' : '✱'; }
+          else if (S.flag[i]) { cls = 'flag'; inner = '⚑'; }
+          else { cls = 'hid'; }
+          var style = P && !rv && !S.flag[i] && P[i] != null ? ' style="--p:' + P[i].toFixed(3) + '"' : '';
+          var lab = P && !rv && !S.flag[i] && P[i] != null && B.w <= 9 ? '<small>' + Math.round(100 * P[i]) + '</small>' : '';
+          out += '<button type="button" class="sw-c ' + cls + (P && !rv ? ' heat' : '') + '" data-i="' + i + '"' + style + '>' + (lab || inner) + '</button>';
+        }
+        G.innerHTML = out;
+        var flags = S.flag.filter(Boolean).length + S.booms;
+        sh.$('#swInfo').innerHTML = '<b>' + (B.m - flags) + '</b> mines unflagged · ' + Math.floor(100 * S.opened / safeN) + '% cleared' + (frozen() ? ' · <span class="res-bad">frozen</span>' : '') + (st.over ? (st.won ? ' · <b class="res-ok">cleared!</b>' : ' · <b class="res-bad">' + (solo ? 'boom' : 'the bot finished first') + '</b>') : '');
+        sh.$('#swFlag').setAttribute('aria-pressed', String(st.flagMode));
+        if (!solo) { sh.$('#swMe').style.width = (100 * S.opened / safeN).toFixed(1) + '%'; sh.$('#swBot').style.width = (100 * BOT.opened / safeN).toFixed(1) + '%'; }
+        sh.setScore(Math.floor(100 * S.opened / safeN), true);
+        sh.$('#swCoach').innerHTML = P ? 'Shading = exact chance of a mine from the numbers (flags are ignored; you might be wrong). Pure white cells are provably safe; open those first. ' + (B.w <= 9 ? 'Numbers are %.' : '') : '';
+      }
+      sh.keys(function (e) { if ((e.key || '').toLowerCase() === 'f') { e.preventDefault(); st.flagMode = !st.flagMode; render(); } });
+      function details(t) {
+        var c = st.clicks, safe = c.filter(function (x) { return x.kind === 'safe'; }).length, unf = c.filter(function (x) { return x.kind === 'unforced'; }), forced = c.filter(function (x) { return x.kind === 'forced'; });
+        var fq = forced.length ? E.mean(forced.map(function (x) { return x.p > 0 ? Math.min(1, x.min / x.p) : 1; })) : null;
+        var ref = swBotGame(B, 'hard', E.makeRng(E.deriveSeed(ctx.seed, 'sw-ref')));
+        var advice = [];
+        if (unf.length) advice.push(unf.length + ' click' + (unf.length === 1 ? ' was an unforced guess' : 's were unforced guesses') + ': a provably safe cell existed, but you opened one with a ' + pct(E.mean(unf.map(function (x) { return x.p; }))) + ' average mine chance. Finish the deductions before guessing.');
+        if (fq != null && fq < 0.8) advice.push('On forced guesses you took ' + pct(E.mean(forced.map(function (x) { return x.p; }))) + ' risk on average when the safest cell had ' + pct(E.mean(forced.map(function (x) { return x.min; }))) + '. Cells far from the numbers often carry the base rate (mines left ÷ cells left), which can be lower than a 50/50 frontier cell.');
+        if (!advice.length) advice.push(c.length ? 'Clean play: every guess you made was forced, and close to the safest available.' : 'No clicks recorded.');
+        return h.tiles([{ v: st.won ? Math.round(t) + ' s' : Math.floor(100 * S.opened / safeN) + '%', l: st.won ? 'time' : 'cleared' }, { v: safe + ' / ' + c.length, l: 'clicks on provably safe cells' }, { v: unf.length, l: 'unforced guesses' }, { v: fq != null ? pct(fq) : '—', l: 'forced-guess quality' }]) +
+          h.panel('Debrief', '<ul class="vs-debrief small">' + advice.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
+            '<p class="small">The exact solver needs ' + ref.actions + ' clicks and hit ' + ref.booms + ' mine' + (ref.booms === 1 ? '' : 's') + ' on this board. Probabilities enumerate every mine layout consistent with the numbers, weighted by how many ways the remaining mines fit in the unconstrained cells: P(mine) = Σ layouts with a mine there ÷ Σ all layouts.</p>');
+      }
+    }
+  });
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ================================================================== */
+/* Part 12 (v2.2): market games against bots.                          */
+/*   Card Table     — 2 private cards each, 4 centre cards; take turns  */
+/*                    quoting the table total, trade against each quote. */
+/*   Make Me a Market — quote estimation questions against an informed   */
+/*                    counterparty, then answer position / break-even /  */
+/*                    worst-case questions before the reveal.            */
+/* Original rules and code; the game ideas are standard trading-interview */
+/* formats.                                                            */
+/* ================================================================== */
+(function (root) {
+  'use strict';
+  var AR = root.SBT_ARCADE;
+  if (!AR || !AR._engine || !AR.versus) return;
+  var E = AR._engine, VS = AR.versus;
+
+  /* ================================================================== */
+  /* Card Table                                                           */
+  /* ================================================================== */
+  var CT_CENTRE = 4, CT_WIDTH = 6, CT_MEAN = 7;
+  function ctVal(c) { return (c >> 2) + 2 > 13 ? 1 : (c >> 2) + 2; }     // 2..K = 2..13, ace = 1
+  function ctNew(seed, nBots) {
+    var r = E.makeRng(E.deriveSeed(seed, 'ct')), d = VS.deck(r), n = nBots + 1, hands = [];
+    for (var i = 0; i < n; i++) hands.push([d[2 * i], d[2 * i + 1]]);
+    var centre = d.slice(2 * n, 2 * n + CT_CENTRE);
+    var T = { n: n, hands: hands, centre: centre, shown: 0, round: 0, turn: 0, first: 0, trades: [], quotes: [], pos: new Array(n).fill(0), cash: new Array(n).fill(0), done: false,
+      belief: [] };
+    for (i = 0; i < n; i++) T.belief.push({ lo: 2, hi: 26 });
+    T.total = E.sum(hands.map(function (h) { return ctVal(h[0]) + ctVal(h[1]); })) + E.sum(centre.map(ctVal));
+    T.cards = 2 * n + CT_CENTRE;
+    return T;
+  }
+  /* Mean value of a card from a 52-card deck after removing the cards a player has seen. */
+  function ctRestMean(seen) { var s = 4 * 91 - E.sum(seen.map(ctVal)); return s / (52 - seen.length); }
+  function ctSeen(T, p) { return T.hands[p].concat(T.centre.slice(0, T.shown)); }
+  /* E[table total | my cards and the centre cards shown], and its standard deviation (sampling without replacement). */
+  function ctEV(T, p) {
+    var seen = ctSeen(T, p), known = E.sum(seen.map(ctVal)), unseen = T.cards - seen.length, rest = 52 - seen.length;
+    var m = ctRestMean(seen), sq = 0, tot = 0;
+    var vals = []; for (var c = 0; c < 52; c++) if (seen.indexOf(c) < 0) vals.push(ctVal(c));
+    vals.forEach(function (v) { sq += (v - m) * (v - m); });
+    var varOne = sq / rest, fpc = (rest - unseen) / Math.max(1, rest - 1);
+    return { ev: known + unseen * m, sd: Math.sqrt(unseen * varOne * fpc), known: known, unseen: unseen, mean: m };
+  }
+  /* Two-card sum distribution from the remaining deck (approximation: independent draws), truncated to [lo, hi]. */
+  function ctPairMean(m, lo, hi) {
+    var w = 0, s = 0;
+    for (var a = 1; a <= 13; a++) for (var b = 1; b <= 13; b++) { var x = a + b; if (x < lo || x > hi) continue; w++; s += x; }
+    if (!w) return Math.min(hi, Math.max(lo, 2 * m));
+    return s / w + (2 * m - 14);    // shift for the deck’s current mean
+  }
+  /* The hard bot's estimate: its own cards + centre + inferred two-card sums of each opponent + unseen centre cards. */
+  function ctEVHard(T, p) {
+    var base = ctEV(T, p), m = base.mean, ev = base.known + (CT_CENTRE - T.shown) * m;
+    for (var j = 0; j < T.n; j++) { if (j === p) continue; var b = T.belief[j]; ev += ctPairMean(m, b.lo, b.hi); }
+    return { ev: ev, sd: base.sd * 0.85, known: base.known, mean: m };
+  }
+  /* What a trade reveals: a buyer at A thinks the total is above A, so its two cards are probably high. */
+  function ctLearn(T, who, side, price) {
+    var b = T.belief[who], others = T.cards - 2 - T.shown, m = ctRestMean(T.centre.slice(0, T.shown)), centreSum = E.sum(T.centre.slice(0, T.shown).map(ctVal));
+    var implied = price - centreSum - others * m;               // the two-card sum at which it is indifferent
+    if (side === 'buy') b.lo = Math.max(b.lo, Math.min(26, Math.round(implied - 2)));
+    else b.hi = Math.min(b.hi, Math.max(2, Math.round(implied + 2)));
+    if (b.lo > b.hi) { var mid = Math.round((b.lo + b.hi) / 2); b.lo = mid; b.hi = mid; }
+  }
+  var CT_BOTS = {
+    easy: { name: 'Easy bots', desc: 'quote around the average table value and ignore their own cards; they trade only on big mispricings', edge: 4, width: 6 },
+    medium: { name: 'Medium bots', desc: 'condition on their own cards and the centre, quote 4 wide and take any quote 1.5 away from their value', edge: 1.5, width: 4 },
+    hard: { name: 'Hard bots', desc: 'also infer everyone’s hidden cards from who bought and sold, skew quotes against their inventory, and only trade with an edge after adverse selection', edge: 1.5, width: 3 }
+  };
+  function ctBotValue(T, p, level) {
+    if (level === 'easy') { var e = ctEV(T, p), naive = E.sum(T.centre.slice(0, T.shown).map(ctVal)) + (T.cards - T.shown) * CT_MEAN; return { ev: naive, sd: e.sd }; }
+    return level === 'hard' ? ctEVHard(T, p) : ctEV(T, p);
+  }
+  function ctBotQuote(T, p, level, r) {
+    var v = ctBotValue(T, p, level), w = CT_BOTS[level].width, c = v.ev + (level === 'easy' ? (r.next() - 0.5) * 6 : 0);
+    if (level === 'hard') c -= 0.5 * T.pos[p];                       // long → quote lower to sell, short → higher
+    var bid = Math.round(c - w / 2), ask = bid + w;
+    return { bid: bid, ask: ask };
+  }
+  /* A bot's response to a quote: 'buy', 'sell' or 'pass'. */
+  function ctBotRespond(T, p, level, q) {
+    var v = ctBotValue(T, p, level), edge = CT_BOTS[level].edge + (level === 'hard' ? 0.15 * v.sd : 0);
+    if (level === 'hard' && Math.abs(T.pos[p]) >= 4) { if (T.pos[p] > 0 && q.bid - v.ev > -1) return 'sell'; if (T.pos[p] < 0 && v.ev - q.ask > -1) return 'buy'; }
+    if (v.ev - q.ask >= edge) return 'buy';
+    if (q.bid - v.ev >= edge) return 'sell';
+    return 'pass';
+  }
+  /* Apply a trade of 1 lot at the maker's quote. */
+  function ctTrade(T, maker, taker, side, q) {
+    var px = side === 'buy' ? q.ask : q.bid, sgn = side === 'buy' ? 1 : -1;
+    T.pos[taker] += sgn; T.cash[taker] -= sgn * px; T.pos[maker] -= sgn; T.cash[maker] += sgn * px;
+    var tr = { round: T.round, shown: T.shown, maker: maker, taker: taker, side: side, px: px };
+    T.trades.push(tr);
+    ctLearn(T, taker, side, px);
+    return tr;
+  }
+  function ctPnl(T, p) { return T.cash[p] + T.pos[p] * T.total; }
+  /* Order of makers: every player quotes once per round, starting player rotates. Rounds = centre cards + 1. */
+  function ctSchedule(n) { var out = []; for (var r = 0; r <= CT_CENTRE; r++) for (var k = 0; k < n; k++) out.push({ round: r, maker: (r + k) % n }); return out; }
+  /* Bot-only table for tests: seat 0 plays `level0`, the others `levelBots`; returns seat 0's P&L. */
+  function ctSim(seed, nBots, level0, levelBots) {
+    var T = ctNew(seed, nBots), r = E.makeRng(E.deriveSeed(seed, 'ct-sim')), sch = ctSchedule(T.n);
+    sch.forEach(function (s) {
+      T.shown = s.round; T.round = s.round;
+      var lv = function (j) { return j === 0 ? level0 : levelBots; }, q = ctBotQuote(T, s.maker, lv(s.maker), r);
+      for (var j = 0; j < T.n; j++) { if (j === s.maker) continue; var a = ctBotRespond(T, j, lv(j), q); if (a !== 'pass') ctTrade(T, s.maker, j, a, q); }
+    });
+    return ctPnl(T, 0);
+  }
+  var CTE = { CENTRE: CT_CENTRE, WIDTH: CT_WIDTH, val: ctVal, newTable: ctNew, ev: ctEV, evHard: ctEVHard, learn: ctLearn, botQuote: ctBotQuote, botRespond: ctBotRespond, trade: ctTrade, pnl: ctPnl, schedule: ctSchedule, sim: ctSim, restMean: ctRestMean, BOTS: CT_BOTS };
+  VS.add({ id: 'cardtable', name: 'Card Table', icon: 'cardtable', group: 'versus', color: 'var(--c-mm, var(--c-ev))',
+    desc: 'Four players, two private cards each, four centre cards. Take turns making a market on the table total; trade against everyone else’s quotes.',
+    skills: ['Market making', 'Inference from trades', 'Adverse selection', 'vs bots'], firms: ['Jane Street', 'Optiver', 'IMC', 'SIG', 'Citadel Securities'],
+    why: 'The classic trading-floor game: price from partial information, then learn from who wants to trade with you. A buyer is telling you something about their cards.',
+    variants: [{ id: 'easy', name: 'Easy bots' }, { id: 'medium', name: 'Medium bots' }, { id: 'hard', name: 'Hard bots' }] });
+  AR.cardtable.engine = CTE;
+
+  /* ================================================================== */
+  /* Make Me a Market                                                     */
+  /* ================================================================== */
+  var MM = { QUESTIONS: 5, ROUNDS: 3, RATIO: [1.6, 1.3, 1.15], LOSS_CAP: 3 };
+  var MM_BOTS = {
+    easy: { name: 'Easy counterparty', desc: 'knows the answer only roughly (typically within ±50%)', sigma: 0.45 },
+    medium: { name: 'Medium counterparty', desc: 'knows the answer within about ±20%', sigma: 0.2 },
+    hard: { name: 'Hard counterparty', desc: 'knows the answer within about ±7% and trades bigger when your quote is far off', sigma: 0.07 }
+  };
+  function mmPool() {
+    var D = root.SBT_ARCADE_DATA && root.SBT_ARCADE_DATA.fermi;
+    return Array.isArray(D) ? D.filter(function (q) { return q && isFinite(q.a) && q.a >= 5 && q.a <= 5e9 && q.d <= 2; }) : [];
+  }
+  function mmPick(seed) {
+    var pool = mmPool(), r = E.makeRng(E.deriveSeed(seed, 'mm-q'));
+    return r.shuffle(pool).slice(0, MM.QUESTIONS);
+  }
+  function mmEstimate(seed, i, a, level) { var r = E.makeRng(E.deriveSeed(seed, 'mm-e' + i)); return a * Math.exp((MM_BOTS[level] || MM_BOTS.medium).sigma * r.normal()); }
+  /* The counterparty sells to a bid above its estimate and buys from an ask below it; size grows with the edge. */
+  function mmRespond(est, bid, ask, level) {
+    function size(edge) { return 1 + (edge > 0.15 ? 1 : 0) + (edge > 0.4 && level !== 'easy' ? 1 : 0); }
+    if (bid > est) return { side: 'sell', px: bid, q: size(Math.log(bid / est)) };     // it sells → you buy
+    if (ask < est) return { side: 'buy', px: ask, q: size(Math.log(est / ask)) };      // it buys → you sell
+    return null;
+  }
+  /* Your book: trades as {q (+ you bought / − you sold), px}. */
+  function mmNet(tr) { return E.sum(tr.map(function (t) { return t.q; })); }
+  function mmPnlAt(tr, V) { return E.sum(tr.map(function (t) { return t.q * (V - t.px); })); }
+  function mmBreakEven(tr) { var n = mmNet(tr); return n ? E.sum(tr.map(function (t) { return t.q * t.px; })) / n : null; }
+  function mmWorst(tr, lo, hi) { return Math.min(mmPnlAt(tr, lo), mmPnlAt(tr, hi)); }
+  /* P&L in "points": each lot's P&L as a fraction of the true value, a single lot's loss capped at LOSS_CAP. */
+  function mmPoints(tr, V) { return 100 * E.sum(tr.map(function (t) { var x = (V - t.px) / V * Math.sign(t.q); return Math.abs(t.q) * Math.max(-MM.LOSS_CAP, x); })); }
+  function mmClose(x, target, tol) { if (!isFinite(x) || !isFinite(target)) return false; return Math.abs(x - target) <= Math.max(tol * Math.abs(target), 0.5); }
+  function mmParse(s) {
+    s = String(s || '').trim().toLowerCase().replace(/[, _]/g, '').replace(/×10\^/g, 'e').replace(/x10\^/g, 'e');
+    var m = /^([-+]?\d*\.?\d+(?:e[-+]?\d+)?)([kmbt]?)$/.exec(s);
+    if (!m) return NaN;
+    return +m[1] * ({ '': 1, k: 1e3, m: 1e6, b: 1e9, t: 1e12 })[m[2]];
+  }
+  var MME = { P: MM, BOTS: MM_BOTS, pool: mmPool, pick: mmPick, estimate: mmEstimate, respond: mmRespond, net: mmNet, pnlAt: mmPnlAt, breakEven: mmBreakEven, worst: mmWorst, points: mmPoints, close: mmClose, parse: mmParse };
+  VS.add({ id: 'mmarket', name: 'Make Me a Market', icon: 'mmarket', group: 'versus', color: 'var(--c-fermi)',
+    desc: 'Quote a bid and an ask on questions you cannot look up, ever tighter, against a counterparty that knows more than you. Then answer for your position.',
+    skills: ['Market making', 'Estimation', 'Position math', 'vs bots'], firms: ['Jane Street', 'Optiver', 'SIG', 'IMC', 'Susquehanna', 'Akuna'],
+    why: '“Make me a market on …” opens many trading interviews. The follow-ups — what is your position, where do you break even, what is the worst case — are where candidates slip.',
+    variants: [{ id: 'easy', name: 'Easy' }, { id: 'medium', name: 'Medium' }, { id: 'hard', name: 'Hard' }] });
+  AR.mmarket.engine = MME;
+
+  /* ================================================================== */
+  /* UI                                                                  */
+  /* ================================================================== */
+  (root.SBT_PLUGINS = root.SBT_PLUGINS || []).push(function (core) {
+    var U = AR._ui, h = VS.h;
+    if (!U || !U.Shell || !h) return;
+    var esc = core.esc, $all = core.$all, num = h.num, signed = h.signed, pct = h.pct;
+
+    /* ------------------------------ Card Table ------------------------------ */
+    function nbt(p) { return +p.nb === 2 ? 2 : 3; }
+    h.mount(AR.cardtable.meta, '<rect x="2" y="7" width="7" height="10" rx="1.5"/><rect x="15" y="7" width="7" height="10" rx="1.5"/><rect x="8.5" y="4" width="7" height="10" rx="1.5"/><path d="M6 21h12"/>', {
+      rules: ['Each player gets 2 private cards; 4 centre cards are dealt face down. Card values: ace 1, 2–10 face value, J 11, Q 12, K 13. The table total = every private card + every centre card.',
+        'Five rounds: before any centre card is shown, then after each one is turned. In each round every player makes one market (bid and ask, at most ' + CT_WIDTH + ' wide); every other player may buy 1 lot at the ask, sell 1 lot at the bid, or pass.',
+        'At the end all cards are shown and every position settles at the table total. Score = your P&L.',
+        'Fair value from your seat: your cards + shown centre cards + (unseen cards) × (average of the cards you have not seen). The coach shows it with its standard deviation. Watch who trades: a buyer at a high ask probably holds high cards.'],
+      recVariant: function (v, p) { return VS.rec(v, nbt(p) + 'b', !!p.coach); },
+      fromRec: function (rv, p) { var q = VS.parseRec(rv); p.coach = q.coach; p.nb = q.extra[0] === '2b' ? 2 : 3; return q.v; },
+      variantLabel: function (rv) { var q = VS.parseRec(rv); return h.lvl(q.v).replace('bot', 'bots') + ' · ' + (q.extra[0] === '2b' ? 2 : 3) + ' opponents' + (q.coach ? ' · coach' : ''); },
+      fmt: function (v) { return signed(v, 0); }, ghost: false,
+      settings: function (v, p) { return h.botLine(v, CT_BOTS) + h.segRow('Opponents', 'nb', [[2, '2 bots'], [3, '3 bots']], nbt(p)) + h.coachRow(p, 'shows your fair value and its standard deviation, and what each trade implies.'); },
+      start: function (main, ctx) { startCT(main, ctx); }
+    });
+    function startCT(main, ctx) {
+      var p = ctx.prefs, k = nbt(p), coach = !!p.coach, lvl = ctx.v;
+      var T = ctNew(ctx.seed, k), sch = ctSchedule(T.n), rb = E.makeRng(E.deriveSeed(ctx.seed, 'ct-bot'));
+      var st = { i: 0, q: null, phase: 'idle', log: [], dec: [], bid: null, ask: null };
+      ctx.settings = { nb: k, coach: coach };
+      var names = ['You']; for (var i = 1; i <= k; i++) names.push('Bot ' + i);
+      var sh = U.Shell(main, h.base(ctx, { title: 'Card Table', scoreLabel: 'position', scoreText: function () { return signed(T.pos[0], 0); }, rounds: true,
+        rightText: function () { return 'round ' + (sch[Math.min(st.i, sch.length - 1)].round + 1) + ' / ' + (CT_CENTRE + 1); }, hint: 'Make markets on your turn; buy, sell or pass on theirs.',
+        onStart: function () { begin(); },
+        result: function () { T.done = true; var pl = ctPnl(T, 0); return { score: pl, scoreText: signed(pl, 0), scoreLabel: 'P&L · table total ' + T.total, x: { pnl: pl, total: T.total, trades: T.trades.filter(function (t) { return t.maker === 0 || t.taker === 0; }).length }, details: details() }; } }));
+      sh.body.innerHTML = '<div class="vs-wrap ct"><div class="ct-seats" id="ctSeats"></div>' +
+        '<div class="ct-centre"><span class="label">Centre</span><div class="he-cards" id="ctCentre"></div></div>' +
+        '<div class="ct-you"><span class="label">Your cards</span><div class="he-cards" id="ctMine"></div><span class="small" id="ctPos"></span></div>' +
+        '<div class="ct-panel" id="ctPanel"></div><div class="vs-coach small" id="ctCoach"></div><ul class="vs-feed small" id="ctFeed"></ul></div>';
+      function begin() { T.shown = sch[0].round; T.round = sch[0].round; turn(); }
+      function turn() {
+        if (st.i >= sch.length) { st.phase = 'end'; render(); sh.later(function () { sh.finish(false); }, 1600); return; }
+        var s = sch[st.i];
+        if (s.round !== T.round) { T.round = s.round; T.shown = s.round; st.log.push({ k: 'info', html: 'Centre card ' + T.shown + ' turned: <b>' + VS.cardTxt(T.centre[T.shown - 1]) + '</b> (' + ctVal(T.centre[T.shown - 1]) + ')' }); }
+        if (s.maker === 0) {
+          st.phase = 'quote';
+          if (st.bid == null) { st.bid = T.cards * CT_MEAN - CT_WIDTH / 2; st.ask = st.bid + CT_WIDTH; }    // start from the naive average; your last quote after that
+          render();
+        } else {
+          st.phase = 'wait'; render();
+          var botQuote = function () {
+            if (!sh.running) { sh.later(botQuote, 300); return; }
+            st.q = ctBotQuote(T, s.maker, lvl, rb); st.phase = 'respond'; render();
+          };
+          sh.later(botQuote, 700);
+        }
+      }
+      function afterQuote(maker, q, youAct) {
+        var acts = [];
+        for (var j = 1; j < T.n; j++) { if (j === maker) continue; var a = ctBotRespond(T, j, lvl, q); if (a !== 'pass') acts.push({ j: j, a: a }); }
+        if (youAct && youAct !== 'pass') acts.unshift({ j: 0, a: youAct });
+        var txt = [];
+        acts.forEach(function (x) { var tr = ctTrade(T, maker, x.j, x.a, q); txt.push(names[x.j] + ' ' + (x.a === 'buy' ? 'bought at ' : 'sold at ') + tr.px); });
+        st.log.push({ k: maker === 0 ? 'you' : 'info', html: names[maker] + ' quoted <b class="mono">' + q.bid + ' @ ' + q.ask + '</b>' + (txt.length ? ' — ' + esc(txt.join(', ')) : ' — no trades') });
+        st.i++; st.q = null;
+        sh.setScore(T.pos[0]);
+        turn();
+      }
+      function sendQuote() {
+        if (st.phase !== 'quote' || !sh.running) return;
+        var b = Math.round(+sh.$('#ctBid').value), a = Math.round(+sh.$('#ctAsk').value);
+        if (!isFinite(b) || !isFinite(a) || a <= b || a - b > CT_WIDTH) { core.toast('Ask must be above bid, at most ' + CT_WIDTH + ' wide.'); return; }
+        var e = ctEV(T, 0);
+        st.dec.push({ kind: 'quote', bid: b, ask: a, ev: e.ev, sd: e.sd, shown: T.shown, total: T.total });
+        st.bid = b; st.ask = a;
+        st.phase = 'busy'; afterQuote(0, { bid: b, ask: a }, null);
+      }
+      function respond(a) {
+        if (st.phase !== 'respond' || !st.q || !sh.running) return;
+        var e = ctEV(T, 0);
+        st.dec.push({ kind: 'respond', a: a, bid: st.q.bid, ask: st.q.ask, ev: e.ev, sd: e.sd, shown: T.shown, maker: sch[st.i].maker });
+        st.phase = 'busy'; afterQuote(sch[st.i].maker, st.q, a);
+      }
+      function render() {
+        var end = st.phase === 'end', s = sch[Math.min(st.i, sch.length - 1)];
+        sh.$('#ctSeats').innerHTML = names.map(function (nm, j) {
+          if (j === 0) return '';
+          var cards = end ? h.card(T.hands[j][0], 'sm') + h.card(T.hands[j][1], 'sm') : h.card(null, 'sm') + h.card(null, 'sm');
+          return '<div class="ld-seat' + (s.maker === j && !end ? ' turn' : '') + '"><b>' + nm + '</b><span class="he-cards">' + cards + '</span><span class="mono small">pos ' + signed(T.pos[j], 0) + '</span></div>';
+        }).join('');
+        var c = ''; for (var x = 0; x < CT_CENTRE; x++) c += x < T.shown || end ? h.card(T.centre[x]) : h.card(null);
+        sh.$('#ctCentre').innerHTML = c;
+        sh.$('#ctMine').innerHTML = h.card(T.hands[0][0]) + h.card(T.hands[0][1]);
+        var be = T.pos[0] ? -T.cash[0] / T.pos[0] : null;
+        sh.$('#ctPos').innerHTML = 'Position <b class="mono">' + signed(T.pos[0], 0) + '</b>' + (be != null ? ' · break-even total <b class="mono">' + num(be, 1) + '</b>' : '') + (end ? ' · table total <b>' + T.total + '</b> · P&L <b class="mono">' + signed(ctPnl(T, 0), 0) + '</b>' : '');
+        var pn = '';
+        if (st.phase === 'quote') pn = '<p class="small"><b>Your market.</b> Everyone else may buy your ask or sell your bid (1 lot each).</p><div class="row ct-q"><label>Bid <input id="ctBid" type="number" inputmode="numeric" value="' + st.bid + '"></label><label>Ask <input id="ctAsk" type="number" inputmode="numeric" value="' + st.ask + '"></label>' +
+          '<button type="button" class="btn sm ghost" data-sh="-1">−1</button><button type="button" class="btn sm ghost" data-sh="1">+1</button><button type="button" class="btn primary" id="ctSend">Quote <span class="kbd">Enter</span></button></div>';
+        else if (st.phase === 'respond' && st.q) pn = '<p><b>' + names[s.maker] + '</b> makes <b class="mono">' + st.q.bid + ' @ ' + st.q.ask + '</b></p><div class="row ct-r"><button type="button" class="btn" data-ra="sell">Sell ' + st.q.bid + ' <span class="kbd">S</span></button><button type="button" class="btn ghost" data-ra="pass">Pass <span class="kbd">P</span></button><button type="button" class="btn" data-ra="buy">Buy ' + st.q.ask + ' <span class="kbd">B</span></button></div>';
+        else if (st.phase === 'wait') pn = '<p class="muted">' + names[s.maker] + ' is thinking…</p>';
+        else if (end) pn = '<p><b>Table total ' + T.total + '.</b> Your P&L ' + signed(ctPnl(T, 0), 0) + '.</p>';
+        sh.$('#ctPanel').innerHTML = pn;
+        var sb = sh.$('#ctSend'); if (sb) sb.addEventListener('click', sendQuote);
+        $all('[data-sh]', sh.body).forEach(function (b) { b.addEventListener('click', function () { var d = +b.getAttribute('data-sh'); st.bid = Math.round(+sh.$('#ctBid').value) + d; st.ask = Math.round(+sh.$('#ctAsk').value) + d; render(); }); });
+        $all('[data-ra]', sh.body).forEach(function (b) { b.addEventListener('click', function () { respond(b.getAttribute('data-ra')); }); });
+        var co = '';
+        if (coach && !end) {
+          var e = ctEV(T, 0);
+          co = 'Your fair value: <b>' + num(e.ev, 1) + '</b> ± ' + num(e.sd, 1) + ' (known ' + e.known + ' + ' + e.unseen + ' unseen × ' + num(e.mean, 2) + ').';
+          var last = T.trades.slice(-3).filter(function (t) { return t.taker !== 0; });
+          if (last.length) co += '<br>' + last.map(function (t) { return names[t.taker] + (t.side === 'buy' ? ' bought at ' + t.px + ' → probably holds high cards' : ' sold at ' + t.px + ' → probably holds low cards'); }).join(' · ') + '.';
+          if (Math.abs(T.pos[0]) >= 3) co += '<br>You are ' + (T.pos[0] > 0 ? 'long' : 'short') + ' ' + Math.abs(T.pos[0]) + ': skew your quote ' + (T.pos[0] > 0 ? 'down' : 'up') + ' to lay off risk.';
+        }
+        sh.$('#ctCoach').innerHTML = co;
+        sh.$('#ctFeed').innerHTML = h.feed(st.log, 5);
+      }
+      sh.keys(function (e) {
+        var key = (e.key || '').toLowerCase();
+        if (st.phase === 'quote' && key === 'enter') { e.preventDefault(); sendQuote(); }
+        else if (st.phase === 'respond') { var m = { b: 'buy', s: 'sell', p: 'pass' }[key]; if (m) { e.preventDefault(); respond(m); } }
+      });
+      function details() {
+        var mine = T.trades.filter(function (t) { return t.maker === 0 || t.taker === 0; });
+        var asMaker = T.trades.filter(function (t) { return t.maker === 0; }), asTaker = T.trades.filter(function (t) { return t.taker === 0; });
+        function pnlOf(list, makerSide) { return E.sum(list.map(function (t) { var sgn = t.side === 'buy' ? 1 : -1; if (makerSide) sgn = -sgn; return sgn * (T.total - t.px); })); }
+        var quotes = st.dec.filter(function (d) { return d.kind === 'quote'; }), resp = st.dec.filter(function (d) { return d.kind === 'respond'; });
+        var centreErr = quotes.length ? E.mean(quotes.map(function (d) { return Math.abs((d.bid + d.ask) / 2 - d.ev); })) : null;
+        var missed = resp.filter(function (d) { return d.a === 'pass' && (d.ev - d.ask >= d.sd || d.bid - d.ev >= d.sd); }).length;
+        var against = resp.filter(function (d) { return (d.a === 'buy' && d.ask - d.ev > 1) || (d.a === 'sell' && d.ev - d.bid > 1); }).length;
+        var advice = [];
+        if (asMaker.length && pnlOf(asMaker, true) < 0) advice.push('Your quotes lost ' + signed(pnlOf(asMaker, true), 0) + ': the bots that traded with you knew their cards. When everyone lifts your offer, your fair value is too low — move up and tighten only when flow is balanced.');
+        if (against) advice.push(against + ' of your trades were against your own fair value by more than a point.');
+        if (missed) advice.push(missed + ' time' + (missed === 1 ? '' : 's') + ' you passed on a quote that was more than one standard deviation through your fair value.');
+        if (centreErr != null && centreErr > 2.5) advice.push('Your quotes were centred ' + num(centreErr, 1) + ' away from your own fair value on average. Centre on value, then skew for inventory.');
+        if (!advice.length) advice.push('Disciplined session: quotes centred on value and trades only with an edge.');
+        var rows = mine.map(function (t) { var you = t.taker === 0 ? (t.side === 'buy' ? 'bought' : 'sold') : (t.side === 'buy' ? 'sold (your ask)' : 'bought (your bid)'); var sgn = (t.taker === 0 ? 1 : -1) * (t.side === 'buy' ? 1 : -1); return '<tr><td>' + (t.round + 1) + '</td><td>' + you + '</td><td class="mono">' + t.px + '</td><td>' + names[t.taker === 0 ? t.maker : t.taker] + '</td><td class="mono">' + signed(sgn * (T.total - t.px), 0) + '</td></tr>'; }).join('');
+        var hands = names.map(function (nm, j) { return '<span class="ct-hand">' + nm + ': ' + h.card(T.hands[j][0], 'sm') + h.card(T.hands[j][1], 'sm') + ' <span class="mono">P&L ' + signed(ctPnl(T, j), 0) + '</span></span>'; }).join('');
+        return h.tiles([{ v: signed(ctPnl(T, 0), 0), l: 'your P&L', cls: ctPnl(T, 0) > 0 ? 'res-ok' : ctPnl(T, 0) < 0 ? 'res-bad' : '' }, { v: T.total, l: 'table total' }, { v: asMaker.length ? signed(pnlOf(asMaker, true), 0) : '—', l: 'P&L from your quotes' }, { v: asTaker.length ? signed(pnlOf(asTaker, false), 0) : '—', l: 'P&L from taking' }]) +
+          h.panel('Debrief', '<ul class="vs-debrief small">' + advice.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul><p class="small">' + hands + '</p>') +
+          h.reveal('Your trades', '<div class="table-scroll"><table class="simple small"><thead><tr><th>Round</th><th>You</th><th>Price</th><th>With</th><th>P&L</th></tr></thead><tbody>' + (rows || '<tr><td colspan="5" class="muted">No trades.</td></tr>') + '</tbody></table></div>');
+      }
+    }
+
+    /* ---------------------------- Make Me a Market ---------------------------- */
+    function fmtN(x) {
+      if (!isFinite(x)) return '—';
+      var a = Math.abs(x);
+      if (a >= 1e9) return num(x / 1e9, a >= 1e10 ? 1 : 2) + 'B';
+      if (a >= 1e6) return num(x / 1e6, a >= 1e7 ? 1 : 2) + 'M';
+      if (a >= 1e4) return num(x / 1e3, 1) + 'k';
+      return num(x, a >= 100 ? 0 : a >= 10 ? 1 : 2);
+    }
+    h.mount(AR.mmarket.meta, '<path d="M4 7h7M4 7l3-3M4 7l3 3M20 17h-7M20 17l-3-3M20 17l-3 3"/><path d="M14 5h6M4 19h6"/>', {
+      rules: ['Five questions with numeric answers you cannot look up. First give a wide market: your 90% interval (low, high).',
+        'Then three rounds of quoting a bid and an ask, each round tighter: ask ÷ bid at most 1.6, then 1.3, then 1.15. A counterparty with a private estimate of the answer sells to you if your bid is above its estimate and buys from you if your ask is below it — 1 to 3 lots, more when you are far off. Trades are information: if it keeps buying, you are too low.',
+        'Before the reveal, answer three questions about your book: your net position, your break-even (the answer at which your P&L is zero — or your flat P&L if you are flat), and your worst P&L if the answer is anywhere in your opening interval.',
+        'Score per question: 10 per correct book answer (within 2%), +10 if your interval contained the answer, plus your trading P&L in points (each lot’s profit as a % of the true value, a lot’s loss capped at 300).'],
+      recVariant: function (v) { return v; },
+      variantLabel: function (rv) { return ({ easy: 'Easy counterparty', medium: 'Medium counterparty', hard: 'Hard counterparty' })[rv] || rv; },
+      fmt: function (v) { return String(E.round(v, 0)); }, ghost: false,
+      settings: function (v) { return h.botLine(v, MM_BOTS) + '<p class="muted small">Numbers accept k, m, b suffixes and scientific notation (4.5m, 3e6).</p>'; },
+      start: function (main, ctx) { startMM(main, ctx); }
+    });
+    function startMM(main, ctx) {
+      var lvl = ctx.v, Q = mmPick(ctx.seed);
+      if (!Q.length) { main.innerHTML = '<div class="card"><p>Questions are not loaded yet.</p></div>'; return; }
+      var st = { i: 0, phase: 'interval', lo: null, hi: null, round: 0, tr: [], est: null, res: [], total: 0, quotes: [] };
+      var sh = U.Shell(main, h.base(ctx, { title: 'Make Me a Market', scoreLabel: 'points', scoreText: function (v) { return String(Math.round(v)); }, rounds: true,
+        rightText: function () { return Math.min(Q.length, st.i + 1) + ' / ' + Q.length; }, hint: 'Interval first, then three tighter markets.',
+        onStart: function () { load(); },
+        result: function () { return { score: Math.round(st.total), scoreText: Math.round(st.total) + ' pts', scoreLabel: 'over ' + st.res.length + ' questions', x: { n: st.res.length }, details: details() }; } }));
+      sh.body.innerHTML = '<div class="vs-wrap mm"><div class="mm-q" id="mmQ"></div><div id="mmBody"></div><div class="mm-book small" id="mmBook"></div><ul class="vs-feed small" id="mmFeed"></ul></div>';
+      function q() { return Q[st.i]; }
+      function load() { st.phase = 'interval'; st.lo = st.hi = null; st.round = 0; st.tr = []; st.quotes = []; st.log = []; st.est = mmEstimate(ctx.seed, st.i, q().a, lvl); render(); }
+      function readNum(id) { var el = sh.$('#' + id); return el ? mmParse(el.value) : NaN; }
+      function submitInterval() {
+        var lo = readNum('mmLo'), hi = readNum('mmHi');
+        if (!(lo > 0) || !(hi > lo)) { core.toast('Enter a low and a higher high (both positive).'); return; }
+        st.lo = lo; st.hi = hi; st.phase = 'quote'; render();
+      }
+      function submitQuote() {
+        var b = readNum('mmBid'), a = readNum('mmAsk'), R = MM.RATIO[st.round];
+        if (!(b > 0) || !(a > b)) { core.toast('Enter a bid and a higher ask.'); return; }
+        if (a / b > R + 1e-9) { core.toast('Too wide: ask ÷ bid must be at most ' + R + ' this round (now ' + num(a / b, 2) + ').'); return; }
+        var res = mmRespond(st.est, b, a, lvl);
+        st.quotes.push({ bid: b, ask: a, res: res });
+        if (res) { var t = { q: res.side === 'sell' ? res.q : -res.q, px: res.px }; st.tr.push(t); st.log.push({ k: res.side === 'sell' ? 'ok' : 'bad', html: 'Round ' + (st.round + 1) + ': you quoted ' + fmtN(b) + ' @ ' + fmtN(a) + ' — the counterparty <b>' + (res.side === 'sell' ? 'sold you ' : 'bought ') + res.q + '</b> at ' + fmtN(res.px) }); }
+        else st.log.push({ k: 'info', html: 'Round ' + (st.round + 1) + ': you quoted ' + fmtN(b) + ' @ ' + fmtN(a) + ' — no trade' });
+        st.round++;
+        if (st.round >= MM.ROUNDS) st.phase = 'quiz';
+        render();
+      }
+      function submitQuiz() {
+        var tr = st.tr, n = mmNet(tr), be = mmBreakEven(tr), wc = mmWorst(tr, st.lo, st.hi), flat = mmPnlAt(tr, 0);
+        var aPos = readNum('mmA1'), aBe = readNum('mmA2'), aWc = readNum('mmA3');
+        if (!isFinite(aPos) || !isFinite(aBe) || !isFinite(aWc)) { core.toast('Answer all three (negative numbers allowed).'); return; }
+        var ok1 = aPos === n, ok2 = n ? mmClose(aBe, be, 0.02) : mmClose(aBe, flat, 0.02), ok3 = mmClose(aWc, wc, 0.02);
+        var V = q().a, pts = mmPoints(tr, V), inInt = V >= st.lo && V <= st.hi;
+        var score = (ok1 ? 10 : 0) + (ok2 ? 10 : 0) + (ok3 ? 10 : 0) + (inInt ? 10 : 0) + pts;
+        st.total += score; sh.setScore(st.total);
+        st.res.push({ q: q(), lo: st.lo, hi: st.hi, quotes: st.quotes, tr: tr, n: n, be: be, wc: wc, flat: flat, ans: [aPos, aBe, aWc], ok: [ok1, ok2, ok3], inInt: inInt, pts: pts, score: score, pnl: mmPnlAt(tr, V), est: st.est });
+        st.phase = 'reveal'; render();
+      }
+      function next() { st.i++; if (st.i >= Q.length) { sh.finish(false); return; } load(); }
+      function render() {
+        var qq = q();
+        sh.$('#mmQ').innerHTML = '<span class="muted small">Question ' + (st.i + 1) + ' of ' + Q.length + ' · answer in ' + esc(qq.unit) + '</span><p class="mm-qt"><b>' + esc(qq.q) + '</b></p>';
+        var b = '';
+        if (st.phase === 'interval') b = '<p class="small">Your 90% interval — wide is fine, but it should contain the answer 9 times in 10.</p><form class="row" id="mmF"><label>Low <input id="mmLo" type="text" inputmode="decimal" autocomplete="off"></label><label>High <input id="mmHi" type="text" inputmode="decimal" autocomplete="off"></label><button type="submit" class="btn primary">Set interval</button></form>';
+        else if (st.phase === 'quote') {
+          var last = st.quotes[st.quotes.length - 1], R = MM.RATIO[st.round];
+          b = '<p class="small">Round ' + (st.round + 1) + ' of ' + MM.ROUNDS + ': ask ÷ bid ≤ <b>' + R + '</b>. Interval ' + fmtN(st.lo) + ' – ' + fmtN(st.hi) + '.</p><form class="row" id="mmF"><label>Bid <input id="mmBid" type="text" inputmode="decimal" autocomplete="off" value="' + (last ? esc(String(E.round(last.bid, 6))) : '') + '"></label><label>Ask <input id="mmAsk" type="text" inputmode="decimal" autocomplete="off" value="' + (last ? esc(String(E.round(last.ask, 6))) : '') + '"></label><button type="submit" class="btn primary">Quote</button></form>';
+        } else if (st.phase === 'quiz') {
+          var n = mmNet(st.tr);
+          b = '<p class="small"><b>Before the reveal — answer for your book.</b> (Your trades are listed below.)</p><form class="stack mm-quiz" id="mmF">' +
+            '<label>1. Net position in lots (+ long, − short) <input id="mmA1" type="text" inputmode="decimal" autocomplete="off"></label>' +
+            '<label>2. ' + (n ? 'Break-even: the answer at which your P&L is exactly 0' : 'You are flat — your P&L at any answer') + ' <input id="mmA2" type="text" inputmode="decimal" autocomplete="off"></label>' +
+            '<label>3. Worst P&L if the answer is anywhere in your interval ' + fmtN(st.lo) + ' – ' + fmtN(st.hi) + ' <input id="mmA3" type="text" inputmode="decimal" autocomplete="off"></label>' +
+            '<button type="submit" class="btn primary">Reveal</button></form>';
+        } else if (st.phase === 'reveal') {
+          var R2 = st.res[st.res.length - 1];
+          function mark(ok) { return ok ? '<span class="res-ok">✓</span>' : '<span class="res-bad">✗</span>'; }
+          b = '<div class="mm-reveal"><p>Answer: <b>' + fmtN(qq.a) + '</b> ' + esc(qq.unit) + (R2.inInt ? ' — inside your interval (+10)' : ' — <span class="res-bad">outside your interval</span>') + '</p>' +
+            '<p class="small">Counterparty’s private estimate was ' + fmtN(R2.est) + '. ' + esc(qq.src || '') + '</p>' +
+            '<ul class="small"><li>' + mark(R2.ok[0]) + ' Position: ' + signed(R2.n, 0) + ' (you said ' + esc(String(R2.ans[0])) + ')</li>' +
+            '<li>' + mark(R2.ok[1]) + ' ' + (R2.n ? 'Break-even: ' + fmtN(R2.be) : 'Flat P&L: ' + fmtN(R2.flat)) + ' (you said ' + fmtN(R2.ans[1]) + ')</li>' +
+            '<li>' + mark(R2.ok[2]) + ' Worst case in your interval: ' + fmtN(R2.wc) + ' (you said ' + fmtN(R2.ans[2]) + ')</li></ul>' +
+            '<p>Trading P&L at the answer: <b class="mono">' + fmtN(R2.pnl) + '</b> (' + signed(R2.pts, 0) + ' points) · question score <b>' + Math.round(R2.score) + '</b></p>' +
+            '<button type="button" class="btn primary" id="mmNext">' + (st.i + 1 >= Q.length ? 'See results' : 'Next question') + ' <span class="kbd">Enter</span></button></div>';
+        }
+        sh.$('#mmBody').innerHTML = b;
+        var f = sh.$('#mmF');
+        if (f) { f.addEventListener('submit', function (e) { e.preventDefault(); if (!sh.running) return; if (st.phase === 'interval') submitInterval(); else if (st.phase === 'quote') submitQuote(); else if (st.phase === 'quiz') submitQuiz(); }); var first = f.querySelector('input'); if (first) try { first.focus({ preventScroll: true }); } catch (e) { } }
+        var nx = sh.$('#mmNext'); if (nx) { nx.addEventListener('click', next); try { nx.focus({ preventScroll: true }); } catch (e) { } }
+        sh.$('#mmBook').innerHTML = st.tr.length && st.phase !== 'interval' ? '<span class="label">Your trades</span>' + st.tr.map(function (t) { return '<span class="mono">' + (t.q > 0 ? 'bought ' + t.q : 'sold ' + (-t.q)) + ' @ ' + fmtN(t.px) + '</span>'; }).join(' · ') : '';
+        sh.$('#mmFeed').innerHTML = h.feed(st.log || [], 4);
+      }
+      sh.keys(function (e) { if (e.key === 'Enter' && st.phase === 'reveal') { e.preventDefault(); next(); } });
+      function details() {
+        var R = st.res, hit = R.filter(function (x) { return x.inInt; }).length, book = E.sum(R.map(function (x) { return x.ok.filter(Boolean).length; }));
+        var lifted = R.filter(function (x) { var s = x.quotes.map(function (q) { return q.res ? q.res.side : null; }).filter(Boolean); return s.length >= 2 && s.every(function (y) { return y === s[0]; }); }).length;
+        var advice = [];
+        if (R.length && hit / R.length < 0.7) advice.push('Your 90% intervals caught the answer ' + hit + ' times in ' + R.length + ' — too narrow. Honest 90% intervals usually span a factor of 3–10 on Fermi questions.');
+        if (lifted) advice.push('On ' + lifted + ' question' + (lifted === 1 ? '' : 's') + ' the counterparty traded the same way two or more rounds running. Repeated buying means you are too low: move your whole market, not just the side that traded.');
+        if (R.length && book < 2.5 * R.length) advice.push('Book questions: ' + book + ' of ' + 3 * R.length + ' right. Position = buys − sells; break-even = (Σ buy prices − Σ sell prices) ÷ net position; P&L is linear in the answer, so the worst case over an interval is at one of its ends.');
+        if (!advice.length) advice.push('Calibrated intervals and a clean book. Try the hard counterparty.');
+        var rows = R.map(function (x, j) { return '<tr><td>' + (j + 1) + '</td><td class="small">' + esc(x.q.q) + '</td><td class="mono">' + fmtN(x.q.a) + '</td><td class="mono">' + fmtN(x.lo) + '–' + fmtN(x.hi) + '</td><td class="mono">' + signed(x.n, 0) + '</td><td class="mono">' + signed(x.pts, 0) + '</td><td class="mono">' + Math.round(x.score) + '</td></tr>'; }).join('');
+        return h.tiles([{ v: Math.round(st.total), l: 'points' }, { v: hit + ' / ' + R.length, l: 'intervals that hit' }, { v: book + ' / ' + 3 * R.length, l: 'book answers right' }, { v: signed(E.sum(R.map(function (x) { return x.pts; })), 0), l: 'trading points' }]) +
+          h.panel('Debrief', '<ul class="vs-debrief small">' + advice.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>') +
+          h.reveal('Question by question', '<div class="table-scroll"><table class="simple small"><thead><tr><th>#</th><th>Question</th><th>Answer</th><th>Interval</th><th>Net</th><th>Trading pts</th><th>Score</th></tr></thead><tbody>' + rows + '</tbody></table></div>');
+      }
     }
   });
 })(typeof window !== 'undefined' ? window : globalThis);
