@@ -171,15 +171,16 @@
     var c = C(), tg = nextTargets().filter(function (x) { return x.date >= today(); });
     var cd = tg.map(function (x) { return '<span class="cdchip"><b>' + compShort(x.id) + '</b> ' + esc(inDays(x.date)) + '</span>'; }).join('');
     var html;
+    // v2.1 calm Home: compact card — title + one quiet button on one line, countdowns as a muted line below.
     if (!c.setup) {
-      html = '<div class="card comp-home"><div class="row"><span class="ticon" style="--cat: var(--accent)">' + ICONS.trophy + '</span><div style="flex:1;min-width:0"><b>Competition prep</b><div class="row" style="gap:.35rem;margin-top:.2rem">' + cd + '</div></div>' +
-        '<a class="btn primary sm" href="#comp/setup">Build my plan</a></div></div>';
+      html = '<div class="card comp-home home-card"><div class="hc-head"><b class="hc-t">Competition prep</b><a class="btn sm" href="#comp/setup">Build plan</a></div>' +
+        (cd ? '<p class="hc-sub">' + cd + '</p>' : '') + '</div>';
     } else {
       var day = K.todayDay();
       var tasks = day ? day.tasks : [];
       var left = tasks.filter(function (t) { return !K.isDone(t, day); });
-      html = '<div class="card comp-home"><div class="row"><span class="ticon" style="--cat: var(--accent)">' + ICONS.trophy + '</span><div style="flex:1;min-width:0"><b>Today’s competition plan</b><div class="row" style="gap:.35rem;margin-top:.2rem">' + cd + '</div></div>' +
-        '<a class="btn primary sm" href="#comp">Open</a></div>' +
+      html = '<div class="card comp-home home-card"><div class="hc-head"><b class="hc-t">Today’s competition plan</b><a class="btn sm" href="#comp">Open</a></div>' +
+        (cd ? '<p class="hc-sub">' + cd + '</p>' : '') +
         (day && tasks.length ? '<ul class="tasks compact">' + tasks.slice(0, 4).map(function (t) { return taskRow(t, day); }).join('') + '</ul>' + (left.length ? '' : '<p class="small res-ok" style="margin:.4rem 0 0">All done for today.</p>')
           : '<p class="muted small" style="margin:.5rem 0 0">' + (day && day.rest ? 'Rest day — nothing scheduled.' : 'No tasks today.') + '</p>') + '</div>';
     }

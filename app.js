@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var APP_VERSION = '2.0.0';
+  var APP_VERSION = '2.1.0';
   var STORE_KEY = 'statbt.progress.v1'; // key kept stable across versions; schema version lives in state.v
   var SCHEMA = 4;
   var PROBLEMS = Array.isArray(window.PROBLEMS) ? window.PROBLEMS : [];
@@ -28,9 +28,12 @@
     { id: 'options', name: 'Options', short: 'Opt', group: 'trading', icon: 'hockey' },
     { id: 'mm', name: 'Market making', short: 'MM', group: 'trading', icon: 'ladder' },
     { id: 'gametheory', name: 'Game theory', short: 'Games', group: 'trading', icon: 'knight' },
+    { id: 'micro', name: 'Microstructure', short: 'Micro', group: 'trading', icon: 'ladder' },
     { id: 'python', name: 'Python', short: 'Py', group: 'tech', icon: 'code' },
     { id: 'sql', name: 'SQL', short: 'SQL', group: 'tech', icon: 'db' },
-    { id: 'ml', name: 'Machine learning', short: 'ML', group: 'tech', icon: 'nodes' }
+    { id: 'ml', name: 'Machine learning', short: 'ML', group: 'tech', icon: 'nodes' },
+    { id: 'coding', name: 'Coding lab', short: 'Code', group: 'tech', icon: 'code' },
+    { id: 'systems', name: 'Systems & design', short: 'Design', group: 'tech', icon: 'db' }
   ];
   var CAT = {};
   CATS.forEach(function (c) { CAT[c.id] = c; });
@@ -537,6 +540,7 @@
       if (i < 0 || i >= (a.options || []).length) return { invalid: true };
       return { ok: i === a.correct, choice: i };
     }
+    if (ANSWER_TYPES[a.type] && ANSWER_TYPES[a.type].check) return ANSWER_TYPES[a.type].check(p, raw);
     return { invalid: true };
   }
   function answerDisplay(p) {
@@ -621,7 +625,7 @@
     });
     var dark = t === 'dark' || (t === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     var meta = $('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', dark ? '#0b1020' : '#f5f6fa');
+    if (meta) meta.setAttribute('content', dark ? '#131416' : '#f5f5f6');
   }
   function cycleTheme() {
     var order = ['auto', 'light', 'dark'];
@@ -824,7 +828,18 @@
   function runCleanups() { while (cleanups.length) { try { cleanups.pop()(); } catch (e) { } } ctl = null; }
 
   var VIEWS = {};
-  var HOOKS = { graded: [], homeCards: [], homeAfter: [], settingsCards: [], settingsAfter: [], exportData: [], importData: [], mergeState: [], boot: [] };
+  var HOOKS = { graded: [], homeCards: [], homeAfter: [], settingsCards: [], settingsAfter: [], exportData: [], importData: [], mergeState: [], boot: [],
+    // v2.1: extension points for the feature modules (mock.js, learn.js, library.js, codelab.js, deck.js, arcade)
+    trainCards: [],   // fn() -> html of extra Train hub cards
+    topicCards: [],   // fn(catId) -> html of extra cards in a topic page's side column
+    firmCards: [],    // fn(firmId) -> html of extra cards on a firm page
+    moreItems: []     // fn() -> html of extra rows on the mobile More page
+  };
+  /* v2.1: custom answer types (e.g. 'open' self-graded design questions, 'code' Python problems).
+   * ANSWER_TYPES[type] = { html(p, opts) -> string, bind(card, p, api) , check?(p, raw) }
+   * api = { grade(correct, how), feedback(kind, html), openSolution(), state, interview, opts } */
+  var ANSWER_TYPES = {};
+  function runHtmlHooks(list, arg) { return list.map(function (fn) { try { return fn(arg) || ''; } catch (e) { console.warn(e); return ''; } }).join(''); }
   var TAB_OF = { home: 'home', practice: 'practice', play: 'practice', review: 'review', train: 'train', sprint: 'train', drills: 'train', interview: 'train', stats: 'stats', settings: 'settings',
     sets: 'practice', core50: 'practice', topics: 'practice', topic: 'practice', firms: 'practice', firm: 'practice', arcade: 'train', prep: 'train', superday: 'train' };
   var TITLES = { home: 'Home', practice: 'Practice', play: 'Practice', review: 'Review', train: 'Train', sprint: 'Mental math', drills: 'Probability drills', interview: 'Interview mode', stats: 'Stats', settings: 'Settings',
@@ -1124,6 +1139,8 @@
       html += '<div class="choices" role="group" aria-label="Answer choices">' + a.options.map(function (o, i) {
         return '<button type="button" class="choice" data-i="' + i + '"><span class="letter">' + letters[i] + '</span><span>' + o + '</span></button>';
       }).join('') + '</div>';
+    } else if (ANSWER_TYPES[a.type]) {
+      html += '<div class="answer-custom" data-atype="' + esc(a.type) + '">' + ANSWER_TYPES[a.type].html(p, opts) + '</div>';
     } else {
       html += '<p class="answer-help">Open question — work it out (paper helps), then reveal the solution and grade yourself honestly.</p>';
     }
@@ -1419,6 +1436,11 @@
     });
 
     if (input && opts.autofocus !== false && hoverDevice()) input.focus();
+    if (ANSWER_TYPES[a.type] && ANSWER_TYPES[a.type].bind) {
+      try {
+        ANSWER_TYPES[a.type].bind(card.querySelector('.answer-custom'), p, { grade: grade, feedback: feedback, openSolution: openSolution, state: st, interview: interview, opts: opts, card: card, confetti: confetti });
+      } catch (e) { console.warn(e); }
+    }
 
     return {
       submit: submit, hint: hint, solution: solution,
@@ -1440,6 +1462,11 @@
         '<li><b>Practice</b> by topic or interview format; <b>Review</b> brings back what you missed.</li>' +
         '<li><b>Train</b>: mental math, the <b>Arcade</b> (80 in 8, sequences, market-making games), a 45-minute <b>superday mock</b> and an <b>interview study plan</b> for your target firm and date.</li>' +
         '<li><b>Compete</b>: a coach for QUMC and the Putnam, with a day-by-day plan and a reflection journal.</li></ul>' },
+      { t: 'Rehearse the real interview', b: '<ul>' +
+        '<li><b>Mock interview</b>: timed rounds that run like the real thing — explain your plan first, solve with a hint ladder, answer the interviewer’s follow-up, then get a debrief and a scorecard.</li>' +
+        '<li><b>Learn</b>: short concept lessons that point you to the best chapter or video, and a <b>Library</b> of curated books, courses and guides with your reading status and notes.</li>' +
+        '<li><b>Coding lab</b>: Python problems with real tests. The optional runner (about 10 MB, downloaded once) works offline afterwards.</li>' +
+        '<li><b>Interview guide</b>: how the process runs and what each firm expects, with every fact tied to its source.</li></ul>' },
       { t: 'Install it — works offline', b: isIOS()
         ? '<p>On iPhone/iPad in <b>Safari</b>: tap <b>Share</b> then <b>Add to Home Screen</b>.</p><p>After the first visit everything is cached, so it works on the metro with no signal.</p>'
         : '<p>On a computer: click <b>Install</b> (or the install icon in Chrome/Edge’s address bar).</p><p>On Android: Chrome menu → <b>Install app</b>. On iPhone: Safari → Share → <b>Add to Home Screen</b>.</p><p>Once loaded, it works fully offline.</p>' },
@@ -1500,10 +1527,11 @@
       '<span class="tbar" role="img" aria-label="' + Math.round(frac * 100) + '% solved"><span style="width:' + (frac * 100) + '%"></span></span></span></button>';
   }
   VIEWS.home = function (main) {
+    // v2.1 calm Home: only the essentials — streak, a quick start, today's tasks (module hook cards).
+    // Topics, train modes and prep pages stay one tap away (Practice / Train / More); a collapsed topic list is kept at the bottom.
     var due = dueIds().length;
     var sk = streakInfo();
     var si = sessionInfo();
-    var weak = weakestCategory();
     var html = '';
     if (isIOS() && !isStandalone() && !S.ui.iosHintDismissed && S.ui.onboarded) {
       html += '<div class="banner" id="iosHint"><p><b>Install on iPhone:</b> tap <b>Share</b> then <b>Add to Home Screen</b>. It then works fully offline.</p>' +
@@ -1511,45 +1539,31 @@
     }
     var h = new Date().getHours();
     var greet = h < 5 ? 'Late-night session' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-    html += '<section class="hero-card"><div class="hero-text"><p class="eyebrow">' + greet + '</p><h1>What are we training today?</h1>' +
-      '<p class="muted">' + PROBLEMS.length + ' problems · ' + solvedCount() + ' solved · ' + sk.cur + '-day streak</p></div>' +
-      '<div class="hero-actions">' +
-      (si && !si.finished ? '<button type="button" class="btn primary lg" id="contBtn">' + ICONS.play + '<span><b>Continue</b><small>' + esc(si.label) + ' · ' + (si.idx + 1) + '/' + si.n + '</small></span></button>' : '') +
-      '<button type="button" class="btn ' + (si && !si.finished ? '' : 'primary ') + 'lg" id="mixBtn">' + ICONS.shuffle + '<span><b>Daily mix</b><small>10 problems, weighted to weak & due</small></span></button>' +
+    var dateTxt = '';
+    try { dateTxt = new Date(today() + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }); } catch (e) { dateTxt = today(); }
+    html += '<header class="home-head"><div class="home-hl"><p class="eyebrow">' + esc(greet) + ' · ' + esc(dateTxt) + '</p><h1>Today</h1></div>' +
+      '<div class="streak" role="img" aria-label="' + sk.cur + '-day streak, longest ' + sk.best + '"><b>' + sk.cur + '</b><span>day streak</span></div></header>';
+    // quick start: one primary action, at most two quiet secondary ones
+    var cont = si && !si.finished;
+    html += '<section class="card home-start" aria-label="Quick start"><div class="home-actions">' +
+      (cont ? '<button type="button" class="btn primary lg" id="contBtn">' + ICONS.play + '<span><b>Continue</b><small>' + esc(si.label) + ' · ' + (si.idx + 1) + '/' + si.n + '</small></span></button>' : '') +
+      '<button type="button" class="btn ' + (cont ? '' : 'primary ') + 'lg" id="mixBtn">' + ICONS.shuffle + '<span><b>Daily mix</b><small>10 problems, weighted to weak &amp; due</small></span></button>' +
       (due ? '<a class="btn lg" href="#review">' + ICONS.review + '<span><b>Review ' + due + '</b><small>due today</small></span></a>' : '') +
-      '</div></section>';
-    html += '<div class="tiles">' +
-      '<div class="stat-tile' + (due ? ' accent' : '') + '"><div class="v">' + due + '</div><div class="l">Due today</div></div>' +
-      '<div class="stat-tile"><div class="v">' + sk.cur + '<small> d</small></div><div class="l">Streak</div></div>' +
-      '<div class="stat-tile"><div class="v">' + solvedCount() + '<small>/' + PROBLEMS.length + '</small></div><div class="l">Solved</div></div>' +
-      '<div class="stat-tile"><div class="v">' + bestSprintText() + '</div><div class="l">Best sprint</div></div></div>';
-    HOOKS.homeCards.forEach(function (fn) { try { html += fn() || ''; } catch (e) { console.warn(e); } });
-    GROUPS.forEach(function (g) {
-      var cs = CATS.filter(function (c) { return c.group === g.id && catStats(c.id).total; });
-      if (!cs.length) return;
-      html += '<section class="group"><div class="group-head"><h2>' + esc(g.name) + '</h2><p class="muted small">' + esc(g.desc) + '</p></div>' +
-        '<div class="topics">' + cs.map(topicCard).join('') + '</div></section>';
-    });
-    html += '<section class="group"><div class="group-head"><h2>Train</h2><p class="muted small">Speed, stamina and interview formats.</p></div><div class="mode-grid">' +
-      modeCard('#sprint', 'sprint', 'Mental math sprint', 'Best ' + bestSprintText() + ' · Zetamac-style') +
-      (window.SBT_ARCADE ? '' : modeCard('#arcade', 'joystick', 'Arcade', '80 in 8, sequences, market-making games')) + // the arcade module adds its own Home card
-      modeCard('#drills', 'drills', 'Probability drills', 'Endless generated questions') +
-      modeCard('#interview', 'interview', 'Interview mode', '5 problems against the clock') +
-      modeCard('#superday', 'mic', 'Superday mock', '45-min mixed set, out loud') +
-      modeCard('#prep', 'route', 'Interview plan', 'Day-by-day prep for a firm & date') + '</div></section>' +
-      '<section class="group"><div class="group-head"><h2>Prepare</h2><p class="muted small">Learn the topics and the firms’ formats.</p></div><div class="mode-grid">' +
-      modeCard('#topics', 'book', 'Topics & concepts', 'Mini-lessons, books, progress') +
-      modeCard('#firms', 'building', 'Firm prep', 'Process, rounds, checklists') +
-      modeCard('#core50', 'list', 'Core 50', core50Progress().done + '/' + core50Progress().n + ' of the must-do list') + '</div></section>';
-    if (weak) {
-      html += '<div class="banner"><p><b>Suggested focus: ' + esc(catName(weak.id)) + '</b> — ' + (weak.score !== null ? 'your lowest accuracy so far (' + pct(weak.score) + ').' : 'the topic you’ve practiced least.') + '</p>' +
-        '<button class="btn sm primary" type="button" data-topic="' + weak.id + '">Start</button></div>';
-    }
+      '</div><p class="home-meta">' + solvedCount() + ' of ' + PROBLEMS.length + ' solved' + (due ? '' : ' · nothing due') + ' · best sprint ' + bestSprintText() + '</p></section>';
+    // today's tasks: interview plan, competition plan, arcade daily (module hooks)
+    var cards = '';
+    HOOKS.homeCards.forEach(function (fn) { try { cards += fn() || ''; } catch (e) { console.warn(e); } });
+    if (!window.SBT_ARCADE) cards += '<a class="card home-row" href="#arcade"><span class="ticon">' + ICONS.joystick + '</span><span class="hr-t"><b>Arcade</b><small>80 in 8, sequences, market-making games</small></span></a>';
+    if (cards) html += '<section class="home-today" aria-labelledby="homeTodayH"><div class="group-head"><h2 id="homeTodayH">Today’s plan</h2></div>' + cards + '</section>';
+    // topics stay reachable from Home, folded away
+    var topics = CATS.filter(function (c) { return catStats(c.id).total; });
+    html += '<details class="reveal home-topics"><summary>' + ICONS.book + '<span>Start a topic</span><small class="muted">' + topics.length + ' topics</small><span class="chev" aria-hidden="true">▾</span></summary>' +
+      '<div class="rbody"><div class="topics">' + topics.map(topicCard).join('') + '</div>' +
+      '<p class="small muted home-links"><a href="#topics">Topics &amp; concepts</a> · <a href="#practice">All problems</a> · <a href="#train">Train</a></p></div></details>';
     // One-time, dismissible offer for update notifications (after onboarding).
     if (S.ui.onboarded && !S.ui.notifyOffered && !S.settings.notify && 'Notification' in window && Notification.permission !== 'denied') {
-      var offer = '<div class="banner offer" id="notifyOffer"><p><b>Want to know when new problems land?</b> Turn on update notifications — you can change this anytime in Settings.</p>' +
+      html += '<div class="banner offer" id="notifyOffer"><p><b>Want to know when new problems land?</b> Turn on update notifications — you can change this anytime in Settings.</p>' +
         '<div class="row"><button class="btn sm primary" type="button" id="offerYes">Turn on</button><button class="btn sm ghost" type="button" id="offerNo">No thanks</button></div></div>';
-      html = html.replace('<section class="group">', offer + '<section class="group">');
     }
     main.innerHTML = html;
     HOOKS.homeAfter.forEach(function (fn) { try { fn(main); } catch (e) { console.warn(e); } });
@@ -1893,12 +1907,13 @@
     var d = S.drills, ivs = S.interviews;
     main.innerHTML = '<div class="page-head"><div><h1>Train</h1><p class="muted">Timed and generated practice, games and full mock days — the reps that make interviews feel easy.</p></div></div>' +
       '<div class="train-grid">' +
-      trainCard('#sprint', 'sprint', 'Mental math sprint', 'Zetamac/Optiver-style: + − × ÷ against the clock, or the quant mix (percentages, fractions, squares).', 'Best (classic 120s): ' + bestSprintText()) +
+      trainCard('#sprint', 'sprint', 'Mental math sprint', 'Timed arithmetic in the online-test format: + − × ÷ against the clock, or the quant mix (percentages, fractions, squares).', 'Best (classic 120s): ' + bestSprintText()) +
       trainCard('#drills', 'drills', 'Probability drills', 'Endless generated questions with exact answers: dice, cards, binomial, Bayes, 2×2 tables, waiting times.', d.n ? d.c + '/' + d.n + ' correct · best streak ' + (d.bestStreak || 0) : 'Not started') +
       trainCard('#interview', 'interview', 'Interview mode', '5 problems from different topics with a countdown on each. Summary and solutions at the end.', ivs.length ? ivs.length + ' sessions · last ' + ivs[ivs.length - 1].score + '/' + ivs[ivs.length - 1].total : 'Not started') +
       trainCard('#arcade', 'joystick', 'Arcade', 'Online-test style games: Arithmetic Mania, 80 in 8, number sequences, balloon risk, card-counting and dice market making, Fermi and Kelly.', arcadeStat()) +
       trainCard('#superday', 'mic', 'Superday mock', 'A timed 45-minute mixed set you solve out loud, then a 5-point self-assessment and a mistake log. Stamina mode: 4 back-to-back.', (S.prep && S.prep.mocks && S.prep.mocks.length) ? S.prep.mocks.length + ' mocks logged' : 'Not started') +
       trainCard('#prep', 'route', 'Interview plan', 'A deterministic day-by-day plan for your target date and firm: mental math → topic problems → format practice → review misses.', S.prep && S.prep.setup ? 'Target ' + S.prep.setup.date : 'Not set up') +
+      runHtmlHooks(HOOKS.trainCards) +
       '</div>';
   };
   function arcadeStat() {
@@ -1907,7 +1922,7 @@
     return A.games.length + ' games';
   }
   function trainCard(href, icon, title, desc, stat) {
-    return '<a class="train-card card" href="' + href + '"><span class="ic">' + ICONS[icon] + '</span><h2>' + esc(title) + '</h2><p class="muted">' + esc(desc) + '</p><p class="small"><b>' + esc(String(stat)) + '</b></p><span class="btn primary sm">Open ' + ICONS.right + '</span></a>';
+    return '<a class="train-card card" href="' + href + '"><span class="ic">' + ICONS[icon] + '</span><h2>' + esc(title) + '</h2><p class="muted">' + esc(desc) + '</p><p class="small muted">' + esc(String(stat)) + '</p><span class="btn sm">Open ' + ICONS.right + '</span></a>';
   }
   function subHead(title, desc) {
     return '<div class="page-head"><div><a class="back-link" href="#train">' + ICONS.left + ' Train</a><h1>' + esc(title) + '</h1>' + (desc ? '<p class="muted">' + desc + '</p>' : '') + '</div></div>';
@@ -2009,7 +2024,7 @@
         [30, 60, 120, 180].map(function (d) { return '<button type="button" data-dur="' + d + '" aria-pressed="' + (cfg.dur === d) + '">' + d + 's</button>'; }).join('') + '</div></div>' +
         (cfg.mode === 'classic'
           ? '<div class="ops-grid">' + opRow('add', 'Addition', 'addA', 'addB', '+') + opRow('sub', 'Subtraction') + opRow('mul', 'Multiplication', 'mulA', 'mulB', '×') + opRow('div', 'Division') + '</div>' +
-            '<div><button type="button" class="btn sm ghost" id="resetRanges">Reset to Zetamac defaults</button></div>'
+            '<div><button type="button" class="btn sm ghost" id="resetRanges">Reset to default ranges</button></div>'
           : '<p class="muted small" style="margin:0">Quant mix: percentages (15% of 240), fractions to 3 decimals (5/16), squares to 35², 2-digit × teens, decimals (0.7 × 0.35), % change (80 → 100 = 25).</p>') +
         '<button type="button" class="btn primary block lg" id="startBtn">Start ' + cfg.dur + 's sprint <span class="kbd">Enter</span></button>' +
         '</div>' +
@@ -2808,7 +2823,8 @@
   /* ------------------------------------------------------------------ */
   window.StatBT = { parseNumber: parseNumber, checkAnswer: checkAnswer, checkNumeric: checkNumeric, checkMulti: checkMulti, splitList: splitList, DRILLS: DRILLS, version: APP_VERSION, schema: SCHEMA,
     migrate: migrate, dailyMix: dailyMix, state: function () { return S; }, status: status, filtersToQuery: filtersToQuery, queryToFilters: queryToFilters, filtered: filtered,
-    pickOneIdx: pickOneIdx, relatedProblems: relatedProblems, topicWeakness: topicWeakness, mergeProgress: mergeProgress, CORE50: CORE50, ENCOURAGE: ENCOURAGE };
+    pickOneIdx: pickOneIdx, relatedProblems: relatedProblems, topicWeakness: topicWeakness, mergeProgress: mergeProgress, CORE50: CORE50, ENCOURAGE: ENCOURAGE,
+    ANSWER_TYPES: ANSWER_TYPES };
 
   /* Plugin API (competition coach etc. live in separate files and register views/hooks here) */
   var core = {
@@ -2823,7 +2839,10 @@
     filtered: filtered, filtersToQuery: filtersToQuery, queryToFilters: queryToFilters, practiceHash: practiceHash, orderForPractice: orderForPractice, mountProblem: mountProblem,
     topicWeakness: topicWeakness, statusCounts: statusCounts, setList: setList, newSet: newSet, modeCard: modeCard, subHead: subHead, pct: pct, shuffle: shuffle, pick: pick,
     fmtNum: fmtNum, sparkline: sparkline, answerDisplay: answerDisplay, solutionBody: solutionBody, bestSprintText: bestSprintText, startTopic: startTopic, RETRY_DAYS: RETRY_DAYS,
-    get modalOpen() { return modalOpen; }, set modalOpen(v) { modalOpen = v; }
+    get modalOpen() { return modalOpen; }, set modalOpen(v) { modalOpen = v; },
+    // v2.1
+    ANSWER_TYPES: ANSWER_TYPES, runHtmlHooks: runHtmlHooks, pageHead: pageHead, catBadge: catBadge, checkAnswer: checkAnswer, recordAttempt: recordAttempt,
+    trainCard: trainCard, confetti: confetti, randInt: randInt, gcd: gcd, parseNumber: parseNumber, checkMulti: checkMulti, defaultState: defaultState
   };
   (window.SBT_PLUGINS || []).forEach(function (fn) { try { fn(core); } catch (e) { console.error('plugin failed', e); } });
 

@@ -4,11 +4,15 @@
  * BUILD is stamped by .github/workflows/deploy.yml on every push (commit sha + run number),
  * so this file's bytes change on every deploy and browsers detect a new service worker.
  * Locally it stays 'dev' and everything still works. */
-var VERSION = '2.0.0';
+var VERSION = '2.1.0';
 var BUILD = 'dev';
 var CACHE_PREFIX = 'stat-brainteaser-';
 var CACHE = CACHE_PREFIX + 'v' + VERSION + '-' + BUILD;
 var META_CACHE = 'sbt-meta'; // small key/value store (last build we notified about); not an app cache
+// Coding lab: the optional Pyodide download (pinned version) lives in its own runtime cache. Its name does not start with
+// CACHE_PREFIX, so app updates (activate cleanup) never delete it; a new Pyodide version gets a new cache name.
+var PYODIDE_BASE = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/';
+var PYODIDE_CACHE = 'sbt-pyodide-v0.26.4';
 
 var PRECACHE = [
   './',
@@ -22,6 +26,17 @@ var PRECACHE = [
   './prep-data.js',
   './prep.js',
   './prep-ui.js',
+  './features.css',
+  './library-data.js',
+  './library.js',
+  './learn-data.js',
+  './learn.js',
+  './guide-data.js',
+  './guide.js',
+  './deck.js',
+  './codelab.js',
+  './codelab-worker.js',
+  './mock.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -128,6 +143,22 @@ self.addEventListener('fetch', function (event) {
   var req = event.request;
   if (req.method !== 'GET') return;
   var url = new URL(req.url);
+  // Coding lab runtime (cross-origin, pinned): cache-first in its own cache so the lab works offline after one download.
+  if (req.url.indexOf(PYODIDE_BASE) === 0) {
+    event.respondWith(
+      caches.open(PYODIDE_CACHE).then(function (cache) {
+        return cache.match(req.url, { ignoreVary: true }).then(function (hit) {
+          if (hit) return hit;
+          // jsdelivr sends CORS headers: fetch in cors mode so the response is readable (not opaque) and safe to cache
+          return fetch(req.url, { mode: 'cors', credentials: 'omit' }).then(function (res) {
+            if (res && res.ok && res.status === 200) cache.put(req.url, res.clone()).catch(function () {});
+            return res;
+          });
+        });
+      })
+    );
+    return;
+  }
   if (url.origin !== self.location.origin) return;
   // version.json: straight to the network, never cached
   for (var i = 0; i < NO_CACHE.length; i++) {

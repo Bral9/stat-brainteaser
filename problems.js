@@ -21,6 +21,56 @@ window.PROBLEMS = [
   ],
   "solution": "<p>All 36 ordered pairs (a, b) are equally likely.</p><p>Pairs summing to 8: (2,6), (3,5), (4,4), (5,3), (6,2) — that is 5 pairs.</p><p>P = 5/36 ≈ 0.139.</p>",
   "key": "Count ordered outcomes: for two dice, the number of ways to make sum s is 6 − |s − 7|.",
+  "plan": {
+   "keyIdea": "36 equally likely ordered pairs; count the pairs (a, 8 − a) with both entries in 1..6.",
+   "method": "Direct count: a = 2, …, 6 gives 5 pairs, so 5/36.",
+   "sanityChecks": [
+    "Must be below 6/36, the probability of the modal sum 7.",
+    "Symmetry: P(sum = 8) = P(sum = 6)."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now roll <b>three</b> fair dice. What is P(sum = 8)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Count solutions of a + b + c = 8 with each in 1..6. Put a′ = a − 1 etc.: a′ + b′ + c′ = 5 with each ≤ 5, so stars and bars gives C(7, 2) = 21 with no cap violated. P = 21/216 = 7/72 ≈ 0.0972.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.09722222222222222,
+     "display": "21/216 = 7/72 ≈ 0.0972"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “There are 11 possible sums, 2 through 12, so P(sum = 8) = 1/11.” Which is right?</p>",
+    "model": "<p>The 11 sums are not equally likely: 7 can be made 6 ways, 2 only 1 way. The equally likely objects are the 36 ordered pairs, so P = 5/36 ≈ 0.139, not 1/11 ≈ 0.091.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: it is 1/6, like any face",
+      "Agree: 1/11",
+      "Disagree: the sums are not equally likely; it is 5/36"
+     ],
+     "correct": 2,
+     "display": "Disagree: 5/36"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Which total is the most likely with two dice, and what is its probability? Answer as two numbers separated by a comma: total, probability.</p>",
+    "model": "<p>7, made by 6 of the 36 pairs: probability 1/6. The distribution of the sum is a triangle peaking at 7.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      7.0,
+      0.16666666666666666
+     ],
+     "ordered": true,
+     "display": "7, 1/6"
+    }
+   }
+  ],
+  "par": 1,
   "style": [
    "OA-speed"
   ]
@@ -176,6 +226,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>The four ordered outcomes BB, BG, GB, GG are equally likely.</p><p>“At least one boy” leaves BB, BG, GB — three equally likely cases.</p><p>Only BB has two boys, so P = 1/3.</p><p>Note: if instead you had <i>seen</i> a particular child who is a boy, the answer would be ½. How you learn the information matters.</p>",
   "key": "Condition on exactly the event you observed; “at least one” keeps 3 of 4 cases.",
+  "plan": {
+   "keyIdea": "Conditioning on “at least one boy” leaves three equally likely ordered families.",
+   "method": "List BB, BG, GB, GG; remove GG; count.",
+   "sanityChecks": [
+    "Answer must be below 1/2 (the specific-child answer).",
+    "Information type matters: how was the boy revealed?"
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Three children, and the parent confirms at least one is a boy. P(all three are boys)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Of the 8 equally likely families, 7 have a boy, one is BBB: 1/7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.14285714285714285,
+     "display": "1/7"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “If instead the parent tells you the <i>older</i> child is a boy, it is still 1/3.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Now the condition fixes one specific child; the other child is independent, so P = 1/2. Only BB and BG (older first) remain.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>With n children and “at least one boy”, P(all boys) = 1/(2ⁿ − 1). What is it for n = 4?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>1/(16 − 1) = 1/15: it falls quickly because “at least one boy” is barely informative for large families.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.06666666666666667,
+     "display": "1/15"
+    }
+   }
+  ],
+  "par": 1.5,
   "style": [
    "brainteaser-phone"
   ]
@@ -202,6 +293,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Each child is one of 14 equally likely types (sex × weekday); ordered pairs of children: 196.</p><p>Pairs with at least one Tuesday-boy: 196 − 13 · 13 = 27 (the complement has each child among the 13 other types).</p><p>Among two-boy pairs (7 · 7 = 49), those with at least one Tuesday: 49 − 6 · 6 = 13.</p><p>P(both boys | at least one Tuesday-boy) = 13/27 ≈ 0.481 — between 1/3 and 1/2, because the extra detail makes the condition closer to identifying one specific child.</p>",
   "key": "More specific conditioning information moves “at least one” closer to “this particular child”.",
+  "plan": {
+   "keyIdea": "Condition on the exact event “at least one Tuesday boy” over 14 × 14 equally likely pairs.",
+   "method": "Complement counting: 196 − 169 = 27 pairs; 49 − 36 = 13 of them are two boys.",
+   "sanityChecks": [
+    "Answer must lie between 1/3 and 1/2.",
+    "With 1 weekday you recover 1/3."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Instead: “at least one son born in January” (12 equally likely months). P(two boys)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>With k categories: (2k − 1)/(4k − 1) = 23/47 ≈ 0.489.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.48936170212765956,
+     "display": "23/47"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>As the detail gets rarer (k categories, k → ∞), what does the probability tend to?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>(2k − 1)/(4k − 1) → 1/2: a very specific detail essentially identifies one child.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: with k = 1 “category” (no extra detail), what does (2k − 1)/(4k − 1) give?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>1/3, the plain “at least one boy” answer.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3333333333333333,
+     "display": "1/3"
+    }
+   }
+  ],
+  "par": 5,
   "style": [
    "brainteaser-phone",
    "trading-desk"
@@ -230,6 +362,57 @@ window.PROBLEMS = [
   ],
   "solution": "<p>States: S₀ (no progress) and S₁ (last flip H). Let E₀, E₁ be expected remaining flips.</p><p>From S₀: E₀ = 1 + ½E₁ + ½E₀ (H moves to S₁, T stays).</p><p>From S₁: E₁ = 1 + ½·0 + ½E₀ (H finishes, T resets).</p><p>The first gives E₀ = 2 + E₁; substituting: E₁ = 1 + ½(2 + E₁) ⇒ E₁ = 4, E₀ = 6.</p>",
   "key": "First-step analysis on a small Markov chain of “progress” states.",
+  "plan": {
+   "keyIdea": "Two-state first-step analysis on the progress toward HH.",
+   "method": "E₀ = 1 + ½E₁ + ½E₀, E₁ = 1 + ½E₀.",
+   "sanityChecks": [
+    "Must exceed 4 (probability ¼ per pair isn't the point).",
+    "Formula 2ⁿ⁺¹ − 2 at n = 2."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected flips until HT?</p><p>Give a number.</p>",
+    "model": "<p>Wait for an H (2 flips), then for a T (2 more): 4. A failed HT attempt never loses the H.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.0,
+     "display": "4"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>The coin lands heads with probability 2/3. Expected flips until HH?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>1/p + 1/p² = 1.5 + 2.25 = 3.75.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.75,
+     "display": "15/4"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “HH and HT both have probability 1/4 per pair, so they take the same time on average.”</p>",
+    "model": "<p>After a failed HH (HT) you restart from scratch; after a failed HT (HH) you still have the H. So HH takes 6, HT only 4.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: HT takes longer",
+      "Agree",
+      "Disagree: HH takes 6 on average, HT takes 4"
+     ],
+     "correct": 2,
+     "display": "Disagree: 6 vs 4"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Is there a faster way?</p>",
+    "model": "<p>Overlap rule: HH matches itself at k = 1 and k = 2, so 2 + 4 = 6; HT only at k = 2, so 4.</p>"
+   }
+  ],
+  "par": 2,
   "style": [
    "trading-desk"
   ]
@@ -285,6 +468,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Let Eₙ be the expected flips to get n heads in a row. To get n in a row, first get n−1 in a row (Eₙ₋₁ flips), then flip once more: with probability ½ you are done, otherwise you start over.</p><p>Eₙ = Eₙ₋₁ + 1 + ½Eₙ ⇒ Eₙ = 2Eₙ₋₁ + 2.</p><p>E₁ = 2, E₂ = 6, E₃ = 14. (In general Eₙ = 2ⁿ⁺¹ − 2.)</p>",
   "key": "Recursion on the run length: Eₙ = 2Eₙ₋₁ + 2, giving 2ⁿ⁺¹ − 2.",
+  "plan": {
+   "keyIdea": "First-step / recursive waiting time: to get n in a row, first get n − 1 in a row.",
+   "method": "Eₙ = 2Eₙ₋₁ + 2 ⇒ 2, 6, 14.",
+   "sanityChecks": [
+    "Must exceed 8, since overlapping failures waste flips.",
+    "Formula check: E₁ = 2 (wait for one head)."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>The coin now lands heads with probability 1/3. Expected flips until HHH?</p><p>Give a number.</p>",
+    "model": "<p>Eₙ = (Eₙ₋₁ + 1)/p, so E = 1/p + 1/p² + 1/p³ = 3 + 9 + 27 = 39.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 39.0,
+     "display": "39"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Back to a fair coin: expected flips until 5 heads in a row?</p><p>Give a number.</p>",
+    "model": "<p>2⁶ − 2 = 62.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 62.0,
+     "display": "62"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Every three-flip pattern has probability 1/8, so HTH also takes 14 flips on average.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Waiting times depend on self-overlap. HTH overlaps itself only at length 1 (H), so E = 2³ + 2 = 10; HHH overlaps at lengths 1 and 2, giving 8 + 4 + 2 = 14.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 10.0,
+     "display": "10"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Is there a faster way than setting up the state equations?</p>",
+    "model": "<p>Conway / martingale shortcut: add 2ᵏ for every k where the first k letters of the pattern equal its last k letters. HHH overlaps at k = 1, 2, 3: 2 + 4 + 8 = 14.</p>"
+   }
+  ],
+  "par": 3,
   "style": [
    "trading-desk"
   ]
@@ -312,6 +541,48 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Split into stages. With k distinct faces already seen, each roll is new with probability (6−k)/6, so stage k is geometric with mean 6/(6−k).</p><p>E = 6/6 + 6/5 + 6/4 + 6/3 + 6/2 + 6/1 = 6(1 + ½ + 1/3 + ¼ + 1/5 + 1/6) = 6 · 2.45 = 14.7.</p>",
   "key": "Coupon collector: E = n·Hₙ, a sum of geometric stage waits.",
+  "plan": {
+   "keyIdea": "Coupon collector: a sum of geometric stages with success probabilities (6 − k)/6.",
+   "method": "6 · (1 + ½ + … + 1/6) = 6 · 2.45.",
+   "sanityChecks": [
+    "The last face alone takes 6 rolls on average.",
+    "n ln n ≈ 10.8 is a rough lower guide."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected rolls to see 3 distinct faces?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>1 + 6/5 + 6/4 = 3.7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.7,
+     "display": "3.7"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>For a 100-sided die, expected rolls to see every face? (Within 1%.)</p>",
+    "model": "<p>n·Hₙ = 100 · 5.187 ≈ 518.7 ≈ n(ln n + 0.5772).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 518.737751763962,
+     "display": "≈ 518.7",
+     "tolRel": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The last new face is just like the first one, it takes 1 roll on average.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>With 5 faces seen, a roll is new with probability 1/6: the last stage takes 6 rolls on average.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 6.0,
+     "display": "6"
+    }
+   }
+  ],
+  "par": 2,
   "style": [
    "trading-desk"
   ]
@@ -365,6 +636,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Let pᵢ be the probability of reaching 5 from i. First-step: pᵢ = p·pᵢ₊₁ + q·pᵢ₋₁, p₀ = 0, p₅ = 1, with p = 0.6, q = 0.4.</p><p>The general solution is pᵢ = A + B·rⁱ where r = q/p = 2/3; the boundary conditions give pᵢ = (1 − rⁱ)/(1 − r⁵).</p><p>p₂ = (1 − 4/9)/(1 − 32/243) = (5/9)/(211/243) = 135/211 ≈ 0.6398.</p>",
   "key": "Biased ruin: P(reach N from i) = (1 − (q/p)ⁱ)/(1 − (q/p)ᴺ).",
+  "plan": {
+   "keyIdea": "Biased gambler's ruin: pᵢ = (1 − rⁱ)/(1 − r^N) with r = q/p.",
+   "method": "r = 2/3, i = 2, N = 5.",
+   "sanityChecks": [
+    "Must exceed the fair-game answer 2/5.",
+    "p₀ = 0, p₅ = 1."
+   ]
+  },
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: a fair game (p = ½), from $2 to $5?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>i/N = 2/5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.4,
+     "display": "2/5"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>p = 0.6 and no upper target (play until broke or forever). P(never going broke from $2)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>N → ∞: 1 − r² = 1 − 4/9 = 5/9.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5555555555555556,
+     "display": "5/9"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “An edge only matters in the long run; over such a short game it's still about 2/5.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Even short games feel the drift: 135/211 ≈ 0.640 vs 0.4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6398104265402843,
+     "display": "135/211"
+    }
+   }
+  ],
+  "par": 4,
   "style": [
    "math-test",
    "trading-desk"
@@ -392,6 +704,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>P(max ≤ k) = (k/6)², so P(max = k) = (2k − 1)/36 for k = 1..6.</p><p>E[max] = Σ k(2k − 1)/36 = (1 + 6 + 15 + 28 + 45 + 66)/36 = 161/36 ≈ 4.472.</p><p>Shortcut: E[max] + E[min] = E[sum] = 7, and E[min] = 91/36, giving the same 161/36.</p>",
   "key": "For a maximum, work with the CDF: P(max ≤ k) = P(each ≤ k).",
+  "plan": {
+   "keyIdea": "Use the CDF of the max: P(max ≤ k) = (k/6)².",
+   "method": "P(max = k) = (2k − 1)/36, then sum.",
+   "sanityChecks": [
+    "E[max] + E[min] = 7.",
+    "Must lie between 3.5 and 6."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>E[min] of two dice?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>7 − 161/36 = 91/36 ≈ 2.53.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.5277777777777777,
+     "display": "91/36"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>E[max] of <b>three</b> dice?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Σ P(max ≥ k) = Σ (1 − ((k − 1)/6)³) = 119/24 ≈ 4.958.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.958333333333333,
+     "display": "119/24"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “E[max(X, Y)] = max(E[X], E[Y]) = 3.5.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Max is convex, so E[max] ≥ max of expectations; the exact value is 161/36 ≈ 4.47.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.472222222222222,
+     "display": "161/36"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Is there a faster way to get E[max]?</p>",
+    "model": "<p>Tail sum: E[max] = Σₖ P(max ≥ k) = Σₖ (1 − ((k − 1)/6)²) = 6 − 55/36 = 161/36. Or use E[max] + E[min] = 7.</p>"
+   }
+  ],
+  "par": 2,
   "style": [
    "OA-speed"
   ]
@@ -472,6 +830,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Measure time in hours: X, Y ~ Uniform(0,1) independent. They meet iff |X − Y| ≤ ¼.</p><p>The region |X − Y| &gt; ¼ is two right triangles with legs ¾, total area 2 · ½ · (¾)² = 9/16.</p><p>P(meet) = 1 − 9/16 = 7/16 = 0.4375.</p>",
   "key": "Two uniform times → area in the unit square; |X−Y| ≤ w has area 1 − (1−w)².",
+  "plan": {
+   "keyIdea": "Geometric probability: they meet iff |X − Y| ≤ ¼ in the unit square.",
+   "method": "1 − area of two corner triangles = 1 − (¾)².",
+   "sanityChecks": [
+    "Wait 0 ⇒ probability 0; wait 1 hour ⇒ 1.",
+    "Answer ≈ 2w for small waits w."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Each waits 20 minutes instead. P(meet)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>1 − (2/3)² = 5/9.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5555555555555556,
+     "display": "5/9"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Only A waits (15 minutes); B leaves immediately if A isn't there. P(meet)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Need 0 ≤ B − A ≤ ¼: half of the band, (1 − (¾)²)/2 = 7/32.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.21875,
+     "display": "7/32"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “If each waits 30 minutes, they are certain to meet.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>If one arrives at 12:00 and the other after 12:30 they miss: P = 1 − (½)² = 3/4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.75,
+     "display": "3/4"
+    }
+   }
+  ],
+  "par": 2,
   "style": [
    "trading-desk"
   ]
@@ -498,6 +897,39 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Three lengths summing to 1 form a triangle iff each is &lt; ½ (triangle inequality).</p><p>The events “piece i ≥ ½” (i = 1, 2, 3) are disjoint (two pieces can't both be ≥ ½ without equality). For the left piece: P(both cuts ≥ ½) = ¼. By symmetry of the gaps, each piece has the same probability ¼.</p><p>P(triangle) = 1 − 3 · ¼ = ¼.</p>",
   "key": "Triangle ⇔ no piece ≥ ½; the three failure events are disjoint, each with probability ¼.",
+  "plan": {
+   "keyIdea": "Triangle iff every piece &lt; ½; the three events “piece i ≥ ½” are disjoint.",
+   "method": "1 − 3 × ¼.",
+   "sanityChecks": [
+    "Each piece is ≥ ½ with the same probability ¼ (exchangeable gaps).",
+    "Answer must be well below 1."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Break once uniformly, then break the <i>longer</i> piece at a uniform point. P(triangle)? (3 decimals.)</p>",
+    "model": "<p>∫ conditional probability gives 2 ln 2 − 1 ≈ 0.386.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3862943611198906,
+     "display": "2 ln 2 − 1 ≈ 0.386",
+     "tolRel": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “If you break once and then break the right-hand piece uniformly, it is still 1/4.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>If the right-hand piece is the shorter one no triangle is possible, so P = ∫₀^½ x/(1 − x) dx = ln 2 − ½ ≈ 0.193.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.1931471805599453,
+     "display": "ln 2 − ½ ≈ 0.193",
+     "tolRel": 0.01
+    }
+   }
+  ],
+  "par": 3,
   "style": [
    "trading-desk",
    "brainteaser-phone"
@@ -606,6 +1038,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Claim: after n draws, the number of red balls added, K, is uniform on {0, …, n}.</p><p>Any specific sequence with k red draws and n − k blue draws has probability [k!·(n−k)!]/(n+1)! (the numerators give 1·2·…·k for red and 1·…·(n−k) for blue, the denominators 2·3·…·(n+1)). Multiplying by C(n, k) sequences gives 1/(n+1).</p><p>Exactly 50 red means K = 49 out of n = 98 draws: P = 1/99.</p>",
   "key": "Pólya urn from (1,1): the number of red additions is uniform on {0,…,n}.",
+  "plan": {
+   "keyIdea": "Pólya urn: the number of red balls added is uniform on {0, …, n}.",
+   "method": "Any sequence with k reds has the same probability; multiply by C(n, k).",
+   "sanityChecks": [
+    "After 1 draw: 1 or 2 reds, ½ each.",
+    "99 possible counts ⇒ 1/99."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Start with 2 red and 1 blue. P(the first three draws are all red)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>(2/3)(3/4)(4/5) = 2/5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.4,
+     "display": "2/5"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>Start 1 red, 1 blue. As the number of draws → ∞, what is P(red fraction &gt; 0.9)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>The fraction converges to a Uniform(0, 1) limit, so 0.1.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.1,
+     "display": "0.1"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Ending with only 1 red ball out of 100 is far less likely than a 50–50 split.”</p>",
+    "model": "<p>Every count of red balls from 1 to 99 has probability exactly 1/99; the urn has no pull toward balance.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: both have probability 1/99",
+      "Disagree: 1 red is more likely",
+      "Agree"
+     ],
+     "correct": 0,
+     "display": "Disagree: 1/99 each"
+    }
+   }
+  ],
+  "par": 4,
   "style": [
    "trading-desk",
    "math-test"
@@ -634,6 +1112,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Bertrand's ballot theorem: with a &gt; b votes, P(A strictly ahead throughout) = (a − b)/(a + b).</p><p>Proof idea (reflection): a good count must start with an A ballot. Every sequence starting with B must reach a tie; and sequences starting with A that later tie are in bijection with sequences starting with B (swap A↔B before the first tie). So P(good) = P(first is A) − P(first is B) = a/(a+b) − b/(a+b).</p><p>Here (6 − 4)/(6 + 4) = 2/10 = 1/5.</p>",
   "key": "Ballot theorem: P(always ahead) = (a − b)/(a + b), via the reflection principle.",
+  "plan": {
+   "keyIdea": "Ballot theorem via reflection: P(A always ahead) = (a − b)/(a + b).",
+   "method": "(6 − 4)/10.",
+   "sanityChecks": [
+    "Must start with an A ballot: answer ≤ 0.6.",
+    "Tie (a = b) ⇒ 0."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>A gets 7 votes and B gets 3. P(A strictly ahead throughout)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>(7 − 3)/10 = 2/5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.4,
+     "display": "2/5"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Back to 6 vs 4: P(A is never behind, ties allowed)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Weak version: (a + 1 − b)/(a + 1) = 3/7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.42857142857142855,
+     "display": "3/7"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “A has 60% of the votes, so A leads throughout with probability 0.6.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>0.6 is only P(first ballot is A). Reflection removes the A-first paths that later tie: 0.6 − 0.4 = 0.2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2,
+     "display": "1/5"
+    }
+   }
+  ],
+  "par": 3,
   "style": [
    "math-test"
   ]
@@ -661,6 +1180,57 @@ window.PROBLEMS = [
   ],
   "solution": "<p>For each of the 48 non-ace cards, let Iⱼ = 1 if it comes before all four aces.</p><p>Among that card and the 4 aces, each of the 5 is equally likely to be first, so E[Iⱼ] = 1/5.</p><p>E[# cards before first ace] = 48/5 = 9.6.</p><p>(Intuition: the 4 aces split the 48 other cards into 5 gaps of equal expected size 9.6.)</p>",
   "key": "k special cards split the others into k+1 gaps of equal expected size.",
+  "plan": {
+   "keyIdea": "Linearity with indicators: each non-ace precedes all 4 aces with probability 1/5.",
+   "method": "48 × 1/5 = 9.6.",
+   "sanityChecks": [
+    "The 4 aces cut 48 cards into 5 gaps of equal mean.",
+    "Answer must be below 48."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected number of cards before the first card that is a king <i>or</i> a queen (8 such cards)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>44 other cards, each first among itself and the 8 with probability 1/9: 44/9 ≈ 4.89.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.888888888888889,
+     "display": "44/9 ≈ 4.889"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>What is the expected <i>position</i> of the first ace?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>9.6 cards before it plus the ace itself: 10.6 = 53/5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 10.6,
+     "display": "53/5 = 10.6"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The gap after the last ace must be smaller than 9.6, because the deck runs out.”</p>",
+    "model": "<p>All five gaps are exchangeable: a uniform shuffle looks the same read backwards, so the cards after the last ace also average 48/5 = 9.6.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree",
+      "Disagree: by symmetry it is also 9.6",
+      "Disagree: it is larger, 12"
+     ],
+     "correct": 1,
+     "display": "Disagree: 9.6"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Can you see the answer without indicators?</p>",
+    "model": "<p>The 4 aces split the 48 other cards into 5 gaps; by symmetry the gaps have equal expected size 48/5.</p>"
+   }
+  ],
+  "par": 2,
   "style": [
    "trading-desk"
   ]
@@ -817,6 +1387,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Let p = P(Alice wins). Alice wins immediately with probability 1/6. Otherwise (5/6) Bob rolls; if he also misses (5/6), we are back at the start.</p><p>p = 1/6 + (25/36)p ⇒ (11/36)p = 1/6 ⇒ p = 6/11 ≈ 0.545.</p>",
   "key": "Self-similar games: write p in terms of itself after one full round.",
+  "plan": {
+   "keyIdea": "Alternating-turn game: condition on the first full round (both miss ⇒ restart).",
+   "method": "p = 1/6 + (25/36)p.",
+   "sanityChecks": [
+    "First mover advantage ⇒ above ½.",
+    "Equivalently p/(1 − q²) with p = 1/6."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now the first to roll a 5 <i>or</i> a 6 wins. P(Alice wins)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>p = 1/3: (1/3)/(1 − (2/3)²) = 3/5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6,
+     "display": "3/5"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>If the winning event has tiny probability per roll, what does P(first player wins) tend to?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>p/(1 − (1 − p)²) = 1/(2 − p) → 1/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The game lasts 12 rolls on average, 6 each.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Rolls until the first 6 (by anyone) are geometric with mean 6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 6.0,
+     "display": "6"
+    }
+   }
+  ],
+  "par": 2,
   "style": [
    "trading-desk",
    "OA-speed"
@@ -872,6 +1483,42 @@ window.PROBLEMS = [
   ],
   "solution": "<p>N &gt; n exactly when the first n draws sum to at most 1. The region {u₁ + … + uₙ ≤ 1} in the unit cube is a simplex of volume 1/n!.</p><p>E[N] = Σ_{n≥0} P(N &gt; n) = Σ_{n≥0} 1/n! = e ≈ 2.718.</p>",
   "key": "Tail-sum formula plus the simplex volume 1/n!.",
+  "plan": {
+   "keyIdea": "Tail-sum: P(N &gt; n) = volume of the simplex {u₁ + … + uₙ ≤ 1} = 1/n!.",
+   "method": "E[N] = Σ 1/n! = e.",
+   "sanityChecks": [
+    "Must exceed 2 (two draws rarely suffice).",
+    "P(N &gt; 1) = 1, P(N &gt; 2) = ½."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Draw until the running sum exceeds ½. Expected number of draws (3 decimals)?</p>",
+    "model": "<p>P(sum of n ≤ t) = tⁿ/n! for t ≤ 1, so E = Σ tⁿ/n! = e^(1/2) ≈ 1.649.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.6487212707001282,
+     "display": "√e ≈ 1.649"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “P(N &gt; 2) = P(U₁ + U₂ ≤ 1) = 1/4.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>That region is a triangle of area ½ in the unit square: P(N &gt; 2) = 1/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why is the volume of {u₁ + … + uₙ ≤ 1} exactly 1/n!?</p>",
+    "model": "<p>Map partial sums: (u₁, u₁ + u₂, …) is an ordered n-tuple in [0, 1]; ordered tuples are 1/n! of the cube by symmetry of the n! orderings.</p>"
+   }
+  ],
+  "par": 4,
   "style": [
    "math-test",
    "trading-desk"
@@ -926,6 +1573,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>For each face j = 1..6, let Iⱼ = 1 if j appears at least once. P(Iⱼ = 1) = 1 − (5/6)⁶ ≈ 0.6651.</p><p>E[# distinct] = 6(1 − (5/6)⁶) ≈ 3.991.</p><p>Note: far fewer than 6 — on average about 2 faces are missing.</p>",
   "key": "Count “things that appear” with one indicator per thing.",
+  "plan": {
+   "keyIdea": "Linearity of expectation over indicators “face j appears”.",
+   "method": "6 × (1 − (5/6)⁶).",
+   "sanityChecks": [
+    "Between 1 and 6; far below 6.",
+    "Missing faces: 6 × (5/6)⁶ ≈ 2."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected number of distinct faces in 12 rolls (3 decimals)?</p>",
+    "model": "<p>6(1 − (5/6)¹²) ≈ 5.327.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5.327060071292309,
+     "display": "≈ 5.327"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>In 6 rolls, the expected number of faces that never appear (3 decimals)?</p>",
+    "model": "<p>6 − 3.991 = 6(5/6)⁶ ≈ 2.009.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.009387860082305,
+     "display": "≈ 2.009"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “So the chance that all six faces show up in six rolls is about 4/6.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>All six distinct means a permutation: 6!/6⁶ = 720/46656 = 5/324 ≈ 0.0154. The expectation 3.99 says nothing like 4/6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.015432098765432098,
+     "display": "5/324 ≈ 0.0154"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Why is linearity the fast route here?</p>",
+    "model": "<p>The distribution of the number of distinct faces is messy (Stirling numbers), but its mean only needs P(face j appears) for one face, times 6.</p>"
+   }
+  ],
+  "par": 2,
   "style": [
    "OA-speed"
   ]
@@ -958,6 +1651,37 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Both patterns need a starting H. Track the states H, HH, HT.</p><p>From HH: further H's keep you at HH, and the first T completes HHT. So from HH, HHT wins with probability 1.</p><p>From HT: H completes HTH; T kills all progress (back to start).</p><p>Let a = P(HHT wins from state H). From H: next H → HH (win), next T → HT. From HT: ½ lose, ½ back to start, which is equivalent to waiting for the next H, i.e. a again. So a = ½ + ½ · ½ · a ⇒ a = 2/3.</p><p>HHT appears first with probability 2/3 — even though both patterns have the same probability at any given position (and HTH actually has a longer mean waiting time, 10 vs 8).</p>",
   "key": "Self-overlap matters: HH progress is never wasted for HHT, but HTH's progress can be destroyed.",
+  "plan": {
+   "keyIdea": "Penney-type races: track the shared prefix states; from HH, HHT is guaranteed.",
+   "method": "a = ½ + ¼a from the state H.",
+   "sanityChecks": [
+    "Both need an H first, so start from H.",
+    "Answer is a probability strictly between ½ and 1."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the probability that HHT appears before HTH? (Fraction.)</p>",
+    "model": "<p>a = 2/3, from a = ½ + ½ · ½ · a.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6666666666666666,
+     "display": "2/3"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Race THH against HHH. P(THH first)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>HHH wins only if the first three flips are HHH; any T before that sets up THH. P = 7/8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.875,
+     "display": "7/8"
+    }
+   }
+  ],
+  "par": 4,
   "style": [
    "trading-desk",
    "math-test"
@@ -1155,7 +1879,48 @@ window.PROBLEMS = [
    "Such a sequence ends in T, TH or THH after a shorter valid sequence: a(n) = a(n−1) + a(n−2) + a(n−3)."
   ],
   "solution": "<p>Let a(n) be the number of length-n sequences with no HHH. Classify by how the sequence ends: …T, …TH, …THH. So a(n) = a(n−1) + a(n−2) + a(n−3), with a(0) = 1, a(1) = 2, a(2) = 4.</p><p>a(3..10) = 7, 13, 24, 44, 81, 149, 274, 504.</p><p>P(at least one HHH) = 1 − 504/1024 = 520/1024 = 65/128 ≈ 0.508.</p><p>Trap: estimating with '8 windows × 1/8 = 1' double-counts overlapping runs badly.</p><p><b>Answer: 65/128 ≈ 0.508.</b></p>",
-  "key": "Count sequences avoiding the run with a tribonacci-type recursion on how they end, then take the complement."
+  "key": "Count sequences avoiding the run with a tribonacci-type recursion on how they end, then take the complement.",
+  "plan": {
+   "keyIdea": "Count the complement: sequences with no HHH satisfy a tribonacci recursion.",
+   "method": "a(n) = a(n−1) + a(n−2) + a(n−3), then 1 − a(10)/2¹⁰.",
+   "sanityChecks": [
+    "a(3) = 7 (all but HHH).",
+    "Answer near ½ is plausible: 8 windows of 1/8 overlap."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>10 flips: P(at least two heads in a row)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>No-HH strings are Fibonacci: 144 of 1024. P = 880/1024 = 55/64 ≈ 0.859.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.859375,
+     "display": "55/64"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check with 5 flips: P(at least three heads in a row)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>a(5) = 24, so 1 − 24/32 = 1/4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.25,
+     "display": "1/4"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Treat the 8 windows as independent: 1 − (7/8)⁸ ≈ 0.656.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Overlapping windows are positively correlated, so independence overstates it. The exact answer is 65/128 ≈ 0.508.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5078125,
+     "display": "65/128"
+    }
+   }
+  ],
+  "par": 4
  },
  {
   "id": "prob-108",
@@ -1190,6 +1955,3473 @@ window.PROBLEMS = [
   "key": "Second moments of indicator sums need the pairwise terms E[I<sub>i</sub>I<sub>j</sub>]; here they make the variance exactly 1."
  },
  {
+  "id": "ci-006",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Two conditions in hospital data",
+  "tags": [
+   "berkson",
+   "collider-bias",
+   "conditional-probability",
+   "selection-bias"
+  ],
+  "style": [
+   "research-stats",
+   "trading-desk"
+  ],
+  "prompt": "<p>In a population, condition A affects 10% of people and condition B affects 20%, independently. A clinic sees everyone who has A or B (or both) and nobody else.</p><p>Among the clinic's patients, what fraction has A? And among the clinic's patients who have B, what fraction has A?</p><p>Give the two fractions, comma-separated.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    0.35714285714285715,
+    0.1
+   ],
+   "ordered": true,
+   "display": "5/14 ≈ 0.357, 1/10"
+  },
+  "hints": [
+   "P(admitted) = P(A ∪ B) = 0.1 + 0.2 − 0.02.",
+   "Having B already guarantees admission, so given B the clinic tells you nothing about A."
+  ],
+  "solution": "<p>P(admitted) = 0.1 + 0.2 − 0.1 × 0.2 = 0.28. A implies admission, so P(A | admitted) = 0.1/0.28 = 5/14 ≈ 0.357.</p><p>Given B, the patient is admitted anyway, so P(A | admitted, B) = P(A | B) = 0.1.</p><p>So inside the clinic, A looks much rarer among B patients (10%) than overall (35.7%): a spurious negative association, created purely by admitting on 'A or B'. This is Berkson's original hospital example of collider bias.</p><p><b>Answer: 5/14, 1/10.</b></p>",
+  "key": "Selecting on 'A or B' makes A and B look negatively associated even when they are independent.",
+  "plan": {
+   "keyIdea": "Admission is a common effect of A and B (a collider); conditioning on it induces dependence.",
+   "method": "Compute P(admitted) by inclusion–exclusion, then the two conditional probabilities.",
+   "sanityChecks": [
+    "Unconditionally P(A | B) = P(A) = 0.1.",
+    "Within the clinic, the patients without B must all have A."
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Among the clinic's patients who do <b>not</b> have B, what fraction has A?</p>",
+    "model": "<p>All of them: anyone admitted without B must have A. P(A | admitted, not B) = 1.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "1",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>What is the correlation between the A and B indicators among clinic patients?</p><p>Give a decimal.</p>",
+    "model": "<p>Within the clinic: E[A] = 5/14, E[B] = 5/7, E[AB] = 0.02/0.28 = 1/14. Cov = 1/14 − 25/98 = −9/49. Var(A) = 45/196, Var(B) = 10/49. Corr = −18/√450 ≈ −0.849.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.8485281374238571,
+     "display": "≈ −0.849",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'A and B are independent in the population, so they're independent among clinic patients too — conditioning on a sample can't create dependence.'</p>",
+    "model": "<p>Wrong: inside the clinic P(A | B) = 0.1 &lt; P(A) = 0.357. Conditioning on a common consequence creates dependence (collider bias).</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Right — independence is preserved",
+      "Wrong — inside the clinic B makes A less likely (0.1 vs 0.357)",
+      "Wrong — inside the clinic B makes A more likely",
+      "Can't tell without more data"
+     ],
+     "correct": 1,
+     "display": "Wrong: negative association inside the clinic"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-024",
+  "cat": "probability",
+  "diff": 1,
+  "title": "A light that signals exactly one head",
+  "tags": [
+   "collider-bias",
+   "coins",
+   "conditional-probability",
+   "correlation"
+  ],
+  "style": [
+   "trading-desk",
+   "brainteaser-phone"
+  ],
+  "prompt": "<p>Two fair coins are tossed independently. A light turns on exactly when one coin shows heads and the other tails. Given that the light is on, what is the correlation between the indicators 'coin 1 is heads' and 'coin 2 is heads'?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": -1.0,
+   "display": "−1",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Given the light is on, list the possible outcomes.",
+   "Only HT and TH remain."
+  ],
+  "solution": "<p>Given the light, the outcome is HT or TH, each with probability 1/2. Then coin 2's indicator = 1 − coin 1's indicator: perfectly negatively correlated, ρ = −1.</p><p>The coins never influenced each other; conditioning on a common effect (the light) created the dependence.</p><p><b>Answer: −1.</b></p>",
+  "key": "Conditioning on a common effect of independent causes can create dependence — even perfect dependence.",
+  "plan": {
+   "keyIdea": "The light is a collider of the two coins.",
+   "method": "Enumerate the conditional outcomes.",
+   "sanityChecks": [
+    "Before conditioning, ρ = 0.",
+    "A deterministic linear relation gives |ρ| = 1."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now the light turns on when <b>at least one</b> coin is heads. Given it's on, what is the correlation of the two indicators?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Outcomes HH, HT, TH equally likely: E[A] = E[B] = 2/3, E[AB] = 1/3, Cov = 1/3 − 4/9 = −1/9, Var = 2/9, ρ = −1/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.5,
+     "display": "−1/2"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'With the exactly-one-head light on, coin 1 is heads with probability 2/3.'</p><p>Give the correct probability.</p>",
+    "model": "<p>1/2: HT and TH are equally likely. (2/3 would be right for an 'at least one head' light.)</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-025",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Two independent fraud flags",
+  "tags": [
+   "bayes",
+   "base-rate",
+   "sequential-updating",
+   "likelihood-ratio"
+  ],
+  "style": [
+   "trading-desk",
+   "research-stats"
+  ],
+  "prompt": "<p>0.5% of transactions are fraudulent. A check flags 99% of fraudulent transactions and 2% of legitimate ones. A transaction is run through two such checks, independent given its true status, and <b>both</b> flag it. What is the probability it is fraudulent?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.9248844012456355,
+   "display": "≈ 0.925",
+   "tolRel": 0.002
+  },
+  "hints": [
+   "Use odds: prior odds 1/199, each flag multiplies them by the likelihood ratio 0.99/0.02 = 49.5.",
+   "Posterior odds = 49.5²/199."
+  ],
+  "solution": "<p>Prior odds = 0.005/0.995 = 1/199. Each flag has likelihood ratio 0.99/0.02 = 49.5.</p><p>After two flags: odds = 49.5²/199 = 2450.25/199 ≈ 12.31, so P = 12.31/13.31 ≈ 0.925.</p><p>After one flag it was only ≈ 0.199: the base rate dominates a single test. Trap: reading 99% sensitivity as 99% posterior.</p><p><b>Answer: ≈ 0.925.</b></p>",
+  "key": "Bayes in odds form: posterior odds = prior odds × product of likelihood ratios (for conditionally independent evidence).",
+  "plan": {
+   "keyIdea": "Base rates matter: start from prior odds, multiply by likelihood ratios.",
+   "method": "Odds form with LR = sensitivity / false-positive rate per flag.",
+   "sanityChecks": [
+    "One flag should still leave fraud unlikely (rare event).",
+    "Posterior must rise with each flag."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'The check catches 99% of fraud, so after a single flag the transaction is 99% likely to be fraud.'</p><p>Give the correct probability after one flag.</p>",
+    "model": "<p>(0.005·0.99)/(0.005·0.99 + 0.995·0.02) = 0.00495/0.02485 ≈ 0.199. Most flags are false alarms on the huge legitimate population.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.19919517102615694,
+     "display": "≈ 0.199",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>What is the likelihood ratio contributed by one flag? (This is the whole 'faster way'.)</p>",
+    "model": "<p>0.99/0.02 = 49.5. Multiply prior odds 1/199 by 49.5 per flag and convert back.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 49.5,
+     "display": "49.5"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Suppose instead the first check flags and the second does <b>not</b>. Probability of fraud?</p><p>Give a decimal to 4 places.</p>",
+    "model": "<p>LR for a clear = 0.01/0.98. Odds = (1/199)(49.5)(0.01/0.98) ≈ 0.00254, P ≈ 0.00253.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.002531775055622331,
+     "display": "≈ 0.00253",
+     "tolRel": 0.003
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-026",
+  "cat": "probability",
+  "diff": 1,
+  "title": "Fair coin or biased coin?",
+  "tags": [
+   "bayes",
+   "coins",
+   "posterior",
+   "sequential-updating"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>A coin is fair or lands heads with probability 3/4, each with prior 1/2. You toss it three times and see HHH. What is the probability it's the biased coin?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.7714285714285715,
+   "display": "27/35 ≈ 0.771"
+  },
+  "hints": [
+   "Likelihoods: (3/4)³ = 27/64 vs (1/2)³ = 8/64.",
+   "With equal priors the posterior is proportional to the likelihoods."
+  ],
+  "solution": "<p>P(biased | HHH) = 27/64 ÷ (27/64 + 8/64) = 27/35 ≈ 0.771.</p><p><b>Answer: 27/35.</b></p>",
+  "key": "With equal priors, the posterior is the normalised likelihood.",
+  "plan": {
+   "keyIdea": "Bayes with two hypotheses.",
+   "method": "Compare (3/4)³ to (1/2)³ and normalise.",
+   "sanityChecks": [
+    "Posterior must exceed the prior 1/2 after heads.",
+    "Many more heads should push it towards 1."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the probability the next toss is heads?</p><p>Give a fraction.</p>",
+    "model": "<p>(27/35)(3/4) + (8/35)(1/2) = 81/140 + 16/140 = 97/140 ≈ 0.693.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6928571428571428,
+     "display": "97/140"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'If we had seen HTH rather than HHT, the posterior would differ because the tail came earlier.' What is P(biased) after HTH?</p><p>Give a fraction.</p>",
+    "model": "<p>Order doesn't matter for i.i.d. tosses: only the counts (2 H, 1 T) enter. Biased: (3/4)²(1/4) = 9/64; fair: 8/64. So P = 9/17 for both HTH and HHT.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5294117647058824,
+     "display": "9/17"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-027",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Laplace's rule after 7 heads in 10",
+  "tags": [
+   "bayes",
+   "beta-binomial",
+   "uniform-prior",
+   "rule-of-succession"
+  ],
+  "style": [
+   "research-stats",
+   "trading-desk"
+  ],
+  "prompt": "<p>A coin's heads probability p is unknown with a Uniform(0, 1) prior. In 10 tosses you see 7 heads. What is the probability that the next toss is heads?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6666666666666666,
+   "display": "8/12 = 2/3"
+  },
+  "hints": [
+   "Uniform prior = Beta(1, 1); after h heads and t tails the posterior is Beta(1 + h, 1 + t).",
+   "P(next head) = posterior mean."
+  ],
+  "solution": "<p>Posterior Beta(8, 4), mean 8/12 = 2/3 (Laplace's rule of succession: (h + 1)/(n + 2)).</p><p>Compare with the MLE 0.7: the prior pulls the estimate towards 1/2.</p><p><b>Answer: 2/3.</b></p>",
+  "key": "Uniform prior: P(next head) = (h + 1)/(n + 2).",
+  "plan": {
+   "keyIdea": "Conjugate Beta prior: add heads and tails to the parameters.",
+   "method": "Predictive probability = posterior mean.",
+   "sanityChecks": [
+    "Should lie between 1/2 and 0.7.",
+    "No data: 1/2."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'So the chance the next <b>two</b> tosses are both heads is (2/3)² = 4/9.'</p><p>Give the correct probability.</p>",
+    "model": "<p>The tosses are only conditionally independent given p: P = E[p²] = (8·9)/(12·13) = 6/13 ≈ 0.462 &gt; 4/9, because p is uncertain (E[p²] = Var(p) + E[p]²).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.46153846153846156,
+     "display": "6/13 ≈ 0.462"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Same prior, but you saw 0 heads in 3 tosses. P(next is heads)?</p>",
+    "model": "<p>(0 + 1)/(3 + 2) = 1/5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2,
+     "display": "1/5"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>If you see 70% heads in n tosses and n → ∞, what does the predictive probability tend to?</p>",
+    "model": "<p>(0.7n + 1)/(n + 2) → 0.7: the data swamp the prior.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7,
+     "display": "0.7"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-028",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Which die did I roll?",
+  "tags": [
+   "bayes",
+   "dice",
+   "posterior",
+   "predictive"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>I pick a 6-sided or a 20-sided fair die with equal probability, roll it, and tell you the result is 5. What is the probability I picked the 6-sided die?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.7692307692307693,
+   "display": "10/13 ≈ 0.769"
+  },
+  "hints": [
+   "Likelihood of a 5: 1/6 vs 1/20.",
+   "Posterior ∝ prior × likelihood."
+  ],
+  "solution": "<p>P(d6 | 5) = (1/6)/(1/6 + 1/20) = (10/60)/(13/60) = 10/13.</p><p><b>Answer: 10/13.</b></p>",
+  "key": "Smaller hypotheses that still explain the data get a likelihood boost (the 'size principle').",
+  "plan": {
+   "keyIdea": "Two hypotheses, likelihoods 1/6 and 1/20.",
+   "method": "Normalise the likelihoods (equal priors).",
+   "sanityChecks": [
+    "A roll above 6 would give 0.",
+    "Posterior above 1/2 since the d6 fits a 5 more tightly."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>I roll the same die again and get another 5. P(6-sided) now?</p><p>Give a fraction.</p>",
+    "model": "<p>(1/36)/(1/36 + 1/400) = 400/436 = 100/109 ≈ 0.917.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.9174311926605505,
+     "display": "100/109"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer (after the first roll of 5): 'The chance my next roll is 6 or below is just 10/13, the chance it's the small die.'</p><p>Give the correct probability.</p>",
+    "model": "<p>Even the 20-sided die can roll ≤ 6: 10/13 · 1 + 3/13 · 6/20 = 109/130 ≈ 0.838.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.8384615384615385,
+     "display": "109/130 ≈ 0.838"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>If the first roll had been an 8, what is P(6-sided)?</p>",
+    "model": "<p>0: a 6-sided die can't show 8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.0,
+     "display": "0",
+     "tolAbs": 0.001
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-029",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Second smallest of five uniforms",
+  "tags": [
+   "order-statistics",
+   "uniform",
+   "beta-distribution",
+   "spacings"
+  ],
+  "style": [
+   "math-test",
+   "OA-speed"
+  ],
+  "prompt": "<p>Five independent Uniform(0, 1) numbers are drawn. What is the expected value of the second smallest?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.3333333333333333,
+   "display": "2/6 = 1/3"
+  },
+  "hints": [
+   "The k-th smallest of n uniforms has mean k/(n + 1).",
+   "The five points cut [0, 1] into six gaps of equal expected length."
+  ],
+  "solution": "<p>By symmetry the 5 points split [0, 1] into 6 spacings with the same distribution, each of mean 1/6. The second smallest is the sum of the first two gaps: 2/6 = 1/3.</p><p>(It is Beta(2, 4), mean 2/(2 + 4).)</p><p><b>Answer: 1/3.</b></p>",
+  "key": "U<sub>(k)</sub> of n uniforms ~ Beta(k, n−k+1), mean k/(n+1): n points make n + 1 exchangeable gaps.",
+  "plan": {
+   "keyIdea": "Spacings are exchangeable.",
+   "method": "Mean = k/(n + 1).",
+   "sanityChecks": [
+    "k = n gives E[max] = n/(n+1).",
+    "k and n+1−k are mirror images: means add to 1."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is Var of the second smallest?</p><p>Give a fraction.</p>",
+    "model": "<p>Beta(2, 4): ab/((a + b)²(a + b + 1)) = 8/(36·7) = 2/63 ≈ 0.0317.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.031746031746031744,
+     "display": "2/63"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Five points, so the second one sits at 2/5 on average.'</p><p>Give the correct mean.</p>",
+    "model": "<p>1/3: five points make six gaps, not five. k/(n + 1), not k/n.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3333333333333333,
+     "display": "1/3"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>What is the expected gap between the 2nd and 3rd smallest?</p>",
+    "model": "<p>Any spacing has mean 1/(n + 1) = 1/6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.16666666666666666,
+     "display": "1/6"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-030",
+  "cat": "probability",
+  "diff": 3,
+  "title": "Second server failure",
+  "tags": [
+   "exponential",
+   "order-statistics",
+   "memoryless",
+   "reliability"
+  ],
+  "style": [
+   "math-test",
+   "research-stats"
+  ],
+  "prompt": "<p>Five servers fail independently after exponential lifetimes with rate 2 per year each. What is the expected time (in years) until the <b>second</b> failure?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.225,
+   "display": "1/10 + 1/8 = 9/40"
+  },
+  "hints": [
+   "The first failure among 5 is exponential with rate 5 × 2 = 10.",
+   "By memorylessness the 4 survivors restart: next failure after an Exp(8) wait."
+  ],
+  "solution": "<p>Min of 5 Exp(2) is Exp(10): mean 1/10. After it, 4 servers remain, all 'as good as new' (memoryless), so the next failure takes Exp(8): mean 1/8.</p><p>E = 1/10 + 1/8 = 9/40 = 0.225 years.</p><p><b>Answer: 9/40.</b></p>",
+  "key": "Exponential order statistics: gaps are independent Exp(rate × survivors).",
+  "plan": {
+   "keyIdea": "Memorylessness turns order statistics into a sum of independent waits.",
+   "method": "Add 1/(10) and 1/(8).",
+   "sanityChecks": [
+    "E[first failure] = 1/10.",
+    "Expected last failure = (1/2)(1 + 1/2 + … + 1/5)."
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected time until the <b>last</b> server fails?</p><p>Give a fraction.</p>",
+    "model": "<p>(1/2)(1/5 + 1/4 + 1/3 + 1/2 + 1) = (1/2)(137/60) = 137/120 ≈ 1.142 years.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.1416666666666666,
+     "display": "137/120"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Failures are equally spaced on average, so the second failure is at 2 × 1/10 = 0.2.'</p><p>Give the correct value.</p>",
+    "model": "<p>9/40 = 0.225. Gaps grow as fewer servers remain: 1/10, then 1/8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.225,
+     "display": "9/40"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Expected time between the 4th and 5th failures?</p>",
+    "model": "<p>Only one server left: Exp(2), mean 1/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-031",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Max of two standard normals",
+  "tags": [
+   "normal-distribution",
+   "order-statistics",
+   "symmetry",
+   "expected-value"
+  ],
+  "style": [
+   "math-test",
+   "trading-desk"
+  ],
+  "prompt": "<p>X and Y are independent N(0, 1). What is E[max(X, Y)]?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.5641895835477563,
+   "display": "1/√π ≈ 0.564",
+   "tolRel": 0.002
+  },
+  "hints": [
+   "max(X, Y) = (X + Y)/2 + |X − Y|/2.",
+   "X − Y ~ N(0, 2), and E|N(0, σ²)| = σ√(2/π)."
+  ],
+  "solution": "<p>max = (X + Y)/2 + |X − Y|/2. The first term has mean 0. X − Y ~ N(0, 2), so E|X − Y| = √2 · √(2/π) = 2/√π.</p><p>E[max] = 1/√π ≈ 0.564.</p><p><b>Answer: 1/√π ≈ 0.564.</b></p>",
+  "key": "max(a, b) = (a + b)/2 + |a − b|/2 turns a max into an absolute value.",
+  "plan": {
+   "keyIdea": "Rewrite the max with an absolute value.",
+   "method": "Use E|N(0, σ²)| = σ√(2/π).",
+   "sanityChecks": [
+    "Must be positive.",
+    "Correlation 1 would give 0."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is E|X − Y|?</p><p>Give a decimal.</p>",
+    "model": "<p>2/√π ≈ 1.128.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.1283791670955126,
+     "display": "2/√π ≈ 1.128",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'If X and Y have correlation 0.5 instead, E[max] doesn't change — correlation doesn't affect expectations.'</p><p>Give E[max] with ρ = 0.5.</p>",
+    "model": "<p>X − Y ~ N(0, 2 − 2ρ) = N(0, 1), so E[max] = (1/2)√(2/π) = 1/√(2π) ≈ 0.399. The max is non-linear, so dependence matters.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3989422804014327,
+     "display": "1/√(2π) ≈ 0.399",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Now X, Y are independent N(1, 4) (mean 1, SD 2). E[max]?</p><p>Give a decimal.</p>",
+    "model": "<p>Shift and scale: 1 + 2/√π ≈ 2.128.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.1283791670955123,
+     "display": "1 + 2/√π ≈ 2.128",
+     "tolRel": 0.002
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-032",
+  "cat": "probability",
+  "diff": 3,
+  "title": "Shortest of four stick pieces",
+  "tags": [
+   "broken-stick",
+   "spacings",
+   "order-statistics",
+   "inspection-paradox"
+  ],
+  "style": [
+   "math-test",
+   "brainteaser-phone"
+  ],
+  "prompt": "<p>A stick of length 1 is cut at 3 independent uniform points, giving 4 pieces. What is the expected length of the <b>shortest</b> piece?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.0625,
+   "display": "1/n² = 1/16"
+  },
+  "hints": [
+   "The spacings are uniform on the simplex; P(all pieces &gt; x) = (1 − 4x)³.",
+   "E[min] = ∫ P(min &gt; x) dx over [0, 1/4]."
+  ],
+  "solution": "<p>All four pieces exceed x exactly when, after removing x from each, the remaining length 1 − 4x is cut freely: P(min &gt; x) = (1 − 4x)³ for x ≤ 1/4.</p><p>E[min] = ∫<sub>0</sub><sup>1/4</sup> (1 − 4x)³ dx = 1/16. In general, the shortest of n pieces has mean 1/n².</p><p><b>Answer: 1/16.</b></p>",
+  "key": "Shortest of n broken-stick pieces: P(min > x) = (1 − nx)<sup>n−1</sup>, mean 1/n².",
+  "plan": {
+   "keyIdea": "Tail-sum: E[min] = ∫ P(min > x) dx.",
+   "method": "Shrink-the-stick argument gives (1 − 4x)³.",
+   "sanityChecks": [
+    "n = 2 pieces ⇒ 1/4.",
+    "Must be below the average piece 1/4."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected length of the <b>longest</b> of the 4 pieces?</p><p>Give a fraction.</p>",
+    "model": "<p>(1/n)(1 + 1/2 + … + 1/n) = (1/4)(25/12) = 25/48 ≈ 0.521.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5208333333333334,
+     "display": "25/48"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'The piece containing the midpoint 1/2 is just a typical piece, so its expected length is 1/4.'</p><p>Give its actual expected length.</p>",
+    "model": "<p>Inspection paradox: long pieces are more likely to cover a given point. Distance from 1/2 to the nearest cut on the left has P(&gt; s) = (1 − s)³ (s &lt; 1/2), mean (1 − (1/2)⁴)/4 = 15/64; same on the right. Total 15/32 ≈ 0.469.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.46875,
+     "display": "15/32"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: one cut (2 pieces). Expected shortest piece?</p>",
+    "model": "<p>min(U, 1 − U) is uniform on (0, 1/2): mean 1/4 = 1/2².</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.25,
+     "display": "1/4"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-033",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Does the max beat the rest combined?",
+  "tags": [
+   "uniform",
+   "symmetry",
+   "volume",
+   "order-statistics"
+  ],
+  "style": [
+   "math-test",
+   "trading-desk"
+  ],
+  "prompt": "<p>Three independent Uniform(0, 1) numbers are drawn. What is the probability that the largest exceeds the sum of the other two?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.5,
+   "display": "3 × 1/6 = 1/2"
+  },
+  "hints": [
+   "The events 'X<sub>i</sub> &gt; sum of the others' are disjoint.",
+   "P(X<sub>1</sub> &gt; X<sub>2</sub> + X<sub>3</sub>) is the volume of a corner pyramid: 1/6."
+  ],
+  "solution": "<p>At most one variable can exceed the sum of the others, so the events are disjoint and P = 3·P(X<sub>1</sub> &gt; X<sub>2</sub> + X<sub>3</sub>).</p><p>P(X<sub>2</sub> + X<sub>3</sub> &lt; X<sub>1</sub>) = E[X<sub>1</sub>²/2] = 1/6. So P = 1/2.</p><p><b>Answer: 1/2.</b></p>",
+  "key": "Disjoint symmetric events: multiply one simplex volume by the number of variables.",
+  "plan": {
+   "keyIdea": "Symmetry plus disjointness.",
+   "method": "P(X<sub>2</sub> + X<sub>3</sub> &lt; x) = x²/2, average over x.",
+   "sanityChecks": [
+    "n = 2: the max always beats the other (P = 1).",
+    "n = 4 should give 4 × 1/24 = 1/6."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same with four uniforms: P(the largest exceeds the sum of the other three)?</p><p>Give a fraction.</p>",
+    "model": "<p>4 · P(X<sub>2</sub> + X<sub>3</sub> + X<sub>4</sub> &lt; X<sub>1</sub>) = 4 · E[X<sub>1</sub>³/6] = 4/24 = 1/6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.16666666666666666,
+     "display": "1/6"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'For three uniforms, P(X<sub>1</sub> &gt; X<sub>2</sub> + X<sub>3</sub>) = 1/2, since that's our answer.'</p><p>Give P(X<sub>1</sub> &gt; X<sub>2</sub> + X<sub>3</sub>).</p>",
+    "model": "<p>1/6. The 1/2 is for 'whichever is the largest' — three disjoint events of 1/6 each.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.16666666666666666,
+     "display": "1/6"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check with two uniforms: P(the larger exceeds the other)?</p>",
+    "model": "<p>1 (ties have probability 0). The general formula n · 1/n! = 1/(n − 1)! gives 1 for n = 2, 1/2 for n = 3, 1/6 for n = 4 ✓.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "1",
+     "tolAbs": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-038",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Record highs in ten days",
+  "tags": [
+   "records",
+   "linearity",
+   "harmonic-numbers",
+   "permutations"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>Daily closing prices over 10 days are i.i.d. continuous (no ties). Day 1 counts as a record; any later day that beats all earlier days is a record. What is the expected number of records?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2.9289682539682538,
+   "display": "H<sub>10</sub> = 7381/2520 ≈ 2.929",
+   "tolRel": 0.001
+  },
+  "hints": [
+   "Linearity: day k is a record with probability 1/k.",
+   "By symmetry the maximum of the first k days is equally likely to be on any of them."
+  ],
+  "solution": "<p>Day k is a record iff it is the largest of the first k, probability 1/k. E = 1 + 1/2 + … + 1/10 = 7381/2520 ≈ 2.929.</p><p><b>Answer: ≈ 2.929.</b></p>",
+  "key": "Expected number of records among n i.i.d. draws is the harmonic number H<sub>n</sub> ≈ ln n + 0.577.",
+  "plan": {
+   "keyIdea": "Indicator for each day + linearity.",
+   "method": "P(day k is a record) = 1/k by symmetry.",
+   "sanityChecks": [
+    "n = 1 ⇒ 1.",
+    "Grows like ln n."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Over 4 days?</p><p>Give a fraction.</p>",
+    "model": "<p>1 + 1/2 + 1/3 + 1/4 = 25/12.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.0833333333333335,
+     "display": "25/12"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Records grow like √n, so over 100 days expect about 10.'</p><p>Give the expected number of records over 100 days.</p>",
+    "model": "<p>H<sub>100</sub> ≈ 5.187 (≈ ln 100 + 0.577): logarithmic, not square-root growth.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5.187377517639621,
+     "display": "≈ 5.187",
+     "tolRel": 0.001
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Are the record indicators of days 2 and 3 independent? What is P(both are records)?</p><p>Give a fraction.</p>",
+    "model": "<p>P = P(X<sub>1</sub> &lt; X<sub>2</sub> &lt; X<sub>3</sub>) = 1/6 = (1/2)(1/3): yes, record indicators are independent (a classical fact), which also gives Var = Σ(1/k)(1 − 1/k).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.16666666666666666,
+     "display": "1/6"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-041",
+  "cat": "probability",
+  "diff": 1,
+  "title": "Adjacent cards of the same colour",
+  "tags": [
+   "linearity",
+   "cards",
+   "indicators",
+   "expected-value"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>A standard 52-card deck is shuffled and laid out in a row. What is the expected number of adjacent pairs (positions i, i + 1) where both cards have the same colour?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 25.0,
+   "display": "51 × 25/51 = 25",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "51 adjacent pairs; use an indicator for each.",
+   "Given the first card, 25 of the remaining 51 cards share its colour."
+  ],
+  "solution": "<p>Each of the 51 adjacent pairs matches in colour with probability 25/51. E = 51 × 25/51 = 25.</p><p>Trap: using 1/2 for each pair (giving 25.5) — the second card is drawn without replacement.</p><p><b>Answer: 25.</b></p>",
+  "key": "Linearity of expectation over adjacent pairs, with without-replacement probabilities.",
+  "plan": {
+   "keyIdea": "Indicator per adjacent pair + linearity (no independence needed).",
+   "method": "P(match) = 25/51.",
+   "sanityChecks": [
+    "Same-rank version: 3/51 per pair.",
+    "Must be slightly below 25.5."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected number of adjacent pairs of the same <b>suit</b>?</p>",
+    "model": "<p>51 × 12/51 = 12.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 12.0,
+     "display": "12",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Each adjacent pair is the same colour half the time, so 51/2 = 25.5.'</p><p>Give the correct expectation.</p>",
+    "model": "<p>25: P(match) = 25/51, slightly below 1/2, because one card of that colour is already used.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 25.0,
+     "display": "25",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Expected number of adjacent pairs of the same <b>rank</b>?</p>",
+    "model": "<p>51 × 3/51 = 3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.0,
+     "display": "3",
+     "tolAbs": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-042",
+  "cat": "probability",
+  "diff": 3,
+  "title": "Exponentials given their sum",
+  "tags": [
+   "exponential",
+   "conditional-expectation",
+   "dirichlet",
+   "symmetry"
+  ],
+  "style": [
+   "math-test",
+   "research-stats"
+  ],
+  "prompt": "<p>X<sub>1</sub>, X<sub>2</sub>, X<sub>3</sub> are i.i.d. exponential. Given X<sub>1</sub> + X<sub>2</sub> + X<sub>3</sub> = 6, what is E[X<sub>1</sub>²]?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 6.0,
+   "display": "s²·2/(3·4) = 6",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Given the sum s, (X<sub>1</sub>, X<sub>2</sub>, X<sub>3</sub>) is uniform on the simplex {x<sub>i</sub> ≥ 0, Σx<sub>i</sub> = s} — the rate drops out.",
+   "Then X<sub>1</sub>/s ~ Beta(1, 2), with density 2(1 − u)."
+  ],
+  "solution": "<p>The joint density λ³e<sup>−λ(x<sub>1</sub>+x<sub>2</sub>+x<sub>3</sub>)</sup> is constant on the plane Σx = 6, so the conditional law is uniform on the triangle. X<sub>1</sub>/6 ~ Beta(1, 2): E[U²] = (1·2)/(3·4) = 1/6. So E[X<sub>1</sub>² | sum = 6] = 36/6 = 6.</p><p>Trap: still treating X<sub>1</sub> as exponential with mean 2 (which would give 2·2² = 8).</p><p><b>Answer: 6.</b></p>",
+  "key": "Given their sum, i.i.d. exponentials are uniform on the simplex (scaled Dirichlet(1,…,1)).",
+  "plan": {
+   "keyIdea": "Conditioning on the sum removes the rate: uniform on a simplex.",
+   "method": "Marginal of one coordinate is s·Beta(1, n − 1).",
+   "sanityChecks": [
+    "E[X<sub>1</sub> | sum] = 2 by symmetry.",
+    "E[X<sub>1</sub>²] must exceed 2² = 4."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Given the same sum 6, what is E[X<sub>1</sub>]?</p>",
+    "model": "<p>Symmetry: 6/3 = 2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.0,
+     "display": "2",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Given the sum 6, what is E[max(X<sub>1</sub>, X<sub>2</sub>, X<sub>3</sub>)]?</p><p>Give a fraction.</p>",
+    "model": "<p>Uniform simplex = broken stick of length 6 into 3 pieces: longest has mean 6 · (1/3)(1 + 1/2 + 1/3) = 11/3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.6666666666666665,
+     "display": "11/3"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Exponentials are memoryless, so conditioning doesn't matter: X<sub>1</sub> is still exponential with mean 2 and E[X<sub>1</sub>²] = 2·2² = 8.'</p><p>Give the correct value.</p>",
+    "model": "<p>6. Memorylessness is about conditioning on X<sub>1</sub> &gt; t, not on the sum. Given the sum, X<sub>1</sub> ≤ 6 and has density ∝ (6 − x).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 6.0,
+     "display": "6",
+     "tolAbs": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-043",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Expected value of the winner",
+  "tags": [
+   "conditional-expectation",
+   "uniform",
+   "order-statistics",
+   "symmetry"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>X and Y are independent Uniform(0, 1). What is E[X | X &gt; Y]?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6666666666666666,
+   "display": "2/3"
+  },
+  "hints": [
+   "Given X &gt; Y, X is the maximum of the two.",
+   "E[max of 2 uniforms] = 2/3."
+  ],
+  "solution": "<p>On the event X &gt; Y, X = max(X, Y), and by symmetry the event doesn't change the law of the max. E[max] = 2/3.</p><p>Directly: ∫∫<sub>x&gt;y</sub> x · 2 dy dx = ∫ 2x² dx = 2/3.</p><p><b>Answer: 2/3.</b></p>",
+  "key": "Conditioning on X > Y turns X into the maximum.",
+  "plan": {
+   "keyIdea": "Recognise the order statistic.",
+   "method": "E[max of n uniforms] = n/(n + 1).",
+   "sanityChecks": [
+    "Must exceed 1/2.",
+    "E[X | X < Y] should be 1/3."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>X, Y i.i.d. exponential with mean 1. E[X | X &gt; Y]?</p><p>Give a decimal.</p>",
+    "model": "<p>X = min + (X − min); the min has mean 1/2 and, given X is the larger, the excess is a fresh Exp(1): 1/2 + 1 = 1.5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.5,
+     "display": "1.5"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Three i.i.d. uniforms: E[X<sub>1</sub> | X<sub>1</sub> is the largest]?</p>",
+    "model": "<p>E[max of 3] = 3/4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.75,
+     "display": "3/4"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'So E[X − Y | X &gt; Y] = 2/3 − 1/2 = 1/6.'</p><p>Give the correct value.</p>",
+    "model": "<p>Given X &gt; Y, Y is the min with mean 1/3, not 1/2: E[X − Y | X &gt; Y] = 2/3 − 1/3 = 1/3 = E|X − Y|.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3333333333333333,
+     "display": "1/3"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-006",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Was the counterparty informed?",
+  "tags": [
+   "conditional-probability",
+   "bayes",
+   "adverse-selection",
+   "market-making"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>You show a two-sided quote. 20% of the traders who look at it are informed; an informed trader trades on it with probability 0.9 (whenever it is stale), while an uninformed trader trades with probability 0.3.</p><p>Someone just traded with you. What is the probability they were informed?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.42857142857142855,
+   "display": "3/7 ≈ 0.429"
+  },
+  "hints": [
+   "Bayes: P(I | trade) = P(trade | I)P(I) / P(trade).",
+   "P(trade) = 0.2·0.9 + 0.8·0.3."
+  ],
+  "solution": "<p>P(trade) = 0.2 × 0.9 + 0.8 × 0.3 = 0.18 + 0.24 = 0.42.</p><p>P(informed | trade) = 0.18/0.42 = 3/7 ≈ 0.429.</p><p>Even though only 20% of the population is informed, more than 40% of your fills are: the act of trading is itself evidence. That is adverse selection in one line.</p><p><b>Answer: 3/7 ≈ 0.429.</b></p>",
+  "key": "Conditioning on 'they traded' up-weights traders who trade more readily — informed flow is over-represented in your fills.",
+  "plan": {
+   "keyIdea": "Bayes' rule with 'trade' as the observed event.",
+   "method": "Joint probabilities 0.18 and 0.24, then normalise.",
+   "sanityChecks": [
+    "If both types traded equally often the answer would be the prior 0.2",
+    "Answer must exceed 0.2"
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Each informed fill costs you 0.20 − s (the value moved 0.20 past your mid and you collected half-spread s), each uninformed fill earns s. What half-spread s makes your expected P&amp;L per fill zero?</p>",
+    "model": "<p>E = (3/7)(s − 0.20) + (4/7)s = s − 0.6/7 = 0 ⇒ s = 0.6/7 ≈ 0.0857.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.08571428571428572,
+     "display": "0.6/7 ≈ 0.0857"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What happens to P(informed | trade) as the uninformed trading probability goes to 0?</p>",
+    "model": "<p>It tends to 1: if only informed traders ever hit you, every fill is informed (0.18/(0.18 + 0) = 1).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "1"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-007",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Two firings of the same signal",
+  "tags": [
+   "bayes",
+   "likelihood-ratio",
+   "signals",
+   "conditional-probability"
+  ],
+  "style": [
+   "research-stats",
+   "trading-desk"
+  ],
+  "prompt": "<p>40% of days are profitable for a strategy. A signal fires on 80% of profitable days and on 30% of unprofitable days. Two independent signals of this type (conditionally independent given the day type) both fire this morning.</p><p>What is the probability today is profitable?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.8258064516129032,
+   "display": "128/155 ≈ 0.826"
+  },
+  "hints": [
+   "Work in odds: posterior odds = prior odds × likelihood ratio per signal.",
+   "Prior odds 0.4/0.6 = 2/3; each firing has likelihood ratio 0.8/0.3 = 8/3."
+  ],
+  "solution": "<p>Prior odds 2/3. Each firing multiplies the odds by 8/3, so after two: (2/3)(8/3)² = 128/27.</p><p>Probability = (128/27)/(1 + 128/27) = 128/155 ≈ 0.826.</p><p>(After one firing: (2/3)(8/3) = 16/9 ⇒ 16/25 = 0.64.)</p><p><b>Answer: 128/155 ≈ 0.826.</b></p>",
+  "key": "Use odds form: independent evidence multiplies the odds by each likelihood ratio.",
+  "plan": {
+   "keyIdea": "Conditionally independent evidence combines multiplicatively in odds.",
+   "method": "Prior odds × LR², convert back to probability.",
+   "sanityChecks": [
+    "One firing should give 0.64",
+    "More evidence should push the probability up, never above 1"
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The signal is 80% accurate, so after one firing P(profitable) = 0.8.” Correct it.</p>",
+    "model": "<p>0.8 is P(fire | profitable), not P(profitable | fire). With the 40% base rate and 30% false-fire rate, P(profitable | fire) = 0.32/0.50 = 0.64.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.64,
+     "display": "0.64"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Instead, the first signal fires and the second does not. Now what?</p>",
+    "model": "<p>Not firing has likelihood ratio 0.2/0.7 = 2/7. Odds = (2/3)(8/3)(2/7) = 32/63 ⇒ probability 32/95 ≈ 0.337.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3368421052631579,
+     "display": "32/95 ≈ 0.337"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-008",
+  "cat": "probability",
+  "diff": 1,
+  "title": "Random walk between two stops",
+  "tags": [
+   "random-walk",
+   "gamblers-ruin",
+   "martingale",
+   "hitting-time"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>A position's P&amp;L moves up or down $1 per step with probability ½ each. You close it at +$4 (take-profit) or at −$6 (stop-loss).</p><p>Give the probability that the take-profit is hit first and the expected number of steps until the position is closed, separated by a comma.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    0.6,
+    24.0
+   ],
+   "ordered": true,
+   "display": "0.6, 24"
+  },
+  "hints": [
+   "The P&amp;L is a martingale: optional stopping gives 4·p − 6·(1 − p) = 0.",
+   "For a symmetric walk, X<sub>n</sub>² − n is also a martingale."
+  ],
+  "solution": "<p>Optional stopping on X<sub>n</sub>: 4p − 6(1 − p) = 0 ⇒ p = 6/10 = 0.6.</p><p>Optional stopping on X<sub>n</sub>² − n: E[T] = E[X<sub>T</sub>²] = 0.6·16 + 0.4·36 = 9.6 + 14.4 = 24 (the classic a·b = 4·6).</p><p><b>Answer: 0.6, 24.</b></p>",
+  "key": "Symmetric walk with barriers +a, −b: P(hit +a first) = b/(a + b), E[duration] = ab.",
+  "plan": {
+   "keyIdea": "Martingales X<sub>n</sub> and X<sub>n</sub>² − n with optional stopping.",
+   "method": "Solve the linear equation for p; E[T] = E[X<sub>T</sub>²].",
+   "sanityChecks": [
+    "Closer barrier is more likely: p &gt; ½ for the nearer +4",
+    "a = b = 1 gives ½ and 1"
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now the walk has a slight edge: up with probability 0.55, down 0.45. What is P(+4 before −6)?</p>",
+    "model": "<p>With r = q/p = 9/11 and the start 6 steps above the lower barrier on a width of 10: P = (1 − r⁶)/(1 − r¹⁰) ≈ 0.809.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.8087340386845628,
+     "display": "≈ 0.809"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity-check your formulas with barriers at +1 and −1.</p>",
+    "model": "<p>P = 1/2 by symmetry and the walk always stops after exactly one step, matching b/(a + b) = 1/2 and ab = 1.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-009",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Ruin with a 60% edge",
+  "tags": [
+   "gamblers-ruin",
+   "random-walk",
+   "first-step",
+   "betting"
+  ],
+  "style": [
+   "trading-desk",
+   "math-test"
+  ],
+  "prompt": "<p>You have 3 units. Each bet wins 1 unit with probability 0.6 and loses 1 unit with probability 0.4. You stop when you reach 10 units or 0.</p><p>What is the probability you reach 10?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.716122361051271,
+   "display": "(1 − (2/3)³)/(1 − (2/3)¹⁰) ≈ 0.7161"
+  },
+  "hints": [
+   "First-step analysis: h(i) = 0.6·h(i + 1) + 0.4·h(i − 1) with h(0) = 0, h(10) = 1.",
+   "The solution is h(i) = (1 − r<sup>i</sup>)/(1 − r<sup>10</sup>) with r = q/p."
+  ],
+  "solution": "<p>With r = q/p = 2/3, the hitting probability is h(i) = (1 − r<sup>i</sup>)/(1 − r<sup>N</sup>).</p><p>h(3) = (1 − 8/27)/(1 − (2/3)<sup>10</sup>) = 0.7037/0.98266 ≈ 0.7161.</p><p>(Alternative: (q/p)<sup>X</sup> is a martingale; optional stopping gives the same equation.)</p><p><b>Answer: ≈ 0.716.</b></p>",
+  "key": "Biased ruin: (q/p)<sup>X<sub>n</sub></sup> is a martingale, so P(reach N from i) = (1 − r<sup>i</sup>)/(1 − r<sup>N</sup>).",
+  "plan": {
+   "keyIdea": "The exponential martingale r<sup>X</sup>, r = q/p, or first-step analysis.",
+   "method": "Plug i = 3, N = 10, r = 2/3.",
+   "sanityChecks": [
+    "p = ½ should give 3/10",
+    "A finite target can only help: the answer must exceed 1 − (2/3)³ ≈ 0.704"
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the expected number of bets until you stop?</p>",
+    "model": "<p>X<sub>n</sub> − 0.2n is a martingale, so E[T] = (E[X<sub>T</sub>] − 3)/0.2 = (10·0.7161 − 3)/0.2 ≈ 20.8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 20.80611805256355,
+     "display": "≈ 20.81"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>The target is removed (N → ∞). What is the probability you are never ruined?</p>",
+    "model": "<p>1 − (q/p)<sup>3</sup> = 1 − 8/27 = 19/27 ≈ 0.704.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7037037037037037,
+     "display": "19/27 ≈ 0.704"
+    }
+   }
+  ]
+ },
+ {
+  "cat": "probability",
+  "diff": 1,
+  "title": "Two dice: the sum is 9",
+  "tags": [
+   "dice",
+   "counting",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>A red die and a blue die are rolled. What is the probability that the two faces add up to 9?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.1111111111111111,
+   "display": "4/36 = 1/9 ≈ 0.111"
+  },
+  "hints": [
+   "Count ordered (red, blue) outcomes: there are 36, all equally likely.",
+   "List the pairs that make 9 and count both colourings of each."
+  ],
+  "solution": "<p>The 36 ordered outcomes (red, blue) are equally likely. Sum 9: (3,6), (4,5), (5,4), (6,3) — four outcomes.</p><p>P = 4/36 = 1/9.</p><p>Trap: saying 1/11 because there are 11 possible sums. The sums are not equally likely — 7 has six ways, 2 has one.</p><p><b>Answer: 1/9.</b></p>",
+  "key": "Count equally likely ordered outcomes; the values you care about (sums) are usually not equally likely.",
+  "plan": {
+   "keyIdea": "The 36 colour-labelled outcomes are equally likely; sums are not.",
+   "method": "List the ordered pairs hitting 9 and divide by 36.",
+   "sanityChecks": [
+    "Total over all sums must be 36/36.",
+    "Sum 9 should be less likely than 7 (6 ways)."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same dice — what is the probability the sum is 10?</p>",
+    "model": "<p>(4,6), (5,5), (6,4): three outcomes, because the double 5–5 cannot be swapped. P = 3/36 = 1/12.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.08333333333333333,
+     "display": "1/12"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “There are 11 possible totals from 2 to 12, so any one total has probability 1/11; for 9 that is 1/11.” Which is right?</p>",
+    "model": "<p>Wrong: the 11 totals are not equally likely. Counting outcomes gives 4/36 = 1/9 for a 9.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "1/11 — each total is equally likely",
+      "1/9 — count the 36 ordered outcomes",
+      "4/11 — four ways out of 11 totals"
+     ],
+     "correct": 1,
+     "display": "1/9"
+    }
+   }
+  ],
+  "id": "pm-001"
+ },
+ {
+  "cat": "probability",
+  "diff": 1,
+  "title": "Equally likely tickets for a trade",
+  "tags": [
+   "counting",
+   "distribution",
+   "independence",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk"
+  ],
+  "prompt": "<p>A small trade loses 2 with probability 0.4, makes 1 with probability 0.4 and makes 4 with probability 0.2. You do two independent copies of it.</p><p>What is the probability that your total P&amp;L is positive? Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.52,
+   "display": "0.52"
+  },
+  "hints": [
+   "Imagine a hat with 5 equally likely tickets: −2, −2, +1, +1, +4.",
+   "Draw two tickets with replacement (25 equally likely pairs) and count the pairs with a positive total."
+  ],
+  "solution": "<p>Model one trade as a draw from 5 equally likely tickets {−2, −2, 1, 1, 4}. Two independent copies = 25 equally likely ordered pairs.</p><p>A total ≤ 0 happens only when at least one −2 is drawn and the other ticket is −2 or +1: (−2,−2) 4 pairs, (−2,1) or (1,−2) 8 pairs. That is 12 of 25 pairs. The positive pairs are the other 13 (totals 2, 2, 5, 8).</p><p>P = 13/25 = 0.52.</p><p><b>Answer: 0.52.</b></p>",
+  "key": "Turn unequal probabilities into equally likely 'tickets' so you can count.",
+  "plan": {
+   "keyIdea": "Rewrite the distribution as equally likely outcomes and count pairs.",
+   "method": "5 tickets → 25 ordered pairs; count totals > 0.",
+   "sanityChecks": [
+    "Probabilities of all totals add to 1.",
+    "EV per trade is +0.4, so 'positive more often than not' is plausible."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the expected total P&amp;L of the two trades?</p>",
+    "model": "<p>One trade: 0.4(−2) + 0.4(1) + 0.2(4) = 0.4. By linearity two trades give 0.8 — no need for the pair table.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.8,
+     "display": "0.8"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>What is the probability the total is exactly +2?</p>",
+    "model": "<p>Totals of 2 come from (1,1) [4 pairs] and (−2,4) or (4,−2) [4 pairs]: 8/25 = 0.32.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.32,
+     "display": "0.32"
+    }
+   }
+  ],
+  "id": "pm-002"
+ },
+ {
+  "cat": "probability",
+  "diff": 1,
+  "title": "Multiple of 3 or of 4 on a d20",
+  "tags": [
+   "inclusion-exclusion",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "OA-speed",
+   "trading-desk"
+  ],
+  "prompt": "<p>A fair 20-sided die (faces 1–20) is rolled. What is the probability that the result is a multiple of 3 or a multiple of 4 (or both)?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.5,
+   "display": "10/20 = 1/2"
+  },
+  "hints": [
+   "P(A or B) = P(A) + P(B) − P(A and B).",
+   "Multiples of both 3 and 4 are multiples of 12."
+  ],
+  "solution": "<p>Multiples of 3: 3, 6, …, 18 → 6. Multiples of 4: 4, 8, …, 20 → 5. Both (multiples of 12): 12 → 1.</p><p>P = (6 + 5 − 1)/20 = 10/20 = 1/2.</p><p>Trap: adding 6 + 5 and counting 12 twice.</p><p><b>Answer: 1/2.</b></p>",
+  "key": "Inclusion–exclusion: add the two events, subtract the overlap once.",
+  "plan": {
+   "keyIdea": "Union of two overlapping events.",
+   "method": "Count each set, subtract the intersection (multiples of 12).",
+   "sanityChecks": [
+    "The answer must be ≤ 6/20 + 5/20."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now a multiple of 3 or of 5?</p>",
+    "model": "<p>6 + 4 − 1 (the 15) = 9, so 9/20.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.45,
+     "display": "9/20"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “6 multiples of 3 plus 5 multiples of 4 — so 11/20.” Correct the number.</p>",
+    "model": "<p>12 was counted twice; subtract it once: 10/20 = 1/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   }
+  ],
+  "id": "pm-003"
+ },
+ {
+  "cat": "probability",
+  "diff": 1,
+  "title": "Two high cards, with and without replacement",
+  "tags": [
+   "cards",
+   "independence",
+   "without-replacement",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>Call a card “high” if it is a 10, J, Q, K or A (20 of the 52 cards). You draw two cards from a shuffled standard deck.</p><p>What is the probability both are high (a) if you put the first card back and reshuffle, (b) if you don't? Answer as two numbers separated by a comma: (a), (b).</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    0.14792899408284024,
+    0.14328808446455504
+   ],
+   "ordered": true,
+   "display": "25/169 ≈ 0.148, 95/663 ≈ 0.143",
+   "tolRel": 0.002
+  },
+  "hints": [
+   "With replacement the draws are independent: multiply.",
+   "Without replacement the second draw has 19 high cards out of 51."
+  ],
+  "solution": "<p>(a) Independent draws: (20/52)² = (5/13)² = 25/169 ≈ 0.148.</p><p>(b) (20/52)·(19/51) = 380/2652 = 95/663 ≈ 0.143.</p><p>Removing a high card makes the second high card slightly less likely, so (b) &lt; (a).</p><p><b>Answer: 25/169, 95/663.</b></p>",
+  "key": "Independence lets you multiply; without replacement, multiply conditional probabilities instead.",
+  "plan": {
+   "keyIdea": "With replacement: independent. Without: condition on the first card.",
+   "method": "Multiply 20/52 by 20/52 or by 19/51.",
+   "sanityChecks": [
+    "(b) must be a little smaller than (a)."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Three cards without replacement — probability all three are high?</p>",
+    "model": "<p>(20·19·18)/(52·51·50) = 6840/132600 ≈ 0.0516.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.051583710407239816,
+     "display": "57/1105 ≈ 0.0516",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why are the two draws without replacement not independent, even though each card on its own is high with probability 20/52?</p>",
+    "model": "<p>Each draw alone is high with probability 20/52 (by symmetry), but learning the first is high changes the second's chances to 19/51. Same marginals, dependent joint.</p>"
+   }
+  ],
+  "id": "pm-004"
+ },
+ {
+  "cat": "probability",
+  "diff": 1,
+  "title": "Product of three dice divisible by 3",
+  "tags": [
+   "dice",
+   "complement",
+   "independence",
+   "pm-track"
+  ],
+  "style": [
+   "OA-speed",
+   "trading-desk"
+  ],
+  "prompt": "<p>Three fair dice are rolled. What is the probability that the product of the three faces is divisible by 3?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.7037037037037037,
+   "display": "19/27 ≈ 0.704"
+  },
+  "hints": [
+   "The product is divisible by 3 unless no die shows a 3 or a 6.",
+   "Use the complement and independence."
+  ],
+  "solution": "<p>The product avoids the factor 3 only if every die is in {1, 2, 4, 5}: probability (4/6)³ = 8/27.</p><p>So P = 1 − 8/27 = 19/27 ≈ 0.704.</p><p><b>Answer: 19/27.</b></p>",
+  "key": "'At least one' events: compute the complement, then multiply independent pieces.",
+  "plan": {
+   "keyIdea": "Complement: no die carries a factor 3.",
+   "method": "1 − (2/3)³.",
+   "sanityChecks": [
+    "With one die the answer is 1/3; it should grow with more dice."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Two dice: probability their product is divisible by 6?</p>",
+    "model": "<p>Need a factor 2 and a factor 3. 1 − P(no 2) − P(no 3) + P(neither) = 1 − 9/36 − 16/36 + 4/36 = 15/36 = 5/12.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.4166666666666667,
+     "display": "5/12"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>With n dice, how many do you need before the product is divisible by 3 with probability at least 99%?</p>",
+    "model": "<p>Need (2/3)ⁿ ≤ 0.01, i.e. n ≥ ln 100 / ln 1.5 ≈ 11.36, so n = 12.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 12.0,
+     "display": "12"
+    }
+   }
+  ],
+  "id": "pm-005"
+ },
+ {
+  "cat": "probability",
+  "diff": 3,
+  "title": "Covariance of sum and product of two dice",
+  "tags": [
+   "random-variables",
+   "covariance",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "math-test"
+  ],
+  "prompt": "<p>Roll a red die R and a blue die B (independent, fair). Let S = R + B and M = R·B.</p><p>What is Cov(S, M)? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 20.416666666666668,
+   "display": "245/12 ≈ 20.42"
+  },
+  "hints": [
+   "Cov(S, M) = E[SM] − E[S]E[M], and SM = R²B + RB².",
+   "E[R²] = 91/6, and independence lets you factor E[R²B] = E[R²]E[B]."
+  ],
+  "solution": "<p>E[SM] = E[R²B] + E[RB²] = 2·E[R²]·E[B] = 2·(91/6)·(7/2) = 637/6.</p><p>E[S]·E[M] = 7 · (7/2)² = 343/4.</p><p>Cov = 637/6 − 343/4 = (1274 − 1029)/12 = 245/12 ≈ 20.42.</p><p>So S and M are clearly not independent — a big sum tends to come with a big product.</p><p><b>Answer: 245/12.</b></p>",
+  "key": "Expand products of random variables and use independence of the underlying dice, not of the derived variables.",
+  "plan": {
+   "keyIdea": "S and M are built from the same dice, so expect strong positive dependence.",
+   "method": "Expand E[SM] into terms in R and B, factor using independence.",
+   "sanityChecks": [
+    "Answer must be positive.",
+    "Check E[R²] = (1+4+9+16+25+36)/6 = 91/6."
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is Cov(R − B, R·B)?</p>",
+    "model": "<p>E[(R − B)RB] = E[R²B] − E[RB²] = 0 by symmetry, and E[R − B] = 0, so the covariance is 0.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.0,
+     "display": "0",
+     "tolAbs": 1e-09
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer: “So R − B and R·B have zero covariance — therefore they are independent.” Is that right?</p>",
+    "model": "<p>No. P(R − B = 0 and RB = 2) = 0 (a product of 2 needs faces 1 and 2), yet P(R − B = 0) = 1/6 and P(RB = 2) = 2/36 are both positive. Zero covariance does not imply independence.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Yes — zero covariance implies independence",
+      "No — e.g. R − B = 0 and RB = 2 can't happen together, although each can happen alone"
+     ],
+     "correct": 1,
+     "display": "Not independent"
+    }
+   }
+  ],
+  "id": "pm-006"
+ },
+ {
+  "cat": "probability",
+  "diff": 1,
+  "title": "A linear payout on a d20",
+  "tags": [
+   "random-variables",
+   "variance",
+   "linearity",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>A contract pays 5X − 20 dollars, where X is the roll of a fair 20-sided die (1–20).</p><p>Give its expected value and its standard deviation, as two numbers separated by a comma (2 decimals).</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    32.5,
+    28.83140648667699
+   ],
+   "ordered": true,
+   "display": "32.5, 5·√(399/12) ≈ 28.83",
+   "tolRel": 0.002
+  },
+  "hints": [
+   "E[aX + b] = aE[X] + b; SD(aX + b) = |a|·SD(X).",
+   "A uniform roll on 1..n has variance (n² − 1)/12."
+  ],
+  "solution": "<p>E[X] = 10.5, so E = 5·10.5 − 20 = 32.5.</p><p>Var(X) = (20² − 1)/12 = 33.25, SD(X) ≈ 5.766. Shifting by −20 doesn't change spread; scaling by 5 multiplies the SD by 5: ≈ 28.83.</p><p><b>Answer: 32.5, ≈ 28.83.</b></p>",
+  "key": "Constants shift the mean only; scale factors multiply the SD.",
+  "plan": {
+   "keyIdea": "A linear function of one random variable.",
+   "method": "Mean transforms linearly; SD scales by |a| and ignores shifts.",
+   "sanityChecks": [
+    "SD can't be negative or depend on the −20."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now the contract pays 5(X + Y) − 40 for two independent d20 rolls X, Y. Expected value and SD? Answer as two numbers separated by a comma.</p>",
+    "model": "<p>Mean 5·21 − 40 = 65. Variances add: Var = 25·2·33.25 = 1662.5, SD ≈ 40.77.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      65.0,
+      40.773766075750224
+     ],
+     "ordered": true,
+     "display": "65, ≈ 40.77",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer: “SD of 5X − 20 is 5·SD(X) − 20 ≈ 8.83.” Give the correct SD.</p>",
+    "model": "<p>Shifts don't affect spread: SD = 5·SD(X) ≈ 28.83.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 28.83140648667699,
+     "display": "≈ 28.83",
+     "tolRel": 0.002
+    }
+   }
+  ],
+  "id": "pm-007"
+ },
+ {
+  "cat": "probability",
+  "diff": 2,
+  "title": "Max times min of two dice",
+  "tags": [
+   "random-variables",
+   "covariance",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "math-test"
+  ],
+  "prompt": "<p>Roll two fair dice; let H be the larger face and L the smaller (equal if a double).</p><p>Compute E[H·L] − E[H]·E[L]. Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.9452160493827161,
+   "display": "1225/1296 = (35/36)² ≈ 0.945"
+  },
+  "hints": [
+   "H·L is just the product of the two dice.",
+   "E[H] = 161/36 and E[L] = 91/36 (they add to 7)."
+  ],
+  "solution": "<p>H·L = R·B for the two dice, so E[HL] = 3.5² = 49/4.</p><p>E[H] = Σ k(2k − 1)/36 = 161/36, and E[L] = 7 − 161/36 = 91/36.</p><p>E[HL] − E[H]E[L] = 49/4 − 14651/1296 = (15876 − 14651)/1296 = 1225/1296 ≈ 0.945.</p><p>It is positive: knowing the max is large makes a large min more likely. This is an example where E[XY] ≠ E[X]E[Y].</p><p><b>Answer: 1225/1296.</b></p>",
+  "key": "Spot that max·min = product of the dice; then it's E[XY] ≠ E[X]E[Y] for dependent X, Y.",
+  "plan": {
+   "keyIdea": "max × min is the product of the dice — a free simplification.",
+   "method": "Get E[H] from P(H = k) = (2k − 1)/36; E[L] = 7 − E[H].",
+   "sanityChecks": [
+    "E[H] + E[L] = 7.",
+    "Covariance should be positive."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is E[H·L] itself?</p>",
+    "model": "<p>The product of the dice: 3.5 × 3.5 = 12.25.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 12.25,
+     "display": "12.25"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Is there a faster way to get E[L] once you have E[H]?</p>",
+    "model": "<p>H + L = R + B always, so E[L] = 7 − E[H] = 7 − 161/36 = 91/36.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.5277777777777777,
+     "display": "91/36 ≈ 2.528"
+    }
+   }
+  ],
+  "id": "pm-011"
+ },
+ {
+  "cat": "probability",
+  "diff": 2,
+  "title": "Many small edges: the chance of losing",
+  "tags": [
+   "law-of-large-numbers",
+   "binomial",
+   "betting",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "betting-game"
+  ],
+  "prompt": "<p>You make 400 independent $1 bets, each won with probability 0.55 (win +$1, lose −$1).</p><p>What is the probability that you finish with a strict loss? Give a decimal to 3 places (a normal approximation with continuity correction is fine).</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.019876215511578452,
+   "display": "P(W ≤ 199) ≈ 0.0199",
+   "tolAbs": 0.003
+  },
+  "hints": [
+   "Total = 2W − 400 where W ~ Binomial(400, 0.55).",
+   "Mean of W is 220, SD is √(400·0.55·0.45) ≈ 9.95."
+  ],
+  "solution": "<p>A strict loss means W ≤ 199 wins. W has mean 220 and SD √99 ≈ 9.95.</p><p>Normal approximation with continuity correction: P(Z ≤ (199.5 − 220)/9.95) = P(Z ≤ −2.06) ≈ 0.020. The exact binomial sum is ≈ 0.0199.</p><p>The expected total is +40 with SD ≈ 19.9: a small edge repeated many times makes losing unlikely — the law of large numbers at work.</p><p><b>Answer: ≈ 0.020.</b></p>",
+  "key": "Repeating a positive-EV bet makes the average converge to the EV; the chance of an overall loss shrinks like a normal tail.",
+  "plan": {
+   "keyIdea": "Sum of many independent bets ≈ normal.",
+   "method": "Mean and SD of the win count, then a z-score with continuity correction.",
+   "sanityChecks": [
+    "Expected total = 400 × 0.1 = 40.",
+    "The answer should be a small tail probability (a couple of percent)."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the standard deviation of your total P&amp;L in dollars?</p>",
+    "model": "<p>Total = 2W − 400, so SD = 2√99 ≈ 19.90.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 19.8997487421324,
+     "display": "2√99 ≈ 19.90",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What happens to the probability of finishing behind as the number of bets grows to infinity?</p>",
+    "model": "<p>The mean grows like 0.1n but the SD only like √n, so the z-score −0.1n/(√n·0.995) → −∞ and the probability of a loss tends to 0.</p>"
+   }
+  ],
+  "id": "pm-012"
+ },
+ {
+  "cat": "probability",
+  "diff": 2,
+  "title": "Ten 90% intervals",
+  "tags": [
+   "confidence-intervals",
+   "binomial",
+   "calibration",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "research-stats"
+  ],
+  "prompt": "<p>You give ten independent 90% confidence intervals for ten unrelated quantities. Assume you are perfectly calibrated (each interval contains the truth with probability 0.9).</p><p>What is the probability that at least 9 of the 10 intervals contain the truth? Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.7360989291,
+   "display": "0.9¹⁰ + 10·0.9⁹·0.1 ≈ 0.7361"
+  },
+  "hints": [
+   "The number of hits is Binomial(10, 0.9).",
+   "Add P(10 hits) and P(exactly 9 hits)."
+  ],
+  "solution": "<p>Hits ~ Binomial(10, 0.9). P(10) = 0.9¹⁰ ≈ 0.3487, P(9) = 10·0.9⁹·0.1 ≈ 0.3874. Sum ≈ 0.7361.</p><p>So even a perfectly calibrated person misses two or more intervals about a quarter of the time — but if you miss 4 or 5 of 10, you are probably overconfident and should widen your ranges.</p><p><b>Answer: ≈ 0.736.</b></p>",
+  "key": "Calibration is checked over many intervals: the hit count should look like Binomial(n, coverage).",
+  "plan": {
+   "keyIdea": "Count of hits is binomial.",
+   "method": "P(X ≥ 9) = P(10) + P(9).",
+   "sanityChecks": [
+    "Answer must exceed P(10) = 0.349.",
+    "Expected misses = 1."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Suppose you are overconfident: each “90%” interval really contains the truth only 70% of the time. Now what is P(at least 9 hits)?</p>",
+    "model": "<p>0.7¹⁰ + 10·0.7⁹·0.3 ≈ 0.1493. Getting 9+ right becomes rare — a quick self-test reveals overconfidence.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.1493083459,
+     "display": "≈ 0.1493"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>If calibrated, how many of the ten intervals do you expect to miss?</p>",
+    "model": "<p>10 × 0.1 = 1.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "1"
+    }
+   }
+  ],
+  "id": "pm-013"
+ },
+ {
+  "cat": "probability",
+  "diff": 1,
+  "title": "Within one SD on two dice",
+  "tags": [
+   "variance",
+   "dice",
+   "confidence-intervals",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>Two fair dice are rolled. The sum has mean 7 and standard deviation σ = √(35/6) ≈ 2.42.</p><p>What is the probability that the sum lands within one σ of 7, i.e. in [7 − σ, 7 + σ]? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6666666666666666,
+   "display": "24/36 = 2/3"
+  },
+  "hints": [
+   "[4.58, 9.42] contains the sums 5, 6, 7, 8, 9.",
+   "Ways: 4 + 5 + 6 + 5 + 4."
+  ],
+  "solution": "<p>The interval [4.58, 9.42] holds sums 5 to 9, with 4 + 5 + 6 + 5 + 4 = 24 of the 36 outcomes. P = 2/3.</p><p>Close to the ≈ 68% rule of thumb for a normal distribution — useful when you size a market's width.</p><p><b>Answer: 2/3.</b></p>",
+  "key": "Mean ± 1 SD captures roughly two-thirds of a bell-shaped distribution.",
+  "plan": {
+   "keyIdea": "Find which integer sums fall inside 7 ± 2.42.",
+   "method": "Count outcomes for sums 5–9.",
+   "sanityChecks": [
+    "Should be near 68%."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the probability of landing within two σ ([2.17, 11.83])?</p>",
+    "model": "<p>All sums except 2 and 12: 34/36 = 17/18 ≈ 0.944.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.9444444444444444,
+     "display": "17/18"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer: “Each die has SD ≈ 1.71, so the sum has SD 1.71 + 1.71 = 3.42.” Give the correct SD of the sum.</p>",
+    "model": "<p>Variances add for independent dice, not SDs: √(2 × 35/12) = √(35/6) ≈ 2.415.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.41522945769824,
+     "display": "√(35/6) ≈ 2.415",
+     "tolRel": 0.002
+    }
+   }
+  ],
+  "id": "pm-014"
+ },
+ {
+  "cat": "probability",
+  "diff": 1,
+  "title": "An 8-sided die that came up prime",
+  "tags": [
+   "conditional-probability",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>A fair 8-sided die (faces 1–8) is rolled and you're told the result is prime.</p><p>What is the expected value of the roll now? Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 4.25,
+   "display": "(2 + 3 + 5 + 7)/4 = 4.25"
+  },
+  "hints": [
+   "Primes on 1–8: 2, 3, 5, 7.",
+   "Conditioning keeps the remaining faces equally likely."
+  ],
+  "solution": "<p>Given the condition, only 2, 3, 5, 7 remain and they stay equally likely (each 1/4). E = 17/4 = 4.25.</p><p>Trap: counting 1 as prime.</p><p><b>Answer: 4.25.</b></p>",
+  "key": "Conditioning = throw away the outcomes ruled out and renormalise the rest.",
+  "plan": {
+   "keyIdea": "Restrict to the conditioning event and renormalise.",
+   "method": "Average the four primes.",
+   "sanityChecks": [
+    "Unconditional EV is 4.5; the primes are slightly low-heavy."
+   ]
+  },
+  "par": 0.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Given prime, what is the probability the roll is at most 3?</p>",
+    "model": "<p>P(roll ∈ {2, 3} | prime) = 2/4 = 1/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Given instead that the roll is at least 5, what is the expected value?</p>",
+    "model": "<p>(5 + 6 + 7 + 8)/4 = 6.5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 6.5,
+     "display": "6.5"
+    }
+   }
+  ],
+  "id": "pm-015"
+ },
+ {
+  "cat": "probability",
+  "diff": 2,
+  "title": "Two heads given at least one tail",
+  "tags": [
+   "conditional-probability",
+   "coins",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>Four fair coins are tossed. Given that at least one coin shows tails, what is the probability that exactly two show heads?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.4,
+   "display": "6/15 = 2/5"
+  },
+  "hints": [
+   "P(A | B) = P(A and B)/P(B).",
+   "Only HHHH is excluded by the condition."
+  ],
+  "solution": "<p>P(≥ 1 tail) = 15/16. Exactly two heads (C(4, 2) = 6 outcomes) automatically includes a tail, so P(A and B) = 6/16.</p><p>P = (6/16)/(15/16) = 6/15 = 2/5.</p><p><b>Answer: 2/5.</b></p>",
+  "key": "P(A | B) = P(A ∩ B)/P(B); here the condition only removes one outcome.",
+  "plan": {
+   "keyIdea": "Conditional probability as a ratio.",
+   "method": "Count outcomes: 6 favourable out of 15 remaining.",
+   "sanityChecks": [
+    "The answer must be a bit above the unconditional 6/16."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same four coins: probability of exactly three heads given at least one head?</p>",
+    "model": "<p>4 outcomes out of 15: 4/15.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.26666666666666666,
+     "display": "4/15"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer: “The condition hardly changes anything, so the answer is still 6/16 = 0.375.” Correct it.</p>",
+    "model": "<p>The condition removes HHHH, so the denominator becomes 15: 6/15 = 0.4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.4,
+     "display": "0.4"
+    }
+   }
+  ],
+  "id": "pm-016"
+ },
+ {
+  "cat": "probability",
+  "diff": 2,
+  "title": "Which die is in the box?",
+  "tags": [
+   "bayes",
+   "conditional-probability",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "market-making-game"
+  ],
+  "prompt": "<p>A box holds either a fair die or a die with faces 4, 4, 5, 5, 6, 6, with equal prior probability. One roll comes up 5.</p><p>What is the probability the box holds the 4–6 die? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6666666666666666,
+   "display": "2/3"
+  },
+  "hints": [
+   "P(5 | fair) = 1/6, P(5 | 4–6 die) = 2/6.",
+   "Bayes: posterior ∝ prior × likelihood."
+  ],
+  "solution": "<p>Posterior odds = prior odds × likelihood ratio = 1 × (2/6)/(1/6) = 2. So P(4–6 die | 5) = 2/3.</p><p><b>Answer: 2/3.</b></p>",
+  "key": "Posterior odds = prior odds × likelihood ratio.",
+  "plan": {
+   "keyIdea": "Bayes with two hypotheses.",
+   "method": "Compare how likely a 5 is under each die.",
+   "sanityChecks": [
+    "A 5 is twice as likely under the 4–6 die, so the posterior should favour it 2:1."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>You now make a market on the <i>next</i> roll of the same die. Where is your fair value?</p>",
+    "model": "<p>Mix the two dice by the posterior: (2/3)·5 + (1/3)·3.5 = 4.5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.5,
+     "display": "4.5"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>A second roll also shows 5. Probability of the 4–6 die now?</p>",
+    "model": "<p>Odds 1 × 2 × 2 = 4, so 4/5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.8,
+     "display": "4/5"
+    }
+   }
+  ],
+  "id": "pm-017"
+ },
+ {
+  "id": "dk-d01",
+  "cat": "probability",
+  "diff": 1,
+  "title": "Two aces off the top",
+  "tags": [
+   "deck",
+   "diamonds",
+   "cards",
+   "counting"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>The top two cards of a well-shuffled deck are turned over. What is the probability that both are aces?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.004524886877828055,
+   "display": "1/221 ≈ 0.0045"
+  },
+  "hints": [
+   "Multiply sequential probabilities.",
+   "4/52 for the first, then 3/51."
+  ],
+  "solution": "<p>P = (4/52)(3/51) = 12/2652 = 1/221 ≈ 0.0045. Equivalently C(4, 2)/C(52, 2) = 6/1326.</p><p><b>Answer: 1/221.</b></p>",
+  "key": "Sequential multiplication = counting unordered pairs.",
+  "plan": {
+   "keyIdea": "Sequential draws without replacement.",
+   "method": "(4/52)(3/51) or C(4,2)/C(52,2).",
+   "sanityChecks": [
+    "Slightly less than (1/13)² ≈ 1/169."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability that <b>at least one</b> of the two is an ace?</p>",
+    "model": "<p>Complement: 1 − (48/52)(47/51) = 1 − 188/221 = 33/221 ≈ 0.149.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.1493212669683258,
+     "display": "33/221 ≈ 0.149"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 1
+  }
+ },
+ {
+  "id": "dk-d02",
+  "cat": "probability",
+  "diff": 1,
+  "title": "At least one six, both sixes?",
+  "tags": [
+   "deck",
+   "diamonds",
+   "conditional",
+   "dice"
+  ],
+  "style": [
+   "OA-speed",
+   "brainteaser-phone"
+  ],
+  "prompt": "<p>Two fair dice are rolled out of sight. You are told that <b>at least one</b> of them shows a 6. What is the probability that both show a 6?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.09090909090909091,
+   "display": "1/11"
+  },
+  "hints": [
+   "List the outcomes consistent with the information.",
+   "11 of the 36 outcomes contain a 6."
+  ],
+  "solution": "<p>The outcomes with at least one 6: 6 + 6 − 1 = 11 equally likely ordered pairs, and only (6, 6) is a double six. P = 1/11.</p><p>Trap: answering 1/6 by reasoning 'the other die is 6 with probability 1/6' — 'the other die' is not well defined when you don't know which one is the 6.</p><p><b>Answer: 1/11.</b></p>",
+  "key": "Condition by restricting the sample space; 'at least one' is weaker than 'this one'.",
+  "plan": {
+   "keyIdea": "Restrict to the 11 outcomes containing a 6.",
+   "method": "Count favourable / consistent.",
+   "sanityChecks": [
+    "Must be below 1/6, because 'at least one' includes more mixed cases."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now you are told the <b>left</b> die shows a 6. Probability both are sixes?</p>",
+    "model": "<p>The right die is independent: 1/6. Knowing which die is the 6 changes the answer.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.16666666666666666,
+     "display": "1/6"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 2
+  }
+ },
+ {
+  "id": "dk-d03",
+  "cat": "probability",
+  "diff": 1,
+  "title": "Three cards, three suits",
+  "tags": [
+   "deck",
+   "diamonds",
+   "cards",
+   "counting"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>Three cards are dealt from a well-shuffled deck. What is the probability that they are of three different suits?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.3976470588235294,
+   "display": "169/425 ≈ 0.398"
+  },
+  "hints": [
+   "The first card can be anything.",
+   "Then 39/51 for a new suit, then 26/50."
+  ],
+  "solution": "<p>P = 1 · (39/51) · (26/50) = 1014/2550 = 169/425 ≈ 0.398.</p><p>Trap: using (3/4)(2/4) as if with replacement (0.375).</p><p><b>Answer: 169/425 ≈ 0.398.</b></p>",
+  "key": "Build the event card by card; the first card is free.",
+  "plan": {
+   "keyIdea": "Sequential conditional probabilities.",
+   "method": "1 × 39/51 × 26/50.",
+   "sanityChecks": [
+    "Should be near the with-replacement 3/8."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability that all three share <b>one</b> suit?</p>",
+    "model": "<p>1 · (12/51) · (11/50) = 132/2550 = 22/425 ≈ 0.052.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.05176470588235294,
+     "display": "22/425 ≈ 0.052"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 3
+  }
+ },
+ {
+  "id": "dk-d04",
+  "cat": "probability",
+  "diff": 1,
+  "title": "The coin that came up heads",
+  "tags": [
+   "deck",
+   "diamonds",
+   "bayes",
+   "coins"
+  ],
+  "style": [
+   "trading-desk"
+  ],
+  "prompt": "<p>A bag holds two fair coins and one coin with heads on both sides. You pick a coin at random, flip it, and see heads. What is the probability you picked the two-headed coin?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.5,
+   "display": "1/2"
+  },
+  "hints": [
+   "Bayes: prior × likelihood.",
+   "P(heads) = (1/3)(1) + (2/3)(1/2)."
+  ],
+  "solution": "<p>P(two-headed | H) = (1/3 · 1)/(1/3 · 1 + 2/3 · 1/2) = (1/3)/(2/3) = 1/2.</p><p>Intuition: count the 6 faces — 4 are heads, 2 of those belong to the special coin.</p><p><b>Answer: 1/2.</b></p>",
+  "key": "Bayes in odds form: prior 1:2, likelihood ratio 2:1, posterior 1:1.",
+  "plan": {
+   "keyIdea": "Bayes' rule; or count equally likely faces.",
+   "method": "Prior odds 1:2 × likelihood ratio 2:1.",
+   "sanityChecks": [
+    "Posterior must exceed the prior 1/3."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>You flip the <b>same</b> coin again. Probability of heads?</p>",
+    "model": "<p>Average over the posterior: ½ · 1 + ½ · ½ = 3/4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.75,
+     "display": "3/4"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 4
+  }
+ },
+ {
+  "id": "dk-d05",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Dealt a natural",
+  "tags": [
+   "deck",
+   "diamonds",
+   "cards",
+   "counting"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>In a two-card hand, a <i>natural</i> is an ace together with a ten-valued card (10, J, Q or K). What is the probability that the top two cards of a shuffled deck form a natural?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.048265460030165915,
+   "display": "32/663 ≈ 0.0483"
+  },
+  "hints": [
+   "There are 4 aces and 16 ten-valued cards.",
+   "Unordered: 4 · 16 hands out of C(52, 2)."
+  ],
+  "solution": "<p>Favourable unordered hands: 4 · 16 = 64. Total C(52, 2) = 1326. P = 64/1326 = 32/663 ≈ 0.0483.</p><p>Ordered check: 2 · (4/52)(16/51) = 128/2652. Trap: forgetting the factor 2 for the two orders.</p><p><b>Answer: 32/663 ≈ 0.0483.</b></p>",
+  "key": "Unordered counting avoids the 'which card first' factor of 2.",
+  "plan": {
+   "keyIdea": "Count unordered two-card hands.",
+   "method": "4 × 16 / C(52,2).",
+   "sanityChecks": [
+    "About 1 hand in 21."
+   ]
+  },
+  "par": 2.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Given your first card is an ace, what is the probability of a natural?</p>",
+    "model": "<p>16 of the remaining 51 cards are ten-valued: 16/51 ≈ 0.314.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3137254901960784,
+     "display": "16/51 ≈ 0.314"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 5
+  }
+ },
+ {
+  "id": "dk-d06",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Two signals agree",
+  "tags": [
+   "deck",
+   "diamonds",
+   "bayes",
+   "signals"
+  ],
+  "style": [
+   "trading-desk",
+   "research-stats"
+  ],
+  "prompt": "<p>A stock goes up or down tomorrow with prior probability ½ each. Two independent signals each predict the direction correctly with probability 0.7. Both signals say <b>up</b>. What is the probability the stock goes up?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.8448275862068966,
+   "display": "49/58 ≈ 0.845"
+  },
+  "hints": [
+   "Likelihood of 'up, up' if up: 0.7²; if down: 0.3².",
+   "Posterior odds = prior odds × likelihood ratio."
+  ],
+  "solution": "<p>Posterior odds = 1 × (0.7/0.3)² = 49/9, so P(up) = 49/58 ≈ 0.845.</p><p>Trap: averaging the signals (0.7) or adding confidence linearly — independent evidence multiplies odds.</p><p><b>Answer: 49/58 ≈ 0.845.</b></p>",
+  "key": "Independent signals multiply likelihood ratios (add log-odds).",
+  "plan": {
+   "keyIdea": "Bayes in odds form.",
+   "method": "Square the per-signal likelihood ratio 7/3.",
+   "sanityChecks": [
+    "Must exceed 0.7 (one signal) and stay below 1."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>A third independent signal (same accuracy) says <b>down</b>. New probability of up?</p>",
+    "model": "<p>The down signal cancels one up signal: odds 7/3, P = 0.7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7,
+     "display": "0.7"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 6
+  }
+ },
+ {
+  "id": "dk-d07",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Three dice that sum to 10",
+  "tags": [
+   "deck",
+   "diamonds",
+   "conditional",
+   "dice",
+   "counting"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>Three fair dice are rolled and their sum is 10. Given that, what is the probability that at least one die shows a 6?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.3333333333333333,
+   "display": "1/3"
+  },
+  "hints": [
+   "First count the ordered outcomes with sum 10 (there are 27).",
+   "With a 6, the other two dice sum to 4."
+  ],
+  "solution": "<p>Ordered triples summing to 10: 27 (from the partitions 6+3+1, 6+2+2, 5+4+1, 5+3+2, 4+4+2, 4+3+3 → 6+3+6+6+3+3).</p><p>A 6 forces the other two to sum to 4: (1,3), (2,2), (3,1) — 3 ways, times 3 positions for the 6 = 9 (two 6s are impossible). P = 9/27 = 1/3.</p><p><b>Answer: 1/3.</b></p>",
+  "key": "Conditioning on a sum = counting inside that sum's level set.",
+  "plan": {
+   "keyIdea": "Restrict the sample space to sum = 10.",
+   "method": "Enumerate partitions with their orderings.",
+   "sanityChecks": [
+    "Unconditionally P(at least one 6) ≈ 0.42, so the condition lowers it."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Given the sum is 10, probability that all three dice are <b>different</b>?</p>",
+    "model": "<p>Distinct partitions 6+3+1, 5+4+1, 5+3+2 give 3 · 6 = 18 orderings: 18/27 = 2/3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6666666666666666,
+     "display": "2/3"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 7
+  }
+ },
+ {
+  "id": "dk-d08",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Every suit in a five-card hand",
+  "tags": [
+   "deck",
+   "diamonds",
+   "cards",
+   "counting",
+   "poker"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>A 5-card hand is dealt from a shuffled deck. What is the probability that it contains at least one card of every suit?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.2637454981992797,
+   "display": "2197/8330 ≈ 0.264"
+  },
+  "hints": [
+   "With 5 cards and 4 suits, the suit pattern must be 2-1-1-1.",
+   "Choose the doubled suit, its 2 cards, then one card from each other suit."
+  ],
+  "solution": "<p>The only pattern is 2-1-1-1: 4 choices of doubled suit × C(13, 2) × 13³ = 4 · 78 · 2197 = 685 464 hands.</p><p>P = 685 464 / 2 598 960 = 2197/8330 ≈ 0.264.</p><p>Trap: choosing 'one of each suit' first (13⁴) and then 'any fifth card' (48) — that counts each hand twice.</p><p><b>Answer: ≈ 0.264.</b></p>",
+  "key": "Classify by suit pattern to avoid double counting.",
+  "plan": {
+   "keyIdea": "Identify the only possible suit pattern.",
+   "method": "Count 4 · C(13,2) · 13³ over C(52,5).",
+   "sanityChecks": [
+    "Check against inclusion–exclusion on missing suits."
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability the hand has <b>no spades</b>?</p>",
+    "model": "<p>C(39, 5)/C(52, 5) = 2109/9520 ≈ 0.222.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.22153361344537814,
+     "display": "2109/9520 ≈ 0.222"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 8
+  }
+ },
+ {
+  "id": "dk-d09",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Which urn did it come from?",
+  "tags": [
+   "deck",
+   "diamonds",
+   "bayes",
+   "urn"
+  ],
+  "style": [
+   "trading-desk"
+  ],
+  "prompt": "<p>Urn A has 3 red and 1 blue ball; urn B has 1 red and 3 blue. An urn is chosen by a fair coin and three balls are drawn <b>with replacement</b>: red, red, blue. What is the probability the urn is A?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.75,
+   "display": "3/4"
+  },
+  "hints": [
+   "Likelihoods: A gives (3/4)²(1/4), B gives (1/4)²(3/4).",
+   "The order of the draws does not matter."
+  ],
+  "solution": "<p>Likelihood ratio A:B = (9/64) : (3/64) = 3 : 1. With even prior odds, P(A) = 3/4.</p><p>Shortcut: one red and one blue cancel, leaving the evidence of a single red, ratio 3 : 1.</p><p><b>Answer: 3/4.</b></p>",
+  "key": "With replacement, opposite observations cancel in the likelihood ratio.",
+  "plan": {
+   "keyIdea": "Bayes with i.i.d. draws given the urn.",
+   "method": "Likelihood ratio (3:1)^(reds − blues).",
+   "sanityChecks": [
+    "One red alone would also give 3/4."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability that the next (fourth) draw from the same urn is red?</p>",
+    "model": "<p>Predictive: (3/4)(3/4) + (1/4)(1/4) = 10/16 = 5/8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.625,
+     "display": "5/8"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 9
+  }
+ },
+ {
+  "id": "dk-d10",
+  "cat": "probability",
+  "diff": 3,
+  "title": "No two aces touching",
+  "tags": [
+   "deck",
+   "diamonds",
+   "cards",
+   "gaps",
+   "counting"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>A standard deck is shuffled and laid in a row. What is the probability that no two aces are adjacent?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.7826244343891403,
+   "display": "C(49,4)/C(52,4) = 4324/5525 ≈ 0.783"
+  },
+  "hints": [
+   "Place the 48 non-aces first; they create 49 gaps.",
+   "The aces' positions are a uniformly random 4-subset of 52; count 4-subsets with no two consecutive."
+  ],
+  "solution": "<p>The set of ace positions is a uniform 4-subset of {1, …, 52}. Subsets with no two consecutive correspond (by the gap / shift trick) to 4-subsets of 49 slots, so the count is C(49, 4).</p><p>P = C(49, 4)/C(52, 4) = 211 876/270 725 ≈ 0.783.</p><p>Trap: (48/51)³-style shortcuts that treat adjacency events as independent.</p><p><b>Answer: ≈ 0.783.</b></p>",
+  "key": "Non-adjacent k-subsets of n positions: C(n − k + 1, k).",
+  "plan": {
+   "keyIdea": "Reduce to positions of the aces.",
+   "method": "Gap method: C(49,4)/C(52,4).",
+   "sanityChecks": [
+    "Expected adjacent ace pairs is 51·C(4,2)/C(52,2) ≈ 0.23, so P(none) ≈ 0.78 is plausible."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability all four aces are <b>together</b> in one block?</p>",
+    "model": "<p>49 possible block starts out of C(52, 4) = 270 725 subsets: 49/270 725 = 1/5525.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.00018099547511312217,
+     "display": "1/5525 ≈ 0.00018"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 10
+  }
+ },
+ {
+  "id": "dk-d11",
+  "cat": "probability",
+  "diff": 3,
+  "title": "A six and an eight before a seven",
+  "tags": [
+   "deck",
+   "diamonds",
+   "dice",
+   "races",
+   "conditional"
+  ],
+  "style": [
+   "trading-desk",
+   "math-test"
+  ],
+  "prompt": "<p>Two dice are rolled repeatedly and their totals recorded. What is the probability that you see a total of 6 <b>and</b> a total of 8 (in either order) before the first total of 7?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.2840909090909091,
+   "display": "25/88 ≈ 0.284"
+  },
+  "hints": [
+   "Only totals 6, 7, 8 matter: 5, 6 and 5 ways out of 36.",
+   "First relevant roll: 6 or 8 with probability 10/16. Then you need the other one before a 7."
+  ],
+  "solution": "<p>Ignore every roll that isn't 6, 7 or 8. The first relevant roll is a 6 or an 8 with probability 10/16.</p><p>Say it was a 6. Now ignore 6s too: the race between 8 (5 ways) and 7 (6 ways) is won with probability 5/11. Symmetric for 8 first.</p><p>P = (10/16)(5/11) = 25/88 ≈ 0.284.</p><p>Trap: multiplying 5/11 · 5/11 (≈ 0.207) — that treats the two races as independent and forgets either order works.</p><p><b>Answer: 25/88 ≈ 0.284.</b></p>",
+  "key": "Races between events: drop irrelevant rolls and update the set of live events.",
+  "plan": {
+   "keyIdea": "Discard irrelevant rolls; chain two races.",
+   "method": "10/16 × 5/11.",
+   "sanityChecks": [
+    "Below P(6 before 7) = 5/11 ≈ 0.45."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability that a total of 6 appears before the first 7?</p>",
+    "model": "<p>5/(5 + 6) = 5/11 ≈ 0.455.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.45454545454545453,
+     "display": "5/11"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 11
+  }
+ },
+ {
+  "id": "dk-d12",
+  "cat": "probability",
+  "diff": 3,
+  "title": "One ace for each player",
+  "tags": [
+   "deck",
+   "diamonds",
+   "cards",
+   "bridge",
+   "counting"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>A deck is dealt into four hands of 13. What is the probability that each hand gets exactly one ace?</p><p>Give a decimal to 4 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.10549819927971188,
+   "display": "(39·26·13)/(51·50·49) ≈ 0.1055",
+   "tolAbs": 0.0005
+  },
+  "hints": [
+   "Only the positions of the 4 aces matter.",
+   "Place the aces one at a time: the second must avoid the first ace's hand, and so on."
+  ],
+  "solution": "<p>Place the aces one by one into the 52 slots. The first goes anywhere. The second must land in one of the 39 slots outside the first ace's hand (out of 51), the third in 26 of 50, the fourth in 13 of 49.</p><p>P = (39/51)(26/50)(13/49) = 2197/20 825 ≈ 0.1055.</p><p>Trap: 4!/4⁴ ≈ 0.094 — that treats each ace as independently assigned to a hand.</p><p><b>Answer: ≈ 0.1055.</b></p>",
+  "key": "Track only the special cards; sequential placement handles the without-replacement constraint.",
+  "plan": {
+   "keyIdea": "Focus on ace positions only.",
+   "method": "Sequential placement (39/51)(26/50)(13/49).",
+   "sanityChecks": [
+    "Compare with the independent-assignment approximation 0.094."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability that one player holds all four aces?</p>",
+    "model": "<p>4 · C(48, 9)/C(52, 13) = 4 · (13·12·11·10)/(52·51·50·49) ≈ 0.0106.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.01056422569027611,
+     "display": "≈ 0.0106",
+     "tolRel": 0.003
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 12
+  }
+ },
+ {
+  "id": "dk-d13",
+  "cat": "probability",
+  "diff": 3,
+  "title": "The ace-of-spades paradox",
+  "tags": [
+   "deck",
+   "diamonds",
+   "conditional",
+   "cards",
+   "bridge"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>You are dealt 13 cards from a shuffled deck. You learn that your hand contains <b>at least one ace</b>. What is the probability it contains at least two aces?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.3696371913367361,
+   "display": "≈ 0.370"
+  },
+  "hints": [
+   "P(≥2 | ≥1) = [1 − P(0) − P(1)] / [1 − P(0)] with hypergeometric P(k).",
+   "P(0) = C(48,13)/C(52,13), P(1) = 4·C(48,12)/C(52,13)."
+  ],
+  "solution": "<p>Hypergeometric: P(0 aces) = C(48, 13)/C(52, 13) ≈ 0.304, P(1 ace) = 4·C(48, 12)/C(52, 13) ≈ 0.439.</p><p>P(≥2 | ≥1) = (1 − 0.304 − 0.439)/(1 − 0.304) ≈ 0.370.</p><p><b>Answer: ≈ 0.370.</b></p>",
+  "key": "Conditioning on 'at least one' vs on a specific card gives different answers: information content matters.",
+  "plan": {
+   "keyIdea": "Hypergeometric counts for 0 and 1 aces.",
+   "method": "Ratio of tail probabilities.",
+   "sanityChecks": [
+    "Must exceed the unconditional P(≥2) ≈ 0.257."
+   ]
+  },
+  "par": 7,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Instead you learn that your hand contains the <b>ace of spades</b>. Now what is P(at least two aces)?</p>",
+    "model": "<p>The other 12 cards come from 51 with 3 aces: 1 − C(48, 12)/C(51, 12) ≈ 0.561. Naming a specific ace is stronger evidence than 'at least one', so the answer jumps.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5611524609843938,
+     "display": "≈ 0.561"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "diamonds",
+   "rank": 13
+  }
+ },
+ {
+  "id": "dk-h01",
+  "cat": "probability",
+  "diff": 1,
+  "title": "Away from the edges",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "uniform"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>A point is chosen uniformly in the unit square. What is the probability that it is more than 0.2 from every side?</p><p>Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.36,
+   "display": "0.36"
+  },
+  "hints": [
+   "The allowed region is a smaller square.",
+   "Its side is 1 − 2·0.2."
+  ],
+  "solution": "<p>The point must have both coordinates in (0.2, 0.8): a square of side 0.6, area 0.36.</p><p><b>Answer: 0.36.</b></p>",
+  "key": "Geometric probability = area of the favourable region / total area.",
+  "plan": {
+   "keyIdea": "Draw the favourable region.",
+   "method": "Area of the inner square.",
+   "sanityChecks": [
+    "Coordinates are independent: 0.6 × 0.6."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same question in the unit <b>cube</b> (more than 0.2 from every face)?</p>",
+    "model": "<p>0.6³ = 0.216. In high dimension almost all the volume is near the boundary.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.216,
+     "display": "0.216"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 1
+  }
+ },
+ {
+  "id": "dk-h02",
+  "cat": "probability",
+  "diff": 1,
+  "title": "Dart inside the inscribed circle",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "pi"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>A dart lands uniformly at random on a square board. What is the probability that it lands inside the circle inscribed in the square?</p><p>Give a decimal or an expression in π.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.7853981633974483,
+   "display": "π/4 ≈ 0.785"
+  },
+  "hints": [
+   "Take the square of side 2 and the circle of radius 1.",
+   "Ratio of areas."
+  ],
+  "solution": "<p>Circle area π · 1² over square area 2² = π/4 ≈ 0.785. This is the Monte Carlo estimator of π.</p><p><b>Answer: π/4 ≈ 0.785.</b></p>",
+  "key": "Area ratio; the basis of the dart-throwing estimate of π.",
+  "plan": {
+   "keyIdea": "Area ratio.",
+   "method": "πr² / (2r)².",
+   "sanityChecks": [
+    "Between ½ and 1."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>A point uniform in a cube: probability it lies in the inscribed ball?</p>",
+    "model": "<p>(4/3)π/8 = π/6 ≈ 0.524.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5235987755982988,
+     "display": "π/6 ≈ 0.524"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 2
+  }
+ },
+ {
+  "id": "dk-h03",
+  "cat": "probability",
+  "diff": 1,
+  "title": "The shorter piece of a snapped stick",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "broken-stick",
+   "uniform"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>A stick of length 1 is snapped at a uniformly random point. What is the expected length of the <b>shorter</b> piece?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.25,
+   "display": "1/4"
+  },
+  "hints": [
+   "The shorter piece is min(U, 1 − U).",
+   "min(U, 1 − U) is uniform on [0, ½]."
+  ],
+  "solution": "<p>min(U, 1 − U) is uniform on [0, ½], so its mean is 1/4. The longer piece has mean 3/4.</p><p><b>Answer: 1/4.</b></p>",
+  "key": "Fold the interval: min(U, 1 − U) ~ Uniform(0, ½).",
+  "plan": {
+   "keyIdea": "Symmetry: fold at ½.",
+   "method": "Mean of Uniform(0, ½).",
+   "sanityChecks": [
+    "Shorter + longer = 1."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability that the longer piece is at least 3 times the shorter one?</p>",
+    "model": "<p>That means the shorter piece ≤ 1/4, which for Uniform(0, ½) has probability 1/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 3
+  }
+ },
+ {
+  "id": "dk-h04",
+  "cat": "probability",
+  "diff": 1,
+  "title": "Closer to the centre than to any corner",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "voronoi"
+  ],
+  "style": [
+   "brainteaser-phone"
+  ],
+  "prompt": "<p>A point is chosen uniformly in the unit square. What is the probability that it is closer to the centre of the square than to every one of the four corners?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.5,
+   "display": "1/2"
+  },
+  "hints": [
+   "Equal distance to the centre and the corner (0, 0) is the line x + y = ½.",
+   "Each corner cuts off a right triangle."
+  ],
+  "solution": "<p>The perpendicular bisector of the centre (½, ½) and the corner (0, 0) is x + y = ½. The points closer to that corner form a triangle of area 1/8. Four corners remove 4 · 1/8 = 1/2.</p><p>P = 1 − 1/2 = 1/2.</p><p><b>Answer: 1/2.</b></p>",
+  "key": "Closer-to regions are bounded by perpendicular bisectors.",
+  "plan": {
+   "keyIdea": "Draw the bisector for one corner and use symmetry.",
+   "method": "Square minus four corner triangles.",
+   "sanityChecks": [
+    "Answer between 0 and 1; the centre point qualifies."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability the point is closer to the centre than to the single corner (0, 0)?</p>",
+    "model": "<p>Only that corner's triangle is excluded: 1 − 1/8 = 7/8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.875,
+     "display": "7/8"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 4
+  }
+ },
+ {
+  "id": "dk-h05",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Chord longer than the radius",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "circle",
+   "chords"
+  ],
+  "style": [
+   "trading-desk"
+  ],
+  "prompt": "<p>Two points are chosen independently and uniformly on a circle of radius 1. What is the probability that the chord joining them is longer than the radius?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6666666666666666,
+   "display": "2/3"
+  },
+  "hints": [
+   "Fix the first point; the central angle θ to the second (taking the shorter arc) is uniform on [0, π].",
+   "Chord length = 2 sin(θ/2)."
+  ],
+  "solution": "<p>The chord exceeds 1 iff 2 sin(θ/2) &gt; 1 iff θ &gt; π/3. With θ uniform on [0, π], P = (π − π/3)/π = 2/3.</p><p><b>Answer: 2/3.</b></p>",
+  "key": "On a circle, fix one point by rotation; only the angle to the other matters.",
+  "plan": {
+   "keyIdea": "Rotational symmetry: fix one endpoint.",
+   "method": "Translate chord length into central angle.",
+   "sanityChecks": [
+    "Chord of length = radius ⇔ 60° (equilateral triangle)."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability the chord is longer than the side of the inscribed square (√2)?</p>",
+    "model": "<p>Need θ &gt; π/2: probability 1/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 5
+  }
+ },
+ {
+  "id": "dk-h06",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Distance to the centre of a disk",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "disk",
+   "density"
+  ],
+  "style": [
+   "OA-speed",
+   "math-test"
+  ],
+  "prompt": "<p>A point is chosen uniformly in a disk of radius 1. What is its expected distance from the centre?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6666666666666666,
+   "display": "2/3"
+  },
+  "hints": [
+   "P(R ≤ r) = r² (area ratio).",
+   "So R has density 2r on [0, 1]."
+  ],
+  "solution": "<p>P(R ≤ r) = πr²/π = r², density 2r. E[R] = ∫<sub>0</sub><sup>1</sup> r · 2r dr = 2/3.</p><p>Trap: answering 1/2 — there is more area far from the centre.</p><p><b>Answer: 2/3.</b></p>",
+  "key": "Uniform in a disk ≠ uniform radius: the radius has density 2r.",
+  "plan": {
+   "keyIdea": "CDF of the radius from area ratios.",
+   "method": "Integrate r against density 2r.",
+   "sanityChecks": [
+    "Must exceed ½ (outer rings have more area)."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the <b>median</b> distance from the centre?</p>",
+    "model": "<p>Solve r² = ½: r = 1/√2 ≈ 0.707.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7071067811865475,
+     "display": "1/√2 ≈ 0.707"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 6
+  }
+ },
+ {
+  "id": "dk-h07",
+  "cat": "probability",
+  "diff": 2,
+  "title": "Needle dropped on ruled paper",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "buffon",
+   "pi"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>Paper is ruled with parallel lines 2 cm apart. A needle of length 1 cm is dropped at random (uniform position and angle). What is the probability that it crosses a line?</p><p>Give a decimal or an expression in π.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.3183098861837907,
+   "display": "1/π ≈ 0.318"
+  },
+  "hints": [
+   "Let y be the distance from the needle's centre to the nearest line (uniform on [0, 1]) and θ its angle (uniform on [0, π]).",
+   "It crosses iff y ≤ (½) sin θ."
+  ],
+  "solution": "<p>With y uniform on [0, 1] (half the spacing) and θ uniform on [0, π], a crossing happens iff y ≤ (L/2) sin θ = ½ sin θ.</p><p>P = (1/π) ∫<sub>0</sub><sup>π</sup> ½ sin θ dθ = (1/π) · 1 = 1/π ≈ 0.318. General short-needle formula: 2L/(πd).</p><p>Linearity view: the expected number of crossings is proportional to length, and a circle of diameter d always crosses exactly twice.</p><p><b>Answer: 1/π ≈ 0.318.</b></p>",
+  "key": "Buffon: P(cross) = 2L/(πd) for L ≤ d; expected crossings are linear in length.",
+  "plan": {
+   "keyIdea": "Parametrise by centre distance and angle.",
+   "method": "Integrate the crossing condition over θ.",
+   "sanityChecks": [
+    "Must be below L/d = 0.5 (a needle perpendicular to the lines is the best case)."
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now the needle length equals the line spacing. Probability of crossing?</p>",
+    "model": "<p>2L/(πd) with L = d: 2/π ≈ 0.637.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6366197723675814,
+     "display": "2/π ≈ 0.637"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 7
+  }
+ },
+ {
+  "id": "dk-h08",
+  "cat": "probability",
+  "diff": 2,
+  "title": "The piece covering the midpoint",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "broken-stick",
+   "inspection-paradox"
+  ],
+  "style": [
+   "trading-desk",
+   "math-test"
+  ],
+  "prompt": "<p>A stick of length 1 is cut at two independent uniform points into three pieces. What is the expected length of the piece that contains the stick's midpoint?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.5833333333333334,
+   "display": "7/12"
+  },
+  "hints": [
+   "Split the piece into the part right of the midpoint and the part left of it.",
+   "The right part exceeds t iff neither cut lands in (½, ½ + t): probability (1 − t)²."
+  ],
+  "solution": "<p>Let R be the distance from ½ to the first cut (or end) on the right. P(R &gt; t) = (1 − t)² for t ≤ ½, so E[R] = ∫<sub>0</sub><sup>½</sup> (1 − t)² dt = (1 − 1/8)/3 = 7/24. Same on the left.</p><p>E = 2 · 7/24 = 7/12 ≈ 0.583 — much more than the 1/3 average piece length.</p><p>Trap: answering 1/3. This is the inspection paradox: a fixed point is more likely to fall in a long piece.</p><p><b>Answer: 7/12.</b></p>",
+  "key": "Inspection paradox: the piece covering a fixed point is length-biased.",
+  "plan": {
+   "keyIdea": "Decompose into left and right extents from the point.",
+   "method": "Tail-sum integrals of (1 − t)².",
+   "sanityChecks": [
+    "Must exceed 1/3 (length bias).",
+    "With one cut the same method gives 3/4."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>With a <b>single</b> uniform cut, expected length of the piece containing the midpoint?</p>",
+    "model": "<p>E[R] = ∫<sub>0</sub><sup>½</sup> (1 − t) dt = 3/8 on each side: total 3/4 — the longer piece, as in the warm-up card.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.75,
+     "display": "3/4"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 8
+  }
+ },
+ {
+  "id": "dk-h09",
+  "cat": "probability",
+  "diff": 2,
+  "title": "A chord from a random midpoint",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "chords",
+   "bertrand"
+  ],
+  "style": [
+   "trading-desk",
+   "math-test"
+  ],
+  "prompt": "<p>A chord of the unit circle is generated by choosing its <b>midpoint</b> uniformly inside the disk. What is the probability that the chord is longer than the side of the inscribed equilateral triangle (√3)?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.25,
+   "display": "1/4"
+  },
+  "hints": [
+   "A chord whose midpoint is at distance d from the centre has length 2√(1 − d²).",
+   "Longer than √3 iff d &lt; ½."
+  ],
+  "solution": "<p>Length 2√(1 − d²) &gt; √3 iff d² &lt; 1/4 iff d &lt; ½. The midpoint must lie in the disk of radius ½: area ratio 1/4.</p><p>This is Bertrand's paradox: 'random chord' is ambiguous, and different generating mechanisms give 1/4, 1/3 or 1/2.</p><p><b>Answer: 1/4.</b></p>",
+  "key": "A 'random' geometric object needs a specified distribution; Bertrand's chords give different answers.",
+  "plan": {
+   "keyIdea": "Translate chord length into midpoint distance.",
+   "method": "Area ratio of the disk of radius ½.",
+   "sanityChecks": [
+    "Ask the interviewer how the chord is generated before computing."
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Instead the chord joins two independent uniform points on the circle. Same question?</p>",
+    "model": "<p>Need central angle &gt; 2π/3, with the angle uniform on [0, π]: probability 1/3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3333333333333333,
+     "display": "1/3"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 9
+  }
+ },
+ {
+  "id": "dk-h10",
+  "cat": "probability",
+  "diff": 3,
+  "title": "Acute triangle on a fixed base",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "triangles"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>Fix A = (0, 0) and B = (1, 0). A point P is chosen uniformly in the unit square [0, 1] × [0, 1]. What is the probability that triangle ABP is acute?</p><p>Give a decimal to 3 places or an expression in π.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6073009183012759,
+   "display": "1 − π/8 ≈ 0.607"
+  },
+  "hints": [
+   "The angles at A and B are never obtuse here (P is between the vertical lines x = 0 and x = 1).",
+   "The angle at P is obtuse iff P is inside the circle with diameter AB."
+  ],
+  "solution": "<p>Because 0 ≤ x ≤ 1, the angles at A and B are at most 90°. By Thales, the angle at P is obtuse exactly when P lies inside the circle with diameter AB: a half-disk of radius ½ inside the square, area π/8.</p><p>P(acute) = 1 − π/8 ≈ 0.607.</p><p><b>Answer: 1 − π/8 ≈ 0.607.</b></p>",
+  "key": "Thales: the angle subtending a diameter is 90°; inside the circle it is obtuse.",
+  "plan": {
+   "keyIdea": "Check which angles can be obtuse.",
+   "method": "Thales circle area π/8.",
+   "sanityChecks": [
+    "Answer between ½ and 1."
+   ]
+  },
+  "par": 7,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now P is uniform in the flatter rectangle [0, 1] × [0, ½]. Probability of an acute triangle?</p>",
+    "model": "<p>The half-disk (area π/8) still fits; the rectangle has area ½: P(obtuse) = π/4, so P(acute) = 1 − π/4 ≈ 0.215.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.21460183660255172,
+     "display": "1 − π/4 ≈ 0.215"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 10
+  }
+ },
+ {
+  "id": "dk-h11",
+  "cat": "probability",
+  "diff": 3,
+  "title": "Mean distance in a unit square",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "integration",
+   "distance"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>Two points are chosen independently and uniformly in the unit square. What is the expected distance between them?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.5214054331647207,
+   "display": "(2 + √2 + 5 ln(1 + √2))/15 ≈ 0.521",
+   "tolAbs": 0.0015
+  },
+  "hints": [
+   "The coordinate differences |X₁ − X₂| and |Y₁ − Y₂| are independent with density 2(1 − u) on [0, 1].",
+   "E = ∫∫ √(u² + v²) · 4(1 − u)(1 − v) du dv; use polar coordinates on each half of the square."
+  ],
+  "solution": "<p>Let u = |X₁ − X₂|, v = |Y₁ − Y₂|, independent with density 2(1 − u). Then E = ∫<sub>0</sub><sup>1</sup>∫<sub>0</sub><sup>1</sup> √(u² + v²) · 4(1 − u)(1 − v) du dv.</p><p>By symmetry integrate over the triangle v ≤ u in polar coordinates and double; the result is (2 + √2 + 5 ln(1 + √2))/15 ≈ 0.5214.</p><p>Sanity: E[distance] ≤ √E[distance²] = √(1/6 + 1/6) ≈ 0.577.</p><p><b>Answer: ≈ 0.521.</b></p>",
+  "key": "Reduce to the difference vector: |X₁ − X₂| has the triangular density 2(1 − u).",
+  "plan": {
+   "keyIdea": "Work with coordinate differences, not the four raw coordinates.",
+   "method": "Double integral with the triangular density; polar coordinates.",
+   "sanityChecks": [
+    "Jensen bound √(1/3) ≈ 0.577.",
+    "1-D analogue is 1/3."
+   ]
+  },
+  "par": 15,
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>The one-dimensional analogue: expected distance between two uniform points on [0, 1]?</p>",
+    "model": "<p>∫ u · 2(1 − u) du = 1/3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3333333333333333,
+     "display": "1/3"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 11
+  }
+ },
+ {
+  "id": "dk-h12",
+  "cat": "probability",
+  "diff": 3,
+  "title": "Area of a random inscribed triangle",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "circle",
+   "triangles"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>Three points are chosen independently and uniformly on the unit circle. What is the expected area of the triangle they form?</p><p>Give a decimal to 3 places or an expression in π.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.477464829275686,
+   "display": "3/(2π) ≈ 0.477"
+  },
+  "hints": [
+   "The three arcs between consecutive points have central angles (α, β, γ) summing to 2π, uniform on that simplex.",
+   "Area = ½(sin α + sin β + sin γ)."
+  ],
+  "solution": "<p>Order the points around the circle; the arcs α, β, γ between them are like two uniform cuts of [0, 2π]. The triangle's area is ½(sin α + sin β + sin γ) (sum of three triangles with apex at the centre, signed).</p><p>By linearity, E[area] = (3/2) E[sin α]. Each arc has density (2π − α)/(2π²) on [0, 2π], so E[sin α] = ∫ sin α (2π − α)/(2π²) dα = 1/π.</p><p>E[area] = 3/(2π) ≈ 0.477, about 37 % of the maximum 3√3/4.</p><p><b>Answer: 3/(2π) ≈ 0.477.</b></p>",
+  "key": "Area as a signed sum of central triangles + linearity over the arcs.",
+  "plan": {
+   "keyIdea": "Parametrise by the three arc angles.",
+   "method": "Area = ½ Σ sin(arc); linearity + one 1-D integral.",
+   "sanityChecks": [
+    "Below the equilateral maximum ≈ 1.299."
+   ]
+  },
+  "par": 15,
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>What is the <b>largest</b> possible area of a triangle inscribed in the unit circle?</p>",
+    "model": "<p>The equilateral triangle: 3√3/4 ≈ 1.299.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.299038105676658,
+     "display": "3√3/4 ≈ 1.299"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 12
+  }
+ },
+ {
+  "id": "dk-h13",
+  "cat": "probability",
+  "diff": 3,
+  "title": "An acute triangle from a broken stick",
+  "tags": [
+   "deck",
+   "hearts",
+   "geometric",
+   "broken-stick",
+   "triangles"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>A stick of length 1 is broken at two independent uniform points. What is the probability that the three pieces form an <b>acute</b> triangle?</p><p>Give a decimal to 3 places or an exact expression.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.07944154167983575,
+   "display": "3 ln 2 − 2 ≈ 0.0794",
+   "tolAbs": 0.0006
+  },
+  "hints": [
+   "The piece lengths (a, b, c) are uniform on the simplex a + b + c = 1.",
+   "Acute iff each side's square is below the sum of the other two squares; the complement is three disjoint regions, one per 'longest side'."
+  ],
+  "solution": "<p>The lengths are uniform on the simplex. The triangle is acute iff a² + b² &gt; c², b² + c² &gt; a² and a² + c² &gt; b². Each failure region (say c² ≥ a² + b²) is a region near a corner of the simplex; they are disjoint.</p><p>Use (a, b) with c = 1 − a − b; the region a, b ≥ 0, a + b ≤ 1 has area ½. The condition c² ≥ a² + b² expands to 1 − 2a − 2b + 2ab ≥ 0, i.e. b ≤ (1 − 2a)/(2(1 − a)) for a &lt; ½. (It also contains every 'no triangle' case c ≥ a + b.)</p><p>Its area: ∫<sub>0</sub><sup>½</sup> (1 − 2a)/(2(1 − a)) da = ∫<sub>½</sub><sup>1</sup> (1 − 1/(2t)) dt = ½ − ½ ln 2, i.e. probability 1 − ln 2. The three regions are disjoint, so P(acute) = 1 − 3(1 − ln 2) = 3 ln 2 − 2 ≈ 0.0794.</p><p>Only about 1 break in 13 gives an acute triangle; a quarter give some triangle.</p><p><b>Answer: 3 ln 2 − 2 ≈ 0.0794.</b></p>",
+  "key": "Simplex geometry: write each condition as a region of the (a, b) triangle and integrate.",
+  "plan": {
+   "keyIdea": "Uniform on the simplex; acute = three quadratic conditions.",
+   "method": "Integrate one 'obtuse' region and use symmetry.",
+   "sanityChecks": [
+    "Must be below ¼ (any triangle)."
+   ]
+  },
+  "par": 20,
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity anchor: probability that the three pieces form <b>any</b> triangle?</p>",
+    "model": "<p>All pieces &lt; ½: 1/4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.25,
+     "display": "1/4"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "hearts",
+   "rank": 13
+  }
+ },
+ {
   "id": "stat-001",
   "cat": "statistics",
   "diff": 1,
@@ -1211,6 +5443,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Mean: x̄ = (2+4+4+4+5+5+7+9)/8 = 40/8 = 5.</p><p>Squared deviations: 9, 1, 1, 1, 0, 0, 4, 16 → sum = 32.</p><p>Divide by n − 1 = 7: s² = 32/7 ≈ 4.571. (Dividing by n would give 4, the biased “population-style” estimate.)</p><p><b>Answer: 32/7 ≈ 4.571</b></p>",
   "key": "Unbiased variance divides the sum of squared deviations by n − 1.",
+  "plan": {
+   "keyIdea": "Unbiased variance divides the sum of squared deviations by n − 1.",
+   "method": "Mean first (5), then squared deviations (sum 32), then divide by 7.",
+   "sanityChecks": [
+    "s² must exceed the divide-by-n value 4.",
+    "Rough spread check: values span 2–9, so s ≈ 2 is plausible."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Add a ninth observation equal to 5 (the current mean). What is the new unbiased s²?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>The mean stays 5 and the new point adds 0 to the sum of squares, so s² = 32/8 = 4. Adding a point at the mean always shrinks s².</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.0,
+     "display": "4"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Instead, transform every observation as y = 3x + 10. What is the unbiased variance of the y's?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Shifts do not matter and scaling by 3 multiplies the variance by 9: 9 · 32/7 = 288/7 ≈ 41.14.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 41.142857142857146,
+     "display": "288/7 ≈ 41.14"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “So the standard error of the sample mean is s²/n = (32/7)/8 ≈ 0.571.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>The standard error is s/√n, not s²/n: √(32/7)/√8 = √(4/7) ≈ 0.756.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7559289460184544,
+     "display": "√(4/7) ≈ 0.756"
+    }
+   }
+  ],
+  "par": 2,
   "style": [
    "OA-speed",
    "research-stats"
@@ -1318,6 +5591,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>The likelihood θ⁻ⁿ (for θ ≥ all xᵢ) is decreasing in θ, so it is maximized at the smallest admissible value: θ̂ = max(Xᵢ).</p><p>CDF of the max: (m/θ)ⁿ, density n mⁿ⁻¹/θⁿ, so E[max] = nθ/(n+1).</p><p>With n = 4, θ = 10: E[θ̂] = 4·10/5 = 8. The MLE underestimates θ by θ/(n+1); multiplying by (n+1)/n removes the bias.</p><p><b>Answer: 8</b></p>",
   "key": "The max of n uniforms sits on average at n/(n+1) of the range, so the MLE is biased low.",
+  "plan": {
+   "keyIdea": "The MLE of a uniform endpoint is the sample maximum, which is biased low.",
+   "method": "CDF of the max (m/θ)ⁿ ⇒ E = nθ/(n + 1).",
+   "sanityChecks": [
+    "Must be below θ = 10.",
+    "n = 1 gives θ/2, the mean of one draw."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same θ = 10 but n = 9 observations. E[max]?</p><p>Give a number.</p>",
+    "model": "<p>9 · 10/10 = 9.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 9.0,
+     "display": "9"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>By what factor must you multiply max(Xᵢ) (n = 4) to make it unbiased?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>(n + 1)/n = 5/4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.25,
+     "display": "5/4"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The mean squared error of θ̂ = max is just its bias squared, (10 − 8)² = 4.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>MSE = bias² + variance. Var(max) = nθ²/((n + 1)²(n + 2)) = 400/150 = 8/3, so MSE = 4 + 8/3 = 20/3 ≈ 6.67 (= 2θ²/((n + 1)(n + 2))).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 6.666666666666667,
+     "display": "20/3 ≈ 6.667"
+    }
+   }
+  ],
+  "par": 3,
   "style": [
    "research-stats",
    "math-test"
@@ -1403,6 +5717,43 @@ window.PROBLEMS = [
   ],
   "solution": "<p>X ~ Bin(100, ½): mean 50, sd 5.</p><p>P(X ≥ 60) ≈ P(Z ≥ (59.5 − 50)/5) = P(Z ≥ 1.9) ≈ 0.0287.</p><p>Without the correction you'd use z = 2 and get 0.0228; the exact binomial tail is 0.0284, so the correction matters.</p><p><b>Answer: ≈ 0.029</b></p>",
   "key": "Continuity correction: P(X ≥ k) ≈ P(Y ≥ k − 0.5).",
+  "plan": {
+   "keyIdea": "Binomial tail by CLT with a continuity correction.",
+   "method": "Mean 50, sd 5; z = (59.5 − 50)/5 = 1.9.",
+   "sanityChecks": [
+    "Two-sigma event ⇒ a few percent.",
+    "Correction moves the cut by ½."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same coin: P(at least 55 heads in 100), normal approximation with continuity correction (3 decimals)?</p>",
+    "model": "<p>z = (54.5 − 50)/5 = 0.9 ⇒ 1 − Φ(0.9) ≈ 0.184.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.18406012534675953,
+     "display": "≈ 0.184",
+     "tolRel": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Skip the continuity correction: 0.0228 is closer to the exact binomial answer.”</p>",
+    "model": "<p>The exact tail is ≈ 0.0284, so the corrected 0.0287 is much closer than 0.0228.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree",
+      "Disagree: exact ≈ 0.0284, so the corrected 0.0287 is closer",
+      "Disagree: the exact answer is 0.05"
+     ],
+     "correct": 1,
+     "display": "Disagree"
+    }
+   }
+  ],
+  "par": 2,
   "style": [
    "OA-speed"
   ]
@@ -1519,6 +5870,37 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Each null test falsely rejects with probability 0.05, independently.</p><p>P(at least one) = 1 − 0.95²⁰ ≈ 1 − 0.358 = 0.642.</p><p>This is why you correct for multiple testing (e.g. Bonferroni: use α/20 = 0.0025 per test) — or hold out data.</p><p><b>Answer: ≈ 0.642</b></p>",
   "key": "Family-wise error grows as 1 − (1 − α)ᵐ; with many tries, “significance” is cheap.",
+  "plan": {
+   "keyIdea": "Independent false positives: P(at least one) = 1 − (1 − α)ⁿ.",
+   "method": "1 − 0.95²⁰.",
+   "sanityChecks": [
+    "Expected false positives = nα = 1.",
+    "Must be below nα = 1."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>With a Bonferroni level α/20 per test, P(at least one false positive)? (4 decimals.)</p>",
+    "model": "<p>1 − (1 − 0.0025)²⁰ ≈ 0.0488 &lt; 0.05.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.04883012474683324,
+     "display": "≈ 0.0488"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “So we expect 0.642 false discoveries.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>0.642 is P(at least one). The expected number is 20 × 0.05 = 1.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "1"
+    }
+   }
+  ],
+  "par": 1,
   "style": [
    "research-stats",
    "trading-desk"
@@ -1601,6 +5983,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Cov(X, X + Y) = Var(X) + Cov(X, Y) = σ² + 0 = σ².</p><p>Var(X + Y) = 2σ², so sd(X + Y) = σ√2.</p><p>Corr = σ²/(σ · σ√2) = 1/√2 ≈ 0.7071. (In general with n i.i.d. terms, Corr(X₁, ∑Xᵢ) = 1/√n.)</p><p><b>Answer: 1/√2 ≈ 0.7071</b></p>",
   "key": "Covariance is bilinear: Cov(X, X+Y) = Var X + Cov(X,Y).",
+  "plan": {
+   "keyIdea": "Covariance is bilinear; independence kills the cross term.",
+   "method": "Cov = σ², sd(X + Y) = σ√2.",
+   "sanityChecks": [
+    "Correlation must be positive and below 1.",
+    "n i.i.d. terms ⇒ 1/√n."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now Var(Y) = 3 Var(X), still independent. Corr(X, X + Y)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>σ²/(σ · 2σ) = 1/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Three i.i.d. variables: Corr(X₁, X₁ + X₂ + X₃)?</p><p>Give an exact value or 4 decimals.</p>",
+    "model": "<p>1/√3 ≈ 0.5774.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5773502691896258,
+     "display": "1/√3"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “And Corr(X, X − Y) = −1/√2, because of the minus sign.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Cov(X, X − Y) = σ² &gt; 0, so it is +1/√2. The sign of Y does not matter.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7071067811865475,
+     "display": "1/√2"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Is there a one-line way to see 1/√n?</p>",
+    "model": "<p>Corr(X₁, ΣXᵢ) = Cov/(σ · σ√n) = σ²/(σ²√n) = 1/√n: X₁ is one of n equal, independent contributors to the sum.</p>"
+   }
+  ],
+  "par": 1,
   "style": [
    "research-stats"
   ]
@@ -1682,6 +6110,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Set the derivative of the variance to zero to get w* = (σ₂² − ρσ₁σ₂)/(σ₁² + σ₂² − 2ρσ₁σ₂).</p><p>σ₁² = 0.01, σ₂² = 0.04, ρσ₁σ₂ = 0.25 × 0.02 = 0.005.</p><p>w* = (0.04 − 0.005)/(0.01 + 0.04 − 0.01) = 0.035/0.04 = 0.875.</p><p>Even the riskier asset gets weight 12.5% because the imperfect correlation diversifies. (At ρ = 0.5 = σ₁/σ₂ the optimum hits w = 1.)</p><p><b>Answer: 0.875</b></p>",
   "key": "Min-variance weight: w₁ = (σ₂² − σ₁₂)/(σ₁² + σ₂² − 2σ₁₂).",
+  "plan": {
+   "keyIdea": "Minimise w²σ₁² + (1 − w)²σ₂² + 2w(1 − w)ρσ₁σ₂: a quadratic in w.",
+   "method": "w* = (σ₂² − ρσ₁σ₂)/(σ₁² + σ₂² − 2ρσ₁σ₂).",
+   "sanityChecks": [
+    "ρ = σ₁/σ₂ ⇒ w* = 1.",
+    "Portfolio vol must be below 10%."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same vols, correlation 0. Weight in asset 1?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>σ₂²/(σ₁² + σ₂²) = 0.04/0.05 = 0.8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.8,
+     "display": "0.8"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Correlation −1. Weight in asset 1 (it gives zero variance)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>(0.04 + 0.02)/(0.01 + 0.04 + 0.04) = 2/3: 2/3 × 10% = 1/3 × 20%.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6666666666666666,
+     "display": "2/3"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The portfolio is mostly asset 1, so its volatility is about 10%.”</p><p>Is that right? Give the volatility of the minimum-variance portfolio (decimal, 4 places).</p>",
+    "model": "<p>Variance = 0.875²·0.01 + 0.125²·0.04 + 2·0.875·0.125·0.005 = 0.009375 ⇒ vol ≈ 0.0968, below either asset.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.09682458365518543,
+     "display": "≈ 0.0968"
+    }
+   }
+  ],
+  "par": 3,
   "style": [
    "research-stats",
    "math-test"
@@ -1795,7 +6264,48 @@ window.PROBLEMS = [
    "Cov(y, x<sub>1</sub>) = 2Var(x<sub>1</sub>) + 3Cov(x<sub>2</sub>, x<sub>1</sub>)."
   ],
   "solution": "<p>The large-sample slope is Cov(y, x<sub>1</sub>)/Var(x<sub>1</sub>) = [2·1 + 3·0.6]/1 = 3.8.</p><p>In general, the short-regression slope = β<sub>1</sub> + β<sub>2</sub>·δ, where δ = Cov(x<sub>2</sub>, x<sub>1</sub>)/Var(x<sub>1</sub>) is the slope of the omitted variable on the included one. Here δ = 0.6, so the bias is 3·0.6 = 1.8.</p><p>Trap: Var(x<sub>2</sub>) = 4 is a distractor. Only the covariance with the included regressor matters.</p><p><b>Answer: 3.8.</b></p>",
-  "key": "Omitted-variable bias = (coefficient of the omitted variable) × (its regression slope on the included one)."
+  "key": "Omitted-variable bias = (coefficient of the omitted variable) × (its regression slope on the included one).",
+  "plan": {
+   "keyIdea": "Omitted-variable bias: short slope = β₁ + β₂ · Cov(x₁, x₂)/Var(x₁).",
+   "method": "Cov(y, x₁)/Var(x₁) = (2 + 3·0.6)/1.",
+   "sanityChecks": [
+    "Bias sign = sign(β₂) × sign(Cov).",
+    "Var(x₂) is irrelevant for this slope."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same model but Cov(x₁, x₂) = −0.5. Slope of y on x₁ alone?</p><p>Give a number.</p>",
+    "model": "<p>2 + 3 · (−0.5) = 0.5: negative correlation biases the slope down.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "0.5"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Original numbers, but regress y on x₂ alone. Slope?</p><p>Give a number.</p>",
+    "model": "<p>Cov(y, x₂)/Var(x₂) = (2·0.6 + 3·4)/4 = 13.2/4 = 3.3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.3,
+     "display": "3.3"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The bias is β₂ · Cov(x₁, x₂)/Var(x₂) = 3 · 0.6/4 = 0.45.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>The auxiliary regression is x₂ on the <i>included</i> x₁, so divide by Var(x₁) = 1: bias = 1.8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.8,
+     "display": "1.8"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "stat-103",
@@ -1944,7 +6454,2312 @@ window.PROBLEMS = [
    "Write X and Z as ρY + √(1 − ρ²)·(independent noise). corr(X, Z) = 0.72 + √(0.19)·√(0.36)·(correlation of the two noise terms)."
   ],
   "solution": "<p>Standardise everything. Write X = 0.9Y + √0.19·U and Z = 0.8Y + √0.36·V, with U, V unit-variance and uncorrelated with Y. Then corr(X, Z) = 0.72 + √0.19·0.6·corr(U, V).</p><p>corr(U, V) can be anything in [−1, 1], so corr(X, Z) ∈ [0.72 − 0.2615, 0.72 + 0.2615] = [0.4585, 0.9815].</p><p>Equivalently, det = 1 − 0.81 − 0.64 − r² + 2(0.72)r ≥ 0 has roots r = 0.72 ± √(0.19·0.36).</p><p>Trap: 'correlation is not transitive' is true, but strong links do force a positive bound: here X and Z must have correlation at least about 0.46.</p><p><b>Answer: 0.458, 0.982.</b></p>",
-  "key": "corr(X,Z) ∈ ρ<sub>1</sub>ρ<sub>2</sub> ± √((1−ρ<sub>1</sub>²)(1−ρ<sub>2</sub>²)), from positive semidefiniteness of the correlation matrix."
+  "key": "corr(X,Z) ∈ ρ<sub>1</sub>ρ<sub>2</sub> ± √((1−ρ<sub>1</sub>²)(1−ρ<sub>2</sub>²)), from positive semidefiniteness of the correlation matrix.",
+  "plan": {
+   "keyIdea": "A correlation matrix must be positive semidefinite; decompose X and Z on Y.",
+   "method": "corr(X, Z) = ρ₁ρ₂ ± √((1 − ρ₁²)(1 − ρ₂²)).",
+   "sanityChecks": [
+    "The midpoint is 0.72 = 0.9 × 0.8.",
+    "The bounds widen as the links weaken."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now corr(X, Y) = corr(Y, Z) = 0.5. Smallest possible corr(X, Z)?</p><p>Give a number.</p>",
+    "model": "<p>0.25 − 0.75 = −0.5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.5,
+     "display": "−0.5"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Correlation chains multiply, so corr(X, Z) is exactly 0.72.”</p>",
+    "model": "<p>0.72 is only the midpoint; the residuals of X and Z can be correlated anywhere in [−1, 1], giving the whole interval [0.458, 0.982].</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree: 0.72",
+      "Disagree: anything in [0.458, 0.982] is possible",
+      "Disagree: anything in [−1, 1] is possible"
+     ],
+     "correct": 1,
+     "display": "Disagree"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>With corr(X, Y) = 0.6, what is the smallest corr(Y, Z) that forces corr(X, Z) ≥ 0?</p><p>Give a number.</p>",
+    "model": "<p>The lower bound is 0 when ρ₁ρ₂ = √((1 − ρ₁²)(1 − ρ₂²)), i.e. ρ₁² + ρ₂² = 1: ρ₂ = 0.8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.8,
+     "display": "0.8"
+    }
+   }
+  ],
+  "par": 4
+ },
+ {
+  "id": "ci-001",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Equicorrelation floor for five assets",
+  "tags": [
+   "correlation-matrix",
+   "positive-semidefinite",
+   "equicorrelation",
+   "eigenvalues"
+  ],
+  "style": [
+   "research-stats",
+   "trading-desk"
+  ],
+  "prompt": "<p>Five random variables have the property that <b>every pair</b> has the same correlation ρ. What is the smallest value ρ can take?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": -0.25,
+   "display": "−1/4"
+  },
+  "hints": [
+   "A matrix is a correlation matrix exactly when it is symmetric, has 1s on the diagonal and is positive semidefinite: no linear combination may have negative variance.",
+   "Try the simplest combination: the sum of all five variables."
+  ],
+  "solution": "<p>Say what you are enforcing before computing: a correlation matrix must be positive semidefinite (PSD), because any portfolio w has variance wᵀRw ≥ 0.</p><p>Write R = (1 − ρ)I + ρJ, where J is the all-ones matrix. J has eigenvalue n (eigenvector (1,…,1)) and eigenvalue 0 for every vector whose entries sum to zero. So R has eigenvalue 1 + (n − 1)ρ once and 1 − ρ with multiplicity n − 1.</p><p>PSD ⇔ both ≥ 0 ⇔ −1/(n − 1) ≤ ρ ≤ 1. The binding constraint is the sum: Var(X<sub>1</sub> + … + X<sub>n</sub>) = n + n(n − 1)ρ ≥ 0.</p><p>For n = 5: ρ ≥ −1/4, attained by X<sub>i</sub> = Z<sub>i</sub> − Z̄ (deviations from a common mean, whose sum is identically 0).</p><p>Trap: answering −1 because 'a correlation is between −1 and 1'. That is only the n = 2 answer.</p><p><b>Answer: −1/4.</b></p>",
+  "key": "Equicorrelation is valid iff −1/(n−1) ≤ ρ ≤ 1: the sum of the variables can't have negative variance.",
+  "plan": {
+   "keyIdea": "A correlation matrix is valid iff it is PSD: variance is never negative.",
+   "method": "Write R = (1−ρ)I + ρJ; eigenvalues 1+(n−1)ρ (once) and 1−ρ (n−1 times); require both ≥ 0.",
+   "sanityChecks": [
+    "n = 2 must give the familiar [−1, 1].",
+    "n = 3 gives −1/2: three variables with a constant sum."
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity-check your formula. What lower bound does it give for n = 2 and for n = 3?</p><p>Give the two bounds, comma-separated.</p>",
+    "model": "<p>−1/(n − 1) gives −1 for n = 2 (the usual range) and −1/2 for n = 3: if X<sub>1</sub> + X<sub>2</sub> + X<sub>3</sub> is constant then 0 = 3 + 6ρ, so ρ = −1/2.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      -1.0,
+      -0.5
+     ],
+     "ordered": true,
+     "display": "−1, −1/2"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Good. So for n = 4 the floor is −1/4, right?'</p><p>Give the correct floor for n = 4.</p>",
+    "model": "<p>No: −1/(n − 1) = −1/3 for n = 4. −1/4 is the n = 5 answer — an off-by-one between n and n − 1.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.3333333333333333,
+     "display": "−1/3"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What happens to the floor as n → ∞? What does that say about a large universe of assets?</p>",
+    "model": "<p>−1/(n − 1) → 0. Many assets cannot all be negatively correlated with each other by a fixed amount; in a large book the average pairwise correlation is essentially ≥ 0.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.0,
+     "display": "0",
+     "tolAbs": 0.001
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-002",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Eigenvalues of an equicorrelation matrix",
+  "tags": [
+   "equicorrelation",
+   "eigenvalues",
+   "correlation-matrix",
+   "linear-algebra"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>A 6 × 6 correlation matrix has every off-diagonal entry equal to 0.3. What are its largest and smallest eigenvalues?</p><p>Give the two numbers, comma-separated: largest, smallest.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    2.5,
+    0.7
+   ],
+   "ordered": true,
+   "display": "2.5, 0.7"
+  },
+  "hints": [
+   "R = 0.7·I + 0.3·J, where J is the all-ones matrix.",
+   "J has eigenvalues 6 (once) and 0 (five times); shifting by 0.7·I shifts every eigenvalue by 0.7."
+  ],
+  "solution": "<p>R = (1 − ρ)I + ρJ with ρ = 0.3. The all-ones vector gives Jv = 6v, so Rv = (0.7 + 1.8)v = 2.5v. Any vector with entries summing to 0 has Jv = 0, so Rv = 0.7v; these form a 5-dimensional space.</p><p>Eigenvalues: 2.5 (once, the 'market' direction) and 0.7 (five times).</p><p>Check: trace = 2.5 + 5 × 0.7 = 6 = n. ✓</p><p><b>Answer: 2.5, 0.7.</b></p>",
+  "key": "Rank-one plus identity: the all-ones direction gets 1 + (n−1)ρ, every orthogonal direction gets 1 − ρ.",
+  "plan": {
+   "keyIdea": "Decompose R = (1−ρ)I + ρJ; eigenvalues of J are known.",
+   "method": "Find the eigenvector (1,…,1) and the zero-sum subspace.",
+   "sanityChecks": [
+    "Trace of R must equal n.",
+    "ρ = 0 gives all eigenvalues 1."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Two distinct eigenvalues on a 6 × 6 matrix, so each one shows up three times.'</p><p>What is the actual multiplicity of the eigenvalue 0.7?</p>",
+    "model": "<p>The eigenvalue 1 − ρ = 0.7 has multiplicity 5 (the zero-sum subspace has dimension n − 1); 2.5 appears once. Trace check: 2.5 + 5(0.7) = 6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5.0,
+     "display": "5",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Without expanding a 6 × 6 determinant, what is det R?</p><p>Give a decimal.</p>",
+    "model": "<p>det = product of eigenvalues = 2.5 × 0.7<sup>5</sup> = 0.420175.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.420175,
+     "display": "2.5 × 0.7⁵ = 0.420175"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Now set every off-diagonal entry to −0.2. What is the smallest eigenvalue, and is the matrix still valid?</p><p>Give the smallest eigenvalue.</p>",
+    "model": "<p>1 + 5(−0.2) = 0: the matrix is singular but still PSD — ρ = −0.2 = −1/(n − 1) is exactly the floor for n = 6. The equally weighted sum has zero variance.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.0,
+     "display": "0 (singular, still valid)",
+     "tolAbs": 0.001
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-003",
+  "cat": "statistics",
+  "diff": 1,
+  "title": "Averaging equicorrelated signals",
+  "tags": [
+   "equicorrelation",
+   "diversification",
+   "variance-of-mean",
+   "covariance"
+  ],
+  "style": [
+   "trading-desk",
+   "research-stats"
+  ],
+  "prompt": "<p>You average 10 trading signals. Each has variance 1 and every pair has correlation 0.2. What is the variance of the equally weighted average?</p><p>Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.28,
+   "display": "(1 + 9·0.2)/10 = 0.28"
+  },
+  "hints": [
+   "Var(ΣX<sub>i</sub>) = Σ Var + Σ<sub>i≠j</sub> Cov.",
+   "There are n(n − 1) ordered pairs."
+  ],
+  "solution": "<p>Var(ΣX<sub>i</sub>) = n + n(n − 1)ρ = 10 + 90(0.2) = 28. Divide by n² = 100: Var(X̄) = 0.28.</p><p>General formula: (1 + (n − 1)ρ)/n = ρ + (1 − ρ)/n — a floor ρ that diversification cannot remove plus an idiosyncratic part that shrinks like 1/n.</p><p>Trap: using 1/n = 0.1, as if the signals were independent.</p><p><b>Answer: 0.28.</b></p>",
+  "key": "Variance of an average of equicorrelated variables = ρ + (1−ρ)/n: correlation sets a floor.",
+  "plan": {
+   "keyIdea": "Variance of a sum = sum of all entries of the covariance matrix.",
+   "method": "Count n diagonal and n(n−1) off-diagonal terms, divide by n².",
+   "sanityChecks": [
+    "ρ = 0 must give 1/n.",
+    "ρ = 1 must give 1 (no diversification)."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "limit",
+    "prompt": "<p>What does the variance of the average tend to as the number of signals n → ∞ (same ρ = 0.2)?</p>",
+    "model": "<p>ρ + (1 − ρ)/n → ρ = 0.2. Only the idiosyncratic part diversifies away; the common component stays.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2,
+     "display": "0.2"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'With 100 such signals the variance of the average is about 1/100 = 0.01.'</p><p>Give the correct value.</p>",
+    "model": "<p>(1 + 99 × 0.2)/100 = 20.8/100 = 0.208. The 1/n rule needs independence; with ρ = 0.2 you are stuck near 0.2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.208,
+     "display": "0.208"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>The 'effective number of independent bets' is the n<sub>eff</sub> with 1/n<sub>eff</sub> = Var(X̄). What is it for the 10 signals?</p><p>Give a decimal.</p>",
+    "model": "<p>n<sub>eff</sub> = n/(1 + (n − 1)ρ) = 10/2.8 ≈ 3.57. Ten correlated signals are worth fewer than four independent ones.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.5714285714285716,
+     "display": "10/2.8 ≈ 3.571"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-004",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Regress Y on X, given X + Y > 1",
+  "tags": [
+   "regression",
+   "conditional-expectation",
+   "collider-bias",
+   "uniform"
+  ],
+  "style": [
+   "research-stats",
+   "trading-desk"
+  ],
+  "prompt": "<p>X and Y are independent Uniform(0, 1). You only observe pairs with X + Y &gt; 1. On that data (infinitely many points), you run an ordinary least-squares regression of Y on X with an intercept. What is the slope β?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": -0.5,
+   "display": "−1/2"
+  },
+  "hints": [
+   "β = Cov(X, Y)/Var(X), both computed under the conditional distribution: uniform on the triangle above the line x + y = 1, density 2.",
+   "Faster: given X = x, where can Y be? What is E[Y | X = x]?"
+  ],
+  "solution": "<p><b>Long way.</b> P(X + Y &gt; 1) = 1/2, so the conditional density is 2 on the triangle. For fixed x, Y ranges over (1 − x, 1), a length x. E[X] = ∫2x·x dx = 2/3, E[X²] = ∫2x²·x dx = 1/2, so Var(X) = 1/2 − 4/9 = 1/18. E[XY] = ∫2x·(1 − (1 − x)²)/2 dx = ∫(2x² − x³) dx = 2/3 − 1/4 = 5/12, so Cov = 5/12 − 4/9 = −1/36. β = (−1/36)/(1/18) = −1/2.</p><p><b>Short way.</b> Given X = x, Y is uniform on (1 − x, 1), so E[Y | X = x] = 1 − x/2. The conditional mean is <i>linear</i> in x, and when it is linear the OLS line is exactly that line: β = −1/2.</p><p>Why negative? Independent before selection, but selecting on the sum (a common effect) means a small X forces a large Y: collider bias / Berkson's paradox.</p><p><b>Answer: β = −1/2.</b></p>",
+  "key": "Conditioning on a common effect (X + Y > 1) makes independent causes negatively related; a linear conditional mean gives the slope instantly.",
+  "plan": {
+   "keyIdea": "The OLS slope is Cov/Var under the conditional law; if E[Y|X] is linear, its slope is the OLS slope.",
+   "method": "Geometry: uniform on the upper triangle with density 2; either integrate moments or read off E[Y | X = x].",
+   "sanityChecks": [
+    "Without the condition β = 0.",
+    "Sign must be negative: selecting on the sum is a collider."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "faster",
+    "prompt": "<p>'Is there a faster way than integrating all those moments?' What is E[Y | X = x] on the selected region, and what slope does it imply?</p><p>Give the slope.</p>",
+    "model": "<p>Y | X = x is Uniform(1 − x, 1), so E[Y | X = x] = (2 − x)/2 = 1 − x/2. It is linear, so it <i>is</i> the population regression line: slope −1/2, two lines instead of a page.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.5,
+     "display": "−1/2"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Now keep only pairs with X + Y &lt; 1 instead. What is the slope?</p>",
+    "model": "<p>Y | X = x is Uniform(0, 1 − x), mean (1 − x)/2: slope −1/2 again (the lower triangle is the mirror image of the upper one under (x, y) → (1 − x, 1 − y)).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.5,
+     "display": "−1/2"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'So in general the OLS slope is just the slope of E[Y | X = x] — that's the shortcut.' When is that true?</p>",
+    "model": "<p>Only when E[Y | X] is linear. Otherwise OLS gives the best <i>linear approximation</i> to the conditional mean. Example: X ~ U(0, 1), Y = X²: E[Y | X = x] = x² has slope 2x (not constant) while the OLS slope is Cov(X, X²)/Var(X) = 1.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Always — OLS slope = slope of E[Y | X]",
+      "Only when E[Y | X = x] is linear in x; otherwise OLS is its best linear approximation",
+      "Only when X and Y are independent",
+      "Only for uniform distributions"
+     ],
+     "correct": 1,
+     "display": "Only when the conditional mean is linear"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-005",
+  "cat": "statistics",
+  "diff": 3,
+  "title": "Correlation after selecting X + Y > 1",
+  "tags": [
+   "correlation",
+   "collider-bias",
+   "uniform",
+   "berkson"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>X and Y are independent Uniform(0, 1). Conditional on X + Y &gt; 1, what is the correlation between X and Y?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": -0.5,
+   "display": "−1/2"
+  },
+  "hints": [
+   "Conditional density is 2 on the upper triangle; by symmetry Var(X) = Var(Y).",
+   "You need E[X], E[X²] and E[XY] on the triangle."
+  ],
+  "solution": "<p>On the triangle {x + y &gt; 1} with density 2: E[X] = E[Y] = 2/3, Var(X) = Var(Y) = 1/2 − 4/9 = 1/18, E[XY] = 5/12, Cov = 5/12 − 4/9 = −1/36.</p><p>Corr = (−1/36)/(1/18) = −1/2.</p><p>Because the two variances are equal, the correlation equals the regression slope here. This is Berkson's paradox: the variables were independent, and selection on their sum alone created a correlation of −1/2.</p><p><b>Answer: −1/2.</b></p>",
+  "key": "Selecting on a sum (a collider) turns independent variables into correlated ones: here ρ = −1/2.",
+  "plan": {
+   "keyIdea": "Correlation = Cov/(σ<sub>X</sub>σ<sub>Y</sub>) under the conditional density 2 on the triangle.",
+   "method": "Compute E[X], E[X²], E[XY] by integrating over y ∈ (1−x, 1); use symmetry for Y.",
+   "sanityChecks": [
+    "Must lie in [−1, 1] and be negative.",
+    "Equal variances ⇒ correlation = regression slope (−1/2)."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'The slope is −1/2, but the correlation is always smaller in size than the slope, so ρ is about −1/4.'</p><p>Give the correct correlation.</p>",
+    "model": "<p>ρ = β·σ<sub>X</sub>/σ<sub>Y</sub>. With σ<sub>X</sub> = σ<sub>Y</sub>, ρ = β = −1/2. Correlation is not 'always smaller' than a slope; slopes depend on units, correlations don't.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.5,
+     "display": "−1/2"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Select instead on X + Y &gt; 3/2 (the smaller corner triangle). What is the correlation?</p>",
+    "model": "<p>Still −1/2: the corner triangle {x + y &gt; 3/2} is a scaled, shifted copy of {x + y &gt; 1} (map (x, y) → (1/2 + x/2, 1/2 + y/2)), and correlation is invariant to affine rescaling.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.5,
+     "display": "−1/2"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>What is Cov(X, Y) on the region X + Y &gt; 1?</p><p>Give a fraction.</p>",
+    "model": "<p>Cov = E[XY] − E[X]E[Y] = 5/12 − 4/9 = −1/36 ≈ −0.0278.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.027777777777777776,
+     "display": "−1/36"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-009",
+  "cat": "statistics",
+  "diff": 3,
+  "title": "Which correlation matrix is real?",
+  "tags": [
+   "correlation-matrix",
+   "positive-semidefinite",
+   "determinant",
+   "linear-algebra"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>Each option lists (ρ<sub>12</sub>, ρ<sub>13</sub>, ρ<sub>23</sub>) for three variables. Which one is a valid correlation matrix?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "(0.9, 0.9, 0.5)",
+    "(−0.6, −0.6, −0.6)",
+    "(0.8, −0.8, 0.5)",
+    "(0.9, 0.9, 0.7)"
+   ],
+   "correct": 3,
+   "display": "(0.9, 0.9, 0.7)"
+  },
+  "hints": [
+   "With unit diagonal and all 2 × 2 minors positive, the 3 × 3 matrix is valid iff its determinant 1 − (a² + b² + c²) + 2abc ≥ 0.",
+   "If X<sub>1</sub> is highly correlated with both X<sub>2</sub> and X<sub>3</sub>, then X<sub>2</sub> and X<sub>3</sub> must be correlated too."
+  ],
+  "solution": "<p>For a = ρ<sub>12</sub>, b = ρ<sub>13</sub>, c = ρ<sub>23</sub>: det = 1 − a² − b² − c² + 2abc (all 2 × 2 minors 1 − r² are positive here).</p><ul><li>(0.9, 0.9, 0.5): 1 − 1.87 + 0.81 = −0.06 &lt; 0 ✗</li><li>(−0.6, −0.6, −0.6): below the equicorrelation floor −1/2 (det = −0.512) ✗</li><li>(0.8, −0.8, 0.5): 1 − 1.53 − 0.64 = −1.17 ✗</li><li>(0.9, 0.9, 0.7): 1 − 2.11 + 1.134 = 0.024 ≥ 0 ✓</li></ul><p>Intuition: if X<sub>2</sub> and X<sub>3</sub> are both 0.9-correlated with X<sub>1</sub>, they are forced to be at least 0.62-correlated with each other.</p><p><b>Answer: (0.9, 0.9, 0.7).</b></p>",
+  "key": "Pairwise correlations in [−1, 1] are not enough: the matrix must be PSD (det ≥ 0 for 3 × 3 with valid 2 × 2 minors).",
+  "plan": {
+   "keyIdea": "Validity = PSD; for 3 × 3 with unit diagonal, check 2 × 2 minors and the determinant.",
+   "method": "Compute det = 1 − a² − b² − c² + 2abc for each option.",
+   "sanityChecks": [
+    "Equicorrelation below −1/2 is impossible for n = 3.",
+    "High correlation with a common variable forces correlation between the others."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>With ρ<sub>12</sub> = ρ<sub>13</sub> = 0.9, what is the smallest valid ρ<sub>23</sub>?</p><p>Give a decimal.</p>",
+    "model": "<p>Set the determinant to 0: c ≥ ab − √((1 − a²)(1 − b²)) = 0.81 − 0.19 = 0.62.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.62,
+     "display": "0.62"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Option (0.9, 0.9, 0.5) has every correlation between −1 and 1, so it's fine.' What is its determinant?</p><p>Give a decimal.</p>",
+    "model": "<p>det = 1 − 0.81 − 0.81 − 0.25 + 2(0.9)(0.9)(0.5) = −0.06 &lt; 0, so some portfolio would have negative variance (e.g. long X<sub>1</sub>, short X<sub>2</sub> and X<sub>3</sub> in the right proportions). Invalid.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.06,
+     "display": "−0.06"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-010",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "One-factor covariance: identity plus rank one",
+  "tags": [
+   "linear-algebra",
+   "factor-model",
+   "determinant",
+   "sherman-morrison"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>Three asset returns follow a one-factor model with covariance matrix Σ = I + bbᵀ, where b = (1, 2, 2) are the factor loadings (unit idiosyncratic variances, unit factor variance). What is det Σ?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 10.0,
+   "display": "1 + |b|² = 10",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "bbᵀ has rank one: its only non-zero eigenvalue is bᵀb, with eigenvector b.",
+   "Adding I adds 1 to every eigenvalue."
+  ],
+  "solution": "<p>bbᵀ has eigenvalue bᵀb = 1 + 4 + 4 = 9 on the direction b and 0 on the 2-dimensional plane orthogonal to b. So Σ = I + bbᵀ has eigenvalues 10, 1, 1.</p><p>det Σ = 10 × 1 × 1 = 10 (the matrix determinant lemma: det(I + bbᵀ) = 1 + bᵀb).</p><p><b>Answer: 10.</b></p>",
+  "key": "Identity plus rank one: eigenvalues 1 + bᵀb and 1 (repeated), so det = 1 + bᵀb.",
+  "plan": {
+   "keyIdea": "A rank-one update only changes one eigenvalue.",
+   "method": "Eigenvalues of bbᵀ are bᵀb and 0; shift by 1.",
+   "sanityChecks": [
+    "b = 0 must give det = 1.",
+    "Trace check: 10 + 1 + 1 = 3 + bᵀb."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>List all three eigenvalues of Σ.</p><p>Give them comma-separated, any order.</p>",
+    "model": "<p>10 (direction b) and 1, 1 (the plane orthogonal to b).</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      10.0,
+      1.0,
+      1.0
+     ],
+     "ordered": false,
+     "display": "10, 1, 1"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Without inverting a 3 × 3 matrix, what is the (1, 1) entry of Σ<sup>−1</sup>?</p><p>Give a decimal.</p>",
+    "model": "<p>Sherman–Morrison: (I + bbᵀ)<sup>−1</sup> = I − bbᵀ/(1 + bᵀb). Entry (1, 1) = 1 − 1·1/10 = 0.9.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.9,
+     "display": "0.9"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'So det(I + bbᵀ) is 1 plus the sum of the loadings, 1 + 5 = 6.'</p><p>Give the correct determinant.</p>",
+    "model": "<p>It is 1 + bᵀb = 1 + Σb<sub>i</sub>² = 10, not 1 + Σb<sub>i</sub>. Sanity: b = (1, −1, 0) has Σb<sub>i</sub> = 0, which would give det 1, but its eigenvalues are 1 + 2 = 3, 1, 1, so det = 3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 10.0,
+     "display": "10",
+     "tolAbs": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-013",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "How big can the covariance be?",
+  "tags": [
+   "covariance-matrix",
+   "positive-semidefinite",
+   "cauchy-schwarz",
+   "portfolio-variance"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>X has variance 4 and Y has variance 9. What is the largest possible value of Cov(X, Y)?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 6.0,
+   "display": "6 = σ<sub>X</sub>σ<sub>Y</sub>",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "The covariance matrix [[4, c], [c, 9]] must be PSD.",
+   "|Cov| ≤ σ<sub>X</sub>σ<sub>Y</sub> (Cauchy–Schwarz)."
+  ],
+  "solution": "<p>PSD requires det = 36 − c² ≥ 0, so |c| ≤ 6 = 2 × 3. Attained when Y = 1.5X (correlation 1).</p><p><b>Answer: 6.</b></p>",
+  "key": "|Cov(X, Y)| ≤ σ<sub>X</sub>σ<sub>Y</sub>: the 2 × 2 covariance matrix must have non-negative determinant.",
+  "plan": {
+   "keyIdea": "A covariance matrix must be PSD.",
+   "method": "det = 36 − c² ≥ 0.",
+   "sanityChecks": [
+    "Correlation c/6 must be in [−1, 1].",
+    "Equality iff one variable is a multiple of the other."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>With Cov(X, Y) = 5, what is Var(X − Y)?</p>",
+    "model": "<p>4 + 9 − 2·5 = 3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.0,
+     "display": "3",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Suppose Cov(X, Y) = 7. Then Var(X − Y) = 13 − 14 = −1; a slightly odd number, but fine.' What's wrong?</p>",
+    "model": "<p>A variance can't be negative: Cov = 7 &gt; σ<sub>X</sub>σ<sub>Y</sub> = 6, so [[4, 7], [7, 9]] has det 36 − 49 &lt; 0 and is not a covariance matrix. The negative variance is the symptom.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Nothing — negative variances happen with estimated matrices",
+      "Cov = 7 is impossible: it exceeds sd(X)·sd(Y) = 6, so the matrix isn't PSD",
+      "The formula should be 13 + 14",
+      "Cov must be below 4, the smaller variance"
+     ],
+     "correct": 1,
+     "display": "Impossible covariance (exceeds 6)"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Over all valid covariances, what is the smallest possible Var(X − Y)?</p>",
+    "model": "<p>13 − 2c is smallest at c = 6: 13 − 12 = 1 = (3 − 2)². Two perfectly correlated assets with different volatilities can't hedge each other to zero with a 1:1 ratio.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "1",
+     "tolAbs": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-014",
+  "cat": "statistics",
+  "diff": 1,
+  "title": "Building correlated normals",
+  "tags": [
+   "simulation",
+   "cholesky",
+   "correlation",
+   "normal-distribution"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>Z<sub>1</sub>, Z<sub>2</sub> are independent standard normals. You set X = Z<sub>1</sub> and Y = 0.6·Z<sub>1</sub> + c·Z<sub>2</sub> with c &gt; 0. What c makes Y standard normal, so that Corr(X, Y) = 0.6?</p><p>Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.8,
+   "display": "√(1 − 0.36) = 0.8"
+  },
+  "hints": [
+   "Var(Y) = 0.36 + c² must equal 1.",
+   "This is the 2 × 2 Cholesky factor."
+  ],
+  "solution": "<p>Var(Y) = 0.6² + c² = 1 ⇒ c = √0.64 = 0.8. Then Cov(X, Y) = 0.6 and both variances are 1, so Corr = 0.6.</p><p>This is the Cholesky factorisation [[1, 0], [0.6, 0.8]] of the correlation matrix [[1, 0.6], [0.6, 1]].</p><p><b>Answer: 0.8.</b></p>",
+  "key": "To simulate correlation ρ: Y = ρZ<sub>1</sub> + √(1 − ρ²)Z<sub>2</sub> (2 × 2 Cholesky).",
+  "plan": {
+   "keyIdea": "Correlation = Cov/(σσ); fix the variance of Y to 1.",
+   "method": "Solve 0.36 + c² = 1.",
+   "sanityChecks": [
+    "ρ = 0 gives c = 1.",
+    "ρ = 1 gives c = 0."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is Corr(Z<sub>1</sub>, Z<sub>1</sub> + 2Z<sub>2</sub>)?</p><p>Give a decimal.</p>",
+    "model": "<p>Cov = 1, Var(Z<sub>1</sub> + 2Z<sub>2</sub>) = 5, so Corr = 1/√5 ≈ 0.447.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.4472135954999579,
+     "display": "1/√5 ≈ 0.447"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Simpler: weights should add to 1, so Y = 0.6Z<sub>1</sub> + 0.4Z<sub>2</sub> gives correlation 0.6.' What correlation does that Y really have with Z<sub>1</sub>?</p><p>Give a decimal.</p>",
+    "model": "<p>Var(Y) = 0.36 + 0.16 = 0.52, so Corr = 0.6/√0.52 ≈ 0.832. It's the <i>squares</i> of the weights that must add to 1.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.8320502943378436,
+     "display": "≈ 0.832"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>For a target correlation of −0.28, what is c?</p><p>Give a decimal.</p>",
+    "model": "<p>c = √(1 − 0.0784) = 0.96 (the sign of ρ goes on the Z<sub>1</sub> weight).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.96,
+     "display": "0.96"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-015",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Reverse regression from R²",
+  "tags": [
+   "regression",
+   "r-squared",
+   "slopes",
+   "correlation"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>Regressing Y on X (with intercept) gives slope 2 and R² = 0.5. What slope do you get regressing X on Y?</p><p>Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.25,
+   "display": "0.25"
+  },
+  "hints": [
+   "b<sub>Y|X</sub> = ρσ<sub>Y</sub>/σ<sub>X</sub> and b<sub>X|Y</sub> = ρσ<sub>X</sub>/σ<sub>Y</sub>.",
+   "Their product is ρ² = R²."
+  ],
+  "solution": "<p>b<sub>Y|X</sub> · b<sub>X|Y</sub> = ρ² = R² = 0.5, so b<sub>X|Y</sub> = 0.5/2 = 0.25.</p><p>Trap: inverting the line (1/2 = 0.5). The two regressions minimise different errors (vertical vs horizontal), so they only agree when |ρ| = 1.</p><p><b>Answer: 0.25.</b></p>",
+  "key": "The two regression slopes multiply to R²; they are reciprocals only when the fit is perfect.",
+  "plan": {
+   "keyIdea": "Slopes are ρσ<sub>Y</sub>/σ<sub>X</sub> and ρσ<sub>X</sub>/σ<sub>Y</sub>.",
+   "method": "Product = ρ² = R².",
+   "sanityChecks": [
+    "R² = 1 should give the reciprocal 0.5.",
+    "Both slopes share the sign of ρ."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'X on Y is just the inverse of Y on X, so the slope is 1/2.'</p><p>Give the correct slope.</p>",
+    "model": "<p>0.25. Inverting is right only if R² = 1. The regression of X on Y shrinks towards the mean of X just like Y on X does.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.25,
+     "display": "0.25"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: if R² were 1 (same Y-on-X slope 2), what would the X-on-Y slope be?</p>",
+    "model": "<p>1/2 — the points lie on a line, and both regressions recover it.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "0.5"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Another pair: Y-on-X slope 2, X-on-Y slope 0.1. What is R²?</p>",
+    "model": "<p>R² = 2 × 0.1 = 0.2 (ρ = +√0.2 ≈ 0.447).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2,
+     "display": "0.2"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-016",
+  "cat": "statistics",
+  "diff": 1,
+  "title": "Changing units in a regression",
+  "tags": [
+   "regression",
+   "scaling",
+   "units",
+   "r-squared"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>A regression of daily P&amp;L Y (dollars) on order flow X (dollars) gives Ŷ = 2 + 1.5X. You re-record X in <b>cents</b> (X′ = 100X) and refit. What is the new slope?</p><p>Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.015,
+   "display": "0.015"
+  },
+  "hints": [
+   "The fitted line must give the same prediction for the same day.",
+   "1.5X = b′ · (100X)."
+  ],
+  "solution": "<p>Predictions don't change, so 1.5X = b′·100X ⇒ b′ = 0.015. The intercept stays 2. R², t-statistics and residuals are unchanged — rescaling a regressor is just a change of units.</p><p><b>Answer: 0.015.</b></p>",
+  "key": "Rescaling X by c divides the slope by c; R² and t-stats are unit-free.",
+  "plan": {
+   "keyIdea": "Fitted values are invariant to relabelling units.",
+   "method": "Match the predictions: 1.5X = b′·100X.",
+   "sanityChecks": [
+    "Units of slope: $ of Y per unit of X.",
+    "R² must not change."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Instead, record Y in cents (X in dollars). What is the new slope?</p>",
+    "model": "<p>Everything on the Y side is multiplied by 100: slope 150, intercept 200.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 150.0,
+     "display": "150",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Instead, add 10 to every X (dollars). What is the new intercept?</p>",
+    "model": "<p>Ŷ = 2 + 1.5(X′ − 10) = −13 + 1.5X′: the slope is unchanged and the intercept becomes 2 − 15 = −13.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -13.0,
+     "display": "−13",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'In cents the numbers are 100 times bigger, so the fit explains more variance and R² goes up.'</p>",
+    "model": "<p>R² = Corr(X, Y)², and correlation is invariant to positive rescaling and shifts. R² is unchanged.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "R² goes up",
+      "R² goes down",
+      "R² is unchanged",
+      "R² is multiplied by 100"
+     ],
+     "correct": 2,
+     "display": "Unchanged"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-017",
+  "cat": "statistics",
+  "diff": 1,
+  "title": "Regression to the mean on a retest",
+  "tags": [
+   "regression-to-the-mean",
+   "regression",
+   "correlation",
+   "prediction"
+  ],
+  "style": [
+   "research-stats",
+   "trading-desk"
+  ],
+  "prompt": "<p>Scores on two aptitude tests both have mean 100 and standard deviation 15, with correlation 0.5. A candidate scored 130 on the first. What is the best linear prediction of their second score?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 115.0,
+   "display": "115",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Standardise: the first score is z = 2.",
+   "Predicted z on the second test is ρ·z."
+  ],
+  "solution": "<p>z = (130 − 100)/15 = 2. Predicted second z = 0.5 × 2 = 1, i.e. 100 + 15 = 115.</p><p>The candidate is still above average but only half as far: regression to the mean. It isn't a causal effect — part of the high first score was luck that doesn't repeat.</p><p><b>Answer: 115.</b></p>",
+  "key": "With equal spreads, predicted z-score = ρ × observed z-score.",
+  "plan": {
+   "keyIdea": "Work in standard units; the regression slope in z-units is ρ.",
+   "method": "ŷ = μ + ρ(x − μ) since both SDs are 15.",
+   "sanityChecks": [
+    "ρ = 1 should predict 130.",
+    "ρ = 0 should predict 100."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same scores but correlation 0.8. Prediction?</p>",
+    "model": "<p>100 + 0.8 × 30 = 124.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 124.0,
+     "display": "124",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Fine. So if someone scores 115 on the second test, we'd predict 130 on the first, by running the line backwards.'</p><p>What is the right prediction of the first score?</p>",
+    "model": "<p>Regress the first on the second: 100 + 0.5 × 15 = 107.5. Regression to the mean works in both directions; you don't invert the line.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 107.5,
+     "display": "107.5"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: with correlation 0, what would you predict for the second score?</p>",
+    "model": "<p>The mean, 100: the first score carries no information.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 100.0,
+     "display": "100",
+     "tolAbs": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-018",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Attenuation from a noisy regressor",
+  "tags": [
+   "errors-in-variables",
+   "attenuation",
+   "regression",
+   "measurement-error"
+  ],
+  "style": [
+   "research-stats",
+   "trading-desk"
+  ],
+  "prompt": "<p>The true model is Y = 2X* + ε. You don't see X*; you see X = X* + u, where Var(X*) = 4, Var(u) = 1 and u is independent of X* and ε. What slope does OLS of Y on X converge to?</p><p>Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 1.6,
+   "display": "2 × 4/5 = 1.6"
+  },
+  "hints": [
+   "Cov(X, Y) = Cov(X* + u, 2X* + ε) = 2 Var(X*).",
+   "Var(X) = Var(X*) + Var(u)."
+  ],
+  "solution": "<p>slope = Cov(X, Y)/Var(X) = 2·4/(4 + 1) = 1.6. The reliability ratio λ = Var(X*)/Var(X) = 0.8 multiplies the true slope: attenuation bias towards 0.</p><p>For a noisy signal in a trading model, this means the estimated coefficient understates the true sensitivity.</p><p><b>Answer: 1.6.</b></p>",
+  "key": "Classical measurement error in X attenuates the slope by Var(X*)/(Var(X*) + Var(u)).",
+  "plan": {
+   "keyIdea": "Slope = Cov/Var; noise in X adds to the denominator only.",
+   "method": "Compute Cov(X, Y) and Var(X) with independence.",
+   "sanityChecks": [
+    "No noise ⇒ 2.",
+    "Huge noise ⇒ slope → 0."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now Var(u) = 4 (as noisy as the signal). Slope?</p>",
+    "model": "<p>2 × 4/8 = 1: the slope is halved.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "1",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'And if the same kind of noise (variance 1) were in Y instead of X, the slope would be attenuated to 1.6 as well.'</p><p>What slope does OLS converge to then?</p>",
+    "model": "<p>2. Noise in the dependent variable just adds to the residual; it inflates standard errors but doesn't bias the slope.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.0,
+     "display": "2",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What happens to the estimated slope as Var(u) → ∞?</p>",
+    "model": "<p>2 · 4/(4 + Var u) → 0: the regressor becomes pure noise.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.0,
+     "display": "0",
+     "tolAbs": 0.001
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-019",
+  "cat": "statistics",
+  "diff": 3,
+  "title": "R² with two correlated predictors",
+  "tags": [
+   "regression",
+   "r-squared",
+   "multicollinearity",
+   "correlation"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>Predictors X<sub>1</sub> and X<sub>2</sub> have correlations 0.3 and 0.4 with Y, and correlation 0.5 with each other. What is the population R² of the regression of Y on both?</p><p>Give a decimal to 4 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.17333333333333334,
+   "display": "0.13/0.75 ≈ 0.1733",
+   "tolRel": 0.002
+  },
+  "hints": [
+   "R² = cᵀR<sup>−1</sup>c, where c = (0.3, 0.4) and R is the predictors' correlation matrix.",
+   "For two predictors: R² = (r<sub>1</sub>² + r<sub>2</sub>² − 2r<sub>1</sub>r<sub>2</sub>r<sub>12</sub>)/(1 − r<sub>12</sub>²)."
+  ],
+  "solution": "<p>With standardised variables, R² = cᵀR<sup>−1</sup>c. For two predictors this is (0.09 + 0.16 − 2·0.3·0.4·0.5)/(1 − 0.25) = 0.13/0.75 ≈ 0.1733.</p><p>Less than 0.09 + 0.16 = 0.25 because the predictors overlap: part of what X<sub>2</sub> explains is already explained by X<sub>1</sub>. (Standardised coefficients: β = R<sup>−1</sup>c = (2/15, 1/3).)</p><p><b>Answer: ≈ 0.1733.</b></p>",
+  "key": "R² = cᵀR⁻¹c; correlated predictors share explanatory power, so R²s don't add.",
+  "plan": {
+   "keyIdea": "Population R² = cᵀR<sup>−1</sup>c in standardised units.",
+   "method": "Invert the 2 × 2 correlation matrix and form the quadratic.",
+   "sanityChecks": [
+    "r<sub>12</sub> = 0 should give r<sub>1</sub>² + r<sub>2</sub>².",
+    "R² must be at least max(r<sub>1</sub>², r<sub>2</sub>²) = 0.16."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same, but the predictors are uncorrelated (r<sub>12</sub> = 0). R²?</p>",
+    "model": "<p>0.09 + 0.16 = 0.25: with orthogonal predictors the R²s add.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.25,
+     "display": "0.25"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'The predictors are positively correlated, so together they must explain <i>more</i> than 0.25.'</p><p>Give the actual R².</p>",
+    "model": "<p>≈ 0.1733 &lt; 0.25: both are positively correlated with Y <i>and</i> with each other, so they carry overlapping information. (Suppression, where R² exceeds the sum, needs a different sign pattern.)</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.17333333333333334,
+     "display": "≈ 0.1733",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Now both predictors have correlation 0.4 with Y (r<sub>12</sub> still 0.5). R²?</p><p>Give a decimal.</p>",
+    "model": "<p>(0.16 + 0.16 − 0.16)/0.75 = 0.16/0.75 ≈ 0.2133.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.21333333333333335,
+     "display": "≈ 0.2133",
+     "tolRel": 0.002
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-020",
+  "cat": "statistics",
+  "diff": 3,
+  "title": "Duplicating every data point",
+  "tags": [
+   "regression",
+   "standard-error",
+   "degrees-of-freedom",
+   "data-snooping"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>You fit a simple regression (intercept + slope) on n = 10 points. A colleague accidentally duplicates every row (20 rows) and refits, using the usual OLS standard-error formula with n − 2 degrees of freedom. What is the ratio (new SE of the slope)/(old SE of the slope)?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6666666666666666,
+   "display": "√(8/18) = 2/3"
+  },
+  "hints": [
+   "Duplication leaves the slope unchanged, doubles S<sub>xx</sub> and doubles the RSS.",
+   "σ̂² = RSS/(n − 2) and SE² = σ̂²/S<sub>xx</sub>."
+  ],
+  "solution": "<p>Old: SE² = [RSS/(n − 2)]/S<sub>xx</sub>. New: SE² = [2RSS/(2n − 2)]/(2S<sub>xx</sub>) = RSS/((2n − 2)S<sub>xx</sub>).</p><p>Ratio² = (n − 2)/(2n − 2) = 8/18 = 4/9, so the ratio is 2/3. The point estimate doesn't move, but the t-stat jumps by 1.5×: fake precision from fake data. As n grows the ratio → 1/√2.</p><p><b>Answer: 2/3.</b></p>",
+  "key": "Duplicated observations aren't new information: the slope is unchanged but naive SEs shrink by about 1/√2.",
+  "plan": {
+   "keyIdea": "Track the three ingredients: slope, RSS, S<sub>xx</sub>, and the degrees of freedom.",
+   "method": "Write SE² before and after; take the ratio.",
+   "sanityChecks": [
+    "The slope itself must be unchanged.",
+    "Large n: ratio ≈ 1/√2."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "limit",
+    "prompt": "<p>What does the ratio tend to as n → ∞?</p><p>Give a decimal.</p>",
+    "model": "<p>√((n − 2)/(2n − 2)) → 1/√2 ≈ 0.707.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7071067811865475,
+     "display": "1/√2 ≈ 0.707"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Duplicating rows changes the residual pattern, so the slope estimate itself moves.' What is (new slope)/(old slope)?</p>",
+    "model": "<p>1. Duplicating every row multiplies both Σ(x − x̄)(y − ȳ) and Σ(x − x̄)² by 2, and the means don't change.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "1",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Same question with n = 20 original points. Ratio?</p><p>Give a decimal.</p>",
+    "model": "<p>√(18/38) ≈ 0.688.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6882472016116853,
+     "display": "√(18/38) ≈ 0.688"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-021",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Correlation of X and X²",
+  "tags": [
+   "correlation",
+   "dependence",
+   "uniform",
+   "moments"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>X ~ Uniform(0, 1). What is Corr(X, X²)?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.9682458365518543,
+   "display": "√15/4 ≈ 0.968",
+   "tolRel": 0.002
+  },
+  "hints": [
+   "E[X<sup>k</sup>] = 1/(k + 1).",
+   "Cov(X, X²) = E[X³] − E[X]E[X²]."
+  ],
+  "solution": "<p>Cov = 1/4 − (1/2)(1/3) = 1/12. Var(X) = 1/12. Var(X²) = 1/5 − 1/9 = 4/45.</p><p>Corr = (1/12)/√((1/12)(4/45)) = √15/4 ≈ 0.968. High, but not 1: X² is a deterministic but non-linear function of X.</p><p><b>Answer: √15/4 ≈ 0.968.</b></p>",
+  "key": "Correlation measures linear association: a perfect non-linear relation gives |ρ| < 1.",
+  "plan": {
+   "keyIdea": "Correlation from raw moments E[X<sup>k</sup>] = 1/(k+1).",
+   "method": "Compute Cov, Var(X), Var(X²).",
+   "sanityChecks": [
+    "Must be below 1 (non-linear).",
+    "On a symmetric interval the answer would be 0."
+   ]
+  },
+  "par": 2.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now X ~ Uniform(−1, 1). What is Corr(X, X²)?</p>",
+    "model": "<p>0: Cov = E[X³] − E[X]E[X²] = 0 by symmetry, although X² is a function of X.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.0,
+     "display": "0",
+     "tolAbs": 0.001
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'So on (−1, 1) they're uncorrelated, which means X² is independent of X.'</p>",
+    "model": "<p>No: zero correlation only rules out <i>linear</i> dependence. Knowing X fixes X² completely; e.g. P(X² &gt; 1/4 | |X| &gt; 1/2) = 1 ≠ P(X² &gt; 1/4) = 1/2.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Correct — zero correlation implies independence",
+      "Wrong — they are uncorrelated but completely dependent",
+      "Wrong — they are actually correlated",
+      "Correct for uniforms only"
+     ],
+     "correct": 1,
+     "display": "Uncorrelated but dependent"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Back on (0, 1): what is Corr(X, X³)?</p><p>Give a decimal.</p>",
+    "model": "<p>Cov = 1/5 − 1/8 = 3/40, Var(X³) = 1/7 − 1/16 = 9/112, Corr = (3/40)/√((1/12)(9/112)) = √1344/40 ≈ 0.917.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.916515138991168,
+     "display": "≈ 0.917",
+     "tolRel": 0.002
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-022",
+  "cat": "statistics",
+  "diff": 3,
+  "title": "Selected because one signal was strong",
+  "tags": [
+   "collider-bias",
+   "selection-bias",
+   "correlation",
+   "uniform"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>Two independent signals X, Y ~ Uniform(0, 1). A trade idea is kept only if at least one signal exceeds 1/2, i.e. max(X, Y) &gt; 1/2. Among kept ideas, what is Corr(X, Y)?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": -0.36363636363636365,
+   "display": "−4/11 ≈ −0.364"
+  },
+  "hints": [
+   "The kept region is the unit square minus the square [0, 1/2]², area 3/4.",
+   "Subtract the small square's moments from the full square's: E[X] = (1/2 − 1/16)/(3/4)."
+  ],
+  "solution": "<p>Kept region = square minus [0, ½]², area 3/4. Using 'full minus small square':</p><p>E[X] = (1/2 − 1/16)/(3/4) = 7/12; E[X²] = (1/3 − 1/48)/(3/4) = 5/12 ⇒ Var = 5/12 − 49/144 = 11/144; E[XY] = (1/4 − 1/64)/(3/4) = 5/16 ⇒ Cov = 45/144 − 49/144 = −1/36.</p><p>Corr = (−1/36)/(11/144) = −4/11 ≈ −0.364. Same collider structure: if X is weak, Y must have been strong for the idea to survive.</p><p><b>Answer: −4/11.</b></p>",
+  "key": "Any selection rule driven by both variables (here 'at least one is high') can induce negative correlation.",
+  "plan": {
+   "keyIdea": "Selection on a function of both variables is a collider.",
+   "method": "Integrate moments as full square minus excluded square.",
+   "sanityChecks": [
+    "Correlation must be negative.",
+    "Threshold 0 means no selection ⇒ 0."
+   ]
+  },
+  "par": 7,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is Cov(X, Y) among kept ideas?</p><p>Give a fraction.</p>",
+    "model": "<p>−1/36 ≈ −0.0278.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.027777777777777776,
+     "display": "−1/36"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>Raise the threshold a → 1 (keep only if max(X, Y) &gt; a). What does the correlation tend to?</p><p>Give a decimal.</p>",
+    "model": "<p>For general a: E[X] = (1 − a³)/(2(1 − a²)), E[X²] = (1 + a²)/3, E[XY] = (1 + a²)/4. As a → 1: E[X] → 3/4, Var → 2/3 − 9/16 = 5/48, Cov → 1/2 − 9/16 = −1/16, so Corr → −3/5. (The region becomes two thin strips: one coordinate ≈ 1, the other uniform.)</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.6,
+     "display": "−3/5"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Kept ideas have high signals, and both tend to be high together, so they should be positively correlated.'</p><p>Give the actual correlation.</p>",
+    "model": "<p>−4/11: selection removes the low–low corner, which is exactly where the two signals agreed. What remains is weighted towards high–low and low–high pairs.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.36363636363636365,
+     "display": "−4/11"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-023",
+  "cat": "statistics",
+  "diff": 3,
+  "title": "Talent and luck among the top half",
+  "tags": [
+   "collider-bias",
+   "truncated-normal",
+   "selection-bias",
+   "correlation"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>Each trader's P&amp;L is Y = T + L, where talent T and luck L are independent N(0, 1). The firm keeps only traders with Y &gt; 0. Among those kept, what is Corr(T, L)?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": -0.4669422069242599,
+   "display": "−1/(π − 1) ≈ −0.467",
+   "tolRel": 0.003
+  },
+  "hints": [
+   "Rotate: Y = T + L and D = T − L are independent N(0, 2), and selection only touches Y.",
+   "Var(Y | Y &gt; 0) = 2(1 − 2/π) for Y ~ N(0, 2)."
+  ],
+  "solution": "<p>T = (Y + D)/2, L = (Y − D)/2 with D independent of Y, so after selecting on Y: Cov(T, L) = (Var(Y | sel) − Var D)/4 and Var T = (Var(Y | sel) + Var D)/4.</p><p>Half-normal: Var(Y | Y &gt; 0) = 2(1 − 2/π). So Cov = −1/π and Var T = 1 − 1/π, giving Corr = −1/(π − 1) ≈ −0.467.</p><p>Among survivors, luckier traders tend to be less talented — survivorship by P&amp;L manufactures a talent–luck trade-off.</p><p><b>Answer: −1/(π − 1) ≈ −0.467.</b></p>",
+  "key": "Truncating on a sum shrinks its variance but not the difference's, so the summands become negatively correlated.",
+  "plan": {
+   "keyIdea": "Selection on Y = T + L is a collider; rotate to (Y, D) where D is untouched.",
+   "method": "Express Cov and Var of T, L via Var(Y | sel) and Var D.",
+   "sanityChecks": [
+    "No selection ⇒ Var(Y) = Var D ⇒ correlation 0.",
+    "Result must be in (−1, 0)."
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Selection on P&amp;L shifts the average talent of the survivors but leaves the spread of talent at 1.' What is Var(T | Y &gt; 0)?</p><p>Give a decimal.</p>",
+    "model": "<p>(Var(Y | sel) + 2)/4 = 1 − 1/π ≈ 0.682: selection also compresses the spread of talent.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6816901138162093,
+     "display": "1 − 1/π ≈ 0.682",
+     "tolRel": 0.003
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>Keep only traders with Y &gt; c and let c → ∞. What does Corr(T, L) tend to?</p>",
+    "model": "<p>Var(Y | Y &gt; c) → 0, so Corr = (Var(Y|sel) − 2)/(Var(Y|sel) + 2) → −1: among extreme winners, talent and luck are almost perfect substitutes (T + L ≈ c).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -1.0,
+     "display": "−1",
+     "tolAbs": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-039",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Variance of a sum without replacement",
+  "tags": [
+   "sampling",
+   "finite-population-correction",
+   "variance",
+   "cards"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>Ten cards numbered 1 to 10. You draw 5 <b>without replacement</b> and add the numbers. What is the variance of the sum?</p><p>Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 22.916666666666668,
+   "display": "5 × 8.25 × 5/9 ≈ 22.917",
+   "tolRel": 0.002
+  },
+  "hints": [
+   "Population variance of 1..10 is (10² − 1)/12 = 8.25.",
+   "Without replacement: Var(sum) = nσ²(N − n)/(N − 1)."
+  ],
+  "solution": "<p>σ² = 8.25. Draws are negatively correlated with Cov = −σ²/(N − 1), so Var(sum) = nσ² − n(n − 1)σ²/(N − 1) = nσ²(N − n)/(N − 1) = 5 × 8.25 × 5/9 ≈ 22.917.</p><p><b>Answer: 275/12 ≈ 22.917.</b></p>",
+  "key": "Sampling without replacement multiplies the i.i.d. variance by the finite-population correction (N − n)/(N − 1).",
+  "plan": {
+   "keyIdea": "Write the sum as indicators or draws; draws are exchangeable and negatively correlated.",
+   "method": "Var = nσ²(N − n)/(N − 1).",
+   "sanityChecks": [
+    "n = N ⇒ variance 0 (you always get 55).",
+    "n = 1 ⇒ σ²."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>With replacement instead?</p>",
+    "model": "<p>nσ² = 5 × 8.25 = 41.25.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 41.25,
+     "display": "41.25"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: draw all 10 cards. Variance of the sum?</p>",
+    "model": "<p>0: the sum is always 55. (N − n)/(N − 1) = 0 ✓.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.0,
+     "display": "0",
+     "tolAbs": 0.001
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'The correction factor is (N − n)/N = 1/2, so the variance is 20.625.'</p><p>Give the correct variance.</p>",
+    "model": "<p>With σ² = 8.25 (divide by N) the factor is (N − n)/(N − 1) = 5/9, giving 22.917. The factor (1 − n/N) = 1/2 belongs with S² = 82.5/9 ≈ 9.17 (divide by N − 1): 5 × 9.17 × 1/2 ≈ 22.917 as well. Mixing the two conventions gives the wrong 20.625.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 22.916666666666668,
+     "display": "≈ 22.917",
+     "tolRel": 0.002
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-040",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Covariance of ones and sixes",
+  "tags": [
+   "covariance",
+   "multinomial",
+   "dice",
+   "indicators"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>A fair die is rolled 12 times. Let A = number of 1s and B = number of 6s. What is Cov(A, B)?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": -0.3333333333333333,
+   "display": "−np<sub>1</sub>p<sub>6</sub> = −1/3"
+  },
+  "hints": [
+   "Write A = Σ a<sub>i</sub>, B = Σ b<sub>i</sub> with indicators per roll.",
+   "Same roll: a<sub>i</sub>b<sub>i</sub> = 0 always. Different rolls: independent."
+  ],
+  "solution": "<p>Cov(A, B) = Σ<sub>i</sub> Cov(a<sub>i</sub>, b<sub>i</sub>) (cross-roll terms vanish). Each Cov(a<sub>i</sub>, b<sub>i</sub>) = 0 − (1/6)(1/6) = −1/36. Total: −12/36 = −1/3.</p><p><b>Answer: −1/3.</b></p>",
+  "key": "Multinomial counts are negatively correlated: Cov(N<sub>i</sub>, N<sub>j</sub>) = −np<sub>i</sub>p<sub>j</sub>.",
+  "plan": {
+   "keyIdea": "Covariance of sums = sum of covariances of indicators.",
+   "method": "Only same-roll pairs contribute: −p<sub>1</sub>p<sub>6</sub> each.",
+   "sanityChecks": [
+    "Sign must be negative (they compete for rolls).",
+    "Correlation should be −p/(1 − p) = −1/5."
+   ]
+  },
+  "par": 2.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is Corr(A, B)?</p>",
+    "model": "<p>Var(A) = Var(B) = 12·(1/6)(5/6) = 5/3, so Corr = (−1/3)/(5/3) = −1/5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.2,
+     "display": "−1/5"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'The rolls are independent, so A and B are independent and Var(A + B) = 5/3 + 5/3 = 10/3.'</p><p>Give the correct Var(A + B).</p>",
+    "model": "<p>A + B counts rolls showing 1 or 6: Binomial(12, 1/3), variance 12·(1/3)(2/3) = 8/3 = 10/3 − 2/3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.6666666666666665,
+     "display": "8/3"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>What is Var(A − B)?</p>",
+    "model": "<p>5/3 + 5/3 + 2/3 = 4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.0,
+     "display": "4",
+     "tolAbs": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-048",
+  "cat": "statistics",
+  "diff": 3,
+  "title": "Correlation of the min and the max",
+  "tags": [
+   "order-statistics",
+   "correlation",
+   "uniform",
+   "covariance"
+  ],
+  "style": [
+   "math-test",
+   "research-stats"
+  ],
+  "prompt": "<p>X, Y independent Uniform(0, 1). Let m = min(X, Y) and M = max(X, Y). What is Corr(m, M)?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.5,
+   "display": "1/2"
+  },
+  "hints": [
+   "m·M = X·Y, so E[mM] = 1/4.",
+   "E[m] = 1/3, E[M] = 2/3, Var(m) = Var(M) = 1/18."
+  ],
+  "solution": "<p>E[mM] = E[XY] = 1/4. Cov = 1/4 − (1/3)(2/3) = 1/36. Var(m) = Var(M) = 1/18 (Beta(1,2) and Beta(2,1)).</p><p>Corr = (1/36)/(1/18) = 1/2. Positive: a large minimum forces a large maximum.</p><p><b>Answer: 1/2.</b></p>",
+  "key": "min·max = X·Y gives E[mM] for free; order statistics are positively correlated.",
+  "plan": {
+   "keyIdea": "Use the identity mM = XY.",
+   "method": "Cov from E[mM] − E[m]E[M]; variances from Beta laws.",
+   "sanityChecks": [
+    "Must be positive (M ≥ m).",
+    "n = 3: the correlation should drop."
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Three i.i.d. uniforms: correlation of the min and the max?</p><p>Give a fraction.</p>",
+    "model": "<p>In general Corr(U<sub>(1)</sub>, U<sub>(n)</sub>) = 1/n, so 1/3. (Cov = 1/((n+1)²(n+2)) and both variances are n/((n+1)²(n+2)).)</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3333333333333333,
+     "display": "1/3"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Since m·M = X·Y, Cov(m, M) = Cov(X, Y) = 0.'</p><p>Give the correct Cov(m, M).</p>",
+    "model": "<p>E[mM] = E[XY] is right, but E[m]E[M] = 2/9 ≠ E[X]E[Y] = 1/4. Cov(m, M) = 1/4 − 2/9 = 1/36.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.027777777777777776,
+     "display": "1/36"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-011",
+  "cat": "statistics",
+  "diff": 1,
+  "title": "Is the year positive?",
+  "tags": [
+   "clt",
+   "normal-distribution",
+   "annualisation",
+   "returns"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>Daily returns are i.i.d. normal with mean 0.04% and standard deviation 1.5%. Treat the annual return as the <b>sum</b> of 252 daily returns.</p><p>What is the probability the annual return is positive?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6639691744313809,
+   "display": "Φ(0.1008/0.2381) ≈ 0.664",
+   "tolRel": 0.005
+  },
+  "hints": [
+   "Mean of the sum 252·0.0004 = 0.1008; standard deviation 0.015·√252 ≈ 0.2381.",
+   "P(sum &gt; 0) = Φ(mean/sd)."
+  ],
+  "solution": "<p>Sum of 252 i.i.d. normals: mean 252 × 0.0004 = 0.1008, sd 0.015 × √252 ≈ 0.2381. (No CLT needed: sums of normals are normal.)</p><p>P(sum &gt; 0) = Φ(0.1008/0.2381) = Φ(0.423) ≈ 0.664.</p><p>Assumptions worth naming: independence, constant parameters, normality, and adding simple returns (which ignores compounding).</p><p><b>Answer: ≈ 0.664.</b></p>",
+  "key": "Means add like n, standard deviations like √n: z = μ√n/σ, so the sign of a long-horizon return is governed by the Sharpe ratio times √n.",
+  "plan": {
+   "keyIdea": "A sum of i.i.d. normals is normal with mean nμ and sd σ√n.",
+   "method": "Compute z = nμ/(σ√n) = (μ/σ)√252, then Φ(z).",
+   "sanityChecks": [
+    "z should be daily Sharpe × √252 ≈ 0.027 × 15.9",
+    "Answer between 0.5 and 1 since the mean is positive"
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer adds lag-1 autocorrelation ρ = 0.1 between consecutive days (none at longer lags) and writes the annual variance as σ²(n + ρ·n(n − 1)). What is the correct annual standard deviation?</p>",
+    "model": "<p>That formula assumes every pair of days is correlated (equicorrelation). With only lag-1 correlation there are n − 1 adjacent pairs: Var = σ²(n + 2ρ(n − 1)) = 0.015²(252 + 50.2) ⇒ sd ≈ 0.2608 (the wrong formula gives ≈ 1.22).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2607585089695061,
+     "display": "≈ 0.2608"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Now treat 0.04% as the mean of daily <i>simple</i> returns and work with log returns: daily log-return mean ≈ μ − σ²/2. What is P(annual log return &gt; 0)?</p>",
+    "model": "<p>μ − σ²/2 = 0.0004 − 0.0001125 = 0.0002875 per day ⇒ annual mean 0.0725, sd 0.2381 ⇒ Φ(0.304) ≈ 0.620. Volatility drag lowers the chance of actually making money.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6195356251747932,
+     "display": "≈ 0.620"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-012",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "How many trades make 58% significant?",
+  "tags": [
+   "hypothesis-testing",
+   "proportions",
+   "sample-size",
+   "backtesting"
+  ],
+  "style": [
+   "research-stats"
+  ],
+  "prompt": "<p>A strategy's design assumes a 50% win rate. You test H₀: p = 0.5 against p &gt; 0.5 with a one-sided z-test (normal approximation, null standard error) at the 5% level. Suppose the observed win rate will be exactly 58%.</p><p>What is the smallest number of trades n for which that result is significant?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 106.0,
+   "display": "n = 106",
+   "tolAbs": 0.5
+  },
+  "hints": [
+   "z = (0.58 − 0.5)/(0.5/√n) must reach 1.645.",
+   "So √n ≥ 1.645 × 0.5/0.08."
+  ],
+  "solution": "<p>z = 0.08√n/0.5 = 0.16√n ≥ 1.645 ⇒ √n ≥ 10.28 ⇒ n ≥ 105.7, so n = 106.</p><p>With 100 trades, z = 1.6 and the one-sided p-value is ≈ 0.055: not significant. The same 58% becomes overwhelming at 1,000 trades (z ≈ 5.06).</p><p><b>Answer: 106.</b></p>",
+  "key": "z grows like √n: an effect size that is not significant at n = 100 becomes significant once 0.16√n passes 1.645.",
+  "plan": {
+   "keyIdea": "Standard error of a proportion under H₀ is √(0.25/n).",
+   "method": "Solve 0.08/(0.5/√n) ≥ 1.645 for n and round up.",
+   "sanityChecks": [
+    "n = 100 should give z = 1.6",
+    "Check: larger effect ⇒ smaller n"
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “With 58 wins in 100 trades the p-value is 0.0548, so it's a near miss.” What is the exact binomial one-sided p-value P(X ≥ 58 | p = 0.5)?</p>",
+    "model": "<p>Σ<sub>k≥58</sub> C(100, k)/2¹⁰⁰ ≈ 0.0666. The plain normal approximation without continuity correction understates the p-value; with the correction (57.5) it gives ≈ 0.067.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.06660530960360667,
+     "display": "≈ 0.0666"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>If the true win rate is 58%, how many trades give 80% power for this one-sided 5% test?</p>",
+    "model": "<p>n = ((1.645·0.5 + 0.8416·√(0.58·0.42))/0.08)² ≈ 239.4 ⇒ 240 trades.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 240.0,
+     "display": "240",
+     "tolAbs": 1.5
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-013",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Years to prove a Sharpe of 1.5",
+  "tags": [
+   "sharpe-ratio",
+   "t-statistic",
+   "hypothesis-testing",
+   "backtesting"
+  ],
+  "style": [
+   "research-stats"
+  ],
+  "prompt": "<p>A strategy truly has an annualised Sharpe ratio of 1.5 (i.i.d. daily returns, 252 days a year). You will declare it real when the t-statistic of its mean daily return reaches 2.</p><p>In expectation, how many years of live data do you need?</p><p>Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 1.7777777777777777,
+   "display": "(2/1.5)² ≈ 1.78 years"
+  },
+  "hints": [
+   "t = (mean/sd)·√(number of days) = daily Sharpe × √days.",
+   "Daily Sharpe = annual Sharpe/√252, so t = annual Sharpe × √years."
+  ],
+  "solution": "<p>t = (μ<sub>d</sub>/σ<sub>d</sub>)√(252Y) = (SR<sub>annual</sub>/√252)·√(252Y) = SR<sub>annual</sub>√Y.</p><p>2 = 1.5√Y ⇒ Y = (2/1.5)² ≈ 1.78 years (about 448 trading days).</p><p><b>Answer: ≈ 1.78 years.</b></p>",
+  "key": "t-stat of the mean = annual Sharpe × √years; the sampling frequency cancels.",
+  "plan": {
+   "keyIdea": "The t-stat of a mean is Sharpe × √n in matching units.",
+   "method": "Convert to annual units and solve SR√Y = 2.",
+   "sanityChecks": [
+    "Higher Sharpe ⇒ fewer years",
+    "Check that daily vs monthly sampling gives the same answer"
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same rule for a Sharpe-0.5 strategy?</p>",
+    "model": "<p>Y = (2/0.5)² = 16 years — why weak strategies cannot be validated on a short history.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 16.0,
+     "display": "16 years"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why doesn't switching from daily to minute data shorten the wait?</p>",
+    "model": "<p>Per-period Sharpe falls like 1/√(periods per year) while the count of periods rises like the number of periods, so t = SR<sub>annual</sub>√Y regardless. More samples of the same noisy drift do not add information about the drift (they do help estimate volatility).</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-014",
+  "cat": "statistics",
+  "diff": 3,
+  "title": "Standard error of a one-year Sharpe",
+  "tags": [
+   "sharpe-ratio",
+   "standard-error",
+   "estimation",
+   "backtesting"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>You estimate a strategy's annualised Sharpe ratio from one year (252 days) of i.i.d. normal daily returns. The true annual Sharpe is 1.5. For i.i.d. normal returns the estimated per-period Sharpe has standard error ≈ √((1 + SR²/2)/T), where SR is the per-period Sharpe and T the number of periods.</p><p>What is the standard error of the <b>annualised</b> Sharpe estimate?</p><p>Give a decimal to 2 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 1.0022296571715914,
+   "display": "√(1 + SR<sub>d</sub>²/2) ≈ 1.002",
+   "tolRel": 0.01
+  },
+  "hints": [
+   "Daily SR = 1.5/√252 ≈ 0.0945; the daily SE is √((1 + 0.0945²/2)/252).",
+   "Annualising multiplies the SE by √252 too."
+  ],
+  "solution": "<p>Daily SR<sub>d</sub> = 1.5/√252 ≈ 0.0945. SE(daily) = √((1 + 0.0945²/2)/252) ≈ √(1.00446/252) ≈ 0.0631.</p><p>Annualising multiplies by √252: SE ≈ √1.00446 ≈ 1.00.</p><p>So a one-year backtest Sharpe of 1.5 has a 95% interval of roughly 1.5 ± 2: you cannot even be sure it is positive. The SR²/2 term (from estimating σ) is negligible for daily data.</p><p><b>Answer: ≈ 1.00.</b></p>",
+  "key": "SE of an annualised Sharpe ≈ √((1 + SR<sub>period</sub>²/2)/years) — about 1/√years for daily data.",
+  "plan": {
+   "keyIdea": "Delta-method SE of a ratio of mean to sd; annualising scales both the estimate and its SE by √252.",
+   "method": "Compute the daily SE, multiply by √252.",
+   "sanityChecks": [
+    "Leading term should be 1/√years = 1",
+    "Simulate: sample Sharpe over many fake years has sd ≈ 1"
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>How many years of daily data do you need for the SE of the annualised Sharpe to fall to 0.25?</p>",
+    "model": "<p>SE ≈ √((1 + SR<sub>d</sub>²/2)/Y) = 0.25 ⇒ Y ≈ 1.0045/0.0625 ≈ 16.1 years.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 16.071428571428573,
+     "display": "≈ 16.1 years",
+     "tolRel": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer claims: “A strategy with true Sharpe 3 has a much smaller SE — about 0.2 from one year of daily data.” What is the SE?</p>",
+    "model": "<p>SR<sub>d</sub> = 3/√252 ≈ 0.189, so SE ≈ √(1 + 0.0179) ≈ 1.009. The SE barely depends on the Sharpe; it is driven by the sample length.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.008889063701824,
+     "display": "≈ 1.009",
+     "tolRel": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-015",
+  "cat": "statistics",
+  "diff": 1,
+  "title": "Monte Carlo paths for one cent",
+  "tags": [
+   "monte-carlo",
+   "standard-error",
+   "simulation",
+   "precision"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>You price an option by Monte Carlo. With 10,000 paths the sample standard deviation of the discounted payoff is 12.00 (so the standard error is 0.12).</p><p>How many paths do you need for a standard error of 0.01?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 1440000.0,
+   "display": "1,440,000 paths"
+  },
+  "hints": [
+   "SE = s/√N.",
+   "Solve 12/√N = 0.01."
+  ],
+  "solution": "<p>SE = s/√N ⇒ N = (s/SE)² = (12/0.01)² = 1,440,000.</p><p>Every extra decimal of precision costs 100× the paths, which is why variance reduction (antithetic variates, control variates, importance sampling) matters more than raw speed.</p><p><b>Answer: 1,440,000.</b></p>",
+  "key": "Monte Carlo error ∝ 1/√N: 10× precision costs 100× paths.",
+  "plan": {
+   "keyIdea": "CLT for the sample mean: SE = s/√N.",
+   "method": "Invert for N.",
+   "sanityChecks": [
+    "Going from 0.12 to 0.01 is 12× precision ⇒ 144× paths",
+    "144 × 10,000 = 1.44M"
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "faster",
+    "prompt": "<p>You add a control variate whose payoff has correlation 0.9 with yours (and a known mean). Roughly how many paths now give SE 0.01?</p>",
+    "model": "<p>The optimal control variate cuts the variance by the factor 1 − ρ² = 0.19, so N ≈ 0.19 × 1.44M = 273,600.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 273600.0,
+     "display": "≈ 273,600"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>By what factor must N grow to make the error 10 times smaller?</p>",
+    "model": "<p>100, since SE ∝ N<sup>−1/2</sup>.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 100.0,
+     "display": "100×"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-016",
+  "cat": "statistics",
+  "diff": 3,
+  "title": "How precise is a simulated VaR?",
+  "tags": [
+   "value-at-risk",
+   "quantiles",
+   "monte-carlo",
+   "standard-error"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>Portfolio P&amp;L is normal with mean 0. You estimate the 95% VaR (the 5% quantile of P&amp;L) as the empirical quantile of N = 10,000 simulated P&amp;Ls. The asymptotic standard error of a sample p-quantile is √(p(1 − p)/N)/f(q<sub>p</sub>), where f is the density at the true quantile.</p><p>What is the standard error as a fraction of the true VaR?</p><p>Give a decimal (0.01 = 1%).</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.012847267844042803,
+   "display": "≈ 0.0128 (≈ 1.28%)",
+   "tolRel": 0.01
+  },
+  "hints": [
+   "For N(0, σ²): q = −1.645σ and f(q) = φ(1.645)/σ ≈ 0.1031/σ.",
+   "Relative SE = √(0.05·0.95/N)/(1.645·φ(1.645)); σ cancels."
+  ],
+  "solution": "<p>√(p(1 − p)/N) = √(0.0475/10,000) ≈ 0.002179. With q = 1.645σ and f(q) = φ(1.645)/σ ≈ 0.10314/σ:</p><p>SE/VaR = 0.002179/(1.645 × 0.10314) ≈ 0.002179/0.16966 ≈ 0.0128.</p><p>So a $2.1M VaR from 10,000 normal scenarios is good to about ±$27k (1 SE), a 95% interval of roughly ±2.5%. Fatter tails (smaller density at the quantile) widen it, and the 99% quantile is noticeably noisier.</p><p><b>Answer: ≈ 0.0128.</b></p>",
+  "key": "Quantile estimates have SE √(p(1 − p)/N)/f(q): the density at the quantile, not just N, sets the precision.",
+  "plan": {
+   "keyIdea": "Asymptotic normality of a sample quantile.",
+   "method": "Plug p = 0.05, N = 10⁴, and the normal density at −1.645σ; divide by the VaR 1.645σ.",
+   "sanityChecks": [
+    "σ must cancel",
+    "Check by simulation: repeat the 10,000-path estimate many times"
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A risk memo says: “For 5% relative precision (95% confidence half-width) you need about 7,600 simulations.” How many do you actually need for this normal P&amp;L?</p>",
+    "model": "<p>Need 1.96 × √(0.0475/N)/0.16966 ≤ 0.05 ⇒ N ≥ (1.96/0.05)² × 0.0475/0.16966² ≈ 2,540. (Dropping the density term, as some formulas do, gives a meaningless ~73.)</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2536.2595252917727,
+     "display": "≈ 2,536",
+     "tolRel": 0.01
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>How would you get a confidence interval for VaR without assuming a density?</p>",
+    "model": "<p>Order-statistic (binomial) interval: the number of simulated P&amp;Ls below the true quantile is Bin(N, p), so ranks Np ± 1.96√(Np(1 − p)) bracket it — about ranks 457 to 543 for N = 10,000. Or bootstrap the empirical quantile.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-017",
+  "cat": "statistics",
+  "diff": 1,
+  "title": "Annualising a daily volatility",
+  "tags": [
+   "volatility",
+   "annualisation",
+   "square-root-of-time",
+   "returns"
+  ],
+  "style": [
+   "OA-speed",
+   "research-stats"
+  ],
+  "prompt": "<p>A strategy's daily P&amp;L volatility is 1.2% of capital. Assuming independent days and 252 trading days a year, what is its annualised volatility?</p><p>Give a decimal (0.10 = 10%).</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.19049409439665055,
+   "display": "1.2% × √252 ≈ 19.05%"
+  },
+  "hints": [
+   "Variances add over independent days; volatility scales with √time."
+  ],
+  "solution": "<p>Annual variance = 252 × 0.012², so annual vol = 0.012 × √252 ≈ 0.012 × 15.875 ≈ 0.1905.</p><p>The √252 rule needs independent returns: positive autocorrelation makes the true annual vol larger, mean reversion makes it smaller.</p><p><b>Answer: ≈ 19.05%.</b></p>",
+  "key": "σ<sub>T</sub> = σ<sub>1</sub>√T for independent increments.",
+  "plan": {
+   "keyIdea": "Variance of a sum of independent terms adds.",
+   "method": "Multiply by √252.",
+   "sanityChecks": [
+    "√252 ≈ 15.87",
+    "16 × 1.2% ≈ 19% as a mental check"
+   ]
+  },
+  "par": 0.5,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A colleague converts the 19.05% annual vol to a monthly vol by dividing by 12. What should it be?</p>",
+    "model": "<p>Divide by √12: 0.1905/3.464 ≈ 5.50% per month. Dividing by 12 (1.59%) treats volatility like a mean.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.05499090833947009,
+     "display": "≈ 5.50%"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Weekly returns have standard deviation 2.5%. Annualised vol (52 weeks)?</p>",
+    "model": "<p>2.5% × √52 ≈ 18.03%.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.18027756377319948,
+     "display": "≈ 18.03%"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-018",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Losing year from a winning edge",
+  "tags": [
+   "clt",
+   "binomial",
+   "normal-approximation",
+   "trading-pnl"
+  ],
+  "style": [
+   "research-stats",
+   "trading-desk"
+  ],
+  "prompt": "<p>A trader makes 400 independent trades in a year. Each makes +$30 with probability 0.55 and −$30 with probability 0.45.</p><p>What is the probability the year's total P&amp;L is negative? (A total of exactly $0 is not negative.)</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.019876215511578865,
+   "display": "≈ 0.0199",
+   "tolAbs": 0.0015
+  },
+  "hints": [
+   "Total = 30(2W − 400) with W ~ Bin(400, 0.55); negative ⇔ W ≤ 199.",
+   "Normal approximation with continuity correction: z = (199.5 − 220)/√(400·0.55·0.45)."
+  ],
+  "solution": "<p>Let W be the number of winners: total = 30W − 30(400 − W) = 30(2W − 400) &lt; 0 ⇔ W ≤ 199.</p><p>W has mean 220 and sd √(400 × 0.2475) ≈ 9.95. With continuity correction z = (199.5 − 220)/9.95 ≈ −2.06 ⇒ P ≈ 0.0197; the exact binomial sum is ≈ 0.0199.</p><p>Even a real 10% edge per trade loses money in about one year in fifty over 400 trades.</p><p><b>Answer: ≈ 0.020.</b></p>",
+  "key": "Reduce P&amp;L to a count, then use a normal approximation with continuity correction (or the exact binomial).",
+  "plan": {
+   "keyIdea": "P&amp;L is an affine function of a binomial count.",
+   "method": "Translate 'negative' into W ≤ 199, then normal approximation with continuity correction.",
+   "sanityChecks": [
+    "Mean P&amp;L = 400 × $3 = $1,200, sd ≈ $597: about 2 sd above zero",
+    "Exact binomial should be close to 2%"
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Ignoring the continuity correction, how many trades are needed for the probability of a losing year to be below 1%?</p>",
+    "model": "<p>Per trade: mean 3, sd 30√(1 − 0.1²) ≈ 29.85. Need 3√n/29.85 ≥ 2.326 ⇒ n ≥ 535.8, so 536 trades.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 536.0,
+     "display": "≈ 536",
+     "tolRel": 0.005
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-019",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Minimum-variance futures hedge",
+  "tags": [
+   "hedging",
+   "regression",
+   "futures",
+   "correlation"
+  ],
+  "style": [
+   "research-stats",
+   "trading-desk"
+  ],
+  "prompt": "<p>You hold a $5,000,000 stock portfolio. Its daily return has volatility 2.4%, the index future's daily return has volatility 2.0%, and their correlation is 0.9. One future contract controls $250,000 of index.</p><p>Give the minimum-variance hedge ratio h* and the number of contracts to sell (unrounded), separated by a comma.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    1.08,
+    21.6
+   ],
+   "ordered": true,
+   "display": "h* = 1.08, 21.6 contracts"
+  },
+  "hints": [
+   "h* = ρσ<sub>S</sub>/σ<sub>F</sub> (the regression slope of portfolio returns on futures returns).",
+   "Contracts = h* × portfolio value / contract value."
+  ],
+  "solution": "<p>Minimising Var(r<sub>S</sub> − h·r<sub>F</sub>) gives h* = Cov/Var(r<sub>F</sub>) = ρσ<sub>S</sub>/σ<sub>F</sub> = 0.9 × 2.4/2.0 = 1.08.</p><p>Contracts = 1.08 × 5,000,000/250,000 = 21.6 (sell about 22).</p><p><b>Answer: 1.08, 21.6.</b></p>",
+  "key": "Minimum-variance hedge ratio = regression beta = ρσ<sub>S</sub>/σ<sub>F</sub>; residual variance fraction = 1 − ρ².",
+  "plan": {
+   "keyIdea": "Hedge ratio is the slope from regressing the position's returns on the hedge's returns.",
+   "method": "h* = ρσ<sub>S</sub>/σ<sub>F</sub>; scale by notionals.",
+   "sanityChecks": [
+    "ρ = 1 and equal vols should give h = 1",
+    "Hedge notional ≈ $5.4M"
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What fraction of the portfolio's variance does the optimal hedge remove?</p>",
+    "model": "<p>ρ² = 0.81 (81%).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.81,
+     "display": "ρ² = 0.81"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Someone says: “With correlation 0.85 between a portfolio and its hedge, 85% of the risk is hedged and 15% remains.” What fraction of the original <b>volatility</b> remains after an optimal hedge at ρ = 0.85?</p>",
+    "model": "<p>Residual variance is (1 − ρ²) = 0.2775 of the original, so residual volatility is √0.2775 ≈ 0.527 of the original — more than half the vol remains.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.526782687642637,
+     "display": "√(1 − 0.85²) ≈ 0.527"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-021",
+  "cat": "statistics",
+  "diff": 3,
+  "title": "Max-Sharpe mix of two strategies",
+  "tags": [
+   "portfolio-optimisation",
+   "sharpe-ratio",
+   "covariance",
+   "tangency"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>Two strategies have expected excess returns 6% and 10%, volatilities 10% and 20%, and correlation 0.2. You combine them with weights summing to 1 (no other constraints).</p><p>Give the weight on the first strategy in the maximum-Sharpe portfolio, and that portfolio's Sharpe ratio, separated by a comma.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    0.7246376811594203,
+    0.7144345083117601
+   ],
+   "ordered": true,
+   "display": "w₁ ≈ 0.725, SR ≈ 0.714",
+   "tolRel": 0.005
+  },
+  "hints": [
+   "Tangency weights ∝ Σ⁻¹μ.",
+   "Max Sharpe² = μᵀΣ⁻¹μ."
+  ],
+  "solution": "<p>Σ = [[0.01, 0.004], [0.004, 0.04]], det = 0.0004 − 0.000016 = 0.000384.</p><p>Σ⁻¹μ ∝ [0.04·0.06 − 0.004·0.10, −0.004·0.06 + 0.01·0.10] = [0.0020, 0.00076] ⇒ w₁ = 0.0020/0.00276 ≈ 0.725, w₂ ≈ 0.275.</p><p>SR² = μᵀΣ⁻¹μ = (0.06·0.0020 + 0.10·0.00076)/0.000384 = 0.000196/0.000384 ≈ 0.5104 ⇒ SR ≈ 0.714 (vs 0.6 and 0.5 alone).</p><p><b>Answer: ≈ 0.725, 0.714.</b></p>",
+  "key": "Tangency portfolio: w ∝ Σ⁻¹μ; its squared Sharpe is μᵀΣ⁻¹μ.",
+  "plan": {
+   "keyIdea": "Mean-variance tangency with two assets.",
+   "method": "Invert the 2×2 covariance, normalise Σ⁻¹μ, compute √(μᵀΣ⁻¹μ).",
+   "sanityChecks": [
+    "Combined Sharpe must beat the best single one (0.6)",
+    "Weights should favour the higher-Sharpe, lower-vol asset"
+   ]
+  },
+  "par": 7,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same strategies but uncorrelated (ρ = 0). Give w₁ and the max Sharpe, separated by a comma.</p>",
+    "model": "<p>Weights ∝ μ<sub>i</sub>/σ<sub>i</sub>² = 6 and 2.5 ⇒ w₁ = 6/8.5 ≈ 0.706. SR = √(0.6² + 0.5²) ≈ 0.781 — uncorrelated Sharpes add in squares.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      0.7058823529411765,
+      0.7810249675906654
+     ],
+     "ordered": true,
+     "display": "≈ 0.706, 0.781",
+     "tolRel": 0.005
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-022",
+  "cat": "statistics",
+  "diff": 3,
+  "title": "How many assets reach the floor?",
+  "tags": [
+   "diversification",
+   "correlation",
+   "portfolio-risk",
+   "equal-weight"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>N assets each have volatility 30% and every pair has correlation 0.3. You hold them equally weighted. As N grows, portfolio volatility falls toward a floor.</p><p>What is the smallest N for which portfolio volatility is within 5% (relative) of that floor?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 23.0,
+   "display": "N = 23",
+   "tolAbs": 0.5
+  },
+  "hints": [
+   "Equal weights: σ<sub>p</sub>² = σ²(ρ + (1 − ρ)/N).",
+   "Need √(ρ + (1 − ρ)/N) ≤ 1.05√ρ."
+  ],
+  "solution": "<p>σ<sub>p</sub> = σ√(ρ + (1 − ρ)/N), with floor σ√ρ ≈ 16.43%.</p><p>Require ρ + (1 − ρ)/N ≤ 1.1025ρ ⇒ (1 − ρ)/N ≤ 0.1025 × 0.3 = 0.03075 ⇒ N ≥ 0.7/0.03075 ≈ 22.8, so N = 23.</p><p>Diversification kills idiosyncratic risk quickly, but the common (correlated) part never goes away.</p><p><b>Answer: 23.</b></p>",
+  "key": "Equicorrelated portfolio: σ<sub>p</sub>² = σ²(ρ + (1 − ρ)/N); the floor is σ√ρ.",
+  "plan": {
+   "keyIdea": "Variance of an equal-weight portfolio splits into a common part ρσ² and a diversifiable part (1 − ρ)σ²/N.",
+   "method": "Write the inequality relative to the floor and solve for N.",
+   "sanityChecks": [
+    "ρ = 0 should give vol σ/√N",
+    "Floor = 0.3√0.3 ≈ 16.4%"
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the portfolio volatility with N = 10?</p>",
+    "model": "<p>0.3√(0.3 + 0.07) ≈ 18.25%.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.18248287590894657,
+     "display": "≈ 18.25%"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What is the floor itself?</p>",
+    "model": "<p>σ√ρ = 0.3√0.3 ≈ 16.43%.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.1643167672515498,
+     "display": "≈ 16.43%"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-036",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "Half-life of a mean-reverting spread",
+  "tags": [
+   "mean-reversion",
+   "ar1",
+   "half-life",
+   "stat-arb"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>You regress the daily change in a spread on yesterday's level: Δs<sub>t</sub> = −0.05·s<sub>t−1</sub> + ε<sub>t</sub>, i.e. an AR(1) with φ = 0.95.</p><p>What is the half-life of a deviation, in days?</p><p>Give a decimal to 2 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 13.513407333964874,
+   "display": "−ln 2/ln 0.95 ≈ 13.51 days",
+   "tolRel": 0.003
+  },
+  "hints": [
+   "E[s<sub>t+k</sub>] = φ<sup>k</sup>s<sub>t</sub>.",
+   "Solve φ<sup>k</sup> = ½."
+  ],
+  "solution": "<p>Deviations decay like φ<sup>k</sup>: 0.95<sup>k</sup> = ½ ⇒ k = −ln 2/ln 0.95 ≈ 0.6931/0.05129 ≈ 13.51 days.</p><p>The continuous-time shortcut ln 2/(1 − φ) = 13.86 is close because ln φ ≈ φ − 1 for φ near 1.</p><p><b>Answer: ≈ 13.51 days.</b></p>",
+  "key": "AR(1): half-life = −ln 2/ln φ; OU with speed θ: ln 2/θ.",
+  "plan": {
+   "keyIdea": "Expected deviation decays geometrically.",
+   "method": "Set φ<sup>k</sup> = ½, take logs.",
+   "sanityChecks": [
+    "φ → 1 ⇒ half-life → ∞",
+    "Close to ln2/0.05 ≈ 13.9"
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A colleague says: “the half-life is 0.5/0.05 = 10 days.” Correct it.</p>",
+    "model": "<p>Decay is exponential, not linear: −ln 2/ln 0.95 ≈ 13.51 days (≈ ln 2/0.05 = 13.86 in continuous time).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 13.513407333964874,
+     "display": "≈ 13.51",
+     "tolRel": 0.003
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>An Ornstein–Uhlenbeck spread has mean-reversion speed θ = 0.2 per day. Half-life?</p>",
+    "model": "<p>ln 2/0.2 ≈ 3.47 days.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.465735902799726,
+     "display": "≈ 3.47 days"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-037",
+  "cat": "statistics",
+  "diff": 2,
+  "title": "OLS hedge ratio for a pair",
+  "tags": [
+   "regression",
+   "pairs-trading",
+   "hedge-ratio",
+   "cointegration"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>Five daily closes of stocks A and B:</p><table><thead><tr><th>A</th><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td></tr></thead><tbody><tr><th>B</th><td>20.5</td><td>22.4</td><td>24.3</td><td>26.2</td><td>28.6</td></tr></tbody></table><p>Regress B on A by ordinary least squares, B = α + βA. Give β and α, separated by a comma.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    2.0,
+    0.4
+   ],
+   "ordered": true,
+   "display": "β = 2, α = 0.4",
+   "tolRel": 0.001
+  },
+  "hints": [
+   "β = Σ(a − ā)(b − b̄)/Σ(a − ā)² with ā = 12, b̄ = 24.4.",
+   "α = b̄ − βā."
+  ],
+  "solution": "<p>ā = 12, deviations −2, −1, 0, 1, 2 (Σ = 10 squared). b̄ = 24.4, deviations −3.9, −2.0, −0.1, 1.8, 4.2.</p><p>Σ(a − ā)(b − b̄) = 7.8 + 2.0 + 0 + 1.8 + 8.4 = 20 ⇒ β = 2.0. α = 24.4 − 24 = 0.4.</p><p>The traded spread is B − 2A − 0.4 (short 2 A per B). In practice you would test the residual for stationarity (cointegration) before trading it.</p><p><b>Answer: 2, 0.4.</b></p>",
+  "key": "Hedge ratio = OLS slope Cov(A, B)/Var(A); the residual is the spread you trade.",
+  "plan": {
+   "keyIdea": "Least squares slope and intercept on centred data.",
+   "method": "Centre both series, compute Σxy/Σx², then the intercept.",
+   "sanityChecks": [
+    "Prices roughly double: β ≈ 2",
+    "Residuals should sum to zero"
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Residuals are 0.1, 0, −0.1, −0.2, 0.2 (residual sd with n − 2 = 3 degrees of freedom ≈ 0.1826). Today A = 15 and B = 31.0. What is the spread's z-score?</p>",
+    "model": "<p>Residual = 31 − 0.4 − 30 = 0.6; s = √(0.10/3) ≈ 0.1826 ⇒ z ≈ 3.29: sell B, buy 2 A.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.286335345030997,
+     "display": "≈ 3.29",
+     "tolRel": 0.003
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says the hedge ratio should be the correlation of A and B (≈ 0.999). What is it?</p>",
+    "model": "<p>The hedge ratio is the slope ρσ<sub>B</sub>/σ<sub>A</sub> = 2.0, not ρ. Correlation is unit-free; the hedge ratio carries the units of B per A.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.0,
+     "display": "2.0"
+    }
+   }
+  ]
  },
  {
   "id": "ev-001",
@@ -1967,6 +8782,42 @@ window.PROBLEMS = [
   ],
   "solution": "<p>The fair price equals the expected payoff, since with that price the expected profit of each side is zero.</p><p>E[X] = (1 + 2 + 3 + 4 + 5 + 6)/6 = 21/6 = 3.5.</p><p><b>Answer: $3.50.</b></p>",
   "key": "Fair price = expected payoff; for a die that is 3.5.",
+  "plan": {
+   "keyIdea": "Fair price = expected payoff; linearity of expectation.",
+   "method": "Average the faces: (1 + … + 6)/6 = 3.5.",
+   "sanityChecks": [
+    "Must lie between the min 1 and the max 6.",
+    "Symmetric distribution, so the mean is the midpoint (1 + 6)/2."
+   ]
+  },
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Then a game that pays the <i>square</i> of the face is worth 3.5² = 12.25.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>No: E[X²] ≠ (E[X])². E[X²] = (1 + 4 + 9 + 16 + 25 + 36)/6 = 91/6 ≈ 15.17. The gap 91/6 − 49/4 = 35/12 is exactly the variance (Jensen: a convex payoff is worth more than the payoff at the mean).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 15.166666666666666,
+     "display": "91/6 ≈ 15.17"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Now the die is a fair 20-sided die with faces 1–20. Fair price?</p><p>Give a number.</p>",
+    "model": "<p>(1 + 20)/2 = 10.5 by symmetry.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 10.5,
+     "display": "10.5"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Is there a faster way than summing the faces?</p>",
+    "model": "<p>Symmetry: the distribution is symmetric about (1 + 6)/2 = 3.5.</p>"
+   }
+  ],
+  "par": 0.5,
   "style": [
    "OA-speed",
    "trading-desk"
@@ -1995,6 +8846,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>If you re-roll, you get an expected 3.5. So keep the first roll exactly when it is greater than 3.5, i.e. on 4, 5 or 6.</p><p>Value = P(4,5,6)·E[X | X ≥ 4] + P(1,2,3)·3.5 = (1/2)(5) + (1/2)(3.5) = 4.25.</p><p><b>Answer: 17/4 = $4.25.</b></p>",
   "key": "Backward induction: keep a roll only if it beats the value of continuing.",
+  "plan": {
+   "keyIdea": "Keep the first roll only if it beats the value of re-rolling (3.5).",
+   "method": "Keep 4, 5, 6; otherwise take 3.5 on average.",
+   "sanityChecks": [
+    "Must exceed 3.5 and be below 6.",
+    "Threshold = continuation value."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now the re-roll costs $1. Value of the game?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Re-rolling is worth 3.5 − 1 = 2.5, so keep 3–6: (4/6)(4.5) + (2/6)(2.5) = 23/6 ≈ 3.83.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.8333333333333335,
+     "display": "23/6 ≈ 3.833"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Only a 6 is worth keeping; re-roll everything else.”</p>",
+    "model": "<p>That rule is worth (1/6)·6 + (5/6)·3.5 = 47/12 ≈ 3.92 &lt; 4.25. A 4 or 5 already beats the 3.5 you get by re-rolling.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree",
+      "Disagree: that rule is worth only 47/12 ≈ 3.92 &lt; 4.25",
+      "Disagree: you should never re-roll"
+     ],
+     "correct": 1,
+     "display": "Disagree"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>Unlimited free re-rolls (you are paid the roll you finally keep). Value?</p><p>Give a number.</p>",
+    "model": "<p>Keep rolling until a 6: value 6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 6.0,
+     "display": "6"
+    }
+   }
+  ],
+  "par": 1.5,
   "style": [
    "trading-desk"
   ]
@@ -2010,7 +8907,7 @@ window.PROBLEMS = [
    "optimal-stopping",
    "dice"
   ],
-  "prompt": "<p>Same game as before, but now you may re-roll up to <b>two</b> times (you are paid the last roll you keep). With optimal play, what is the game worth?</p><p>Give a fraction or decimal, in dollars.</p>",
+  "prompt": "<p>You roll a fair die and are paid its face value in dollars. After seeing a roll you may re-roll, up to <b>two</b> times in total (you are paid the last roll you keep). With optimal play, what is the game worth?</p><p>Give a fraction or decimal, in dollars.</p>",
   "answer": {
    "type": "numeric",
    "value": 4.666666666666667,
@@ -2022,6 +8919,42 @@ window.PROBLEMS = [
   ],
   "solution": "<p>With one re-roll remaining the continuation value is 4.25 (keep 4, 5, 6; otherwise re-roll for 3.5).</p><p>On the first roll, keep only 5 or 6 (they beat 4.25); otherwise continue and get 4.25 in expectation.</p><p>Value = (5 + 6)/6 + (4/6)(4.25) = 11/6 + 17/6 = 28/6 = 14/3.</p><p><b>Answer: 14/3 ≈ $4.67.</b></p>",
   "key": "Each extra option raises the keep threshold; values are computed from the last stage backwards.",
+  "plan": {
+   "keyIdea": "Backward induction: the threshold on each roll is the value of the remaining game.",
+   "method": "Last stage 3.5 → 4.25 → keep 5, 6 first.",
+   "sanityChecks": [
+    "Value rises with re-rolls but stays below 6.",
+    "Thresholds: first roll vs 4.25."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Up to three re-rolls. Value?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Continuation 14/3 ≈ 4.67: keep 5, 6 again. (11/6) + (4/6)(14/3) = 89/18 ≈ 4.944.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.944444444444445,
+     "display": "89/18 ≈ 4.944"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “On the first roll keep a 4, since it beats the average 3.5.”</p>",
+    "model": "<p>The relevant comparison is the value of the remaining game, 4.25, not 3.5. Keeping 4 gives (4 + 5 + 6)/6 + ½ · 4.25 = 4.625 &lt; 14/3.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: compare with 4.25; keeping 4 gives only 4.625",
+      "Disagree: keep only a 6",
+      "Agree"
+     ],
+     "correct": 0,
+     "display": "Disagree"
+    }
+   }
+  ],
+  "par": 2,
   "style": [
    "trading-desk"
   ]
@@ -2186,6 +9119,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Define V(r, b) as the value of the remaining game. You can always just stop, so V ≥ 0. V(r, 0) = r and V(0, b) = 0.</p><p>V(1,1) = max(0, ½(1 + 0) + ½(−1 + 1)) = ½.</p><p>V(2,1) = max(0, ⅔(1 + V(1,1)) + ⅓(−1 + V(2,0))) = ⅔(1.5) + ⅓(1) = 4/3.</p><p>V(1,2) = max(0, ⅓(1 + V(0,2)) + ⅔(−1 + V(1,1))) = max(0, ⅓ − ⅓) = 0.</p><p>V(2,2) = ½(1 + V(1,2)) + ½(−1 + V(2,1)) = ½(1) + ½(1/3) = 2/3.</p><p><b>Answer: 2/3.</b></p>",
   "key": "The option to stop has value even when the deck is fair: DP over (reds left, blacks left).",
+  "plan": {
+   "keyIdea": "Optimal stopping on the remaining cards; your sunk P&L is irrelevant.",
+   "method": "DP V(r, b) = max(0, (r/n)(1 + V(r−1, b)) + (b/n)(−1 + V(r, b−1))).",
+   "sanityChecks": [
+    "V ≥ 0: you can always stop.",
+    "V(r, 0) = r, V(0, b) = 0."
+   ]
+  },
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: 1 red and 1 black card. Value?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Flip once: ½ you win 1 and stop; ½ you lose 1 and then take the last red (+1): ½. V = ½.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>3 red and 2 black cards. Value with optimal play?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Same DP: V(3, 2) = 3/2 ≈ 1.500.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.5,
+     "display": "3/2 ≈ 1.500"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The deck is balanced, so each flip has zero EV and the game is worth 0.”</p>",
+    "model": "<p>The option to stop is valuable: you stop after good runs and play on after bad ones. V(2, 2) = 2/3.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: it is worth 2",
+      "Agree: 0",
+      "Disagree: the stopping option is worth 2/3"
+     ],
+     "correct": 2,
+     "display": "Disagree: 2/3"
+    }
+   }
+  ],
+  "par": 4,
   "style": [
    "trading-desk"
   ]
@@ -2200,7 +9179,7 @@ window.PROBLEMS = [
    "cards",
    "dynamic-programming"
   ],
-  "prompt": "<p>Same game with a standard 52-card deck (26 red, 26 black): +$1 per red, −$1 per black, stop whenever you like. What is the value of the game under optimal play? (You'll need to reason about how to compute it; give a decimal to 2 places.)</p>",
+  "prompt": "<p>A shuffled standard 52-card deck (26 red, 26 black) is turned over one card at a time: +$1 for each red card, −$1 for each black card, and you may stop whenever you like (including before the first card). What is the value of the game under optimal play? (You'll need to reason about how to compute it; give a decimal to 2 places.)</p>",
   "answer": {
    "type": "numeric",
    "value": 2.624475548993925,
@@ -2213,6 +9192,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Let V(r, b) be the value with r reds and b blacks remaining (your current P&amp;L doesn't matter, only future increments). Boundary: V(r, 0) = r, V(0, b) = 0.</p><p>Recursion: V(r, b) = max(0, (r/(r+b))(1 + V(r−1, b)) + (b/(r+b))(−1 + V(r, b−1))).</p><p>Filling the 27 × 27 table gives V(26, 26) ≈ 2.6245.</p><p>Sanity check: it is positive because you can never end worse than 0 (if you never stop, you finish at exactly 0), yet you get to lock in gains during favorable runs. Typical interview answer: 'a bit over $2.50, computed by DP'.</p><p><b>Answer: ≈ $2.62.</b></p>",
   "key": "Optimal stopping on a fair random walk with a floor: value comes from the option to quit when ahead.",
+  "plan": {
+   "keyIdea": "Optimal stopping on the remaining deck: V(r, b) = max(0, continue).",
+   "method": "Fill a 27 × 27 DP table from the boundaries V(r, 0) = r, V(0, b) = 0.",
+   "sanityChecks": [
+    "V ≥ 0 (you can stop immediately) and V ≤ 26.",
+    "Small deck (2, 2) gives 2/3."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Deck of 3 red and 3 black. Value with optimal play?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>The same DP gives V(3, 3) = 17/20 = 0.85.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.85,
+     "display": "17/20 = 0.85"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Optimal play is easy: stop the first time you are up $1.”</p>",
+    "model": "<p>That rule earns 1 whenever the walk ever goes positive and 0 otherwise: P = 26/27, so ≈ 0.963 — far below 2.62. Waiting for bigger leads early in the deck is worth much more.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: that rule is worth 0",
+      "Agree",
+      "Disagree: that rule is worth only 26/27 ≈ 0.96"
+     ],
+     "correct": 2,
+     "display": "Disagree: ≈ 0.96"
+    }
+   },
+   {
+    "type": "complexity",
+    "prompt": "<p>What is the time and memory cost of the DP for a deck with n red and n black cards?</p>",
+    "model": "<p>(n + 1)² states, O(1) work each: O(n²) time; O(n) memory if you sweep row by row.</p>"
+   }
+  ],
+  "par": 8,
   "style": [
    "trading-desk",
    "math-test"
@@ -2267,6 +9287,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>EV per $1: 0.4·2 − 0.6 = 0.2 &gt; 0, so you should bet something.</p><p>Maximize g(f) = p ln(1 + bf) + q ln(1 − f): setting g′ = 0 gives f* = p − q/b.</p><p>f* = 0.4 − 0.6/2 = 0.1.</p><p><b>Answer: 0.1 (10% of bankroll).</b></p>",
   "key": "Kelly fraction = edge / odds = (bp − q)/b.",
+  "plan": {
+   "keyIdea": "Kelly maximises expected log-wealth; for b-to-1 odds f* = p − q/b = edge/odds.",
+   "method": "Edge 0.2 per $1, odds 2 ⇒ f* = 0.1.",
+   "sanityChecks": [
+    "f* must be 0 if the edge is ≤ 0.",
+    "Even-money check: f* = p − q."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now p = 0.5, still 2-to-1. Kelly fraction?</p><p>Give a decimal.</p>",
+    "model": "<p>f* = 0.5 − 0.5/2 = 0.25 (edge 0.5 ÷ odds 2).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.25,
+     "display": "0.25"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Kelly says bet your edge: the edge is 20 cents per dollar, so stake 20%.”</p>",
+    "model": "<p>“Bet your edge” is only for even money. In general f* = edge/odds = 0.2/2 = 0.1.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: f* = edge/odds = 0.1",
+      "Disagree: f* = 0.4",
+      "Agree: 0.2"
+     ],
+     "correct": 0,
+     "display": "Disagree: 0.1"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>What is the expected log-growth per bet at the Kelly fraction 0.1? (Natural log, 4 decimals.)</p>",
+    "model": "<p>g = 0.4 ln 1.2 + 0.6 ln 0.9 ≈ 0.07293 − 0.06322 = 0.00971.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.00971231332288608,
+     "display": "≈ 0.00971"
+    }
+   }
+  ],
+  "par": 1.5,
   "style": [
    "betting-game"
   ]
@@ -2416,6 +9482,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>HT and TH each have probability p(1 − p), so they are equally likely — that's why the procedure is fair.</p><p>A pair succeeds with probability s = 2p(1 − p) = 2(0.3)(0.7) = 0.42.</p><p>Number of pairs is geometric with mean 1/s, so expected flips = 2/s = 1/(p(1 − p)) = 1/0.21 ≈ 4.76.</p><p><b>Answer: ≈ 4.76 flips.</b></p>",
   "key": "Von Neumann trick: HT and TH are equally likely; expected cost is geometric with success prob 2p(1−p).",
+  "plan": {
+   "keyIdea": "HT and TH have the same probability p(1 − p); a pair succeeds with probability 2p(1 − p).",
+   "method": "Geometric number of pairs: 2 flips × 1/(2p(1 − p)).",
+   "sanityChecks": [
+    "Fair coin ⇒ 4 flips.",
+    "Very biased coin ⇒ blows up."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now P(heads) = 0.1. Expected flips?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>1/(0.1 · 0.9) = 1/0.09 ≈ 11.1.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 11.11111111111111,
+     "display": "≈ 11.11"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Heads is rarer, so this procedure outputs ‘heads’ less than half the time.”</p><p>Is that right? Give P(output = heads).</p>",
+    "model": "<p>The output is decided by a successful pair, HT or TH, each with probability 0.21: exactly ½.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check with a fair coin: expected flips?</p><p>Give a number.</p>",
+    "model": "<p>1/(¼) = 4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.0,
+     "display": "4"
+    }
+   }
+  ],
+  "par": 2,
   "style": [
    "brainteaser-phone",
    "trading-desk"
@@ -2478,6 +9585,37 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Let E(s) = expected rolls still needed when the total is s. E(s) = 0 for s ≥ 10.</p><p>For s &lt; 10: E(s) = 1 + (1/6)[E(s+1) + … + E(s+6)].</p><p>Backwards: E(9) = 1, E(8) = 7/6, E(7) = 49/36, E(6) ≈ 1.588, E(5) ≈ 1.853, E(4) ≈ 2.161, E(3) ≈ 2.522, E(2) ≈ 2.775, E(1) ≈ 3.043, E(0) ≈ 3.324.</p><p>Sanity check with Wald's identity: E[final total] = 3.5 · E[rolls]. The final total lies between 10 and 15 and averages about 11.6 (you overshoot 10 by a bit), giving 11.6/3.5 ≈ 3.3. ✓</p><p><b>Answer: ≈ 3.324 rolls.</b></p>",
   "key": "First-passage expectations: recursion on the current state, solved backwards.",
+  "plan": {
+   "keyIdea": "First-step recursion on the running total, solved backwards from 9.",
+   "method": "E(s) = 1 + (1/6)Σ E(s + k), E = 0 for s ≥ 10.",
+   "sanityChecks": [
+    "Wald: 3.5 · E[N] = E[final total] ≈ 11.6.",
+    "Must exceed 10/3.5 ≈ 2.86."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Target 3 instead of 10. Expected rolls?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>E(2) = 1, E(1) = 7/6, E(0) = 1 + (1 + 7/6)/6 = 49/36 ≈ 1.361.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.3611111111111112,
+     "display": "49/36"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “By Wald, E[N] = 10/3.5 ≈ 2.86.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Wald uses the final total, not the target: you overshoot 10 by about 1.6 on average, so E[N] ≈ 11.63/3.5 ≈ 3.324.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.323693729201595,
+     "display": "≈ 3.324"
+    }
+   }
+  ],
+  "par": 5,
   "style": [
    "trading-desk",
    "math-test"
@@ -2504,6 +9642,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>EV = 450,000,000 / 300,000,000 = $1.50.</p><p>The ticket costs $2, so the expected profit is −$0.50 per ticket (a −25% return). In reality, taxes and the chance of splitting the jackpot make it worse.</p><p><b>Answer: $1.50.</b></p>",
   "key": "EV = payoff × probability; compare to price to get the edge.",
+  "plan": {
+   "keyIdea": "Expected payout = jackpot × win probability; compare with the price.",
+   "method": "450 M / 300 M = $1.50 vs a $2 ticket.",
+   "sanityChecks": [
+    "Net EV = 1.50 − 2 = −0.50.",
+    "Splitting and taxes only lower it."
+   ]
+  },
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The expected payout is positive, $1.50, so buying a ticket is a good bet.”</p>",
+    "model": "<p>Positive payout is not positive profit: you pay $2 for an expected $1.50, a net −$0.50 (−25%).</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: net EV is −$1.50 per ticket",
+      "Agree",
+      "Disagree: net EV is −$0.50 per ticket"
+     ],
+     "correct": 2,
+     "display": "Disagree: −$0.50"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>The jackpot grows to $750 million, same odds. What is the expected <i>profit</i> of a $2 ticket?</p><p>Give dollars.</p>",
+    "model": "<p>750/300 = $2.50 expected payout, minus $2: +$0.50 (before taxes and splitting, which matter a lot at that size).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "+$0.50"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>At what jackpot does the ticket break even?</p><p>Give dollars (k/m/b suffixes are fine).</p>",
+    "model": "<p>Jackpot / 300 M = 2 ⇒ $600 million.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 600000000.0,
+     "display": "$600 million"
+    }
+   }
+  ],
+  "par": 1,
   "style": [
    "betting-game",
    "trading-desk"
@@ -2561,6 +9745,37 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Strategy 'stop when X ≥ k': the number of rolls is geometric with mean 6/(7 − k), and the payoff is E[X | X ≥ k] = (k + 6)/2.</p><p>k = 6: 6 − 6 = 0. k = 5: 5.5 − 3 = 2.5. k = 4: 5 − 2 = 3. k = 3: 4.5 − 1.5 = 3. k = 2: 4 − 1.2 = 2.8.</p><p>Check with the fixed point V = −1 + E[max(X, V)]: with V = 3, E[max(X, 3)] = (3 + 3 + 3 + 4 + 5 + 6)/6 = 4, and −1 + 4 = 3. ✓</p><p>Keep any roll ≥ V = 3 (a 3 is a tie), re-roll otherwise.</p><p><b>Answer: $3.</b></p>",
   "key": "Stationary stopping: the continuation value V solves V = −c + E[max(X, V)]; stop when the roll beats V.",
+  "plan": {
+   "keyIdea": "Fixed-point stopping rule: V = −1 + E[max(X, V)].",
+   "method": "Try thresholds k: payoff (k + 6)/2 minus expected cost 6/(7 − k).",
+   "sanityChecks": [
+    "V must be below 5 (6 minus the cost of one roll).",
+    "Keep a roll iff it is ≥ V."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Each roll now costs $2. Value of the game?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>k = 2: 4 − 2.4 = 1.6; k = 3: 4.5 − 3 = 1.5; k = 1: 3.5 − 2 = 1.5. Stop on 2 or more: $1.60.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.6,
+     "display": "1.6"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “You pay $1 and get 3.5 on average, so the game is worth $2.50.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>That ignores the option to re-roll low faces; with the threshold rule the value is $3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.0,
+     "display": "3"
+    }
+   }
+  ],
+  "par": 4,
   "style": [
    "trading-desk"
   ]
@@ -2590,7 +9805,48 @@ window.PROBLEMS = [
    "If the continuation value is v, the value one stage earlier is E[max(U, v)] = (1 + v²)/2."
   ],
   "solution": "<p>Let v<sub>k</sub> be the value with k draws left. v<sub>1</sub> = 1/2.</p><p>With continuation value v, you stop on U ≥ v: E[max(U, v)] = v·v + (1 − v²)/2 = (1 + v²)/2.</p><p>v<sub>2</sub> = (1 + 1/4)/2 = 5/8. v<sub>3</sub> = (1 + 25/64)/2 = 89/128 ≈ 0.695.</p><p>So: keep the first draw if it is above 5/8, the second if above 1/2.</p><p><b>Answer: 89/128 ≈ 0.695.</b></p>",
-  "key": "Backward induction with uniform draws: v ↦ (1 + v²)/2."
+  "key": "Backward induction with uniform draws: v ↦ (1 + v²)/2.",
+  "plan": {
+   "keyIdea": "Optimal stopping by backward induction: stop when the draw beats the value of continuing.",
+   "method": "v₁ = ½, vₖ₊₁ = (1 + vₖ²)/2.",
+   "sanityChecks": [
+    "Value must exceed 1/2 and grow with more draws.",
+    "Threshold for the first draw = value of the 2-draw game."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Four draws allowed. Value of the game?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>v₄ = (1 + (89/128)²)/2 = 24305/32768 ≈ 0.742.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.741729736328125,
+     "display": "24305/32768 ≈ 0.7417"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What does the value tend to as the number of draws → ∞?</p><p>Give a number.</p>",
+    "model": "<p>The fixed point of v = (1 + v²)/2 is v = 1: with unlimited draws you can wait for a number as close to 1 as you like.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "1"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “With three draws, keep the first draw whenever it beats ½, the average.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Compare with what continuing is worth: two more draws are worth 5/8, so keep the first draw only if it exceeds 5/8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.625,
+     "display": "5/8"
+    }
+   }
+  ],
+  "par": 4
  },
  {
   "id": "ev-102",
@@ -2618,7 +9874,53 @@ window.PROBLEMS = [
    "P(ends at g) = C(g−1, 3)[0.6⁴·0.4<sup>g−4</sup> + 0.4⁴·0.6<sup>g−4</sup>]."
   ],
   "solution": "<p>P(ends in game g) = C(g − 1, 3)(p⁴q<sup>g−4</sup> + q⁴p<sup>g−4</sup>) with p = 0.6, q = 0.4.</p><p>g = 4: 0.1552; g = 5: 0.2688; g = 6: 0.29952; g = 7: 0.27648 (sum = 1 ✓).</p><p>E = 4(0.1552) + 5(0.2688) + 6(0.29952) + 7(0.27648) = 5.69728.</p><p>For comparison, evenly matched teams give 93/16 = 5.8125: a stronger favourite shortens the series.</p><p><b>Answer: ≈ 5.697 games.</b></p>",
-  "key": "Condition on who clinches and when: negative-binomial terms for both teams."
+  "key": "Condition on who clinches and when: negative-binomial terms for both teams.",
+  "plan": {
+   "keyIdea": "Condition on the game in which the series ends: the winner takes game g and 3 of the first g − 1.",
+   "method": "Sum g · C(g−1, 3)(p⁴q^(g−4) + q⁴p^(g−4)) for g = 4..7.",
+   "sanityChecks": [
+    "Probabilities over g = 4..7 sum to 1.",
+    "Must lie between 4 and 7; even teams give 93/16."
+   ]
+  },
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Evenly matched teams (p = ½): expected number of games?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>(4·2 + 5·4 + 6·5 + 7·5)/16 = 93/16 = 5.8125.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5.8125,
+     "display": "93/16"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What does the expected length tend to as p → 1?</p><p>Give a number.</p>",
+    "model": "<p>A sweep in 4 games.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.0,
+     "display": "4"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “A strong favourite makes the series longer because the underdog has to fight back.”</p>",
+    "model": "<p>Expected length is largest at p = ½ (5.81) and falls as p moves away: 5.70 at p = 0.6.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: the length doesn't depend on p",
+      "Agree",
+      "Disagree: it is longest for evenly matched teams"
+     ],
+     "correct": 2,
+     "display": "Disagree"
+    }
+   }
+  ],
+  "par": 4
  },
  {
   "id": "ev-103",
@@ -2765,7 +10067,1347 @@ window.PROBLEMS = [
    "Bold play visits 2 → 4 → 5 or 3, and 3 → 5 or 1, and 1 → 2. Write V<sub>1</sub>, …, V<sub>4</sub> and solve the linear system."
   ],
   "solution": "<p>When each bet is unfavourable, you want as few bets as possible: bold play. From x, stake min(x, 5 − x).</p><p>V<sub>1</sub> = 0.4V<sub>2</sub>, V<sub>2</sub> = 0.4V<sub>4</sub>, V<sub>3</sub> = 0.4 + 0.6V<sub>1</sub>, V<sub>4</sub> = 0.4 + 0.6V<sub>3</sub>.</p><p>Substituting: V<sub>4</sub> = 0.4 + 0.6(0.4 + 0.6·0.4·0.4·V<sub>4</sub>) = 0.64 + 0.0576V<sub>4</sub> ⇒ V<sub>4</sub> = 0.64/0.9424 = 400/589, so V<sub>2</sub> = 160/589 ≈ 0.2716.</p><p>Timid play ($1 bets) gives gambler's ruin with r = q/p = 1.5: (1.5² − 1)/(1.5⁵ − 1) ≈ 0.190, much worse. A full dynamic program over all stakes confirms bold play is optimal here.</p><p><b>Answer: 160/589 ≈ 0.272.</b></p>",
-  "key": "In a sub-fair game, bet boldly: fewer bets mean less exposure to the house edge."
+  "key": "In a sub-fair game, bet boldly: fewer bets mean less exposure to the house edge.",
+  "plan": {
+   "keyIdea": "Against an unfavourable game, minimise the number of bets: bold play.",
+   "method": "Stake min(x, 5 − x) and solve the 4 linear equations.",
+   "sanityChecks": [
+    "Must beat timid play (≈ 0.19).",
+    "Must be below 2/5 (what a fair game would give)."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What does timid play ($1 bets every time) give from $2?</p><p>Give a decimal (4 places).</p>",
+    "model": "<p>Gambler's ruin with r = 1.5: (1.5² − 1)/(1.5⁵ − 1) ≈ 0.1896.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.1895734597156398,
+     "display": "≈ 0.1896"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Bold play is always best, so it is also optimal if you win each bet with probability 0.6.”</p>",
+    "model": "<p>With a favourable bet you want many small bets: $1 stakes give 135/211 ≈ 0.640, bold play only ≈ 0.535.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree",
+      "Disagree: with p = 0.6, $1 bets (≈ 0.640) beat bold play (≈ 0.535)",
+      "Disagree: with p = 0.6 every strategy gives 0.6"
+     ],
+     "correct": 1,
+     "display": "Disagree"
+    }
+   }
+  ],
+  "par": 6
+ },
+ {
+  "id": "ci-035",
+  "cat": "ev",
+  "diff": 2,
+  "title": "Sum of rolls until the first six",
+  "tags": [
+   "wald-identity",
+   "dice",
+   "stopping-time",
+   "linearity"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>You roll a fair die until the first 6 appears and are paid the sum of <b>all</b> rolls, including the 6. What is the expected payout?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 21.0,
+   "display": "6 × 3.5 = 21",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "The number of rolls N is a stopping time with E[N] = 6.",
+   "Wald's identity: E[sum] = E[N]·E[roll]."
+  ],
+  "solution": "<p>N is geometric with E[N] = 6, and the decision to stop depends only on rolls already seen, so Wald applies: E[S<sub>N</sub>] = 6 × 3.5 = 21.</p><p>Check by splitting: the 5 expected non-six rolls average 3 each (uniform on 1..5) giving 15, plus the final 6: 21 ✓.</p><p><b>Answer: 21.</b></p>",
+  "key": "Wald: for a stopping time N with finite mean, E[X<sub>1</sub> + … + X<sub>N</sub>] = E[N]E[X].",
+  "plan": {
+   "keyIdea": "Stopping time + i.i.d. rolls ⇒ Wald's identity.",
+   "method": "E[N] = 6, E[X] = 3.5.",
+   "sanityChecks": [
+    "Cross-check: non-six rolls average 3, not 3.5.",
+    "Lower bound: at least 6."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'So excluding the final 6, the expected sum is 5 rolls × 3.5 = 17.5.'</p><p>Give the correct expected sum excluding the final 6.</p>",
+    "model": "<p>21 − 6 = 15: the rolls before the first six are conditioned to be non-sixes, so they average 3, not 3.5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 15.0,
+     "display": "15",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Roll until the first <b>1</b> instead. Expected sum excluding that final 1?</p>",
+    "model": "<p>Wald: total 6 × 3.5 = 21, minus the final 1: 20 (the earlier rolls average 4).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 20.0,
+     "display": "20",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>An 8-sided die is rolled until the first 8. Expected sum including the 8?</p>",
+    "model": "<p>8 × 4.5 = 36.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 36.0,
+     "display": "36",
+     "tolAbs": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-044",
+  "cat": "ev",
+  "diff": 2,
+  "title": "Random number of customers, random spend",
+  "tags": [
+   "compound-poisson",
+   "law-of-total-variance",
+   "poisson",
+   "conditional-expectation"
+  ],
+  "style": [
+   "research-stats",
+   "trading-desk"
+  ],
+  "prompt": "<p>The number of customers N in an hour is Poisson with mean 4. Each spends an independent Uniform(0, 100) dollars. Find the mean and the variance of the total spend.</p><p>Give the two numbers, comma-separated: mean, variance.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    200.0,
+    13333.333333333334
+   ],
+   "ordered": true,
+   "display": "200, 40000/3 ≈ 13333.3",
+   "tolRel": 0.002
+  },
+  "hints": [
+   "Tower rule: E[S] = E[N]E[X].",
+   "Total variance: Var S = E[N]Var X + Var N·(E X)², and for Poisson Var N = E N."
+  ],
+  "solution": "<p>E[S] = 4 × 50 = 200.</p><p>Var S = E[Var(S | N)] + Var(E[S | N]) = E[N]Var(X) + Var(N)E[X]² = 4·(2500/3) + 4·2500 = 4·E[X²] = 4·10000/3 ≈ 13333.3.</p><p><b>Answer: 200, 13333.3.</b></p>",
+  "key": "Law of total variance; for a compound Poisson sum, Var = λE[X²].",
+  "plan": {
+   "keyIdea": "Condition on N.",
+   "method": "E[S] = E[N]E[X]; Var S = E[N]Var X + Var N (E X)².",
+   "sanityChecks": [
+    "Fixed N = 4 would give only 4·Var X.",
+    "Poisson shortcut: λE[X²]."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'The randomness in N averages out, so the variance is just E[N]·Var(X) = 4 × 2500/3 ≈ 3333.' By how much does that understate the true variance?</p><p>Give a number.</p>",
+    "model": "<p>It misses Var(N)·E[X]² = 4 × 50² = 10000: the uncertainty in how many customers come. True variance 13333.3 = 3333.3 + 10000.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 10000.0,
+     "display": "10000",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Now N ~ Binomial(8, 1/2) (mean 4, variance 2). Variance of the total?</p><p>Give a decimal.</p>",
+    "model": "<p>4·(2500/3) + 2·2500 ≈ 8333.3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 8333.333333333334,
+     "display": "≈ 8333.3",
+     "tolRel": 0.002
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-005",
+  "cat": "ev",
+  "diff": 1,
+  "title": "Expected value per generated signal",
+  "tags": [
+   "expected-value",
+   "signals",
+   "execution",
+   "break-even"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>A signal generator fires many times a day. When a signal is traded it is right 55% of the time (profit $1,200) and wrong 45% of the time (loss $900). Because of market conditions you can only act on 80% of the signals; untraded signals make $0.</p><p>What is the expected P&amp;L per signal <i>generated</i>?</p><p>Give a number in dollars.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 204.0,
+   "display": "$204"
+  },
+  "hints": [
+   "First the EV of a traded signal, then weight by the execution rate.",
+   "0.55·1200 − 0.45·900 = 255."
+  ],
+  "solution": "<p>EV of a traded signal: 0.55 × 1,200 − 0.45 × 900 = 660 − 405 = $255.</p><p>Per generated signal: 0.8 × 255 + 0.2 × 0 = $204.</p><p><b>Answer: $204.</b></p>",
+  "key": "Condition step by step: EV per signal = P(executed) × EV given executed.",
+  "plan": {
+   "keyIdea": "Total expectation over the 'executed or not' split.",
+   "method": "Compute E[P&amp;L | executed], multiply by 0.8.",
+   "sanityChecks": [
+    "The result must be below $255",
+    "Break-even accuracy should not depend on the execution rate"
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What hit rate makes the strategy break even?</p>",
+    "model": "<p>1200p − 900(1 − p) = 0 ⇒ p = 900/2100 = 3/7 ≈ 42.9%.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.42857142857142855,
+     "display": "3/7 ≈ 0.429"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Because you only execute 80% of signals, the break-even hit rate is higher: 3/7 divided by 0.8.” Is that right?</p>",
+    "model": "<p>No. EV per signal is 0.8 × (1200p − 900(1 − p)); the factor 0.8 scales the EV but does not move its zero, so break-even stays at 3/7. (It would matter if unexecuted signals had a cost, e.g. a fee per signal.)</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Yes, 0.536",
+      "No, it is unchanged at 3/7",
+      "No, it falls to 0.8 × 3/7",
+      "It depends on the number of signals"
+     ],
+     "correct": 1,
+     "display": "Unchanged: 3/7"
+    }
+   }
+  ]
+ },
+ {
+  "cat": "ev",
+  "diff": 1,
+  "title": "EV of a loaded die",
+  "tags": [
+   "expected-value",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>A die is loaded so that a 1 comes up with probability 0.4 and each of 2, 3, 4, 5, 6 with probability 0.12.</p><p>What is the expected roll? Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2.8,
+   "display": "2.8"
+  },
+  "hints": [
+   "E[X] = Σ x·P(X = x).",
+   "2 + 3 + 4 + 5 + 6 = 20."
+  ],
+  "solution": "<p>E = 0.4·1 + 0.12·(2 + 3 + 4 + 5 + 6) = 0.4 + 2.4 = 2.8.</p><p>Trap: answering 3.5 because the faces are 1–6 — the midpoint shortcut works only for a symmetric distribution.</p><p><b>Answer: 2.8.</b></p>",
+  "key": "Weight each outcome by its probability; the midpoint shortcut needs symmetry.",
+  "plan": {
+   "keyIdea": "Not symmetric, so no midpoint shortcut.",
+   "method": "Sum outcome × probability.",
+   "sanityChecks": [
+    "Probabilities sum to 0.4 + 5·0.12 = 1.",
+    "Mass on 1 should pull the EV below 3.5."
+   ]
+  },
+  "par": 0.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Back to a fair die, but the 1 face is relabelled 10. Expected roll?</p>",
+    "model": "<p>(10 + 2 + 3 + 4 + 5 + 6)/6 = 30/6 = 5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5.0,
+     "display": "5"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>For the loaded die, what is P(roll ≥ 4)?</p>",
+    "model": "<p>3 × 0.12 = 0.36.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.36,
+     "display": "0.36"
+    }
+   }
+  ],
+  "id": "pm-008"
+ },
+ {
+  "cat": "ev",
+  "diff": 2,
+  "title": "Faces seen at least twice in ten rolls",
+  "tags": [
+   "indicator",
+   "linearity",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk"
+  ],
+  "prompt": "<p>A fair die is rolled 10 times. What is the expected number of faces (out of 1–6) that show up at least twice?</p><p>Give a decimal to 2 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 3.092899507982777,
+   "display": "6·(1 − (5/6)¹⁰ − 10·(1/6)(5/6)⁹) ≈ 3.093"
+  },
+  "hints": [
+   "Write the count as a sum of six indicators, one per face.",
+   "For one face, the number of appearances is Binomial(10, 1/6)."
+  ],
+  "solution": "<p>Let I<sub>f</sub> = 1 if face f appears at least twice. The count is Σ I<sub>f</sub>, so its expectation is 6·P(a given face appears ≥ 2 times) — linearity works even though the indicators are dependent.</p><p>P(≥ 2) = 1 − (5/6)¹⁰ − 10·(1/6)(5/6)⁹ ≈ 1 − 0.1615 − 0.3230 = 0.5155.</p><p>Expected count ≈ 6 × 0.5155 ≈ 3.093.</p><p><b>Answer: ≈ 3.09.</b></p>",
+  "key": "E[1_A] = P(A): counts become sums of indicators, and expectations add regardless of dependence.",
+  "plan": {
+   "keyIdea": "Indicator per face; linearity of expectation.",
+   "method": "6 × P(Binomial(10, 1/6) ≥ 2).",
+   "sanityChecks": [
+    "Must be between 0 and 5 (10 rolls can make at most 5 repeated faces).",
+    "Sanity with 1 roll: the answer is 0."
+   ]
+  },
+  "par": 2.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected number of faces that appear <i>exactly once</i> in the 10 rolls?</p>",
+    "model": "<p>6 × 10·(1/6)(5/6)⁹ = 10·(5/6)⁹ ≈ 1.938.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.9380669946781486,
+     "display": "≈ 1.938"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity-check your formula with 2 rolls: expected number of faces seen at least twice?</p>",
+    "model": "<p>With 2 rolls a face repeats only on a double: 6·(1/36) = 1/6. The formula 6(1 − (5/6)² − 2(1/6)(5/6)) gives 6·(1/36) = 1/6 ✓.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.16666666666666666,
+     "display": "1/6"
+    }
+   }
+  ],
+  "id": "pm-009"
+ },
+ {
+  "cat": "ev",
+  "diff": 1,
+  "title": "Break-even odds on a bet",
+  "tags": [
+   "expected-value",
+   "indicator",
+   "betting",
+   "pm-track"
+  ],
+  "style": [
+   "betting-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>A friend offers a bet on a match: you win $30 if your team wins and lose $20 if it loses (no draws).</p><p>What win probability makes the bet exactly break even? Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.4,
+   "display": "0.4"
+  },
+  "hints": [
+   "Payout = −20 + 50·1<sub>win</sub>, so EV = −20 + 50p."
+  ],
+  "solution": "<p>Write the payout with an indicator: −20 + (30 − (−20))·1<sub>win</sub>. EV = −20 + 50p = 0 ⇒ p = 0.4.</p><p><b>Answer: 0.4.</b></p>",
+  "key": "A win/lose bet paying x or y has EV = y + (x − y)·p.",
+  "plan": {
+   "keyIdea": "Payout is linear in the win indicator.",
+   "method": "Set y + (x − y)p = 0.",
+   "sanityChecks": [
+    "p should be below 1/2 because the win is bigger than the loss."
+   ]
+  },
+  "par": 0.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>You think the team wins 45% of the time. EV of the bet?</p>",
+    "model": "<p>−20 + 50 × 0.45 = 2.5 dollars.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.5,
+     "display": "2.5"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer: “Break-even is when 30p = 20, so p = 2/3.” Correct it.</p>",
+    "model": "<p>That ignores that you only lose when you <i>don't</i> win: 30p = 20(1 − p) ⇒ p = 0.4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.4,
+     "display": "0.4"
+    }
+   }
+  ],
+  "id": "pm-010"
+ },
+ {
+  "cat": "ev",
+  "diff": 2,
+  "title": "Who gets to re-roll?",
+  "tags": [
+   "optimal-stopping",
+   "dice",
+   "fair-value",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>A contract settles at one roll of a fair 8-sided die (1–8), but after the first roll one side may demand a single re-roll (the second roll then counts, even if worse).</p><p>Give the fair value if (a) the buyer of the contract decides about the re-roll, and (b) the seller decides. Answer as two numbers separated by a comma: (a), (b).</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    5.5,
+    3.5
+   ],
+   "ordered": true,
+   "display": "5.5, 3.5"
+  },
+  "hints": [
+   "A re-roll is worth 4.5 on average. Whoever decides compares the first roll to 4.5.",
+   "The buyer re-rolls 1–4; the seller re-rolls 5–8."
+  ],
+  "solution": "<p>(a) The buyer keeps 5–8 (avg 6.5) and re-rolls 1–4 (worth 4.5): E = ½·6.5 + ½·4.5 = 5.5.</p><p>(b) The seller keeps 1–4 (avg 2.5) and re-rolls 5–8: E = ½·2.5 + ½·4.5 = 3.5.</p><p>The same contract is worth 2 points more or less depending on who holds the option — always ask who decides.</p><p><b>Answer: 5.5, 3.5.</b></p>",
+  "key": "An embedded choice belongs to someone; price it from that person's optimal decision.",
+  "plan": {
+   "keyIdea": "Optional re-roll = an option for whoever controls it.",
+   "method": "Compare the first roll with the 4.5 continuation value.",
+   "sanityChecks": [
+    "Without any re-roll the value is 4.5: (a) must be above, (b) below."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>The buyer may now re-roll up to twice (each new roll replaces the last). Fair value?</p>",
+    "model": "<p>With one re-roll left the value is 5.5, so on the first roll keep 6, 7, 8 (avg 7): E = (3/8)·7 + (5/8)·5.5 = 97/16 ≈ 6.06.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 6.0625,
+     "display": "97/16 ≈ 6.06"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>The interviewer won't tell you who decides. What market do you make?</p>",
+    "model": "<p>Quote wide enough to survive either case — around 3.5 at 5.5 — or ask the question. In a real trade, the person on the other side chose this contract; assume the option is theirs.</p>"
+   }
+  ],
+  "id": "pm-021"
+ },
+ {
+  "cat": "ev",
+  "diff": 2,
+  "title": "How low should you bid?",
+  "tags": [
+   "expected-value",
+   "fill-probability",
+   "quoting",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>A contract pays one roll of a fair die (EV 3.5). A seller will sell to you if your bid b is at least their private reservation price, which is uniform on [2, 5] and unrelated to the roll.</p><p>What bid maximises your expected profit? Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2.75,
+   "display": "2.75"
+  },
+  "hints": [
+   "Expected profit = P(fill)·(3.5 − b) = ((b − 2)/3)(3.5 − b).",
+   "A downward parabola: maximise at the midpoint of its roots."
+  ],
+  "solution": "<p>Profit(b) = ((b − 2)/3)·(3.5 − b), zero at b = 2 and at b = 3.5. The maximum is at the midpoint b = 2.75, giving (0.75 × 0.75)/3 = 0.1875.</p><p>Bidding 3.5 trades often but makes nothing; bidding 2 makes a lot per trade but never trades. Good quotes balance fill rate and edge.</p><p><b>Answer: 2.75.</b></p>",
+  "key": "Expected profit = P(fill) × edge per fill; trade one against the other.",
+  "plan": {
+   "keyIdea": "Trade-off: higher bid ⇒ more fills, less edge.",
+   "method": "Write profit as a quadratic in b and maximise.",
+   "sanityChecks": [
+    "Optimal bid must be between 2 and 3.5."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the expected profit per seller at the optimal bid?</p>",
+    "model": "<p>(0.75/3)·0.75 = 0.1875.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.1875,
+     "display": "3/16 = 0.1875"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Same sellers, but the contract is an 8-sided die (EV 4.5). Optimal bid?</p>",
+    "model": "<p>Roots at 2 and 4.5, so b = 3.25 (profit 1.25²/3 ≈ 0.52).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.25,
+     "display": "3.25"
+    }
+   }
+  ],
+  "id": "pm-027"
+ },
+ {
+  "cat": "ev",
+  "diff": 2,
+  "title": "Selling rain insurance to a forecaster",
+  "tags": [
+   "adverse-selection",
+   "bayes",
+   "expected-value",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>A contract pays 100 if it rains tomorrow. You think rain has probability 30% and offer it at 35. A forecaster's private signal says “rain” with probability 0.8 if it will rain and 0.2 if it won't; she buys only when her signal says rain. She lifts your offer.</p><p>What is your expected profit per contract on that sale? Give a number (2 decimals).</p>",
+  "answer": {
+   "type": "numeric",
+   "value": -28.157894736842106,
+   "display": "35 − 100·12/19 ≈ −28.16"
+  },
+  "hints": [
+   "Her buying tells you her signal said rain.",
+   "P(rain | signal) = 0.3·0.8 / (0.3·0.8 + 0.7·0.2)."
+  ],
+  "solution": "<p>P(rain | rain-signal) = 0.24/(0.24 + 0.14) = 12/19 ≈ 0.632. Conditional value ≈ 63.16.</p><p>Your profit per contract = 35 − 63.16 ≈ −28.16. Selling at 35 looked like +5 of edge against your 30% belief — but the only person who buys is the one who knows more.</p><p><b>Answer: ≈ −28.16.</b></p>",
+  "key": "Be most careful quoting things others can know better than you; condition on who is trading with you.",
+  "plan": {
+   "keyIdea": "The trade reveals her signal; condition on it.",
+   "method": "Bayes for P(rain | signal), then value minus your price.",
+   "sanityChecks": [
+    "Answer should be negative: she only buys when it's good for her."
+   ]
+  },
+  "par": 2.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Her signal is weaker: right 60% of the time either way. Expected profit per contract when she lifts you at 35?</p>",
+    "model": "<p>P(rain | signal) = 0.18/(0.18 + 0.28) = 9/23 ≈ 0.391, value ≈ 39.13, profit ≈ −4.13.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -4.130434782608695,
+     "display": "≈ −4.13"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why do you lose even though your 30% estimate was “right” on average?</p>",
+    "model": "<p>Your estimate is right unconditionally, but trades happen only in the states she selects. Conditional on the trade, rain is far more likely — the essence of adverse selection.</p>"
+   }
+  ],
+  "id": "pm-028"
+ },
+ {
+  "cat": "ev",
+  "diff": 2,
+  "title": "Two sixes in a row",
+  "tags": [
+   "recursion",
+   "first-step",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "trading-desk",
+   "brainteaser-phone"
+  ],
+  "prompt": "<p>You roll a fair die repeatedly. What is the expected number of rolls until you see two 6s in a row?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 42.0,
+   "display": "42"
+  },
+  "hints": [
+   "States: 'no progress' (E₀) and 'last roll was a 6' (E₁).",
+   "E₀ = 1 + (1/6)E₁ + (5/6)E₀ and E₁ = 1 + (5/6)E₀."
+  ],
+  "solution": "<p>From scratch: E₀ = 1 + (1/6)E₁ + (5/6)E₀. After one 6: E₁ = 1 + (1/6)·0 + (5/6)E₀.</p><p>The first gives E₀ = 6 + E₁; substituting, E₀ = 6 + 1 + (5/6)E₀ ⇒ E₀/6 = 7 ⇒ E₀ = 42.</p><p>Trap: answering 36 (= 1/p²) — that ignores that a failed attempt can waste the 6 you were building on.</p><p><b>Answer: 42.</b></p>",
+  "key": "Memoryless processes: write the expectation recursively in terms of itself and solve.",
+  "plan": {
+   "keyIdea": "Repeat-until process: set up states and recurse.",
+   "method": "Two linear equations in E₀, E₁.",
+   "sanityChecks": [
+    "Must exceed 36.",
+    "Single 6 takes 6 rolls on average (1/p)."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected number of rolls until a 6 immediately followed by a 1?</p>",
+    "model": "<p>Now a failed second roll can still be a 6, which keeps your progress: E₁ = 1 + (1/6)E₁ + (4/6)E₀, E₀ = 1 + (1/6)E₁ + (5/6)E₀ ⇒ E₀ = 36.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 36.0,
+     "display": "36"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Three 6s in a row?</p>",
+    "model": "<p>Same recursion one level deeper: 6 + 36 + 216 = 258.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 258.0,
+     "display": "258"
+    }
+   }
+  ],
+  "id": "pm-032"
+ },
+ {
+  "id": "dk-c01",
+  "cat": "ev",
+  "diff": 1,
+  "title": "Total of a five-card hand",
+  "tags": [
+   "deck",
+   "clubs",
+   "linearity",
+   "cards"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>Count an ace as 1, number cards at face value, and J, Q, K as 11, 12, 13. You are dealt 5 cards from a well-shuffled 52-card deck. What is the expected total of your hand?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 35.0,
+   "display": "35",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Each single card, on its own, is a uniformly random rank.",
+   "Linearity of expectation does not care that the cards are dependent."
+  ],
+  "solution": "<p>Write the total as X<sub>1</sub> + … + X<sub>5</sub>. Each X<sub>i</sub> on its own is uniform on 1…13, so E[X<sub>i</sub>] = 7.</p><p>By linearity, E[total] = 5 · 7 = 35. Drawing without replacement makes the cards dependent, but linearity never needs independence.</p><p>Trap: trying to condition on the earlier cards — correct but pointless work.</p><p><b>Answer: 35.</b></p>",
+  "key": "Linearity of expectation holds for dependent variables: just sum the marginal means.",
+  "plan": {
+   "keyIdea": "A sum of marginally identical cards.",
+   "method": "Linearity: 5 × mean rank.",
+   "sanityChecks": [
+    "Mean rank (1+13)/2 = 7.",
+    "With replacement the answer would be the same."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now give the <b>variance</b> of the total. (The variance of a single card's rank is 14.)</p>",
+    "model": "<p>Sampling without replacement adds a finite-population factor: Var = 5 · 14 · (52 − 5)/(52 − 1) = 3290/51 ≈ 64.5. With replacement it would be 70; the cards are negatively correlated.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 64.50980392156863,
+     "display": "3290/51 ≈ 64.5",
+     "tolRel": 0.003
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 1
+  }
+ },
+ {
+  "id": "dk-c02",
+  "cat": "ev",
+  "diff": 1,
+  "title": "Matching ranks in two decks",
+  "tags": [
+   "deck",
+   "clubs",
+   "linearity",
+   "indicators",
+   "cards"
+  ],
+  "style": [
+   "OA-speed",
+   "trading-desk"
+  ],
+  "prompt": "<p>Two well-shuffled standard decks are turned over together, one card from each at a time, for 52 turns. A turn is a <i>match</i> if the two cards have the same rank (suits may differ). What is the expected number of matches?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 4.0,
+   "display": "4",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Use one indicator per turn.",
+   "On any single turn, what is the chance the two ranks agree?"
+  ],
+  "solution": "<p>Let I<sub>k</sub> = 1 if turn k is a match. Whatever the first deck shows, the second deck's card at that position is uniform over 52 cards, 4 of which share the rank: P = 4/52 = 1/13.</p><p>E[matches] = 52 · 1/13 = 4.</p><p><b>Answer: 4.</b></p>",
+  "key": "Expected count = sum of indicator probabilities, one per position.",
+  "plan": {
+   "keyIdea": "Count matches with indicators.",
+   "method": "52 positions × P(same rank) = 52 × 4/52.",
+   "sanityChecks": [
+    "If only the exact same card counted, the answer should drop by a factor of 4."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What if a match requires the <b>identical card</b> (same rank and suit)?</p>",
+    "model": "<p>Now P = 1/52 per turn, so E = 52 · 1/52 = 1 — the classic matching (derangement) result.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "1",
+     "tolAbs": 0.01
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 2
+  }
+ },
+ {
+  "id": "dk-c03",
+  "cat": "ev",
+  "diff": 1,
+  "title": "Lowest of three dice",
+  "tags": [
+   "deck",
+   "clubs",
+   "tail-sum",
+   "dice",
+   "order-statistics"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>Roll three fair six-sided dice. What is the expected value of the <b>smallest</b> of the three numbers?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2.0416666666666665,
+   "display": "49/24 ≈ 2.042"
+  },
+  "hints": [
+   "For a non-negative integer variable, E[M] = Σ<sub>k≥1</sub> P(M ≥ k).",
+   "P(min ≥ k) = ((7 − k)/6)³."
+  ],
+  "solution": "<p>Tail-sum formula: E[min] = Σ<sub>k=1</sub><sup>6</sup> P(min ≥ k) = Σ ((7 − k)/6)³ = (216 + 125 + 64 + 27 + 8 + 1)/216 = 441/216 = 49/24 ≈ 2.042.</p><p>Trap: computing P(min = k) directly is fine but slower; the tail sum turns it into a sum of cubes.</p><p><b>Answer: 49/24 ≈ 2.042.</b></p>",
+  "key": "Tail sums: E[M] = Σ P(M ≥ k) — and P(min ≥ k) factorises over independent dice.",
+  "plan": {
+   "keyIdea": "Minimum events factorise: min ≥ k iff every die ≥ k.",
+   "method": "Tail-sum formula with cubes.",
+   "sanityChecks": [
+    "Answer must lie between 1 and 3.5.",
+    "Max should be 7 − min by symmetry."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "faster",
+    "prompt": "<p>Now the expected <b>largest</b> of the three dice — without redoing the sum?</p>",
+    "model": "<p>Map each die x → 7 − x: the maximum becomes 7 − minimum. So E[max] = 7 − 49/24 = 119/24 ≈ 4.958.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.958333333333333,
+     "display": "119/24 ≈ 4.958"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 3
+  }
+ },
+ {
+  "id": "dk-c04",
+  "cat": "ev",
+  "diff": 1,
+  "title": "Same-colour neighbours",
+  "tags": [
+   "deck",
+   "clubs",
+   "linearity",
+   "indicators",
+   "cards"
+  ],
+  "style": [
+   "trading-desk"
+  ],
+  "prompt": "<p>Shuffle a standard 52-card deck and lay it out in a row. A <i>neighbour pair</i> is two adjacent cards. What is the expected number of neighbour pairs in which both cards have the same colour?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 25.0,
+   "display": "25",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "There are 51 adjacent pairs; use an indicator for each.",
+   "Given the left card, how many of the remaining 51 cards share its colour?"
+  ],
+  "solution": "<p>For each of the 51 adjacent pairs, the right card is uniform over the 51 cards other than the left one, and 25 of those share the colour: P = 25/51.</p><p>E = 51 · 25/51 = 25.</p><p>Trap: using 1/2 for the probability (giving 25.5) — the left card has used up one card of its colour.</p><p><b>Answer: 25.</b></p>",
+  "key": "Indicators over adjacent pairs; the conditional probability of a match is 25/51, not 1/2.",
+  "plan": {
+   "keyIdea": "Count pairs with indicators.",
+   "method": "51 pairs × 25/51.",
+   "sanityChecks": [
+    "Must be a bit below 25.5 (the with-replacement answer)."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>And the expected number of neighbour pairs with the <b>same rank</b>?</p>",
+    "model": "<p>Same argument: P = 3/51 per pair, so E = 51 · 3/51 = 3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.0,
+     "display": "3",
+     "tolAbs": 0.01
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 4
+  }
+ },
+ {
+  "id": "dk-c05",
+  "cat": "ev",
+  "diff": 2,
+  "title": "Empty boxes",
+  "tags": [
+   "deck",
+   "clubs",
+   "linearity",
+   "indicators",
+   "occupancy"
+  ],
+  "style": [
+   "OA-speed",
+   "trading-desk"
+  ],
+  "prompt": "<p>Ten balls are thrown independently and uniformly at random into ten boxes. What is the expected number of boxes left empty?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 3.486784401,
+   "display": "10·(9/10)¹⁰ ≈ 3.487"
+  },
+  "hints": [
+   "Indicator for each box being empty.",
+   "P(a given box is empty) = (9/10)¹⁰."
+  ],
+  "solution": "<p>A fixed box is missed by each ball with probability 9/10, independently, so P(empty) = 0.9<sup>10</sup> ≈ 0.3487.</p><p>By linearity, E[empty boxes] = 10 · 0.9<sup>10</sup> ≈ 3.487.</p><p>Trap: thinking 'ten balls, ten boxes' should leave about zero empty — over a third of the boxes stay empty.</p><p><b>Answer: ≈ 3.487.</b></p>",
+  "key": "Occupancy problems: one indicator per box; P(empty) = (1 − 1/n)<sup>m</sup>.",
+  "plan": {
+   "keyIdea": "Indicators per box; no need for the full occupancy distribution.",
+   "method": "n(1 − 1/n)^m with n = m = 10.",
+   "sanityChecks": [
+    "Answer between 0 and 9.",
+    "Compare with n/e ≈ 3.68 for large n."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "limit",
+    "prompt": "<p>With n balls into n boxes, what <b>fraction</b> of boxes is empty as n → ∞?</p>",
+    "model": "<p>(1 − 1/n)<sup>n</sup> → 1/e ≈ 0.368. So roughly 37 % of boxes stay empty.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.36787944117144233,
+     "display": "1/e ≈ 0.368"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 5
+  }
+ },
+ {
+  "id": "dk-c06",
+  "cat": "ev",
+  "diff": 2,
+  "title": "Pairs hiding in a poker hand",
+  "tags": [
+   "deck",
+   "clubs",
+   "linearity",
+   "cards",
+   "poker"
+  ],
+  "style": [
+   "trading-desk"
+  ],
+  "prompt": "<p>Deal 5 cards from a standard deck. Count every unordered pair of cards in the hand that share a rank (so three of a kind contributes 3 pairs, a full house 4). What is the expected count?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.5882352941176471,
+   "display": "10/17 ≈ 0.588"
+  },
+  "hints": [
+   "There are C(5, 2) = 10 pairs of cards in the hand.",
+   "For one pair of positions, P(same rank) = 3/51."
+  ],
+  "solution": "<p>Index by the 10 pairs of positions. For a fixed pair, the second card shares the first's rank with probability 3/51.</p><p>E = 10 · 3/51 = 10/17 ≈ 0.588.</p><p>Trap: computing P(one pair), P(two pair), … from poker tables and weighting — linearity skips all of it.</p><p><b>Answer: 10/17 ≈ 0.588.</b></p>",
+  "key": "Count pairs, not hands: C(k, 2) × P(a given pair matches).",
+  "plan": {
+   "keyIdea": "Linearity over the C(5,2) position pairs.",
+   "method": "10 × 3/51.",
+   "sanityChecks": [
+    "Should be below 1: most hands have no pair at all (about 50 %)."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected number of pairs of cards that share a <b>suit</b>?</p>",
+    "model": "<p>10 · 12/51 = 40/17 ≈ 2.35.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.3529411764705883,
+     "display": "40/17 ≈ 2.353"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 6
+  }
+ },
+ {
+  "id": "dk-c07",
+  "cat": "ev",
+  "diff": 2,
+  "title": "Couples at a round table",
+  "tags": [
+   "deck",
+   "clubs",
+   "linearity",
+   "indicators",
+   "seating"
+  ],
+  "style": [
+   "trading-desk",
+   "brainteaser-phone"
+  ],
+  "prompt": "<p>Ten couples (20 people) are seated uniformly at random around a round table with 20 seats. What is the expected number of couples who end up sitting next to each other?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 1.0526315789473684,
+   "display": "20/19 ≈ 1.053"
+  },
+  "hints": [
+   "One indicator per couple.",
+   "Seat one partner anywhere; the other partner is uniform over the 19 remaining seats."
+  ],
+  "solution": "<p>Seat one partner; the other is uniform over 19 seats, of which 2 are adjacent. P(couple together) = 2/19.</p><p>E = 10 · 2/19 = 20/19 ≈ 1.053.</p><p>Trap: trying to count arrangements with inclusion–exclusion; that is needed for P(no couple together), not for the mean.</p><p><b>Answer: 20/19 ≈ 1.053.</b></p>",
+  "key": "Indicators per couple; the dependence between couples doesn't affect the expectation.",
+  "plan": {
+   "keyIdea": "One indicator per couple.",
+   "method": "Fix one partner, 2 good seats out of 19.",
+   "sanityChecks": [
+    "Should be close to 1."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same 20 people in a single <b>straight row</b> of 20 seats?</p>",
+    "model": "<p>There are 19 adjacent seat pairs out of C(20, 2) = 190, so P = 19/190 = 1/10 and E = 10 · 1/10 = 1. The ends cost a little.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "1",
+     "tolAbs": 0.01
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 7
+  }
+ },
+ {
+  "id": "dk-c08",
+  "cat": "ev",
+  "diff": 2,
+  "title": "Inversions in a shuffle",
+  "tags": [
+   "deck",
+   "clubs",
+   "linearity",
+   "permutations",
+   "indicators"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>A random permutation of 1, 2, …, 8 is chosen uniformly. An <i>inversion</i> is a pair of positions i &lt; j whose entries are out of order. What is the expected number of inversions?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 14.0,
+   "display": "14",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Each of the C(8, 2) pairs of positions is inverted with probability ½.",
+   "By symmetry, swapping the two entries maps inverted to non-inverted."
+  ],
+  "solution": "<p>There are C(8, 2) = 28 pairs of positions; each is inverted with probability ½ by symmetry. E = 28/2 = 14 = n(n − 1)/4.</p><p>This is also the expected number of adjacent swaps bubble sort makes on random input.</p><p><b>Answer: 14.</b></p>",
+  "key": "Pair indicators: E[inversions] = C(n, 2)/2.",
+  "plan": {
+   "keyIdea": "Indicator per pair of positions.",
+   "method": "C(n,2) × ½.",
+   "sanityChecks": [
+    "n = 2: expect ½ — check.",
+    "Max possible is 28, so 14 is the midpoint by symmetry."
+   ]
+  },
+  "par": 2.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Give the <b>variance</b> of the number of inversions (n = 8). The general formula is n(n − 1)(2n + 5)/72.</p>",
+    "model": "<p>8 · 7 · 21/72 = 49/3 ≈ 16.33. The pair indicators are dependent when they share a position, which is where the (2n + 5) comes from.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 16.333333333333332,
+     "display": "49/3 ≈ 16.33"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 8
+  }
+ },
+ {
+  "id": "dk-c09",
+  "cat": "ev",
+  "diff": 2,
+  "title": "Record highs in a price series",
+  "tags": [
+   "deck",
+   "clubs",
+   "linearity",
+   "records",
+   "harmonic"
+  ],
+  "style": [
+   "trading-desk",
+   "math-test"
+  ],
+  "prompt": "<p>Ten daily closing prices are i.i.d. draws from a continuous distribution. A day is a <i>record</i> if its price is higher than every earlier day's (day 1 always counts). What is the expected number of record days?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2.9289682539682538,
+   "display": "H₁₀ = 7381/2520 ≈ 2.929"
+  },
+  "hints": [
+   "Day k is a record iff it is the largest of the first k days.",
+   "By symmetry that has probability 1/k."
+  ],
+  "solution": "<p>Day k is a record exactly when it is the maximum of days 1…k, which by exchangeability has probability 1/k (the distribution doesn't matter, ties have probability 0).</p><p>E = 1 + 1/2 + … + 1/10 = H<sub>10</sub> = 7381/2520 ≈ 2.929.</p><p>Trap: assuming records are rare and roughly ten-fold fewer than days; they grow like ln n.</p><p><b>Answer: ≈ 2.929.</b></p>",
+  "key": "Records: P(day k is a record) = 1/k, so E = H<sub>n</sub> ≈ ln n + 0.577.",
+  "plan": {
+   "keyIdea": "Exchangeability: each of the first k days is equally likely to be the max.",
+   "method": "Sum 1/k for k = 1..10.",
+   "sanityChecks": [
+    "Answer grows like ln n — about 2.3 + 0.58."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "limit",
+    "prompt": "<p>How many records do you expect in <b>100</b> days?</p>",
+    "model": "<p>H<sub>100</sub> ≈ ln 100 + 0.5772 + 1/200 ≈ 5.187. Ten times the days, only about 2.26 more records.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5.187377517639621,
+     "display": "H₁₀₀ ≈ 5.187",
+     "tolRel": 0.002
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 9
+  }
+ },
+ {
+  "id": "dk-c10",
+  "cat": "ev",
+  "diff": 3,
+  "title": "Balls left when a colour runs out",
+  "tags": [
+   "deck",
+   "clubs",
+   "linearity",
+   "urn",
+   "indicators"
+  ],
+  "style": [
+   "math-test",
+   "trading-desk"
+  ],
+  "prompt": "<p>An urn holds 5 red and 10 blue balls. You draw balls one at a time without replacement and stop as soon as one colour has been completely removed. What is the expected number of balls still in the urn when you stop?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2.121212121212121,
+   "display": "70/33 ≈ 2.121"
+  },
+  "hints": [
+   "Think of the whole random order of all 15 balls. Which balls are left when you stop?",
+   "A blue ball is left iff it comes after all 5 reds; a red ball is left iff it comes after all 10 blues."
+  ],
+  "solution": "<p>Lay out a uniformly random order of all 15 balls. The balls left are exactly the tail after the last ball of the colour that runs out.</p><p>A given blue ball is left iff it comes after all 5 reds: among those 6 balls it is last with probability 1/6. A given red ball is left iff it is after all 10 blues: probability 1/11.</p><p>E = 10 · 1/6 + 5 · 1/11 = 5/3 + 5/11 = 70/33 ≈ 2.121.</p><p>Trap: conditioning on which colour runs out first and getting tangled; the indicator view handles both cases at once.</p><p><b>Answer: 70/33 ≈ 2.121.</b></p>",
+  "key": "Embed the stopping rule in a full random order; each leftover ball is an indicator about relative order.",
+  "plan": {
+   "keyIdea": "Complete the draw to a random permutation.",
+   "method": "Indicator per ball: last among itself + the other colour.",
+   "sanityChecks": [
+    "Answer should be small (a couple of balls).",
+    "Check r = b = 1: one ball left always; formula gives ½ + ½ = 1."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the probability that the <b>reds</b> run out first?</p>",
+    "model": "<p>Reds run out first iff the last ball in the full order is blue: probability 10/15 = 2/3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6666666666666666,
+     "display": "2/3"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 10
+  }
+ },
+ {
+  "id": "dk-c11",
+  "cat": "ev",
+  "diff": 3,
+  "title": "Comparisons in random quicksort",
+  "tags": [
+   "deck",
+   "clubs",
+   "linearity",
+   "algorithms",
+   "harmonic"
+  ],
+  "style": [
+   "math-test",
+   "coding-screen"
+  ],
+  "prompt": "<p>Quicksort is run on 10 distinct numbers, choosing each pivot uniformly at random from its sub-array; each non-pivot element is compared once with the pivot. What is the expected total number of comparisons?</p><p>Give a decimal to 2 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 24.437301587301587,
+   "display": "2·11·H₁₀ − 40 ≈ 24.44",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Ranks i &lt; j are compared iff the first pivot chosen from {i, …, j} is i or j.",
+   "So P(i and j compared) = 2/(j − i + 1)."
+  ],
+  "solution": "<p>Label elements by rank. Elements i &lt; j are compared exactly when, among ranks i…j, the first one picked as a pivot is i or j; otherwise a pivot strictly between them separates them forever. P = 2/(j − i + 1).</p><p>E = Σ<sub>i&lt;j</sub> 2/(j − i + 1) = Σ<sub>d=1</sub><sup>9</sup> (10 − d) · 2/(d + 1) = 2(n + 1)H<sub>n</sub> − 4n with n = 10: 22 · 7381/2520 − 40 ≈ 24.44.</p><p>Trap: n log₂ n ≈ 33 is the wrong constant; the exact mean is about 2n ln n − 2.85n for large n.</p><p><b>Answer: ≈ 24.44.</b></p>",
+  "key": "Pair indicators: two keys are compared iff one of them is the first pivot from the range between them.",
+  "plan": {
+   "keyIdea": "Indicator for each pair of ranks being compared.",
+   "method": "P = 2/(gap + 1), sum over pairs.",
+   "sanityChecks": [
+    "Between n − 1 = 9 (best case) and 45 (worst case).",
+    "n = 3: 8/3 comparisons; check by hand."
+   ]
+  },
+  "par": 10,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the probability that the smallest and the largest of the 10 numbers are ever compared?</p>",
+    "model": "<p>Only if the very first pivot is one of them: 2/10 = 1/5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2,
+     "display": "1/5"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 11
+  }
+ },
+ {
+  "id": "dk-c12",
+  "cat": "ev",
+  "diff": 3,
+  "title": "Uniforms until the total passes 2",
+  "tags": [
+   "deck",
+   "clubs",
+   "renewal",
+   "uniform",
+   "tail-sum"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>Draw independent Uniform(0, 1) numbers until their running total first exceeds 2. What is the expected number of draws?</p><p>Give a decimal to 3 places (or an exact expression in e).</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 4.670774270471604,
+   "display": "e² − e ≈ 4.671"
+  },
+  "hints": [
+   "E[N] = Σ<sub>n≥0</sub> P(N &gt; n) = Σ P(S<sub>n</sub> ≤ 2).",
+   "Or solve the renewal equation m(t) = 1 + ∫<sub>t−1</sub><sup>t</sup> m(s) ds on [1, 2] using m(t) = e<sup>t</sup> on [0, 1]."
+  ],
+  "solution": "<p>Let m(t) be the expected number of draws to exceed t. For t ≤ 1, the classic result is m(t) = e<sup>t</sup> (because P(S<sub>n</sub> ≤ t) = t<sup>n</sup>/n!).</p><p>For 1 ≤ t ≤ 2, conditioning on the first draw u: m(t) = 1 + ∫<sub>0</sub><sup>1</sup> m(t − u) du. Differentiating, m'(t) = m(t) − m(t − 1) = m(t) − e<sup>t−1</sup>, with m(1) = e. The solution is m(t) = e<sup>t</sup> − (t − 1)e<sup>t−1</sup>.</p><p>At t = 2: m(2) = e² − e ≈ 4.671. Sanity: about 2/(½) = 4 draws plus overshoot.</p><p><b>Answer: e² − e ≈ 4.671.</b></p>",
+  "key": "Renewal equations: condition on the first draw; the t ≤ 1 piece gives e<sup>t</sup>, which seeds the next interval.",
+  "plan": {
+   "keyIdea": "Renewal / first-step equation in the threshold t.",
+   "method": "Solve the delay ODE piecewise on [0,1] then [1,2].",
+   "sanityChecks": [
+    "Must exceed 4 (mean ½ per draw) but not by much.",
+    "At t = 1 the formula must give e."
+   ]
+  },
+  "par": 12,
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check your method: what is the expected number of draws for the total to exceed <b>1</b>?</p>",
+    "model": "<p>P(S<sub>n</sub> ≤ 1) = 1/n!, so E[N] = Σ 1/n! = e ≈ 2.718.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.718281828459045,
+     "display": "e ≈ 2.718"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 12
+  }
+ },
+ {
+  "id": "dk-c13",
+  "cat": "ev",
+  "diff": 3,
+  "title": "Every face at least twice",
+  "tags": [
+   "deck",
+   "clubs",
+   "coupon-collector",
+   "dice",
+   "first-step"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>Roll a fair die until every face has appeared <b>at least twice</b>. What is the expected number of rolls?</p><p>Give a decimal to 2 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 24.133869197530863,
+   "display": "≈ 24.13",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Track the state (a, b) = (faces seen 0 times, faces seen exactly once).",
+   "From (a, b) the next useful roll comes after 6/(a + b) rolls on average; then a face moves 0→1 or 1→2."
+  ],
+  "solution": "<p>State (a, b): a faces unseen, b faces seen once. A roll hits an unseen face with probability a/6 (→ (a − 1, b + 1)), a once-seen face with probability b/6 (→ (a, b − 1)), otherwise nothing changes.</p><p>So E(a, b) = [1 + (a/6)E(a − 1, b + 1) + (b/6)E(a, b − 1)] / ((a + b)/6), with E(0, 0) = 0. Filling the table from small states up gives E(6, 0) ≈ 24.13.</p><p>Alternative: Poissonise (each face arrives at rate 1, total rate 6): E = 6∫<sub>0</sub><sup>∞</sup>[1 − (1 − e<sup>−t</sup>(1 + t))<sup>6</sup>] dt.</p><p>Trap: doubling the coupon-collector answer (2 × 14.7 = 29.4) — the second copies are mostly collected while still hunting the first ones.</p><p><b>Answer: ≈ 24.13.</b></p>",
+  "key": "Coupon collector with quotas: a two-dimensional first-step recursion (or Poissonisation).",
+  "plan": {
+   "keyIdea": "Markov state = how many faces are at 0 and at 1.",
+   "method": "First-step recursion on (a, b), or Poissonise.",
+   "sanityChecks": [
+    "Between 14.7 (one copy) and 29.4 (two separate collections).",
+    "E(0, 1) = 6 — one missing face needs 6 rolls."
+   ]
+  },
+  "par": 15,
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity anchor: the expected rolls until every face appears <b>at least once</b>?</p>",
+    "model": "<p>6(1 + ½ + ⅓ + ¼ + ⅕ + ⅙) = 14.7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 14.7,
+     "display": "14.7"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "clubs",
+   "rank": 13
+  }
  },
  {
   "id": "comb-001",
@@ -2839,6 +11481,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Any arrangement of 10 stars and 3 bars encodes a solution: x₁ = stars before the first bar, etc.</p><p>Number of arrangements = C(13, 3) = 286.</p><p>General formula: C(n + k − 1, k − 1) for k variables summing to n.</p><p><b>Answer: 286</b></p>",
   "key": "Non-negative solutions of x₁+…+x_k = n: C(n+k−1, k−1).",
+  "plan": {
+   "keyIdea": "Stars and bars: 10 identical stars split by 3 bars into 4 groups.",
+   "method": "Count arrangements of 13 symbols with 3 bars: C(13, 3).",
+   "sanityChecks": [
+    "Small case: x₁ + x₂ = 2 has 3 solutions = C(3, 1).",
+    "Bars = variables − 1."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now every xᵢ ≥ 1. How many solutions?</p><p>Give a number.</p>",
+    "model": "<p>Give each variable 1 first: y₁ + … + y₄ = 6 with yᵢ ≥ 0, so C(9, 3) = 84.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 84.0,
+     "display": "84"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Back to xᵢ ≥ 0, but now each xᵢ ≤ 5. How many solutions?</p><p>Give a number.</p>",
+    "model": "<p>Inclusion–exclusion on variables that are ≥ 6: subtract 4 · C(7, 3) = 140 (set x₁ = 6 + y₁); two variables ≥ 6 would need 12 &gt; 10. Answer 286 − 140 = 146.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 146.0,
+     "display": "146"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “It's C(13, 4) = 715: choose where the 4 variables go.”</p>",
+    "model": "<p>Four variables need only 3 separators, so we choose 3 bar positions among 13: C(13, 3) = 286. C(13, 4) would describe 5 variables summing to 9.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: it is 10⁴ / 4!",
+      "Agree: 715",
+      "Disagree: 3 bars separate 4 variables, so C(13, 3) = 286"
+     ],
+     "correct": 2,
+     "display": "Disagree: 286"
+    }
+   }
+  ],
+  "par": 1.5,
   "style": [
    "OA-speed"
   ]
@@ -2919,6 +11607,48 @@ window.PROBLEMS = [
   ],
   "solution": "<p>By inclusion–exclusion over the set of people who get their own hat:</p><p>D_n = n! ∑_{k=0}^{n} (−1)ᵏ/k!, so P = ∑_{k=0}^{10} (−1)ᵏ/k!.</p><p>Recurrence: D₃ = 2, D₄ = 9, D₅ = 44, D₆ = 265, D₇ = 1854, D₈ = 14833, D₉ = 133496, D₁₀ = 1334961.</p><p>P = 1334961/3628800 ≈ 0.367879 — already within 10⁻⁷ of 1/e ≈ 0.3678794.</p><p><b>Answer: ≈ 0.367879</b></p>",
   "key": "Derangement probability = ∑(−1)ᵏ/k! → 1/e very fast.",
+  "plan": {
+   "keyIdea": "Inclusion–exclusion over fixed points: Dₙ/n! = Σ (−1)ᵏ/k!.",
+   "method": "Recurrence Dₙ = (n − 1)(Dₙ₋₁ + Dₙ₋₂) or the alternating series.",
+   "sanityChecks": [
+    "≈ 1/e for n ≥ 6.",
+    "n = 3: 2 of 6."
+   ]
+  },
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check with 4 people: P(no one gets their own hat)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>D₄ = 9 of 24 = 3/8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.375,
+     "display": "3/8"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>10 people: P(exactly one gets their own hat)? (6 decimals.)</p>",
+    "model": "<p>10 · D₉ / 10! = D₉/9! ≈ 0.367879, almost the same as zero matches.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.36787918871252206,
+     "display": "≈ 0.367879",
+     "tolRel": 1e-06
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What does P(no match) tend to as n → ∞?</p><p>Give 4 decimals.</p>",
+    "model": "<p>1/e ≈ 0.3679.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.36787944117144233,
+     "display": "1/e"
+    }
+   }
+  ],
+  "par": 3,
   "style": [
    "math-test"
   ]
@@ -2945,6 +11675,57 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Total arrangements of 5 '(' and 5 ')': C(10,5) = 252.</p><p>Reflect the prefix up to the first point where ')' exceeds '(': bad strings ↔ strings with 6 ')' and 4 '(', of which there are C(10,4) = 210.</p><p>Good = 252 − 210 = 42 = C(10,5)/6.</p><p><b>Answer: 42</b></p>",
   "key": "Catalan: C_n = C(2n,n)/(n+1), counted via the reflection principle.",
+  "plan": {
+   "keyIdea": "Balanced strings are Catalan numbers; count all strings and subtract the bad ones by reflection.",
+   "method": "C(10, 5) − C(10, 4) = 252 − 210 = 42.",
+   "sanityChecks": [
+    "n = 3 gives 5 (list them).",
+    "Formula C(2n, n)/(n + 1) must be an integer."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>6 pairs of parentheses?</p><p>Give a number.</p>",
+    "model": "<p>C(12, 6)/7 = 924/7 = 132.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 132.0,
+     "display": "132"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: how many balanced strings with 3 pairs?</p><p>Give a number.</p>",
+    "model": "<p>((())), (()()), (())(), ()(()), ()()() — 5 = C(6, 3)/4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5.0,
+     "display": "5"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “These counts double each time, 1, 2, 4, 8, so with 5 pairs there are 16.”</p>",
+    "model": "<p>The sequence is 1, 2, 5, 14, 42 (Catalan), not powers of 2: already n = 3 gives 5.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree: 16",
+      "Disagree: it is the Catalan number 42",
+      "Disagree: it is 252"
+     ],
+     "correct": 1,
+     "display": "Disagree: 42"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Is there a faster way than reflection?</p>",
+    "model": "<p>The Catalan recurrence Cₙ₊₁ = Σ CᵢCₙ₋ᵢ (split at the bracket matching the first one): 1, 1, 2, 5, 14, 42.</p>"
+   }
+  ],
+  "par": 3,
   "style": [
    "math-test",
    "OA-speed"
@@ -3100,6 +11881,37 @@ window.PROBLEMS = [
   ],
   "solution": "<p>All paths: C(10, 4) = 210.</p><p>Through (3, 2): C(5, 2)·C(5, 2) = 10·10 = 100.</p><p>Avoiding: 210 − 100 = 110.</p><p><b>Answer: 110</b></p>",
   "key": "Paths through a point multiply; avoid a point by complement.",
+  "plan": {
+   "keyIdea": "Complement: paths through the point = (paths to it) × (paths from it).",
+   "method": "C(10, 4) − C(5, 2)·C(5, 2).",
+   "sanityChecks": [
+    "Multiply, don't add, the two legs.",
+    "Must be below 210."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Avoid both (3, 2) and (5, 3). How many paths?</p><p>Give a number.</p>",
+    "model": "<p>210 − 100 − C(8, 3)·C(2, 1) + C(5, 2)·C(3, 1)·C(2, 1) = 210 − 100 − 112 + 60 = 58.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 58.0,
+     "display": "58"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Paths through (3, 2) number C(5, 2) + C(5, 2) = 20.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Each first leg pairs with each second leg: 10 × 10 = 100.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 100.0,
+     "display": "100"
+    }
+   }
+  ],
+  "par": 2,
   "style": [
    "OA-speed"
   ]
@@ -3281,6 +12093,37 @@ window.PROBLEMS = [
   ],
   "solution": "<p>All functions: 3⁶ = 729.</p><p>Missing a given exchange: 2⁶ = 64, three choices → 192. Missing two given exchanges: 1⁶ = 1, three choices → +3. Missing all three: 0.</p><p>Surjections = 729 − 192 + 3 = 540 (= 3!·S(6,3) = 6·90).</p><p><b>Answer: 540</b></p>",
   "key": "Surjections onto k boxes: ∑(−1)ʲC(k,j)(k−j)ⁿ.",
+  "plan": {
+   "keyIdea": "Surjections by inclusion–exclusion over the missing exchanges.",
+   "method": "3⁶ − 3·2⁶ + 3·1⁶.",
+   "sanityChecks": [
+    "= 3! · S(6, 3) = 6 · 90.",
+    "Must be below 3⁶ = 729."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>4 orders, 3 exchanges, each exchange at least one order?</p><p>Give a number.</p>",
+    "model": "<p>81 − 48 + 3 = 36.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 36.0,
+     "display": "36"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “First give each exchange one order (6 · 5 · 4 ways), then route the other 3 freely (3³): 3 240.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>That overcounts: the same assignment is produced several times depending on which order was the ‘first’. Correct count 540.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 540.0,
+     "display": "540"
+    }
+   }
+  ],
+  "par": 3,
   "style": [
    "math-test"
   ]
@@ -3310,7 +12153,43 @@ window.PROBLEMS = [
    "w(0) = 1, w(1) = 1, w(2) = 2."
   ],
   "solution": "<p>The last stride is 1, 2 or 3, so w(n) = w(n − 1) + w(n − 2) + w(n − 3), with w(0) = 1, w(1) = 1, w(2) = 2.</p><p>w(3..10) = 4, 7, 13, 24, 44, 81, 149, 274.</p><p>Trap: starting the recursion with w(0) = 0 (there is exactly one way to climb zero steps: do nothing).</p><p><b>Answer: 274.</b></p>",
-  "key": "Ordered compositions with parts in {1, 2, 3} follow a tribonacci recursion on the last part."
+  "key": "Ordered compositions with parts in {1, 2, 3} follow a tribonacci recursion on the last part.",
+  "plan": {
+   "keyIdea": "Classify by the last stride: w(n) = w(n−1) + w(n−2) + w(n−3).",
+   "method": "Iterate from w(0) = 1, w(1) = 1, w(2) = 2.",
+   "sanityChecks": [
+    "w(3) = 4: 111, 12, 21, 3.",
+    "Growth ratio ≈ 1.84 per step."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Strides of 1 or 2 only, 10 steps?</p><p>Give a number.</p>",
+    "model": "<p>Fibonacci: w(10) = 89.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 89.0,
+     "display": "89"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “For 4 steps there are 3 + 3 = 6 ways.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>w(4) = w(3) + w(2) + w(1) = 4 + 2 + 1 = 7: 1111, 112, 121, 211, 22, 13, 31.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 7.0,
+     "display": "7"
+    }
+   },
+   {
+    "type": "complexity",
+    "prompt": "<p>What is the cost of naive recursion versus the DP, and the fix?</p>",
+    "model": "<p>Naive recursion branches three ways and recomputes subproblems: exponential, about 1.84ⁿ calls. Memoising or iterating bottom-up with three rolling variables gives O(n) time and O(1) space.</p>"
+   }
+  ],
+  "par": 2
  },
  {
   "id": "comb-102",
@@ -3419,7 +12298,187 @@ window.PROBLEMS = [
    "Collinear triples lie on rows, columns, or diagonals of slope ±1. Check whether any other slope fits three points in a 4 × 4 grid."
   ],
   "solution": "<p>All triples: C(16, 3) = 560. Subtract collinear triples:</p><ul><li>4 rows and 4 columns with 4 points each: 8·C(4, 3) = 32.</li><li>Slope ±1: the two main diagonals have 4 points (2·4 = 8); four shorter diagonals have 3 points (4·1 = 4).</li><li>Slopes like ±2 or ±1/2 would need a span of 4 in one coordinate: impossible.</li></ul><p>Collinear = 32 + 8 + 4 = 44. Triangles = 560 − 44 = 516.</p><p>Trap: forgetting the short diagonals of length 3.</p><p><b>Answer: 516.</b></p>",
-  "key": "Triangles = all triples − collinear triples; enumerate lines by slope."
+  "key": "Triangles = all triples − collinear triples; enumerate lines by slope.",
+  "plan": {
+   "keyIdea": "Count all triples, subtract collinear ones line by line.",
+   "method": "C(16, 3) − (rows/columns + diagonals of 4 + diagonals of 3).",
+   "sanityChecks": [
+    "Lines need ≥ 3 points: only slopes 0, ∞, ±1 here.",
+    "3 × 3 grid check: 84 − 8 = 76."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same question on the 3 × 3 grid (9 points).</p><p>Give a number.</p>",
+    "model": "<p>C(9, 3) = 84 minus 3 rows, 3 columns and 2 diagonals: 84 − 8 = 76.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 76.0,
+     "display": "76"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Only rows, columns and the two main diagonals are collinear, so the answer is 560 − 40 = 520.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>The four shorter diagonals with exactly 3 points add 4 more collinear triples: 516.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 516.0,
+     "display": "516"
+    }
+   }
+  ],
+  "par": 6
+ },
+ {
+  "id": "ci-007",
+  "cat": "combinatorics",
+  "diff": 1,
+  "title": "Signs on five ones",
+  "tags": [
+   "target-sum",
+   "subset-sum",
+   "counting",
+   "dynamic-programming"
+  ],
+  "style": [
+   "OA-speed",
+   "trading-desk"
+  ],
+  "prompt": "<p>Put a + or − sign in front of each of the five numbers 1, 1, 1, 1, 1. In how many of the 2<sup>5</sup> sign patterns does the signed total equal 3?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 5.0,
+   "display": "5",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Let P be the sum of the plus-numbers and N of the minus-numbers. You know P − N and P + N.",
+   "P − N = 3 and P + N = 5, so P = 4."
+  ],
+  "solution": "<p>Reduce to subset-sum: P − N = T and P + N = S give P = (S + T)/2 = (5 + 3)/2 = 4. So exactly four of the ones get a +, one gets a −.</p><p>Choose the position of the minus sign: C(5, 4) = 5 ways.</p><p><b>Answer: 5.</b></p>",
+  "key": "± target counting reduces to counting subsets with sum (S + T)/2.",
+  "plan": {
+   "keyIdea": "Signs split the numbers into a plus-set and a minus-set; only the plus-set's sum matters.",
+   "method": "P = (S + T)/2, then count subsets with that sum.",
+   "sanityChecks": [
+    "S + T must be even, else the answer is 0.",
+    "Target 5 must give exactly 1 way."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same question for the numbers 1, 2, 3, 4, 5 and target 3.</p><p>Give an integer.</p>",
+    "model": "<p>S = 15, so P = (15 + 3)/2 = 9. Subsets of {1,…,5} with sum 9: {4,5}, {1,3,5}, {2,3,4}. Answer 3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.0,
+     "display": "3",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "complexity",
+    "prompt": "<p>The naive DFS branches + / − at each index. For five numbers, how many nodes does the full decision tree have (root included), and how many distinct (index, running sum) states are there? Why does memoisation fix the time limit?</p><p>Give the two counts, comma-separated.</p>",
+    "model": "<p>Tree: 1 + 2 + 4 + 8 + 16 + 32 = 63 nodes, O(2<sup>n</sup>). Distinct states: after k numbers the running sum is one of k + 1 values (−k, −k + 2, …, k), so 1 + 2 + … + 6 = 21. Caching each (index, sum) state turns the cost into O(n · S) — the number of states — instead of the number of paths.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      63.0,
+      21.0
+     ],
+     "ordered": true,
+     "display": "63, 21"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'With five ones and target 2, I'd want 3.5 plus signs, so roughly C(5, 3) or C(5, 4) ways — call it 7?'</p><p>How many ways are there really?</p>",
+    "model": "<p>0. P = (5 + 2)/2 is not an integer: a sum of five ±1's is always odd. Parity check before counting.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.0,
+     "display": "0",
+     "tolAbs": 0.001
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-008",
+  "cat": "combinatorics",
+  "diff": 3,
+  "title": "Balancing 1 to 8 with signs",
+  "tags": [
+   "target-sum",
+   "subset-sum",
+   "dynamic-programming",
+   "parity"
+  ],
+  "style": [
+   "math-test",
+   "OA-speed"
+  ],
+  "prompt": "<p>Assign a + or − sign to each of 1, 2, 3, 4, 5, 6, 7, 8. In how many of the 256 sign patterns does the signed sum equal 0?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 14.0,
+   "display": "14",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "P − N = 0 and P + N = 36, so you need subsets of {1,…,8} with sum 18.",
+   "Count subsets with sum 18 by a table: ways[s] after adding each number (iterate s downwards)."
+  ],
+  "solution": "<p>The plus-set must sum to (36 + 0)/2 = 18. Count subsets of {1,…,8} with sum 18 by the knapsack recursion ways<sub>k</sub>(s) = ways<sub>k−1</sub>(s) + ways<sub>k−1</sub>(s − k).</p><p>Running it gives 14 subsets (e.g. {8,7,3}, {8,6,4}, {1,2,7,8}, …). Each subset is a sign pattern, and complements pair up ({8,7,3} ↔ {1,2,4,5,6}), so there are 7 unordered balanced splits.</p><p><b>Answer: 14.</b></p>",
+  "key": "Signed-sum counting = subset-sum counting at (S + T)/2, solved by an O(n·S) table.",
+  "plan": {
+   "keyIdea": "Reduce to counting subsets with sum (S + T)/2 = 18.",
+   "method": "Knapsack-style DP over items and partial sums (or careful enumeration by largest element).",
+   "sanityChecks": [
+    "Answer must be even: complements pair up.",
+    "Parity: if S + T is odd the count is 0."
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same question for 1, 2, …, 7 (target 0).</p><p>Give an integer.</p>",
+    "model": "<p>S = 28, need subsets with sum 14: there are 8 (e.g. {7,6,1}, {7,5,2}, {7,4,3}, {7,4,2,1} and their complements).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 8.0,
+     "display": "8",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'With more numbers there's more freedom, so 1 to 10 must have more balanced sign patterns than 1 to 8.'</p><p>How many sign patterns of 1, …, 10 sum to 0?</p>",
+    "model": "<p>0: 1 + … + 10 = 55 is odd, and flipping a sign changes the total by an even amount, so the signed sum is always odd.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.0,
+     "display": "0",
+     "tolAbs": 0.001
+    }
+   },
+   {
+    "type": "complexity",
+    "prompt": "<p>The DP table has one row per number of items used (0 to 8) and one column per partial sum 0 to 18. How many cells is that, versus 256 leaves for brute force? What is the complexity in general?</p><p>Give the number of cells.</p>",
+    "model": "<p>9 × 19 = 171 cells, O(n · S) time, O(S) space if you keep one row and iterate sums downward. Brute force is O(2<sup>n</sup>): fine for 8 numbers, hopeless for 40.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 171.0,
+     "display": "171",
+     "tolAbs": 0.01
+    }
+   }
+  ]
  },
  {
   "id": "brain-001",
@@ -3443,6 +12502,42 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Label pirates P1 (most junior) … P5 (most senior). Work backwards.</p>\n<ol>\n<li><b>1 pirate (P1):</b> P1 keeps 100.</li>\n<li><b>2 pirates (P2, P1):</b> P2 needs 1 of 2 votes — his own. Split: P2 = 100, P1 = 0.</li>\n<li><b>3 pirates:</b> P3 needs 2 votes. P1 gets 0 in the next round, so 1 coin buys him. Split: P3 = 99, P2 = 0, P1 = 1.</li>\n<li><b>4 pirates:</b> P4 needs 2 votes. P2 gets 0 in the 3-pirate round, so 1 coin buys him. Split: P4 = 99, P3 = 0, P2 = 1, P1 = 0.</li>\n<li><b>5 pirates:</b> P5 needs 3 votes, i.e. 2 besides his own. The pirates getting 0 in the 4-pirate round are P3 and P1; 1 coin each buys them. Split: P5 = 98, P4 = 0, P3 = 1, P2 = 0, P1 = 1.</li>\n</ol>\n<p><b>Answer: 98 coins.</b></p>",
   "key": "Backward induction: each proposer bribes, at 1 coin each, exactly the pirates who would get nothing in the next round.",
+  "plan": {
+   "keyIdea": "Backward induction from 1 pirate; buy the votes of pirates who get nothing in the next round.",
+   "method": "Each bribe costs 1 more than the voter's next-round payoff.",
+   "sanityChecks": [
+    "Proposer needs ⌈n/2⌉ votes including his own.",
+    "Bribed pirates alternate in parity."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Six pirates, same rules. How many coins does the most senior keep?</p><p>Give a number.</p>",
+    "model": "<p>He needs 3 votes; P4 and P2 get 0 in the 5-pirate split, so 1 coin each: 98.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 98.0,
+     "display": "98"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “With five pirates the senior one should bribe the next two most senior pirates, they have the most power.”</p>",
+    "model": "<p>Power is irrelevant: the cheapest votes belong to P3 and P1, who get 0 if P5 is thrown overboard.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: he bribes P3 and P1 with 1 coin each",
+      "Disagree: he bribes everyone",
+      "Agree"
+     ],
+     "correct": 0,
+     "display": "Disagree"
+    }
+   }
+  ],
+  "par": 5,
   "style": [
    "brainteaser-phone"
   ]
@@ -3522,6 +12617,47 @@ window.PROBLEMS = [
   ],
   "solution": "<ol>\n<li>The box contents define a random permutation σ of {1,…,100}. Prisoner i opens box i, sees σ(i), opens box σ(i), and so on. He is walking around the cycle of σ that contains i, and he finds his number exactly when he gets back to the start, i.e. after (cycle length) boxes.</li>\n<li>So prisoner i succeeds iff his cycle has length ≤ 50, and <b>all</b> succeed iff σ has no cycle of length > 50.</li>\n<li>At most one cycle can exceed 50. The number of permutations of n = 100 with a specific cycle of length k > 50 is C(100,k)·(k−1)!·(100−k)! = 100!/k. So P(longest cycle = k) = 1/k.</li>\n<li>P(fail) = ∑<sub>k=51</sub><sup>100</sup> 1/k = H<sub>100</sub> − H<sub>50</sub> ≈ 0.6882.</li>\n<li>P(all freed) = 1 − 0.6882 ≈ <b>0.3118</b>. (As n → ∞ this tends to 1 − ln 2 ≈ 0.307.)</li>\n</ol>\n<p>Compare with independent random guessing: (1/2)<sup>100</sup> ≈ 8·10<sup>−31</sup>.</p>",
   "key": "The pointer-chasing strategy correlates everyone's success: all win iff the permutation has no cycle longer than 50, probability 1 − (H₁₀₀ − H₅₀).",
+  "plan": {
+   "keyIdea": "Follow the cycle starting at your own box; all succeed iff no cycle exceeds 50.",
+   "method": "P(longest cycle &gt; 50) = Σ_{k=51}^{100} 1/k.",
+   "sanityChecks": [
+    "At most one cycle can exceed 50.",
+    "Limit 1 − ln 2 ≈ 0.307."
+   ]
+  },
+  "followups": [
+   {
+    "type": "limit",
+    "prompt": "<p>As the number of prisoners → ∞ (each opens half the boxes), the success probability tends to?</p><p>Give 4 decimals.</p>",
+    "model": "<p>1 − (H₂ₙ − Hₙ) → 1 − ln 2 ≈ 0.3069.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3068528194400547,
+     "display": "1 − ln 2 ≈ 0.3069"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: 2 prisoners, each opens 1 of the 2 boxes, using the cycle strategy. P(both succeed)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>They succeed iff the permutation is the identity: 1/2 (random guessing would give 1/4).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Random guessing gives (½)¹⁰⁰, and the cycle trick raises it to ½.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>The trick gives 1 − Σ_{k=51}^{100} 1/k ≈ 0.3118.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.31182782068980475,
+     "display": "≈ 0.3118"
+    }
+   }
+  ],
+  "par": 6,
   "style": [
    "brainteaser-phone",
    "math-test"
@@ -3549,6 +12685,52 @@ window.PROBLEMS = [
   ],
   "solution": "<ol>\n<li>Each weighing gives one of 3 outcomes, so w weighings distinguish at most 3<sup>w</sup> cases. With 9 candidates we need 3<sup>w</sup> ≥ 9, so w ≥ 2. One weighing (3 outcomes) cannot separate 9 cases.</li>\n<li>Two suffice: weigh coins {1,2,3} vs {4,5,6}. If one side is heavier, the heavy coin is among those three; if they balance, it is among {7,8,9}.</li>\n<li>From the 3 suspects, weigh one against another: the heavier one is fake; if they balance, it is the third.</li>\n</ol>\n<p><b>Answer: 2 weighings.</b></p>",
   "key": "A balance is a ternary device: w weighings separate up to 3ʷ possibilities, so split into thirds.",
+  "plan": {
+   "keyIdea": "Each weighing has 3 outcomes, so w weighings separate at most 3ʷ cases.",
+   "method": "Information bound gives w ≥ 2; split into thirds 3-3-3 to achieve it.",
+   "sanityChecks": [
+    "One weighing can only separate 3 candidates.",
+    "The construction must work for every outcome."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now 27 coins, one heavier. Minimum number of weighings?</p><p>Give a number.</p>",
+    "model": "<p>3³ = 27, so 3 weighings: split 9-9-9, then 3-3-3, then 1-1-1.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.0,
+     "display": "3"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What is the largest number of coins (one heavier) you can always handle with 4 weighings?</p><p>Give a number.</p>",
+    "model": "<p>3⁴ = 81: each weighing divides the suspects into three equal groups.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 81.0,
+     "display": "81"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “With 10 coins you still only need 2 weighings.”</p>",
+    "model": "<p>Two weighings give only 3² = 9 distinguishable outcomes, fewer than 10 suspects, so some two coins would always be confused. You need 3.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree",
+      "Disagree: 10 &gt; 3² = 9, so you need 3",
+      "Disagree: you need 5 (halving)"
+     ],
+     "correct": 1,
+     "display": "Disagree: 3"
+    }
+   }
+  ],
+  "par": 1,
   "style": [
    "brainteaser-phone"
   ]
@@ -3601,6 +12783,42 @@ window.PROBLEMS = [
   ],
   "solution": "<ol>\n<li>When two ants collide and reverse, the set of positions and directions is identical to what it would be if they had simply walked through each other. Only the labels differ.</li>\n<li>So treat the ants as ghosts that pass through one another. Each ghost walks straight off the end it faces, taking (distance to that end)/1 cm/s.</li>\n<li>The stick is empty when the last ghost falls off, after max over ants of distance-to-facing-end, which is at most 100 cm → 100 s.</li>\n<li>This is attained: an ant at the left end facing right needs 100 s.</li>\n</ol>\n<p><b>Answer: 100 seconds</b>, no matter how many ants or collisions.</p>",
   "key": "Collisions that swap directions are equivalent to ants passing through each other; relabeling removes the interactions.",
+  "plan": {
+   "keyIdea": "Colliding ants are indistinguishable from ants passing through each other.",
+   "method": "Max over ants of the distance to the end it faces.",
+   "sanityChecks": [
+    "Labels don't matter for when the stick is empty.",
+    "Worst case: an ant at one end facing the other."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same ants on a 2-metre stick. Longest possible wait?</p><p>Give seconds.</p>",
+    "model": "<p>200 s.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 200.0,
+     "display": "200 s"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “An ant can bounce back and forth, so the worst case is longer than 100 s — up to 200 s.”</p>",
+    "model": "<p>Bouncing only swaps labels; the ghost picture shows the stick is always empty within 100 s.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: at most 100 s",
+      "Disagree: unbounded",
+      "Agree"
+     ],
+     "correct": 0,
+     "display": "Disagree: 100 s"
+    }
+   }
+  ],
+  "par": 2,
   "style": [
    "brainteaser-phone"
   ]
@@ -3627,6 +12845,52 @@ window.PROBLEMS = [
   ],
   "solution": "<ol>\n<li>1 and 2 cross: 2 min.</li>\n<li>1 returns with the torch: 1 min (total 3).</li>\n<li>5 and 10 cross together: 10 min (total 13).</li>\n<li>2 returns: 2 min (total 15).</li>\n<li>1 and 2 cross: 2 min (total 17).</li>\n</ol>\n<p>Pairing the two slowest saves 5 minutes versus having 1 escort each (19 min). An exhaustive search confirms nothing beats 17.</p>\n<p><b>Answer: 17 minutes.</b></p>",
   "key": "Make the two slowest cross together, with the two fastest acting as torch shuttles.",
+  "plan": {
+   "keyIdea": "Only two strategies matter: shuttle the two fastest, or let the fastest escort everyone.",
+   "method": "Compare 2 + 1 + 10 + 2 + 2 = 17 with 10 + 1 + 5 + 1 + 2 = 19.",
+   "sanityChecks": [
+    "Lower bound: the 10-minute walker must cross once.",
+    "Always check both strategies."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now the crossing times are 1, 5, 6 and 7 minutes. Minimum total?</p><p>Give a number.</p>",
+    "model": "<p>Shuttle: 5 + 1 + 7 + 5 + 5 = 23. Escort by 1: 7 + 1 + 6 + 1 + 5 = 20. When the second-fastest is slow, escorting wins: 20.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 20.0,
+     "display": "20"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The rule is simple: always send the two slowest across together.”</p>",
+    "model": "<p>Pairing the slowest pays only when 2·t₂ &lt; t₁ + t₃. With 1, 5, 6, 7 it gives 23, but escorting gives 20.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: never pair the slowest",
+      "Agree",
+      "Disagree: with times 1, 5, 6, 7 escorting gives 20 &lt; 23"
+     ],
+     "correct": 2,
+     "display": "Disagree"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Five people: 1, 2, 5, 10 and 12 minutes. Minimum total?</p><p>Give a number.</p>",
+    "model": "<p>Move the two slowest first with the shuttle (2 + 1 + 12 + 2 = 17), leaving 1, 2, 5 who cross in 5 + 1 + 2 = 8: total 25. An exhaustive search confirms 25.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 25.0,
+     "display": "25"
+    }
+   }
+  ],
+  "par": 3,
   "style": [
    "brainteaser-phone"
   ]
@@ -3680,6 +12944,52 @@ window.PROBLEMS = [
   ],
   "solution": "<ol>\n<li>Suppose you can afford at most d drops. Drop egg 1 from floor d: if it breaks, egg 2 checks floors 1…d−1 one by one, which is d−1 more drops. Total ≤ d.</li>\n<li>If it survives, you have d−1 drops left, so the next drop of egg 1 can go up d−1 more floors, then d−2, and so on.</li>\n<li>So d drops cover d + (d−1) + … + 1 = d(d+1)/2 floors. We need d(d+1)/2 ≥ 100.</li>\n<li>13·14/2 = 91 &lt; 100 and 14·15/2 = 105 ≥ 100, so d = <b>14</b>. One schedule: floors 14, 27, 39, 50, 60, 69, 77, 84, 90, 95, 99, 100.</li>\n</ol>",
   "key": "Balance the worst case: decrease the jump by one after each safe drop, so d drops cover d(d+1)/2 floors.",
+  "plan": {
+   "keyIdea": "With d drops, egg 1 jumps d, then d − 1, … floors: d(d + 1)/2 floors covered.",
+   "method": "Smallest d with d(d + 1)/2 ≥ 100.",
+   "sanityChecks": [
+    "13 · 14/2 = 91 &lt; 100.",
+    "Every-10-floors gives 19."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Two eggs, 200 floors. Minimum worst-case drops?</p><p>Give a number.</p>",
+    "model": "<p>20 · 21/2 = 210 ≥ 200 &gt; 190: 20.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 20.0,
+     "display": "20"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Three eggs, 100 floors?</p><p>Give a number.</p>",
+    "model": "<p>With e eggs and d drops you cover Σ_{i=1}^{e} C(d, i) floors: d = 9 gives 9 + 36 + 84 = 129 ≥ 100, d = 8 gives 92.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 9.0,
+     "display": "9"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Dropping every 10 floors is optimal.”</p>",
+    "model": "<p>Worst case 10 + 9 = 19 drops; the decreasing-gap schedule needs only 14.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: binary search needs 7",
+      "Agree",
+      "Disagree: every-10 needs 19 in the worst case; 14 is possible"
+     ],
+     "correct": 2,
+     "display": "Disagree"
+    }
+   }
+  ],
+  "par": 4,
   "style": [
    "brainteaser-phone"
   ]
@@ -4052,7 +13362,38 @@ window.PROBLEMS = [
    "20 + 60v = 32 + 30v."
   ],
   "solution": "<p>During a trip, the steps I climb plus the steps the escalator carries me must add up to N.</p><p>N = 20 + 60v and N = 32 + 30v ⇒ 30v = 12 ⇒ v = 0.4 steps/s ⇒ N = 20 + 24 = 44.</p><p>Check: 32 + 0.4·30 = 44 ✓.</p><p>Trap: averaging the step counts, or ignoring that the slower trip lasts longer and so the escalator does more of the work.</p><p><b>Answer: 44.</b></p>",
-  "key": "Distance = own contribution + carrier's contribution; two trips give two linear equations."
+  "key": "Distance = own contribution + carrier's contribution; two trips give two linear equations.",
+  "plan": {
+   "keyIdea": "Steps walked + steps carried by the escalator = visible steps N in both trips.",
+   "method": "N = 20 + 60v = 32 + 30v ⇒ v = 0.4, N = 44.",
+   "sanityChecks": [
+    "N must exceed both step counts.",
+    "Check the second equation."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>If I stand still, how long does the ride take?</p><p>Give seconds.</p>",
+    "model": "<p>44 steps at 0.4 steps/s = 110 s.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 110.0,
+     "display": "110 s"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “v = (32 − 20)/(60 − 30) = 0.4 steps/s, so N = 32 + 0.4 × 60 = 56.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>The 32-step trip lasted 30 s, not 60: N = 32 + 0.4 × 30 = 44 (or 20 + 0.4 × 60 = 44).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 44.0,
+     "display": "44"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "brain-103",
@@ -4108,7 +13449,43 @@ window.PROBLEMS = [
    "Rule: if you see two hats of the same colour, guess the opposite colour; otherwise pass."
   ],
   "solution": "<p>Strategy: if the two hats you see match, guess the other colour; if they differ, pass.</p><p>Of the 8 configurations, 6 have a 2-1 split. In those, the odd one out sees a matching pair and guesses correctly, and the other two see different colours and pass: win. In the 2 all-same configurations, all three guess wrong: lose. Win probability = 6/8 = 3/4.</p><p>It cannot be beaten: every guess is right in exactly as many configurations as it is wrong, so total correct guesses = total wrong guesses. A win needs at least one correct guess, and a loss can hold up to three wrong ones, so at most 3/4 of configurations can be wins. (A search over all strategies confirms it.)</p><p>Trap: thinking 1/2 is the limit because each individual guess is a coin flip.</p><p><b>Answer: 3/4.</b></p>",
-  "key": "You cannot change the odds of a guess, but you can concentrate the wrong guesses into few configurations."
+  "key": "You cannot change the odds of a guess, but you can concentrate the wrong guesses into few configurations.",
+  "plan": {
+   "keyIdea": "Count correct and wrong guesses over all 8 configurations: they balance, so concentrate the wrong ones.",
+   "method": "Guess the opposite colour when you see a matching pair; else pass.",
+   "sanityChecks": [
+    "Upper bound n/(n + 1) for n = 2ᵏ − 1 players.",
+    "Single guesser baseline: ½."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Seven players with the same rules. Best winning probability?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Hamming-code strategy: assume your configuration is not a codeword. Wrong guesses are packed into the 16 codewords, so you win 112/128 = 7/8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.875,
+     "display": "7/8"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check with two players: best winning probability?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>1/2: nothing beats having one player guess at random, since each guess is right in exactly half the configurations.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why can no strategy beat 3/4 with three players?</p>",
+    "model": "<p>Each player's guess, made from what they see, is right in exactly as many configurations as it is wrong. A win needs ≥ 1 right guess, a loss can absorb 3 wrong ones, so wins ≤ 3 × losses ⇒ P(win) ≤ 3/4.</p>"
+   }
+  ],
+  "par": 5
  },
  {
   "id": "brain-105",
@@ -4287,6 +13664,39 @@ window.PROBLEMS = [
   ],
   "solution": "<ol>\n<li>Dimensions: 50 m × 25 m, depth ≈ 2 m (the minimum standard; 3 m is recommended).</li>\n<li>Volume = 50 × 25 × 2 = 2,500 m³.</li>\n<li>1 m³ = 1,000 L → <b>2.5 million litres</b>. A 3 m deep pool holds 3.75M L.</li>\n</ol>\n<p>“2.5 million litres” is the standard quoted figure.</p>",
   "key": "Length × width × depth, then convert: 1 m³ = 1,000 L.",
+  "plan": {
+   "keyIdea": "Volume = length × width × depth, then convert m³ to litres.",
+   "method": "50 m × 25 m × 2 m = 2 500 m³ = 2.5 million litres.",
+   "sanityChecks": [
+    "1 m³ = 1 000 L.",
+    "Order of magnitude: millions of litres."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>A 25 m club pool, 12.5 m wide and 1.5 m deep on average. How many litres?</p><p>Give a single number.</p>",
+    "model": "<p>25 × 12.5 × 1.5 = 468.75 m³ ≈ 470 000 L — roughly a fifth of the Olympic pool.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 468750.0,
+     "display": "468,750 L",
+     "tolRel": 0.05
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “A cubic metre is 100 litres, so the Olympic pool holds about 250 000 L.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>1 m³ = 1 000 L (a 10 cm cube is one litre, and 10 × 10 × 10 of them fill a cubic metre), so 2 500 m³ = 2.5 million litres.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2500000.0,
+     "display": "2.5 million",
+     "tolRel": 0.3
+    }
+   }
+  ],
+  "par": 1.5,
   "style": [
    "trading-desk"
   ]
@@ -4347,6 +13757,33 @@ window.PROBLEMS = [
   ],
   "solution": "<ol>\n<li>Land area ≈ 59 km² (≈ 23 sq mi).</li>\n<li>Streets, parks (Central Park alone is 3.4 km²) and open space leave ≈ 35% covered by building footprints → ≈ 20.7 km².</li>\n<li>Average height ≈ 6 floors (many 5-storey walk-ups plus towers) → floor area ≈ 20.7 × 6 ≈ 124 km² ≈ 1.24·10<sup>8</sup> m². (Published estimates of Manhattan floor area are around 9·10<sup>7</sup>–1·10<sup>8</sup> m², so this is in the right range.)</li>\n<li>About one window per 12 m² of floor area (a small room has one or two windows) → 1.24·10<sup>8</sup> / 12 ≈ <b>10 million windows</b>.</li>\n</ol>",
   "key": "Convert area to floor area via coverage × floors, then use a density of windows per floor area.",
+  "plan": {
+   "keyIdea": "Floor area drives the window count: land × built fraction × floors ÷ area per window.",
+   "method": "≈ 59 km² × 35% × 6 floors ≈ 1.2·10⁸ m², one window per ~12 m².",
+   "sanityChecks": [
+    "Floor area should be ~10⁸ m².",
+    "Per person: ~1.6 M residents, several windows each plus offices."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Keep every assumption (59 km² land, 35% footprint, one window per 12 m²) but use an average height of 10 floors. How many windows?</p><p>Give a single number.</p>",
+    "model": "<p>59 × 0.35 = 20.65 km² footprint × 10 = 2.065·10⁸ m² ÷ 12 ≈ 1.7·10⁷ windows. The estimate is linear in every factor.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 17208333.333333332,
+     "display": "≈ 17 million",
+     "tolRel": 0.05
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Which single assumption would you stress-test first, and why?</p>",
+    "model": "<p>Average building height (or floor area): it is the most uncertain factor and enters linearly; cross-check it against a known total such as residents × floor area per person plus office space.</p>"
+   }
+  ],
+  "par": 6,
   "style": [
    "trading-desk",
    "brainteaser-phone"
@@ -4526,7 +13963,48 @@ window.PROBLEMS = [
    "Bull→bull→bull plus bull→bear→bull."
   ],
   "solution": "<p>Condition on tomorrow's state: P = P(bb)P(bb) + P(b→B)P(B→b) = 0.9·0.9 + 0.1·0.2 = 0.81 + 0.02 = 0.83.</p><p>Equivalently it is the (bull, bull) entry of P². Trap: answering 0.81, which forgets the path that dips into a bear day and comes back.</p><p><b>Answer: 0.83.</b></p>",
-  "key": "n-step probabilities are entries of Pⁿ: sum over every intermediate path."
+  "key": "n-step probabilities are entries of Pⁿ: sum over every intermediate path.",
+  "plan": {
+   "keyIdea": "Two-step transition probability = sum over the intermediate state (Chapman–Kolmogorov).",
+   "method": "Condition on tomorrow: 0.9·0.9 + 0.1·0.2, i.e. the (bull, bull) entry of P².",
+   "sanityChecks": [
+    "Must exceed 0.81 (the stay-stay path alone).",
+    "Must stay above the long-run bull share 2/3."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Three steps ahead: P(bull in 3 days | bull today)?</p><p>Give a decimal.</p>",
+    "model": "<p>Multiply once more: P²(bull, ·) = (0.83, 0.17), so 0.83 · 0.9 + 0.17 · 0.2 = 0.781.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.781,
+     "display": "0.781"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Bull is so sticky that in the long run the market is bull 90% of the time.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Balance the flows: π_bull · 0.1 = π_bear · 0.2, so π_bull = 0.2/(0.1 + 0.2) = 2/3. The 0.9 is a persistence, not a long-run share.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6666666666666666,
+     "display": "2/3"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>The n-step probability P(bull at n | bull now) tends to 2/3. By what factor does its distance from 2/3 shrink each day?</p><p>Give a number.</p>",
+    "model": "<p>For a two-state chain the second eigenvalue is 1 − a − b = 1 − 0.1 − 0.2 = 0.7, so P = 2/3 + (1/3)·0.7ⁿ. Check n = 2: 2/3 + 0.49/3 = 0.83 ✓.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7,
+     "display": "0.7"
+    }
+   }
+  ],
+  "par": 1.5
  },
  {
   "id": "mc-002",
@@ -4672,7 +14150,53 @@ window.PROBLEMS = [
    "e<sub>0</sub> = 1 + e<sub>1</sub>, e<sub>1</sub> = 1 + ⅓e<sub>0</sub> + ⅔e<sub>2</sub>, e<sub>2</sub> = 1 + ⅔e<sub>1</sub> + ⅓·0."
   ],
   "solution": "<p>By symmetry only the distance d ∈ {0,1,2,3} to the start matters. Let e<sub>d</sub> be the expected time to reach d = 3.</p><p>e<sub>0</sub> = 1 + e<sub>1</sub>; e<sub>1</sub> = 1 + ⅓e<sub>0</sub> + ⅔e<sub>2</sub>; e<sub>2</sub> = 1 + ⅔e<sub>1</sub>.</p><p>Substitute: e<sub>1</sub> = 1 + ⅓(1 + e<sub>1</sub>) + ⅔(1 + ⅔e<sub>1</sub>) = 2 + (⅓ + 4/9)e<sub>1</sub> ⇒ (2/9)e<sub>1</sub> = 2 ⇒ e<sub>1</sub> = 9, e<sub>0</sub> = 10.</p><p><b>Answer: 10 seconds.</b></p>",
-  "key": "Use symmetry to collapse states, then first-step analysis."
+  "key": "Use symmetry to collapse states, then first-step analysis.",
+  "plan": {
+   "keyIdea": "Lump the cube's vertices by distance from the start: a 4-state chain.",
+   "method": "First-step equations for e₀, e₁, e₂ with e₃ = 0.",
+   "sanityChecks": [
+    "e₀ = 1 + e₁ (first move is forced).",
+    "Must exceed 3, the shortest path."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected time for the bug to return to its <i>starting</i> vertex?</p><p>Give a number.</p>",
+    "model": "<p>The walk is on a regular graph, so π is uniform over 8 vertices and the return time is 1/π = 8 (Kac).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 8.0,
+     "display": "8"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check on a square (4 vertices, 2 edges each): expected time from a corner to the opposite corner?</p><p>Give a number.</p>",
+    "model": "<p>e₀ = 1 + e₁, e₁ = 1 + ½e₀ ⇒ e₀ = 4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.0,
+     "display": "4"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “From distance 2 the target is one edge away, so e₂ = 1.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Only 1 of the 3 edges leads to the target; with probability 2/3 the bug falls back to distance 1. e₂ = 1 + (2/3)e₁ = 1 + 6 = 7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 7.0,
+     "display": "7"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Is there a slicker way to get 10?</p>",
+    "model": "<p>Climb one level at a time and add the expected crossing times: τ₀ = 1; τ₁ = 1 + ⅓(τ₀ + τ₁) ⇒ τ₁ = 2; τ₂ = 1 + ⅔(τ₁ + τ₂) ⇒ τ₂ = 7. Total 1 + 2 + 7 = 10.</p>"
+   }
+  ],
+  "par": 4
  },
  {
   "id": "mc-007",
@@ -4700,7 +14224,48 @@ window.PROBLEMS = [
    "For a symmetric walk started at k with barriers 0 and n, the expected time is k(n − k)."
   ],
   "solution": "<p>Going either way around, the token hits 5 the first time its position reaches +5 or −5. That is a symmetric random walk started 5 from each barrier of the interval [−5, 5] (length 10).</p><p>Expected exit time from k in [0, n] is k(n − k); here 5·5 = 25.</p><p>(Check with first-step analysis: e<sub>k</sub> = 1 + ½e<sub>k−1</sub> + ½e<sub>k+1</sub> has solution e<sub>k</sub> = k(n − k).)</p><p><b>Answer: 25.</b></p>",
-  "key": "Symmetric random walk: expected exit time from [0, n] started at k is k(n − k)."
+  "key": "Symmetric random walk: expected exit time from [0, n] started at k is k(n − k).",
+  "plan": {
+   "keyIdea": "Fold the ring: hitting the opposite terminal = exiting [−5, 5] for a simple walk.",
+   "method": "Exit time from k in [0, n] is k(n − k).",
+   "sanityChecks": [
+    "Must exceed 5 (the distance).",
+    "Symmetric walk ⇒ time ~ distance²."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Ring of 12 terminals, target directly opposite (6 away)?</p><p>Give a number.</p>",
+    "model": "<p>6 · 6 = 36.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 36.0,
+     "display": "36"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Ring of 10: expected time to return to terminal 0?</p><p>Give a number.</p>",
+    "model": "<p>Uniform stationary law ⇒ 1/π = 10.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 10.0,
+     "display": "10"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The token reaches the neighbouring terminal 1 in 1 step on average.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>It may wander the other way round the ring. Exit time from 1 in [0, 10]: 1 × 9 = 9.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 9.0,
+     "display": "9"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "mc-008",
@@ -4788,7 +14353,38 @@ window.PROBLEMS = [
    "e<sub>0</sub> = 1 + (5/6)e<sub>0</sub> + (1/6)e<sub>1</sub>, e<sub>1</sub> = 1 + (5/6)e<sub>0</sub>."
   ],
   "solution": "<p>e<sub>1</sub> = 1 + (5/6)e<sub>0</sub> and e<sub>0</sub> = 1 + (5/6)e<sub>0</sub> + (1/6)e<sub>1</sub>.</p><p>Substitute: e<sub>0</sub> = 1 + (5/6)e<sub>0</sub> + 1/6 + (5/36)e<sub>0</sub> ⇒ (1/36)e<sub>0</sub> = 7/6 ⇒ e<sub>0</sub> = 42.</p><p>Shortcut (Conway): the pattern 66 overlaps itself at lengths 2 and 1, so E = 6² + 6 = 42. Trap: answering 36, which ignores that a failed attempt can reuse the last 6.</p><p><b>Answer: 42.</b></p>",
-  "key": "Pattern waiting time = sum of 1/P(prefix) over prefixes that are also suffixes: 36 + 6."
+  "key": "Pattern waiting time = sum of 1/P(prefix) over prefixes that are also suffixes: 36 + 6.",
+  "plan": {
+   "keyIdea": "First-step analysis with states “no 6” and “one 6”; or Conway's overlap rule.",
+   "method": "E = 6² + 6.",
+   "sanityChecks": [
+    "Must exceed 36.",
+    "Self-overlap of 66 at length 1 adds 6."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Three 6s in a row?</p><p>Give a number.</p>",
+    "model": "<p>6 + 36 + 216 = 258.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 258.0,
+     "display": "258"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “66 and 65 are equally likely pairs, so you wait 42 rolls for 65 as well.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>65 does not overlap itself, so E = 36. After a failed attempt at 65 (a 6 then a 6) you still hold a 6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 36.0,
+     "display": "36"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "mc-011",
@@ -4844,7 +14440,48 @@ window.PROBLEMS = [
    "Conway's rule: add 2<sup>k</sup> for each k such that the length-k prefix equals the length-k suffix."
   ],
   "solution": "<p>Conway / martingale argument: E[T] = Σ 2<sup>k</sup> over k ∈ {1..4} where the first k letters equal the last k letters.</p><p>k = 4 (whole pattern): yes. k = 3: HTH vs THT, no. k = 2: HT vs HT, yes. k = 1: H vs T, no. So E = 2⁴ + 2² = 20.</p><p>First-step check with states ∅, H, HT, HTH: e<sub>∅</sub> = 1 + ½e<sub>H</sub> + ½e<sub>∅</sub>, e<sub>H</sub> = 1 + ½e<sub>H</sub> + ½e<sub>HT</sub>, e<sub>HT</sub> = 1 + ½e<sub>HTH</sub> + ½e<sub>∅</sub>, e<sub>HTH</sub> = 1 + ½·0 + ½e<sub>H</sub> (after HTHH the suffix H is kept). Solving: e<sub>H</sub> = 18, e<sub>∅</sub> = 20.</p><p>Trap: answering 16 = 2⁴, which only holds for patterns with no self-overlap (like HHTT).</p><p><b>Answer: 20.</b></p>",
-  "key": "Self-overlap lengthens waiting times: E = Σ 1/P(prefix) over prefixes equal to suffixes."
+  "key": "Self-overlap lengthens waiting times: E = Σ 1/P(prefix) over prefixes equal to suffixes.",
+  "plan": {
+   "keyIdea": "Conway's correlation: E = Σ 2ᵏ over k where the length-k prefix equals the suffix.",
+   "method": "HTHT: k = 4 and k = 2 ⇒ 16 + 4.",
+   "sanityChecks": [
+    "No overlaps ⇒ 16.",
+    "First-step equations on 4 states as a check."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected flips until HTTH?</p><p>Give a number.</p>",
+    "model": "<p>Overlaps at k = 4 and k = 1: 16 + 2 = 18.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 18.0,
+     "display": "18"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “HTHT and HHTT both have probability 1/16, so both take 16 flips on average.”</p>",
+    "model": "<p>HHTT has no self-overlap (16), but HTHT overlaps at length 2 and takes 20.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: both take 20",
+      "Agree",
+      "Disagree: HHTT takes 16 but HTHT takes 20"
+     ],
+     "correct": 2,
+     "display": "Disagree"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Is there a faster way than the four first-step equations?</p>",
+    "model": "<p>Conway's overlap rule: HTHT matches itself at k = 4 and k = 2, so 2⁴ + 2² = 20.</p>"
+   }
+  ],
+  "par": 4
  },
  {
   "id": "mc-013",
@@ -4876,7 +14513,38 @@ window.PROBLEMS = [
    "Track states ∅, H, T, HT, TT. From TT the game ends at the next H."
   ],
   "solution": "<p>Once an H appears, any TT that follows must first produce HTT (the H immediately before the first TT), so HTT wins. TTH wins only if the game starts with TT. P(HTT first) = 1 − 1/4 = 3/4.</p><p>Expected length, states H, HT, T, TT: e<sub>TT</sub> = 2 (wait for an H); e<sub>HT</sub> = 1 + ½e<sub>H</sub>; e<sub>H</sub> = 1 + ½e<sub>H</sub> + ½e<sub>HT</sub> ⇒ e<sub>H</sub> = 6, e<sub>HT</sub> = 4; e<sub>T</sub> = 1 + ½e<sub>H</sub> + ½e<sub>TT</sub> = 5.</p><p>e<sub>∅</sub> = 1 + ½·6 + ½·5 = 6.5.</p><p><b>Answer: 3/4, 13/2.</b></p>",
-  "key": "Pattern races: one state from which the winner is already determined usually cracks the problem."
+  "key": "Pattern races: one state from which the winner is already determined usually cracks the problem.",
+  "plan": {
+   "keyIdea": "Once an H has appeared, HTT must win; TTH wins only from an initial TT.",
+   "method": "P = 1 − ¼; expected length by first-step on states H, HT, T, TT.",
+   "sanityChecks": [
+    "Probabilities can differ even though each pattern alone waits 8.",
+    "Length must be below 8."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Race HH against TH. P(TH first)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>HH wins only if the first two flips are HH; any T earlier means TH comes first: 3/4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.75,
+     "display": "3/4"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “HTT and TTH each take 8 flips on average on their own, so the race is 50–50.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Equal waiting times don't make a fair race; HTT wins with probability 3/4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.75,
+     "display": "3/4"
+    }
+   }
+  ],
+  "par": 5
  },
  {
   "id": "mc-014",
@@ -5056,7 +14724,38 @@ window.PROBLEMS = [
    "That is a random walk on the 4-cube — regular, so π is uniform."
   ],
   "solution": "<p>The configuration is a vector in {L, R}⁴; each step flips a uniformly random coordinate, i.e. a simple random walk on the 4-dimensional hypercube. It is 4-regular, so the stationary distribution is uniform: π = 1/16 per configuration.</p><p>By Kac's lemma, the expected return time to 'all left' is 1/π = 16.</p><p>Equivalently, the count of balls in the left urn has stationary law Binomial(4, ½), so π(4) = 1/16.</p><p>Trap: treating the 5 counts 0..4 as equally likely (answer 5). The extremes are the rarest states.</p><p><b>Answer: 16.</b></p>",
-  "key": "Expected return time = 1/π; the Ehrenfest chain has binomial stationary law."
+  "key": "Expected return time = 1/π; the Ehrenfest chain has binomial stationary law.",
+  "plan": {
+   "keyIdea": "Random walk on the hypercube is regular ⇒ uniform stationary law; return time = 1/π (Kac).",
+   "method": "π(all-left) = 1/2⁴ = 1/16.",
+   "sanityChecks": [
+    "Count chain: π(k) = C(4, k)/16.",
+    "Extremes are the rarest states."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Six balls instead of four. Expected return time to all-left?</p><p>Give a number.</p>",
+    "model": "<p>2⁶ = 64.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 64.0,
+     "display": "64"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Four balls: expected return time to a 2–2 split, starting from a 2–2 split?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>π(2) = C(4, 2)/16 = 6/16, so 16/6 = 8/3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.6666666666666665,
+     "display": "8/3"
+    }
+   }
+  ],
+  "par": 4
  },
  {
   "id": "mc-020",
@@ -5112,7 +14811,48 @@ window.PROBLEMS = [
    "With w(n) ways to roll n: P(win | point) = w(n)/(w(n) + 6)."
   ],
   "solution": "<p>Immediate win: P(7) + P(11) = 6/36 + 2/36 = 8/36.</p><p>For point n with w(n) ways (4 and 10: 3; 5 and 9: 4; 6 and 8: 5), P(win | n) = w/(w + 6).</p><p>P = 8/36 + 2·[ (3/36)(3/9) + (4/36)(4/10) + (5/36)(5/11) ] = 8/36 + 2·(1/36 + 1.6/36 + (25/11)/36) = 244/495 ≈ 0.4929.</p><p>Trap: treating 'point vs 7' as a fixed number of rolls; the absorbing-state trick removes all irrelevant rolls.</p><p><b>Answer: 244/495 ≈ 0.4929.</b></p>",
-  "key": "In a race between two absorbing events, P(A first) = P(A)/(P(A) + P(B)) per step."
+  "key": "In a race between two absorbing events, P(A first) = P(A)/(P(A) + P(B)) per step.",
+  "plan": {
+   "keyIdea": "Ignore rolls that are neither the point nor 7: P(point before 7) = w/(w + 6).",
+   "method": "Sum over first-roll outcomes.",
+   "sanityChecks": [
+    "Must be just under ½ (a casino game).",
+    "Points 4/10, 5/9, 6/8 pair up by symmetry."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Given the point is 6, P(win)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>5 ways for 6 versus 6 ways for 7: 5/11.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.45454545454545453,
+     "display": "5/11"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Expected number of rolls in one game?</p><p>Give a fraction or decimal (3 places).</p>",
+    "model": "<p>1 + Σ P(point) · 36/(w + 6) = 1 + 2(3/9 + 4/10 + 5/11) = 557/165 ≈ 3.376.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.375757575757576,
+     "display": "557/165 ≈ 3.376"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The house edge on an even-money pass bet is about 4%.”</p><p>Is that right? If not, give the house edge as a decimal.</p>",
+    "model": "<p>Edge = P(lose) − P(win) = 1 − 2·244/495 = 7/495 ≈ 0.0141, about 1.4%.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.014141414141414142,
+     "display": "7/495 ≈ 0.0141"
+    }
+   }
+  ],
+  "par": 5
  },
  {
   "id": "mc-022",
@@ -5140,7 +14880,1087 @@ window.PROBLEMS = [
    "Or: P<sup>n</sup>(start, start) = ¼ + ¾(−⅓)<sup>n</sup>."
   ],
   "solution": "<p>To be at the start at step n + 1 you must be elsewhere at step n and then pick the start (prob 1/3): a<sub>n+1</sub> = (1 − a<sub>n</sub>)/3.</p><p>a<sub>0</sub> = 1, a<sub>1</sub> = 0, a<sub>2</sub> = 1/3, a<sub>3</sub> = 2/9, a<sub>4</sub> = (7/9)/3 = 7/27.</p><p>Closed form: ¼ + ¾(−⅓)⁴ = ¼ + 1/108 = 28/108 = 7/27.</p><p><b>Answer: 7/27.</b></p>",
-  "key": "Complete-graph walks reduce to a one-variable recursion; the non-unit eigenvalue −1/(n−1) gives the decay."
+  "key": "Complete-graph walks reduce to a one-variable recursion; the non-unit eigenvalue −1/(n−1) gives the decay.",
+  "plan": {
+   "keyIdea": "Recurrence aₙ₊₁ = (1 − aₙ)/3: to be home you must be away and pick home.",
+   "method": "Iterate from a₀ = 1, or ¼ + ¾(−⅓)ⁿ.",
+   "sanityChecks": [
+    "a₁ = 0, a₂ = 1/3.",
+    "Values oscillate around ¼."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability of being home after exactly 5 steps?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>(1 − 7/27)/3 = 20/81.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.24691358024691357,
+     "display": "20/81"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What does the probability tend to as n → ∞?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>1/4, the uniform stationary distribution on 4 vertices.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.25,
+     "display": "1/4"
+    }
+   }
+  ],
+  "par": 2
+ },
+ {
+  "id": "ci-034",
+  "cat": "markov",
+  "diff": 2,
+  "title": "Waiting for HTH",
+  "tags": [
+   "coins",
+   "patterns",
+   "stopping-time",
+   "first-step"
+  ],
+  "style": [
+   "trading-desk",
+   "math-test"
+  ],
+  "prompt": "<p>A fair coin is tossed until the pattern H T H first appears (consecutively). What is the expected number of tosses?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 10.0,
+   "display": "10",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "States: nothing, H, HT. From HT, a T sends you back to the start; an H finishes.",
+   "Or use the overlap rule: add 2<sup>k</sup> for each k where the first k letters equal the last k letters."
+  ],
+  "solution": "<p>First-step: let a, b, c be the expected remaining tosses from states ∅, H, HT. a = 1 + (a + b)/2; b = 1 + (b + c)/2 (H stays H); c = 1 + (0 + a)/2.</p><p>Solving gives a = 10. Overlap rule: HTH matches itself at k = 1 (H) and k = 3: 2 + 8 = 10.</p><p><b>Answer: 10.</b></p>",
+  "key": "Expected waiting time for a pattern = Σ 2<sup>k</sup> over self-overlaps (prefix = suffix of length k).",
+  "plan": {
+   "keyIdea": "Patterns with self-overlap take longer: a failed attempt can restart from scratch.",
+   "method": "First-step equations on prefix states, or the overlap rule.",
+   "sanityChecks": [
+    "HHT has no proper overlap ⇒ 8.",
+    "HHH overlaps at every length ⇒ 14."
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected tosses until H H T?</p>",
+    "model": "<p>Only the full overlap (k = 3): 8. A failure after HH keeps you at HH, so it's quicker.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 8.0,
+     "display": "8",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Every 3-letter pattern has probability 1/8 per window, so every one takes 8 tosses on average.' What is the expected wait for H H H?</p>",
+    "model": "<p>14 = 2 + 4 + 8. Equal frequencies in the long run, but overlapping occurrences cluster, so the first one comes later.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 14.0,
+     "display": "14",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Use the overlap rule directly: expected tosses until H T H T H?</p>",
+    "model": "<p>Overlaps at k = 1 (H), 3 (HTH), 5: 2 + 8 + 32 = 42.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 42.0,
+     "display": "42",
+     "tolAbs": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-036",
+  "cat": "markov",
+  "diff": 1,
+  "title": "Random walk to ±5",
+  "tags": [
+   "random-walk",
+   "optional-stopping",
+   "martingale",
+   "stopping-time"
+  ],
+  "style": [
+   "trading-desk",
+   "math-test"
+  ],
+  "prompt": "<p>A simple symmetric random walk starts at 0 (steps ±1 with probability 1/2). What is the expected number of steps until it first reaches +5 or −5?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 25.0,
+   "display": "5 × 5 = 25",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "S<sub>n</sub>² − n is a martingale.",
+   "At the stopping time, S² = 25 for sure."
+  ],
+  "solution": "<p>Optional stopping on S<sub>n</sub>² − n: E[S<sub>T</sub>²] − E[T] = 0. Since |S<sub>T</sub>| = 5, E[T] = 25. In general, exit time from (−a, b) is ab.</p><p><b>Answer: 25.</b></p>",
+  "key": "For a symmetric walk, E[time to exit (−a, b)] = ab via the martingale S² − n.",
+  "plan": {
+   "keyIdea": "Use the martingale S<sub>n</sub>² − n with optional stopping.",
+   "method": "E[T] = E[S<sub>T</sub>²] = 25.",
+   "sanityChecks": [
+    "Barriers at ±1 ⇒ 1 step.",
+    "Check by first-step: E(k) = 1 + (E(k−1) + E(k+1))/2."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Barriers at +3 and −7 instead (start 0). Expected steps?</p>",
+    "model": "<p>ab = 3 × 7 = 21.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 21.0,
+     "display": "21",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>With barriers +3 and −7, what is the probability of hitting +3 first?</p>",
+    "model": "<p>S<sub>n</sub> is a martingale: 3p − 7(1 − p) = 0 ⇒ p = 7/10.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7,
+     "display": "0.7"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Drop the lower barrier. The walk is sure to hit +1 eventually, so the expected time to hit +1 must be small — a couple of steps.' What is the expected time?</p>",
+    "model": "<p>Infinite. The walk hits +1 with probability 1, but E[T] = lim<sub>a→∞</sub> a·1 = ∞ (optional stopping fails: E[S<sub>T</sub>] = 1 ≠ 0).</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "1",
+      "2",
+      "Finite but large",
+      "Infinite"
+     ],
+     "correct": 3,
+     "display": "Infinite"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-037",
+  "cat": "markov",
+  "diff": 3,
+  "title": "Drifting walk to +5: mean and variance",
+  "tags": [
+   "random-walk",
+   "wald-identity",
+   "stopping-time",
+   "drift"
+  ],
+  "style": [
+   "math-test",
+   "research-stats"
+  ],
+  "prompt": "<p>A random walk starts at 0 and steps +1 with probability 0.6, −1 with probability 0.4. Let T be the first time it reaches +5. Find E[T] and Var(T).</p><p>Give the two numbers, comma-separated: mean, variance.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    25.0,
+    600.0
+   ],
+   "ordered": true,
+   "display": "25, 600"
+  },
+  "hints": [
+   "T is the sum of 5 i.i.d. copies of T<sub>1</sub>, the time to go up by one level.",
+   "For T<sub>1</sub>: E = 1/(p − q), Var = 4pq/(p − q)³ (first-step on the generating function, or the martingale (S − (p−q)n)² − 4pq·n)."
+  ],
+  "solution": "<p>Mean by Wald: E[S<sub>T</sub>] = (p − q)E[T] ⇒ 5 = 0.2·E[T] ⇒ E[T] = 25.</p><p>Variance: one level takes T<sub>1</sub> with Var = 4pq/(p − q)³ = 0.96/0.008 = 120 (from the martingale (S<sub>n</sub> − 0.2n)² − 0.96n). The five levels are independent, so Var(T) = 5 × 120 = 600.</p><p><b>Answer: 25, 600.</b></p>",
+  "key": "Hitting times of a drifting walk: levels are i.i.d., mean a/(p−q) and variance a·4pq/(p−q)³.",
+  "plan": {
+   "keyIdea": "Decompose into 5 independent one-level climbs.",
+   "method": "Wald for the mean; second martingale (or a generating function) for the variance.",
+   "sanityChecks": [
+    "p = 1 gives T = 5 exactly.",
+    "Variance blows up as p → 1/2."
+   ]
+  },
+  "par": 10,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same target +5 with p = 0.75. E[T]?</p>",
+    "model": "<p>5/(0.75 − 0.25) = 10.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 10.0,
+     "display": "10",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Each level's time has variance 1/(p − q)² = 25, so Var(T) = 5 × 25 = 125.'</p><p>Give the correct Var(T).</p>",
+    "model": "<p>Var(T<sub>1</sub>) = 4pq/(p − q)³ = 120, not 1/(p − q)². Var(T) = 600.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 600.0,
+     "display": "600",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check with p = 1: what are E[T] and Var(T)?</p><p>Comma-separated.</p>",
+    "model": "<p>T = 5 deterministically: mean 5, variance 0 (formula: 4pq = 0).</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      5.0,
+      0.0
+     ],
+     "ordered": true,
+     "display": "5, 0"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-045",
+  "cat": "markov",
+  "diff": 2,
+  "title": "Back at zero after ten steps",
+  "tags": [
+   "random-walk",
+   "reflection-principle",
+   "counting",
+   "coins"
+  ],
+  "style": [
+   "math-test",
+   "trading-desk"
+  ],
+  "prompt": "<p>A simple symmetric random walk starts at 0. What is the probability it is at 0 after exactly 10 steps?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.24609375,
+   "display": "C(10,5)/2¹⁰ = 63/256 ≈ 0.246"
+  },
+  "hints": [
+   "You need exactly 5 up-steps out of 10.",
+   "C(10, 5) = 252."
+  ],
+  "solution": "<p>P = C(10, 5)/2<sup>10</sup> = 252/1024 = 63/256 ≈ 0.246.</p><p><b>Answer: 63/256.</b></p>",
+  "key": "P(S<sub>2n</sub> = 0) = C(2n, n)/4<sup>n</sup> ≈ 1/√(πn).",
+  "plan": {
+   "keyIdea": "Count paths with equal ups and downs.",
+   "method": "Binomial coefficient over 2<sup>10</sup>.",
+   "sanityChecks": [
+    "Odd step counts give 0.",
+    "Stirling: ≈ 1/√(5π) ≈ 0.252."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected number of visits to 0 at times 1, …, 10 (not counting time 0)?</p><p>Give a decimal.</p>",
+    "model": "<p>Σ<sub>k=1..5</sub> C(2k, k)/4<sup>k</sup> = 0.5 + 0.375 + 0.3125 + 0.2734 + 0.2461 ≈ 1.707.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.70703125,
+     "display": "437/256 ≈ 1.707"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'The probability that the walk never revisits 0 during steps 1–10 must be tiny, around 1/32.'</p><p>Give the correct probability.</p>",
+    "model": "<p>It equals P(S<sub>10</sub> = 0) = 63/256 ≈ 0.246 (a classical consequence of the reflection principle). Random walks spend long stretches on one side.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.24609375,
+     "display": "63/256 ≈ 0.246"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-046",
+  "cat": "markov",
+  "diff": 3,
+  "title": "Running maximum of a ten-step walk",
+  "tags": [
+   "reflection-principle",
+   "random-walk",
+   "maximum",
+   "counting"
+  ],
+  "style": [
+   "math-test",
+   "research-stats"
+  ],
+  "prompt": "<p>A simple symmetric random walk takes 10 steps from 0. What is the probability that its maximum over the 10 steps is at least 3?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.34375,
+   "display": "352/1024 = 11/32 ≈ 0.344"
+  },
+  "hints": [
+   "Reflection: P(M<sub>n</sub> ≥ a) = P(S<sub>n</sub> ≥ a) + P(S<sub>n</sub> &gt; a).",
+   "After 10 steps S<sub>10</sub> is even, so S ≥ 3 means S ≥ 4."
+  ],
+  "solution": "<p>Reflect each path after its first visit to 3: paths with M ≥ 3 and S<sub>10</sub> &lt; 3 biject with paths ending above 3. So P(M ≥ 3) = P(S ≥ 3) + P(S &gt; 3).</p><p>S<sub>10</sub> is even, so both equal P(S ≥ 4) = P(≥ 7 heads) = (120 + 45 + 10 + 1)/1024 = 176/1024. Total 352/1024 = 11/32.</p><p><b>Answer: 11/32 ≈ 0.344.</b></p>",
+  "key": "Reflection principle: P(max ≥ a) = P(S ≥ a) + P(S > a) = 2P(S > a) + P(S = a).",
+  "plan": {
+   "keyIdea": "Reflection principle at the first hitting time of the level.",
+   "method": "Translate into binomial tail counts.",
+   "sanityChecks": [
+    "a = 0 gives 1.",
+    "Must exceed P(S<sub>10</sub> ≥ 3)."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Same trick for level 4: P(M ≥ 4) = 2P(S<sub>10</sub> ≥ 4) = 352/1024.'</p><p>Give the correct P(M ≥ 4).</p>",
+    "model": "<p>S<sub>10</sub> = 4 is possible now, and those paths must not be double-counted: P(M ≥ 4) = P(S ≥ 4) + P(S &gt; 4) = (176 + 56)/1024 = 232/1024 ≈ 0.227.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2265625,
+     "display": "232/1024 ≈ 0.227"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: P(maximum ≥ 1) over 10 steps?</p><p>Give a fraction.</p>",
+    "model": "<p>P(S ≥ 1) + P(S &gt; 1) = 2·P(S ≥ 2) = 2·(386/1024) = 772/1024 = 193/256 ≈ 0.754; equivalently 1 − P(walk stays ≤ 0) = 1 − C(10,5)/1024.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.75390625,
+     "display": "193/256 ≈ 0.754"
+    }
+   }
+  ]
+ },
+ {
+  "id": "dk-s01",
+  "cat": "markov",
+  "diff": 1,
+  "title": "Back at zero after four steps",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "binomial"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>A symmetric random walk starts at 0 and moves +1 or −1 with probability ½ each step. What is the probability it is at 0 after exactly 4 steps?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.375,
+   "display": "3/8"
+  },
+  "hints": [
+   "You need exactly 2 up-steps among 4.",
+   "C(4, 2)/2⁴."
+  ],
+  "solution": "<p>Position 0 after 4 steps needs 2 ups and 2 downs: C(4, 2)/16 = 6/16 = 3/8.</p><p><b>Answer: 3/8.</b></p>",
+  "key": "Return probabilities are central binomial coefficients: C(2n, n)/4ⁿ ≈ 1/√(πn).",
+  "plan": {
+   "keyIdea": "Count up-steps.",
+   "method": "Binomial C(4,2)/16.",
+   "sanityChecks": [
+    "Odd step counts give probability 0."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability of being at 0 after 6 steps?</p>",
+    "model": "<p>C(6, 3)/64 = 20/64 = 5/16.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3125,
+     "display": "5/16"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 1
+  }
+ },
+ {
+  "id": "dk-s02",
+  "cat": "markov",
+  "diff": 1,
+  "title": "Up five or down three?",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "martingale",
+   "optional-stopping"
+  ],
+  "style": [
+   "trading-desk"
+  ],
+  "prompt": "<p>A symmetric ±1 random walk starts at 0 and stops when it first reaches +5 or −3. What is the probability it stops at +5?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.375,
+   "display": "3/8"
+  },
+  "hints": [
+   "The position is a martingale; apply optional stopping.",
+   "p · 5 + (1 − p) · (−3) = 0."
+  ],
+  "solution": "<p>The walk is a martingale and the stopping time is bounded in expectation, so E[S<sub>T</sub>] = 0: 5p − 3(1 − p) = 0 ⟹ p = 3/8.</p><p>General rule: P(hit +a before −b) = b/(a + b) = 3/(3 + 5) — the nearer barrier is the likelier one.</p><p><b>Answer: 3/8.</b></p>",
+  "key": "Optional stopping on S<sub>n</sub>: P(hit +a before −b) = b/(a + b).",
+  "plan": {
+   "keyIdea": "Fair game ⇒ martingale.",
+   "method": "Optional stopping: expected final position = 0.",
+   "sanityChecks": [
+    "Below ½ since +5 is farther away."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected number of steps until it stops?</p>",
+    "model": "<p>S<sub>n</sub>² − n is a martingale, so E[T] = E[S<sub>T</sub>²] = (3/8)·25 + (5/8)·9 = 15 = a·b.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 15.0,
+     "display": "15",
+     "tolAbs": 0.01
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 2
+  }
+ },
+ {
+  "id": "dk-s03",
+  "cat": "markov",
+  "diff": 1,
+  "title": "Drift of a biased walk",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "linearity"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>A random walk starts at 0 and moves +1 with probability 0.6 and −1 with probability 0.4 each step. What is its expected position after 10 steps?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2.0,
+   "display": "2",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Each step has mean 0.6 − 0.4.",
+   "Linearity over 10 steps."
+  ],
+  "solution": "<p>Each step has mean 0.2, so after 10 steps E = 10 · 0.2 = 2.</p><p><b>Answer: 2.</b></p>",
+  "key": "Linearity: drift per step × number of steps.",
+  "plan": {
+   "keyIdea": "Mean step, then linearity.",
+   "method": "n(2p − 1).",
+   "sanityChecks": [
+    "Positive since p > ½."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Variance of the position after 10 steps?</p>",
+    "model": "<p>Each step has variance 1 − 0.2² = 0.96; independent steps: 9.6 (= 4np(1 − p)).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 9.6,
+     "display": "9.6"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 3
+  }
+ },
+ {
+  "id": "dk-s04",
+  "cat": "markov",
+  "diff": 1,
+  "title": "Never below zero",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "counting",
+   "catalan"
+  ],
+  "style": [
+   "brainteaser-phone",
+   "math-test"
+  ],
+  "prompt": "<p>A symmetric ±1 random walk starts at 0 and takes 4 steps. What is the probability that it never goes below 0 (it may touch 0)?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.375,
+   "display": "3/8"
+  },
+  "hints": [
+   "List the paths: the first step must be up.",
+   "There are 6 such paths out of 16."
+  ],
+  "solution": "<p>Valid paths: UUUU, UUUD, UUDU, UUDD, UDUU, UDUD — 6 of 16, so P = 3/8.</p><p>Curious fact (a reflection-principle identity): P(S<sub>1</sub>, …, S<sub>2n</sub> ≥ 0) = P(S<sub>2n</sub> = 0) = C(2n, n)/4ⁿ — the same 3/8 as the previous card.</p><p><b>Answer: 3/8.</b></p>",
+  "key": "Staying non-negative for 2n steps has the same probability as being at 0 at time 2n.",
+  "plan": {
+   "keyIdea": "Enumerate (16 paths) or use the reflection identity.",
+   "method": "Count non-negative paths.",
+   "sanityChecks": [
+    "First step must be up, so P ≤ ½."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A colleague says: 'For 6 steps the chance of never going below 0 is 1/4, since each step halves it.' Correct the number.</p>",
+    "model": "<p>By the identity, it equals P(S<sub>6</sub> = 0) = C(6, 3)/64 = 5/16 — it decays like 1/√n, not geometrically.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3125,
+     "display": "5/16"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 4
+  }
+ },
+ {
+  "id": "dk-s05",
+  "cat": "markov",
+  "diff": 2,
+  "title": "Exit time from a symmetric strip",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "martingale",
+   "wald"
+  ],
+  "style": [
+   "trading-desk"
+  ],
+  "prompt": "<p>A symmetric ±1 random walk starts at 0. What is the expected number of steps until it first reaches +3 or −3?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 9.0,
+   "display": "9",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "S<sub>n</sub>² − n is a martingale.",
+   "At the stopping time S<sub>T</sub>² = 9 always."
+  ],
+  "solution": "<p>M<sub>n</sub> = S<sub>n</sub>² − n is a martingale (E[(S + X)² − S²] = 1). Optional stopping: E[S<sub>T</sub>²] = E[T]. Since |S<sub>T</sub>| = 3, E[T] = 9.</p><p>General: exit from (−b, a) takes ab steps on average.</p><p><b>Answer: 9.</b></p>",
+  "key": "The quadratic martingale S² − n turns exit times into second moments.",
+  "plan": {
+   "keyIdea": "Use S² − n martingale.",
+   "method": "Optional stopping, |S_T| = 3.",
+   "sanityChecks": [
+    "Check width-1 case: exit ±1 takes exactly 1 step."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected steps until it reaches +2 or −5?</p>",
+    "model": "<p>a · b = 2 · 5 = 10.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 10.0,
+     "display": "10",
+     "tolAbs": 0.01
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 5
+  }
+ },
+ {
+  "id": "dk-s06",
+  "cat": "markov",
+  "diff": 2,
+  "title": "Climbing with a tailwind",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "wald",
+   "hitting-time"
+  ],
+  "style": [
+   "trading-desk"
+  ],
+  "prompt": "<p>A random walk moves +1 with probability 2/3 and −1 with probability 1/3. Starting at 0, what is the expected number of steps to first reach +5?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 15.0,
+   "display": "15",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Wald: E[S<sub>T</sub>] = E[T] · (p − q).",
+   "S<sub>T</sub> = 5 exactly."
+  ],
+  "solution": "<p>The walk drifts up so T is finite with finite mean. Wald's identity: 5 = E[T](2/3 − 1/3), so E[T] = 15.</p><p>Equivalently, each +1 level takes 1/(p − q) = 3 steps on average, and levels add.</p><p><b>Answer: 15.</b></p>",
+  "key": "Wald's identity: E[S<sub>T</sub>] = μ E[T] for a stopping time with finite mean.",
+  "plan": {
+   "keyIdea": "Positive drift; level-by-level additivity.",
+   "method": "Wald: E[T] = a/(p − q).",
+   "sanityChecks": [
+    "Must exceed 5 (the minimum)."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability the walk <b>ever</b> visits −1?</p>",
+    "model": "<p>Using the martingale (q/p)<sup>S</sup> = (½)<sup>S</sup>: P(ever reach −1) = q/p = 1/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 6
+  }
+ },
+ {
+  "id": "dk-s07",
+  "cat": "markov",
+  "diff": 2,
+  "title": "Wald's identity at the dice table",
+  "tags": [
+   "deck",
+   "spades",
+   "wald",
+   "dice",
+   "stopping-time"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>You roll a fair die until the first 6 appears, adding up every roll including the final 6. What is the expected total?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 21.0,
+   "display": "21",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "The number of rolls N is a stopping time with E[N] = 6.",
+   "Wald: E[sum] = E[N] · E[roll]."
+  ],
+  "solution": "<p>N is geometric with mean 6, and it is a stopping time, so Wald's identity applies: E[sum] = 6 · 3.5 = 21.</p><p>Check: 5 non-six rolls on average, each averaging 3 (uniform on 1–5), plus the final 6: 15 + 6 = 21.</p><p>Trap: 'given the roll isn't the last one, it averages 3.5' — no, non-final rolls are conditioned to be 1–5.</p><p><b>Answer: 21.</b></p>",
+  "key": "Wald's identity needs a stopping time, not independence of N from the rolls.",
+  "plan": {
+   "keyIdea": "Recognise a stopping time.",
+   "method": "Wald E[N]·E[X].",
+   "sanityChecks": [
+    "Cross-check by splitting the final six from the rest."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "explain",
+    "prompt": "<p>What is the expected sum of the rolls <b>before</b> the 6?</p>",
+    "model": "<p>21 − 6 = 15; equivalently 5 rolls × average 3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 15.0,
+     "display": "15",
+     "tolAbs": 0.01
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 7
+  }
+ },
+ {
+  "id": "dk-s08",
+  "cat": "markov",
+  "diff": 2,
+  "title": "A high-water mark",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "reflection-principle"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>A symmetric ±1 random walk starts at 0 and takes 10 steps. What is the probability that its maximum over the 10 steps is at least 3?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.34375,
+   "display": "11/32 ≈ 0.344"
+  },
+  "hints": [
+   "Reflection principle: P(max ≥ a) = P(S<sub>n</sub> ≥ a) + P(S<sub>n</sub> &gt; a).",
+   "S<sub>10</sub> is even, so both terms equal P(S<sub>10</sub> ≥ 4)."
+  ],
+  "solution": "<p>Reflect each path after its first visit to 3: paths that reach 3 and end below 3 pair up with paths ending above 3. So P(M ≥ 3) = P(S ≥ 3) + P(S &gt; 3).</p><p>S<sub>10</sub> is even, so this is 2P(S<sub>10</sub> ≥ 4) = 2P(≥ 7 heads) = 2(120 + 45 + 10 + 1)/1024 = 352/1024 = 11/32.</p><p><b>Answer: 11/32 ≈ 0.344.</b></p>",
+  "key": "Reflection principle: the running maximum's tail is about twice the endpoint's tail.",
+  "plan": {
+   "keyIdea": "Reflect at the first hitting of level 3.",
+   "method": "Binomial tail for the endpoint.",
+   "sanityChecks": [
+    "Roughly twice P(S ≥ 4) ≈ 0.17."
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability the maximum is at least 2?</p>",
+    "model": "<p>P(S ≥ 2) + P(S &gt; 2) = 386/1024 + 176/1024 = 562/1024 = 281/512 ≈ 0.549.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.548828125,
+     "display": "281/512 ≈ 0.549"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 8
+  }
+ },
+ {
+  "id": "dk-s09",
+  "cat": "markov",
+  "diff": 2,
+  "title": "Will a biased walk come home?",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "recurrence"
+  ],
+  "style": [
+   "trading-desk",
+   "math-test"
+  ],
+  "prompt": "<p>A random walk on the integers starts at 0 and moves +1 with probability 0.6, −1 with probability 0.4. What is the probability that it ever returns to 0?</p><p>Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.8,
+   "display": "0.8"
+  },
+  "hints": [
+   "Condition on the first step.",
+   "From +1, P(ever hitting 0) = q/p; from −1 it is 1 (upward drift)."
+  ],
+  "solution": "<p>After an up-step (prob 0.6) the walk must come back down one level: probability q/p = 2/3. After a down-step (0.4) it returns surely because of the upward drift.</p><p>P(return) = 0.6 · 2/3 + 0.4 · 1 = 0.8 = 1 − |p − q|.</p><p><b>Answer: 0.8.</b></p>",
+  "key": "A biased walk is transient: P(return) = 1 − |p − q|.",
+  "plan": {
+   "keyIdea": "First-step analysis + one-sided hitting probabilities.",
+   "method": "0.6·(q/p) + 0.4·1.",
+   "sanityChecks": [
+    "p = ½ should give 1 (recurrence)."
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Expected number of returns to 0 (over all time)?</p>",
+    "model": "<p>Each visit is followed by another with probability 0.8: a geometric count with mean 0.8/0.2 = 4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.0,
+     "display": "4",
+     "tolAbs": 0.01
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 9
+  }
+ },
+ {
+  "id": "dk-s10",
+  "cat": "markov",
+  "diff": 3,
+  "title": "Two matchboxes",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "banach-matchbox",
+   "counting"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>A smoker carries two boxes, each starting with 5 matches. Each time, he picks one of the two boxes at random and takes a match. The first time he picks a box and finds it empty, what is the expected number of matches left in the other box?</p><p>Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 1.70703125,
+   "display": "437/256 ≈ 1.707"
+  },
+  "hints": [
+   "If the other box has k left when the empty one is discovered, the empty box has been picked 6 times and the other 5 − k times.",
+   "P(k) = 2 · C(10 − k, 5) (½)<sup>11 − k</sup> = C(10 − k, 5)/2<sup>10 − k</sup>."
+  ],
+  "solution": "<p>Say box A is found empty with k left in B: among the first 10 − k picks, exactly 5 are A, and pick 11 − k is A again. Probability C(10 − k, 5)(½)<sup>11 − k</sup>; double for the symmetric case.</p><p>P(k) = C(10 − k, 5)/2<sup>10 − k</sup> for k = 0…5, and Σ k P(k) = 437/256 ≈ 1.707.</p><p>Trap: stopping when a box <i>becomes</i> empty instead of when it is <i>found</i> empty.</p><p><b>Answer: 437/256 ≈ 1.707.</b></p>",
+  "key": "Banach matchbox: a negative-binomial count in a walk between two boxes.",
+  "plan": {
+   "keyIdea": "Model picks as a symmetric walk; condition on which box empties.",
+   "method": "Negative binomial P(k), then the mean.",
+   "sanityChecks": [
+    "Probabilities P(0..5) must sum to 1."
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability that the other box is <b>also</b> empty at that moment?</p>",
+    "model": "<p>P(0) = C(10, 5)/2<sup>10</sup> = 252/1024 = 63/256 ≈ 0.246.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.24609375,
+     "display": "63/256 ≈ 0.246"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 10
+  }
+ },
+ {
+  "id": "dk-s11",
+  "cat": "markov",
+  "diff": 3,
+  "title": "Reflecting floor, absorbing ceiling",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "hitting-time",
+   "martingale"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>A walk lives on {0, 1, …, 10}. From 0 it always moves to 1; from any other state below 10 it moves ±1 with probability ½ each. Starting at 0, what is the expected number of steps to first reach 10?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 100.0,
+   "display": "100",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Let h(k) be the expected time from k; h(k) = 1 + ½h(k − 1) + ½h(k + 1), h(0) = 1 + h(1), h(10) = 0.",
+   "Try a quadratic: h(k) = N² − k²."
+  ],
+  "solution": "<p>The function h(k) = 100 − k² satisfies h(k) = 1 + ½h(k − 1) + ½h(k + 1) (second difference −2) and h(0) = 1 + h(1) (100 = 1 + 99), h(10) = 0. Hence h(0) = 100.</p><p>Martingale view: reflecting at 0 is like a free walk where you stop at ±10, and |S|² − n is a martingale ⇒ E[T] = 10².</p><p><b>Answer: 100.</b></p>",
+  "key": "Reflection at 0 folds the walk: time to reach N from 0 is N².",
+  "plan": {
+   "keyIdea": "First-step equations; guess a quadratic.",
+   "method": "h(k) = N² − k².",
+   "sanityChecks": [
+    "Unfolded: exit from (−10, 10) takes 10·10 steps."
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Starting at 5 instead?</p>",
+    "model": "<p>h(5) = 100 − 25 = 75.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 75.0,
+     "display": "75",
+     "tolAbs": 0.01
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 11
+  }
+ },
+ {
+  "id": "dk-s12",
+  "cat": "markov",
+  "diff": 3,
+  "title": "Return to the origin on a grid",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "two-dimensional",
+   "rotation-trick"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>A walker on the integer grid starts at (0, 0) and moves one step up, down, left or right with probability ¼ each. What is the probability it is back at (0, 0) after exactly 4 steps?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.140625,
+   "display": "9/64"
+  },
+  "hints": [
+   "Rotate 45°: u = x + y and v = x − y each do an independent ±1 walk.",
+   "Return to the origin iff both u and v are at 0."
+  ],
+  "solution": "<p>Each grid step changes (u, v) = (x + y, x − y) by (±1, ±1) with all four sign combinations equally likely, so u and v are independent symmetric walks.</p><p>P(back at origin after 4) = P(u<sub>4</sub> = 0) · P(v<sub>4</sub> = 0) = (C(4, 2)/16)² = (3/8)² = 9/64.</p><p>Direct check: 36 of the 256 four-step paths return.</p><p><b>Answer: 9/64.</b></p>",
+  "key": "The 45° rotation turns the 2-D simple walk into two independent 1-D walks.",
+  "plan": {
+   "keyIdea": "Decouple coordinates by rotation.",
+   "method": "Square of the 1-D return probability.",
+   "sanityChecks": [
+    "Brute-force count: 36/256."
+   ]
+  },
+  "par": 10,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Probability of being back at the origin after 6 steps?</p>",
+    "model": "<p>(C(6, 3)/64)² = (5/16)² = 25/256 ≈ 0.098.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.09765625,
+     "display": "25/256"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 12
+  }
+ },
+ {
+  "id": "dk-s13",
+  "cat": "markov",
+  "diff": 3,
+  "title": "Two walkers on a ring",
+  "tags": [
+   "deck",
+   "spades",
+   "random-walk",
+   "hitting-time",
+   "cycle"
+  ],
+  "style": [
+   "math-test"
+  ],
+  "prompt": "<p>A ring has 8 nodes. Two walkers start at opposite nodes. Every second, <b>both</b> move simultaneously and independently one node clockwise or anticlockwise with probability ½ each. What is the expected number of seconds until they first stand on the same node?</p><p>Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 8.0,
+   "display": "8",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Track the clockwise gap D. Each second it changes by +2, 0 or −2 with probabilities ¼, ½, ¼.",
+   "Halve it: a lazy walk on a 4-cycle starting opposite the target."
+  ],
+  "solution": "<p>The gap D (mod 8) changes by +2 (¼), 0 (½) or −2 (¼). Writing d = D/2, d is a lazy walk on the 4-cycle starting at 2, and the walkers meet when d = 0.</p><p>A non-lazy walk on a 4-cycle from distance 2 needs k(n − k) = 2 · 2 = 4 steps on average; laziness ½ doubles it to 8.</p><p>Trap: worrying about walkers 'passing through' each other — with an even gap they can only meet on nodes.</p><p><b>Answer: 8.</b></p>",
+  "key": "Reduce two walkers to one difference walk; account for laziness and parity.",
+  "plan": {
+   "keyIdea": "Difference process; check parity first.",
+   "method": "Lazy cycle walk: double the k(n − k) hitting time.",
+   "sanityChecks": [
+    "If the gap were odd they could never meet on a node."
+   ]
+  },
+  "par": 12,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same ring, but the walkers start 2 nodes apart. Expected time to meet?</p>",
+    "model": "<p>d starts at 1 on the 4-cycle: non-lazy time 1 · 3 = 3, doubled: 6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 6.0,
+     "display": "6",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>What happens if they start on adjacent nodes (gap 1)?</p>",
+    "model": "<p>The gap stays odd forever, so they never share a node (they can only swap across an edge).</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "They meet after 4 s on average",
+      "They meet after 7 s on average",
+      "They never stand on the same node"
+     ],
+     "correct": 2,
+     "display": "They never meet on a node"
+    }
+   }
+  ],
+  "deck": {
+   "suit": "spades",
+   "rank": 13
+  }
  },
  {
   "id": "nt-001",
@@ -5167,7 +15987,38 @@ window.PROBLEMS = [
    "The last digits repeat with period 4."
   ],
   "solution": "<p>Last digits of 7<sup>n</sup>: 7, 9, 3, 1, 7, 9, … (period 4, since 7⁴ = 2401 ≡ 1 mod 10).</p><p>2026 = 4·506 + 2, so 7<sup>2026</sup> ≡ 7² = 49 ≡ 9 (mod 10).</p><p>Trap: matching the remainder 2 to the wrong position in the cycle (the cycle starts at n = 1, not n = 0).</p><p><b>Answer: 9.</b></p>",
-  "key": "Powers mod 10 cycle; reduce the exponent mod the cycle length."
+  "key": "Powers mod 10 cycle; reduce the exponent mod the cycle length.",
+  "plan": {
+   "keyIdea": "Last digits of powers cycle; 7⁴ ≡ 1 (mod 10).",
+   "method": "Reduce the exponent mod 4: 2026 ≡ 2, so 7² = 49.",
+   "sanityChecks": [
+    "The cycle 7, 9, 3, 1 starts at n = 1.",
+    "Odd base not divisible by 5 ⇒ last digit odd and not 5."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What are the last <b>two</b> digits of 7²⁰²⁶?</p><p>Give a number.</p>",
+    "model": "<p>7⁴ = 2401 ≡ 1 (mod 100), so 7²⁰²⁶ ≡ 7² = 49 (mod 100).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 49.0,
+     "display": "49"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The exponent doesn't matter much: 7²⁰²⁵ also ends in 9.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>2025 ≡ 1 (mod 4), so 7²⁰²⁵ ends in 7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 7.0,
+     "display": "7"
+    }
+   }
+  ],
+  "par": 1
  },
  {
   "id": "nt-002",
@@ -5441,7 +16292,38 @@ window.PROBLEMS = [
    "⌊√k⌋ = m for k = m², …, (m + 1)² − 1: that is 2m + 1 values."
   ],
   "solution": "<p>⌊√k⌋ = m exactly for the 2m + 1 integers m² ≤ k ≤ m² + 2m. For k ≤ 99 this covers m = 1..9 completely (m = 9: 81..99).</p><p>Sum = Σ<sub>m=1..9</sub> m(2m + 1) = 2·Σm² + Σm = 2·285 + 45 = 615.</p><p>Trap: including 100 (which would add 10) or giving the block for m = 9 only 18 terms.</p><p><b>Answer: 615.</b></p>",
-  "key": "Floor sums: swap the order — count how many k give each floor value."
+  "key": "Floor sums: swap the order — count how many k give each floor value.",
+  "plan": {
+   "keyIdea": "Group k by the value of ⌊√k⌋: the block m² ≤ k ≤ m² + 2m has 2m + 1 terms.",
+   "method": "Σ m(2m + 1) for m = 1..9.",
+   "sanityChecks": [
+    "99 = 9² + 18, so block 9 is complete.",
+    "Rough size: ≈ (2/3)·99^(3/2) ≈ 650."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Extend the sum to k = 120.</p><p>Give a number.</p>",
+    "model": "<p>Add k = 100..120 (21 terms of 10): 615 + 210 = 825.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 825.0,
+     "display": "825"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: ⌊√1⌋ + … + ⌊√8⌋?</p><p>Give a number.</p>",
+    "model": "<p>1 + 1 + 1 + 2 + 2 + 2 + 2 + 2 = 13 = 1·3 + 2·5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 13.0,
+     "display": "13"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "nt-012",
@@ -5649,7 +16531,49 @@ window.PROBLEMS = [
    "n² + 21 ≡ 9 + 21 = 30 (mod n + 3), so n + 3 must divide 30."
   ],
   "solution": "<p>Since n ≡ −3 (mod n + 3), n² + 21 ≡ 9 + 21 = 30. So n + 3 divides n² + 21 iff n + 3 divides 30.</p><p>Divisors of 30 that are at least 4: 5, 6, 10, 15, 30, giving n = 2, 3, 7, 12, 27.</p><p>Check n = 2: 25/5 = 5 ✓; n = 27: 750/30 = 25 ✓. Trap: missing that divisors 1, 2, 3 give n ≤ 0.</p><p><b>Answer: 2, 3, 7, 12, 27.</b></p>",
-  "key": "To test d(n) | f(n), reduce f modulo d(n) to a constant."
+  "key": "To test d(n) | f(n), reduce f modulo d(n) to a constant.",
+  "plan": {
+   "keyIdea": "Reduce mod n + 3: n ≡ −3, so n² + 21 ≡ 30.",
+   "method": "n + 3 must divide 30 and be ≥ 4.",
+   "sanityChecks": [
+    "Test the endpoints n = 2 and n = 27.",
+    "Divisors 1, 2, 3 give n ≤ 0."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Find all positive n with n + 2 dividing n² + 21. Give them comma-separated (any order).</p>",
+    "model": "<p>n ≡ −2 gives 4 + 21 = 25, so n + 2 ∈ {5, 25}: n = 3, 23.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      3.0,
+      23.0
+     ],
+     "ordered": false,
+     "display": "3, 23"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Then n + 3 must divide 21, so n = 4 or 18.”</p><p>Is that right? If not, list all valid n, comma-separated.</p>",
+    "model": "<p>The remainder is (−3)² + 21 = 30, not 21: n + 3 | 30 ⇒ n = 2, 3, 7, 12, 27. (n = 4: 37/7 is not an integer.)</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      2.0,
+      3.0,
+      7.0,
+      12.0,
+      27.0
+     ],
+     "ordered": false,
+     "display": "2, 3, 7, 12, 27"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "nt-019",
@@ -5795,7 +16719,39 @@ window.PROBLEMS = [
    "E[3X] = 3·E[X] = 3 × 3.5."
   ],
   "solution": "<p>The fair price is the expected payout: E[3X] = 3 × 3.5 = $10.50.</p><p>You pay $10, so your expected profit is 10.50 − 10 = <b>+$0.50</b> per play, an edge of 5% of the stake. You should play, but how much of a bankroll to risk on a game like this is a separate question (Kelly).</p><p><b>Answer: +$0.50.</b></p>",
-  "key": "Price = expected payout; edge = price − cost. Positive edge ⇒ play, then size the bet separately."
+  "key": "Price = expected payout; edge = price − cost. Positive edge ⇒ play, then size the bet separately.",
+  "plan": {
+   "keyIdea": "Expected profit = E[payout] − price; linearity gives E[3X] = 3·3.5.",
+   "method": "Fair price 10.50, pay 10, edge +0.50.",
+   "sanityChecks": [
+    "Payout ranges 3–18, so a mean near 10 is sensible.",
+    "Edge as a % of stake: 5%."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now you receive the <i>square</i> of the face value and pay $15. Expected profit per play?</p><p>Give a fraction or decimal in dollars.</p>",
+    "model": "<p>E[X²] = 91/6 ≈ 15.17, so the profit is 91/6 − 15 = 1/6 ≈ $0.17.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.16666666666666666,
+     "display": "1/6 ≈ 0.167"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The game can be scaled: pay 10k, receive 3k × the face. The interviewer says: “The edge is 5%, so the Kelly bettor puts 5% of the bankroll into the entry fee.”</p><p>Is that right? If not, give the Kelly fraction of bankroll paid as entry fee (decimal, within 2%).</p>",
+    "model": "<p>Per $1 of fee the return is R = 0.3X − 1 ∈ {−0.7, −0.4, …, +0.8}, mean 0.05, variance 0.09 · 35/12 = 0.2625. Kelly ≈ mean/variance ≈ 0.19; maximising E[ln(1 + fR)] exactly gives f* ≈ 0.191. “Bet the edge” only works for even-money bets.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.19096638670484345,
+     "display": "≈ 0.191",
+     "tolRel": 0.02
+    }
+   }
+  ],
+  "par": 1
  },
  {
   "id": "kel-002",
@@ -5897,7 +16853,7 @@ window.PROBLEMS = [
    "betting-game",
    "trading-desk"
   ],
-  "prompt": "<p>Continue with the 0.55 coin at even money, betting the Kelly fraction 10% on every flip. What is the expected growth rate of log-wealth per flip, E[ln(W<sub>n+1</sub>/W<sub>n</sub>)]?</p><p>Give a decimal to 4 significant figures.</p>",
+  "prompt": "<p>A coin lands heads with probability 0.55 and you bet at even money, staking the Kelly fraction 10% of your wealth on heads every flip. What is the expected growth rate of log-wealth per flip, E[ln(W<sub>n+1</sub>/W<sub>n</sub>)]?</p><p>Give a decimal to 4 significant figures.</p>",
   "answer": {
    "type": "numeric",
    "value": 0.0050083668463568876,
@@ -5909,7 +16865,38 @@ window.PROBLEMS = [
    "The edge²/2 rule of thumb gives 0.005; compute the exact value."
   ],
   "solution": "<p>Wealth is multiplied by 1.1 with probability 0.55 and by 0.9 with probability 0.45, so</p><p>g = 0.55 ln 1.1 + 0.45 ln 0.9 ≈ 0.052421 − 0.047412 = 0.005008.</p><p>This is close to the small-edge approximation g* ≈ edge²/2 = 0.01/2 = 0.005. At this rate wealth doubles in about ln 2/g ≈ 138 flips (median).</p><p><b>Answer: ≈ 0.00501 per flip.</b></p>",
-  "key": "Growth at Kelly: g* = Σ p<sub>i</sub> ln(1 + f*x<sub>i</sub>) ≈ edge²/(2·variance) for small edges."
+  "key": "Growth at Kelly: g* = Σ p<sub>i</sub> ln(1 + f*x<sub>i</sub>) ≈ edge²/(2·variance) for small edges.",
+  "plan": {
+   "keyIdea": "Log-growth per flip = p ln(1 + f) + q ln(1 − f).",
+   "method": "0.55 ln 1.1 + 0.45 ln 0.9.",
+   "sanityChecks": [
+    "Small-edge approximation edge²/2 = 0.005.",
+    "Growth must be positive at Kelly."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>A 60% coin at even money, betting its Kelly fraction 20%. Growth rate per flip (4 significant figures)?</p>",
+    "model": "<p>0.6 ln 1.2 + 0.4 ln 0.8 ≈ 0.02014 (edge²/2 = 0.02).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.020135513550688863,
+     "display": "≈ 0.02014"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “So the expected <i>arithmetic</i> return per flip is also 0.5%.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>E[return] = f × edge = 0.1 × 0.1 = 1%. The log-growth is lower because of volatility drag.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.01,
+     "display": "0.01"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "kel-006",
@@ -5936,7 +16923,57 @@ window.PROBLEMS = [
    "Kelly leverage f* = μ/σ² = 2; half-Kelly is f = 1."
   ],
   "solution": "<p>With constant leverage f the log-wealth drift is g(f) = fμ − ½f²σ².</p><p>Kelly: f* = μ/σ² = 0.08/0.04 = 2, with g* = μ²/(2σ²) = 0.0064/0.08 = 0.08.</p><p>Half Kelly, f = 1: g = 0.08 − ½(0.04) = 0.06. In general c·Kelly earns (2c − c²) g*, so half Kelly keeps 75% of the growth with half the volatility.</p><p><b>Answer: 0.06 (6% per year).</b></p>",
-  "key": "Fractional Kelly c·f* earns (2c − c²)·g*: half Kelly gives 75% of the growth for 50% of the volatility."
+  "key": "Fractional Kelly c·f* earns (2c − c²)·g*: half Kelly gives 75% of the growth for 50% of the volatility.",
+  "plan": {
+   "keyIdea": "Log-wealth drift with leverage f is fμ − ½f²σ²; Kelly is μ/σ².",
+   "method": "f* = 2, half Kelly f = 1, g = 0.08 − 0.02.",
+   "sanityChecks": [
+    "Fraction c of Kelly keeps (2c − c²) of the max growth.",
+    "Half Kelly: 75% of 8% = 6%."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the growth rate at 1.5× Kelly (f = 3)?</p><p>Give a decimal per year.</p>",
+    "model": "<p>g = 3 · 0.08 − ½ · 9 · 0.04 = 0.24 − 0.18 = 0.06: the same as half Kelly, since g is symmetric around f*. Over-betting costs as much growth with far more volatility.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.06,
+     "display": "0.06"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Now σ = 25% (μ still 8%). Kelly leverage and the maximum growth rate? Answer as two numbers separated by a comma.</p>",
+    "model": "<p>f* = 0.08/0.0625 = 1.28, g* = μ²/(2σ²) = 0.0064/0.125 = 0.0512.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      1.28,
+      0.0512
+     ],
+     "ordered": true,
+     "display": "1.28, 0.0512"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Halving the leverage halves the growth, so half Kelly earns 4%.”</p>",
+    "model": "<p>Growth is a parabola in f, so half Kelly keeps 2·½ − ¼ = 75% of the 8%: 6%.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree: 4%",
+      "Disagree: half Kelly keeps 75% of the growth, 6%",
+      "Disagree: growth is unchanged, 8%"
+     ],
+     "correct": 1,
+     "display": "Disagree: 6%"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "kel-007",
@@ -5989,7 +17026,43 @@ window.PROBLEMS = [
    "Its other root is twice the Kelly leverage."
   ],
   "solution": "<p>g(f) = fμ − ½f²σ² = f(μ − ½fσ²) vanishes at f = 0 and at f = 2μ/σ² = 2 × 0.05/0.0625 = 1.6.</p><p>Kelly leverage is μ/σ² = 0.8 (growth μ²/(2σ²) = 0.02). Betting twice Kelly brings growth back to zero; beyond that wealth decays to 0 almost surely, even though expected wealth still grows.</p><p><b>Answer: 1.6.</b></p>",
-  "key": "Growth is zero at 2× Kelly and negative beyond: over-betting is far worse than under-betting."
+  "key": "Growth is zero at 2× Kelly and negative beyond: over-betting is far worse than under-betting.",
+  "plan": {
+   "keyIdea": "Growth g(f) = fμ − ½f²σ² is a parabola with roots 0 and 2μ/σ².",
+   "method": "2 × 0.05/0.0625.",
+   "sanityChecks": [
+    "Kelly sits at the vertex μ/σ² = 0.8.",
+    "Beyond 2× Kelly growth is negative."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>μ = 8%, σ = 20%. Leverage above which growth turns negative?</p><p>Give a number.</p>",
+    "model": "<p>2 × 0.08/0.04 = 4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.0,
+     "display": "4"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Growth turns negative as soon as you lever above Kelly, 0.8.”</p>",
+    "model": "<p>Above Kelly growth falls but stays positive until twice Kelly, 1.6.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: growth is still positive up to 2 × Kelly = 1.6",
+      "Disagree: growth is never negative",
+      "Agree"
+     ],
+     "correct": 0,
+     "display": "Disagree: 1.6"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "kel-009",
@@ -6129,7 +17202,38 @@ window.PROBLEMS = [
    "With θ = 2ν/s², e<sup>−θX</sup> is a martingale; here θ = 1, so W<sub>0</sub>/W is a martingale. Apply optional stopping."
   ],
   "solution": "<p>At f = μ/σ² log-wealth X has drift ν = fμ − ½f²σ² = μ²/(2σ²) and variance s² = f²σ² = μ²/σ², so θ = 2ν/s² = 1. Then e<sup>−X</sup> = W<sub>0</sub>/W is a martingale.</p><p>With p = P(double first): p·(1/2) + (1 − p)·2 = 1 ⇒ 2 − 1.5p = 1 ⇒ p = 2/3.</p><p>Notice it doesn't depend on μ or σ at all.</p><p><b>Answer: 2/3.</b></p>",
-  "key": "Under full Kelly, 1/W is a martingale: P(reach 2W before W/2) = 2/3 whatever the edge."
+  "key": "Under full Kelly, 1/W is a martingale: P(reach 2W before W/2) = 2/3 whatever the edge.",
+  "plan": {
+   "keyIdea": "For Brownian log-wealth, e^(−θX) is a martingale with θ = 2·drift/variance; at full Kelly θ = 1.",
+   "method": "Optional stopping: p · ½ + (1 − p) · 2 = 1.",
+   "sanityChecks": [
+    "Independent of μ and σ.",
+    "Must exceed ½ (positive drift)."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Full Kelly: probability of tripling before falling to a third?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>p/3 + 3(1 − p) = 1 ⇒ p = 3/4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.75,
+     "display": "3/4"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Since the answer doesn't depend on μ or σ, half Kelly also doubles before halving with probability 2/3.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>The answer is free of μ, σ but not of the Kelly multiple. At half Kelly θ = 3: p · 2⁻³ + (1 − p) · 2³ = 1 ⇒ p = 8/9.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.8888888888888888,
+     "display": "8/9"
+    }
+   }
+  ],
+  "par": 5
  },
  {
   "id": "kel-014",
@@ -6145,7 +17249,7 @@ window.PROBLEMS = [
    "trading-desk",
    "math-test"
   ],
-  "prompt": "<p>Same set-up, but you run <b>half</b> Kelly (leverage f = μ/(2σ²)). Now what is the probability that wealth doubles before it halves?</p><p>Give a fraction or decimal.</p>",
+  "prompt": "<p>You run a continuously rebalanced strategy on a GBM asset at <b>half</b> Kelly (leverage f = μ/(2σ²), where full Kelly is μ/σ²). Now what is the probability that wealth doubles before it halves?</p><p>Give a fraction or decimal.</p>",
   "answer": {
    "type": "numeric",
    "value": 0.8888888888888888,
@@ -6323,7 +17427,48 @@ window.PROBLEMS = [
    "Set B/(P + 2B) = 1/3."
   ],
   "solution": "<p>The caller risks B to win P + B, so the break-even equity is B/(P + B + B) = B/(P + 2B).</p><p>B/(P + 2B) = 1/3 ⇒ 3B = P + 2B ⇒ B = P.</p><p>Half-pot gives 1/4, pot-size 1/3, 2× pot 2/5: equity requirements rise slowly with bet size.</p><p><b>Answer: 1 (a pot-sized bet).</b></p>",
-  "key": "Required calling equity = B/(P + 2B): ¼ for half pot, ⅓ for pot."
+  "key": "Required calling equity = B/(P + 2B): ¼ for half pot, ⅓ for pot.",
+  "plan": {
+   "keyIdea": "Break-even equity = amount risked / final pot.",
+   "method": "B/(P + 2B) = 1/3 ⇒ B = P.",
+   "sanityChecks": [
+    "Tiny bet ⇒ required equity near 0.",
+    "Huge bet ⇒ required equity near ½."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Required calling equity against a half-pot bet?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>B = P/2: (P/2)/(2P) = 1/4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.25,
+     "display": "1/4"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What does the required equity tend to as B/P → ∞?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>B/(P + 2B) → 1/2: the pot becomes negligible and you are flipping for the bet.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Facing a pot-sized bet you risk P to win P, so you need 50% equity to call.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>You risk P to win the existing pot plus the bet, 2P: required equity P/3P = 1/3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3333333333333333,
+     "display": "1/3"
+    }
+   }
+  ],
+  "par": 1.5
  },
  {
   "id": "kel-021",
@@ -6350,7 +17495,48 @@ window.PROBLEMS = [
    "q/p = 0.45/0.55 = 9/11."
   ],
   "solution": "<p>Let r(k) = P(ever hit 0 from k). Then r(k) = p·r(k + 1) + q·r(k − 1), r(0) = 1, and r(k) → 0 as k → ∞ when p &gt; q. The solution is r(k) = (q/p)<sup>k</sup>.</p><p>r(10) = (9/11)<sup>10</sup> ≈ 0.1344.</p><p>A positive edge still leaves a 13% chance of ruin with fixed-size bets; proportional (Kelly) betting never hits exactly zero.</p><p><b>Answer: ≈ 0.1344.</b></p>",
-  "key": "Fixed-stake ruin probability with an edge: (q/p)<sup>bankroll</sup>."
+  "key": "Fixed-stake ruin probability with an edge: (q/p)<sup>bankroll</sup>.",
+  "plan": {
+   "keyIdea": "Unbounded gambler's ruin: r(k) = (q/p)ᵏ when p &gt; q.",
+   "method": "(0.45/0.55)¹⁰.",
+   "sanityChecks": [
+    "r(0) = 1, decreasing in k.",
+    "Fair game ⇒ certain ruin."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same bets, $20 bankroll. P(ruin)? (3 significant figures.)</p>",
+    "model": "<p>(9/11)²⁰ ≈ 0.0181: ruin probability squares when the bankroll doubles.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.018071595021380404,
+     "display": "≈ 0.0181"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>$10 bankroll, but you win each round with probability 0.6. P(ruin)?</p><p>Give a decimal (3 significant figures).</p>",
+    "model": "<p>(2/3)¹⁰ ≈ 0.0173.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.017341529915832606,
+     "display": "≈ 0.0173"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “With a $1 bankroll you're ruined 45% of the time — the chance of losing the first bet.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Even after winning the first bet you can still go broke later: r(1) = q/p = 9/11 ≈ 0.818.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.8181818181818182,
+     "display": "9/11 ≈ 0.818"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "kel-022",
@@ -6377,7 +17563,518 @@ window.PROBLEMS = [
    "So (2000 − c)(1000 − c) = 1000²."
   ],
   "solution": "<p>Paying c gives wealth 2000 − c or 1000 − c with equal chance. Indifference: (2000 − c)(1000 − c) = 10<sup>6</sup> ⇒ c² − 3000c + 10<sup>6</sup> = 0 ⇒ c = 1500 − √(1,250,000) ≈ 381.97.</p><p>The risk-neutral price is $500, but a bettor whose whole bankroll is at stake should pay at most about $382.</p><p><b>Answer: ≈ $382.</b></p>",
-  "key": "A bankroll-constrained (log) bettor prices a game at its certainty equivalent, below the EV."
+  "key": "A bankroll-constrained (log) bettor prices a game at its certainty equivalent, below the EV.",
+  "plan": {
+   "keyIdea": "Pay the fee only if expected log-wealth does not fall: solve (2000 − c)(1000 − c) = 1000².",
+   "method": "Quadratic c² − 3000c + 10⁶ = 0, take the smaller root.",
+   "sanityChecks": [
+    "Must be below the risk-neutral price 500.",
+    "Large bankroll ⇒ approaches 500."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same game but your bankroll is $2000. Maximum fee?</p><p>Give dollars.</p>",
+    "model": "<p>(3000 − c)(2000 − c) = 2000² ⇒ c = 2500 − √4 250 000 ≈ $438.45.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 438.44718719116963,
+     "display": "≈ $438.45"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What does the maximum fee tend to as the bankroll → ∞?</p><p>Give dollars.</p>",
+    "model": "<p>Log utility becomes locally linear: the fee tends to the expected value, $500.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 500.0,
+     "display": "$500"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Your certainty equivalent is the geometric mean √(2000 × 1000) ≈ 1414, so you'd pay up to $414.”</p>",
+    "model": "<p>That values the gamble <i>as if it were free</i>; the fee is paid in both outcomes, so it lowers both terms. Solving (2000 − c)(1000 − c) = 10⁶ gives ≈ $382.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: the fee comes out of both outcomes; ≈ $382",
+      "Disagree: $500",
+      "Agree: $414"
+     ],
+     "correct": 0,
+     "display": "Disagree: ≈ $382"
+    }
+   }
+  ],
+  "par": 4
+ },
+ {
+  "id": "js-001",
+  "cat": "kelly",
+  "diff": 1,
+  "title": "Maximise expected wealth, not growth",
+  "tags": [
+   "kelly",
+   "coins",
+   "expected-value",
+   "betting"
+  ],
+  "style": [
+   "betting-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>You start with $100 and play 10 rounds. Each round you may stake any amount up to your current wealth on a coin that lands heads with probability 0.6; heads you win your stake, tails you lose it.</p><p>If your goal is literally to maximise your <b>expected</b> wealth after 10 rounds, what is that maximum expected wealth?</p><p>Give a number in dollars.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 619.1736422399997,
+   "display": "$619.17 (stake everything every round: 100·1.2¹⁰)"
+  },
+  "hints": [
+   "If you stake a fraction f each round, E[W<sub>n+1</sub>] = W<sub>n</sub>(1 + f(2p − 1)). Which f maximises that?",
+   "The expected multiplier per round is linear in f, so the optimum sits at a boundary."
+  ],
+  "solution": "<p>Staking a fraction f of wealth, each round multiplies expected wealth by 0.6(1 + f) + 0.4(1 − f) = 1 + 0.2f. Rounds are independent, so E[W<sub>10</sub>] = 100(1 + 0.2f)<sup>10</sup>, which is increasing in f. The maximiser is f = 1: bet everything every round.</p><p>E[W<sub>10</sub>] = 100 · 1.2<sup>10</sup> ≈ 619.17.</p><p>The catch: you only survive if all 10 flips are heads, probability 0.6<sup>10</sup> ≈ 0.6%. The expectation is carried by one path worth 100·2<sup>10</sup> = $102,400. That is why traders maximise expected <i>log</i> wealth instead (Kelly: f = 2p − 1 = 0.2), which maximises the long-run growth rate and the median outcome, not the mean.</p><p><b>Answer: ≈ $619.17.</b></p>",
+  "key": "Expected wealth is maximised by betting everything; Kelly (f = 2p − 1) maximises expected log wealth, i.e. growth and the median, which is a different objective.",
+  "plan": {
+   "keyIdea": "Expected wealth is multiplicative in independent rounds and linear in the stake fraction per round.",
+   "method": "Write E[W<sub>n+1</sub>] = W<sub>n</sub>(1 + f(2p − 1)), see it increases in f, take f = 1, then compute 100·1.2¹⁰.",
+   "sanityChecks": [
+    "With p = 0.5 every f gives the same expectation",
+    "Check the probability of surviving 10 all-in bets: 0.6¹⁰"
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “So the answer is the Kelly fraction, f = 2p − 1 = 20%, because Kelly maximises expected wealth.” What is wrong with this?</p>",
+    "model": "<p>Kelly maximises E[log W] (the long-run growth rate, equivalently the median of W<sub>n</sub> for large n), not E[W]. E[W<sub>10</sub>] = 100(1 + 0.2f)<sup>10</sup> keeps rising all the way to f = 1. Under f = 0.2 the expected wealth is only 100·1.04<sup>10</sup> ≈ $148, but the chance of ruin is zero and typical outcomes grow.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Nothing; Kelly maximises expected wealth",
+      "Kelly maximises expected log wealth (growth/median); expected wealth is maximised at f = 1",
+      "Kelly is only optimal for fair coins",
+      "Expected wealth is maximised at f = 0.6"
+     ],
+     "correct": 1,
+     "display": "Kelly maximises E[log W], not E[W]"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Under the all-in strategy, what is the probability that you are not broke after 10 rounds?</p>",
+    "model": "<p>You must win all 10 flips: 0.6<sup>10</sup> ≈ 0.00605 (about 0.6%).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.006046617599999997,
+     "display": "0.6¹⁰ ≈ 0.00605"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Instead you bet the Kelly fraction f = 0.2 every round. What is your <b>median</b> wealth after 10 rounds?</p>",
+    "model": "<p>The number of heads K ~ Bin(10, 0.6) has median 6, and wealth 100·1.2<sup>K</sup>·0.8<sup>10−K</sup> is increasing in K, so the median wealth is 100·1.2⁶·0.8⁴ ≈ $122.31.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 122.30590463999998,
+     "display": "100·1.2⁶·0.8⁴ ≈ $122.31"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-002",
+  "cat": "kelly",
+  "diff": 3,
+  "title": "Kelly sizing for a stop-loss trade",
+  "tags": [
+   "kelly",
+   "position-sizing",
+   "leverage",
+   "stop-loss"
+  ],
+  "style": [
+   "betting-game",
+   "research-stats"
+  ],
+  "prompt": "<p>A breakout signal is either right or wrong. If you put a fraction f of your capital into the trade, it gains 6% of the position with probability 0.55 (take-profit) and loses 2% of the position with probability 0.45 (stop-loss). Trades are independent and you can lever up freely.</p><p>What position size f (as a multiple of capital) maximises the long-run growth rate of capital?</p><p>Give a number (e.g. 0.5 means half your capital, 3 means 3× leverage).</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 20.000000000000004,
+   "display": "f* = 20 (20× capital)"
+  },
+  "hints": [
+   "Maximise g(f) = 0.55 ln(1 + 0.06f) + 0.45 ln(1 − 0.02f).",
+   "For outcomes +b·f and −a·f the first-order condition gives f* = (pb − qa)/(ab)."
+  ],
+  "solution": "<p>Growth per trade is g(f) = p ln(1 + bf) + q ln(1 − af) with p = 0.55, b = 0.06, q = 0.45, a = 0.02.</p><p>g′(f) = pb/(1 + bf) − qa/(1 − af) = 0 ⇒ pb(1 − af) = qa(1 + bf) ⇒ f* = (pb − qa)/(ab) = (0.033 − 0.009)/0.0012 = 20.</p><p>So the growth-optimal position is 20× capital: on a stop-out you lose 20 × 2% = 40% of capital, on a winner you gain 120%.</p><p>The trap: plugging into the betting formula f = p − q/(b/a) = 0.55 − 0.45/3 = 0.4 and calling it a position size. That formula assumes the whole stake is lost on a loss; here only 2% of the position is at risk, so 0.4 is the fraction of capital <i>at risk</i> (lost at the stop), not the position. In practice nobody runs full Kelly on an estimated edge; the point is the units.</p><p><b>Answer: f* = 20.</b></p>",
+  "key": "Kelly is about outcomes per unit of position: f* = (pb − qa)/(ab). The textbook 'edge/odds' fraction is the capital at risk, not the position size.",
+  "plan": {
+   "keyIdea": "Log-utility growth per trade with two outcomes measured as fractions of the position.",
+   "method": "Set the derivative of p ln(1 + bf) + q ln(1 − af) to zero and solve the linear equation.",
+   "sanityChecks": [
+    "Check the edge is positive: pb − qa = 0.024 > 0",
+    "Translate the answer: loss at stop = 20 × 2% = 40% of capital"
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Kelly is (p·win − q·loss)/win = (0.55·0.06 − 0.45·0.02)/0.06 = 0.4, so put 40% of capital into the trade.” What does that 0.4 actually measure?</p>",
+    "model": "<p>(pb − qa)/b = f*·a: it is the fraction of capital lost when the stop is hit at the growth-optimal size (20 × 2% = 40%). Treating it as the position size under-bets by a factor of 50 relative to full Kelly.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "The optimal position size",
+      "The fraction of capital lost at the stop when sized at full Kelly",
+      "The probability of ruin",
+      "The half-Kelly position"
+     ],
+     "correct": 1,
+     "display": "Capital at risk at full Kelly (20 × 2% = 40%)"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>You run half Kelly instead. What fraction of capital do you lose on one stop-out?</p>",
+    "model": "<p>Half Kelly is 10× capital, so a 2% stop costs 10 × 2% = 20% of capital.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2,
+     "display": "0.20 (20%)"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>Your mandate forbids leverage: 0 ≤ f ≤ 1. What f maximises growth now?</p>",
+    "model": "<p>g is concave with its unconstrained maximum at 20 > 1, so g is increasing on [0, 1]: take the corner f = 1 (fully invested, no leverage).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0,
+     "display": "f = 1"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-003",
+  "cat": "kelly",
+  "diff": 3,
+  "title": "How much growth does half Kelly keep?",
+  "tags": [
+   "kelly",
+   "fractional-kelly",
+   "growth-rate",
+   "coins"
+  ],
+  "style": [
+   "betting-game",
+   "research-stats"
+  ],
+  "prompt": "<p>A coin lands heads with probability 0.53 and pays even money, so the Kelly fraction is f* = 0.06. You decide to bet half Kelly, f = 0.03, on every flip.</p><p>What is the ratio of your long-run growth rate (expected log-return per flip) to the full-Kelly growth rate?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.7497371032717198,
+   "display": "0.7497 ≈ 3/4",
+   "tolRel": 0.003
+  },
+  "hints": [
+   "Expand g(f) = p ln(1 + f) + q ln(1 − f) to second order: g(f) ≈ μf − f²/2 with μ = 2p − 1.",
+   "A quadratic with maximum at f*: g(f*/2)/g(f*) = ?"
+  ],
+  "solution": "<p>For small f, g(f) = p ln(1 + f) + q ln(1 − f) ≈ (p − q)f − f²/2 = μf − f²/2, maximised at f* = μ with g(f*) = μ²/2.</p><p>At f = f*/2: g ≈ μ²/2 − μ²/8 = 3μ²/8, so the ratio is 3/4.</p><p>Exactly: g(0.06) = 0.53 ln 1.06 + 0.47 ln 0.94 ≈ 0.001801 and g(0.03) ≈ 0.001350, ratio ≈ 0.7497.</p><p>Half Kelly keeps about 75% of the growth while halving the volatility of log-wealth — the usual reason desks size at a fraction of Kelly, especially since the edge itself is estimated.</p><p><b>Answer: ≈ 0.750.</b></p>",
+  "key": "Near the optimum the growth curve is a parabola: fraction c of Kelly keeps c(2 − c) of the growth, so half Kelly keeps ~75%.",
+  "plan": {
+   "keyIdea": "The growth rate is approximately quadratic in f around the Kelly fraction.",
+   "method": "Second-order expansion of ln(1 ± f), then evaluate the parabola at f*/2; confirm with the exact logs.",
+   "sanityChecks": [
+    "c = 1 should give ratio 1",
+    "c = 2 should give ratio ≈ 0"
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same coin, but now you over-bet at 1.5× Kelly (f = 0.09). What growth ratio do you get?</p>",
+    "model": "<p>c(2 − c) with c = 1.5 gives 0.75 again — the parabola is symmetric. Exactly g(0.09)/g(0.06) ≈ 0.749. Same growth as half Kelly, with three times the volatility.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7485278221477087,
+     "display": "≈ 0.749",
+     "tolRel": 0.005
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer claims: “Betting twice Kelly gives you half the Kelly growth rate.” Correct them.</p>",
+    "model": "<p>c(2 − c) = 0 at c = 2: twice Kelly has (approximately) zero growth; here g(0.12) ≈ −0.00002, slightly negative. Beyond 2× Kelly wealth shrinks almost surely.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Correct, it is about half",
+      "Growth is about zero (here slightly negative)",
+      "Growth is about 1.5× Kelly's",
+      "Growth is unchanged"
+     ],
+     "correct": 1,
+     "display": "≈ 0 (slightly negative)"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-004",
+  "cat": "kelly",
+  "diff": 2,
+  "title": "Sharpe ratio sets the Kelly growth rate",
+  "tags": [
+   "kelly",
+   "sharpe-ratio",
+   "continuous-time",
+   "leverage"
+  ],
+  "style": [
+   "research-stats",
+   "betting-game"
+  ],
+  "prompt": "<p>A strategy has annual excess return μ and volatility σ (log-normal, continuously rebalanced, risk-free rate 0), with Sharpe ratio μ/σ = 1.2. You may lever it by any factor L.</p><p>What is the maximum achievable long-run growth rate of capital per year?</p><p>Give a decimal (0.10 = 10% per year).</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.72,
+   "display": "SR²/2 = 0.72 per year"
+  },
+  "hints": [
+   "With leverage L the growth rate is g(L) = Lμ − L²σ²/2.",
+   "Maximise over L and express the maximum in terms of μ/σ."
+  ],
+  "solution": "<p>Levered by L, log-wealth drifts at g(L) = Lμ − ½L²σ². The maximiser is L* = μ/σ² (continuous Kelly), giving g* = μ²/(2σ²) = SR²/2.</p><p>With SR = 1.2: g* = 1.44/2 = 0.72, i.e. 72% per year in log terms. Note that only the Sharpe ratio matters for the optimal growth; the volatility only decides how much leverage gets you there.</p><p><b>Answer: 0.72.</b></p>",
+  "key": "Continuous Kelly: L* = μ/σ², and the optimal growth rate is SR²/2.",
+  "plan": {
+   "keyIdea": "Log-wealth of a levered log-normal strategy has drift Lμ − L²σ²/2.",
+   "method": "Maximise the quadratic in L, substitute back.",
+   "sanityChecks": [
+    "Units: SR²/2 is dimensionless per year",
+    "Half Kelly should give 3/4 of the growth"
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer adds: “So the Kelly leverage equals the Sharpe ratio, 1.2×.” If the unlevered volatility is 10%, what is the Kelly leverage?</p>",
+    "model": "<p>L* = μ/σ² = (μ/σ)/σ = SR/σ = 1.2/0.10 = 12. Leverage scales with Sharpe divided by volatility, not with Sharpe alone.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 12.0,
+     "display": "L* = SR/σ = 12"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>What growth rate do you get at half Kelly?</p>",
+    "model": "<p>g(L*/2) = (L*/2)μ − (L*/2)²σ²/2 = (3/8)SR² = 0.54 per year — three quarters of 0.72.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.54,
+     "display": "0.54"
+    }
+   }
+  ]
+ },
+ {
+  "cat": "kelly",
+  "diff": 3,
+  "title": "A million times a die",
+  "tags": [
+   "log-utility",
+   "risk",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "betting-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>A contract pays $1 000 000 × (one roll of a fair die). You have $4 000 000 in total and maximise expected log wealth.</p><p>What is the most you would pay for one contract? Give a number in millions of dollars (2 decimals).</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 3.12750410774849,
+   "display": "≈ 3.13 M"
+  },
+  "hints": [
+   "Paying p (in millions) leaves final wealth 4 − p + k for a roll k.",
+   "Solve (1/6) Σ<sub>k</sub> ln(4 − p + k) = ln 4 numerically."
+  ],
+  "solution": "<p>Your expected-value price is 3.5 M, but the bet is a large fraction of your wealth. With log utility you pay p only if E[ln(4 − p + K)] ≥ ln 4.</p><p>At p = 3.5: E[ln(0.5 + K)] = ln(1.5·2.5·3.5·4.5·5.5·6.5)/6 ≈ 1.31 &lt; ln 4 ≈ 1.386 — too expensive. Bisection gives p ≈ 3.128 M.</p><p>Losing a lot hurts more than winning the same amount helps, because it shrinks your ability to take future good trades.</p><p><b>Answer: ≈ 3.13 M.</b></p>",
+  "key": "When a trade is big relative to your capital, the price you'll pay falls below EV — size and risk matter, not just EV.",
+  "plan": {
+   "keyIdea": "Large bet relative to wealth ⇒ use a concave utility (log), not EV.",
+   "method": "Find the price where E[ln wealth] equals ln 4.",
+   "sanityChecks": [
+    "Answer must be below the EV price of 3.5 M.",
+    "With huge wealth it should approach 3.5 M."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "limit",
+    "prompt": "<p>Same contract, but your wealth is $40 M. Maximum price (in millions)?</p>",
+    "model": "<p>Solve E[ln(40 − p + K)] = ln 40: p ≈ 3.464 M — much closer to 3.5, because the bet is now small relative to wealth.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.4635339736045587,
+     "display": "≈ 3.46 M",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer: “It's worth 3.5 M on average, so with $4 M you should happily pay up to 3.5 M.” Give the correct maximum price (in millions) for a log-utility trader with $4 M.</p>",
+    "model": "<p>Risk-neutral: 3.5 M. But a 1 rolled after paying 3.5 M leaves you with 1.5 M of 4 M. Under log utility the maximum price drops to about 3.13 M; 3.5 M is only right for a risk-neutral trader.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.12750410774849,
+     "display": "≈ 3.13 M"
+    }
+   }
+  ],
+  "id": "pm-022"
+ },
+ {
+  "cat": "kelly",
+  "diff": 2,
+  "title": "Higher EV, but which bet would you take?",
+  "tags": [
+   "log-utility",
+   "variance",
+   "betting",
+   "pm-track"
+  ],
+  "style": [
+   "betting-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>You have $100 and can take one of two coin-flip bets (or neither):</p><ul><li>A: pay $50, receive $120 on heads (EV +$10).</li><li>B: pay $10, receive $25 on heads (EV +$2.50).</li></ul><p>If you maximise expected log wealth, what do you choose?</p>",
+  "answer": {
+   "type": "choice",
+   "options": [
+    "A",
+    "B",
+    "Neither"
+   ],
+   "correct": 1,
+   "display": "B"
+  },
+  "hints": [
+   "Compare ½·ln(final if heads) + ½·ln(final if tails) with ln 100.",
+   "A: wealth 170 or 50. B: wealth 115 or 90."
+  ],
+  "solution": "<p>No bet: ln 100 ≈ 4.605. A: ½(ln 170 + ln 50) ≈ 4.524 — worse than not betting. B: ½(ln 115 + ln 90) ≈ 4.622 — better.</p><p>Equivalently, compare geometric means: √(170·50) ≈ 92.2, √(115·90) ≈ 101.7. B wins despite a quarter of A's EV, because A risks half your wealth on a coin flip.</p><p><b>Answer: B.</b></p>",
+  "key": "With limited capital, compare growth (expected log, or the geometric mean), not raw EV.",
+  "plan": {
+   "keyIdea": "Bet size relative to wealth matters, not just EV.",
+   "method": "Compute E[ln W] (or the geometric mean of outcomes) for each choice.",
+   "sanityChecks": [
+    "Neither must score ln 100 exactly."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the certainty equivalent gain of bet B (in dollars) under log utility?</p>",
+    "model": "<p>√(115 × 90) − 100 ≈ 1.73.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.7349497468790247,
+     "display": "≈ 1.73",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Your wealth is $1 000 instead. Which bet does log utility now prefer?</p>",
+    "model": "<p>√(1070 × 950) − 1000 ≈ 8.22 for A versus √(1015 × 990) − 1000 ≈ 2.42 for B: A. The same bet is fine once it is a small part of wealth.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "A",
+      "B",
+      "Neither"
+     ],
+     "correct": 0,
+     "display": "A"
+    }
+   }
+  ],
+  "id": "pm-031"
+ },
+ {
+  "cat": "kelly",
+  "diff": 3,
+  "title": "How much of your wealth to put on a die",
+  "tags": [
+   "kelly",
+   "log-utility",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "betting-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>You can buy any amount of a contract at price 3 that pays one roll of a fair die (so each $1 spent returns k/3 dollars for a roll k). The game repeats many times with fresh rolls and you reinvest.</p><p>What fraction of your wealth should you spend each time to maximise long-run growth? Give a decimal to 2 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.5268121166300024,
+   "display": "f* ≈ 0.527",
+   "tolRel": 0.01
+  },
+  "hints": [
+   "Growth g(f) = (1/6) Σ<sub>k</sub> ln(1 + f(k/3 − 1)).",
+   "Set g′(f) = (1/6) Σ r<sub>k</sub>/(1 + f r<sub>k</sub>) = 0 and solve numerically, r<sub>k</sub> ∈ {−2/3, −1/3, 0, 1/3, 2/3, 1}."
+  ],
+  "solution": "<p>Each $1 returns r<sub>k</sub> = k/3 − 1 ∈ {−2/3, −1/3, 0, 1/3, 2/3, 1}, with mean 1/6. Maximise g(f) = (1/6)Σ ln(1 + f r<sub>k</sub>).</p><p>g′(f) = 0 numerically at f* ≈ 0.527, giving growth ≈ 4.34% per round. The quick approximation f ≈ mean/variance = (1/6)/(35/108) ≈ 0.514 is close but not exact, because the returns are large rather than small.</p><p><b>Answer: ≈ 0.53.</b></p>",
+  "key": "Kelly maximises E[ln(1 + f·R)]; mean/variance is only a small-edge approximation.",
+  "plan": {
+   "keyIdea": "Repeated reinvested bet ⇒ maximise expected log growth.",
+   "method": "Differentiate and solve for f numerically (bisection).",
+   "sanityChecks": [
+    "f* must be positive (EV per $ is +1/6) and below 1.5 (where a roll of 1 would wipe you out)."
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same contract, but the price is 3.2. New Kelly fraction?</p>",
+    "model": "<p>Returns k/3.2 − 1 have mean 0.09375; solving g′(f) = 0 gives f* ≈ 0.332.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3319255562241268,
+     "display": "≈ 0.332",
+     "tolRel": 0.01
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>At price 3, what is the expected return per $1 spent?</p>",
+    "model": "<p>3.5/3 − 1 = 1/6 ≈ 0.167.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.16666666666666666,
+     "display": "1/6"
+    }
+   }
+  ],
+  "id": "pm-033"
  },
  {
   "id": "opt-001",
@@ -6409,7 +18106,53 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Net debit = 7 − 3 = $4. At expiry the spread pays 0 below 95, S<sub>T</sub> − 95 between 95 and 105, and 10 above 105.</p><ul><li>Max loss = the debit = 4 (S<sub>T</sub> ≤ 95).</li><li>Max profit = 10 − 4 = 6 (S<sub>T</sub> ≥ 105).</li><li>Breakeven: S<sub>T</sub> − 95 = 4 ⇒ S<sub>T</sub> = 99.</li></ul><p>Trap: forgetting that the short call caps the payoff at the strike width (10), not at infinity.</p><p><b>Answer: 4, 6, 99.</b></p>",
   "key": "A debit call spread risks the debit and can make at most (strike width − debit).",
-  "cat": "options"
+  "cat": "options",
+  "plan": {
+   "keyIdea": "A bull call spread costs the net debit and pays at most the strike width.",
+   "method": "Debit 4; payoff 0 → 10 between the strikes; breakeven = lower strike + debit.",
+   "sanityChecks": [
+    "Max loss + max profit = strike width 10.",
+    "Breakeven must lie between the strikes."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same view with puts: buy the 105 put for $8.50 and sell the 95 put for $2.50. Max loss, max profit and breakeven? Answer as three numbers separated by commas.</p>",
+    "model": "<p>Debit 6. The bear put spread pays 10 below 95, 105 − S between the strikes and 0 above 105. Max loss 6 (S ≥ 105), max profit 10 − 6 = 4 (S ≤ 95), breakeven 105 − 6 = 99.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      6.0,
+      4.0,
+      99.0
+     ],
+     "ordered": true,
+     "display": "6, 4, 99"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “You are long a call, so your maximum profit is unlimited.”</p>",
+    "model": "<p>The short 105 call caps the payoff at 105 − 95 = 10, so the maximum profit is 10 − 4 = 6.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: the maximum profit is 10",
+      "Agree",
+      "Disagree: the short call caps the profit at 6"
+     ],
+     "correct": 2,
+     "display": "Disagree: 6"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why does the breakeven sit at the lower strike plus the debit?</p>",
+    "model": "<p>Between the strikes the spread behaves like one long share starting at 95, so you recover the $4 you paid once the stock is $4 above 95.</p>"
+   }
+  ],
+  "par": 2
  },
  {
   "id": "opt-002",
@@ -6523,7 +18266,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Parity: P = C − S + K e<sup>−rT</sup> = 8 − 100 + 105 e<sup>−0.05</sup> = 8 − 100 + 99.879 = 7.879.</p><p>Trap: using K undiscounted gives 13, which is far too high; the strike is paid only at expiry, so you hold its present value.</p><p><b>Answer: ≈ $7.88.</b></p>",
   "key": "Discount the strike: P = C − S + K·e^(−rT).",
-  "cat": "options"
+  "cat": "options",
+  "plan": {
+   "keyIdea": "Put–call parity: C − P = S − K e^(−rT).",
+   "method": "P = C − S + K e^(−rT) = 8 − 100 + 99.88.",
+   "sanityChecks": [
+    "Discount the strike, don't use it raw.",
+    "With r = 0 the put would be 13."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same prices but rates are zero. Put value?</p><p>Give a number.</p>",
+    "model": "<p>P = 8 − 100 + 105 = 13.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 13.0,
+     "display": "13"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Back to r = 5%. The put actually trades at $9.00. What riskless profit (in today's dollars) does one parity arbitrage lock in?</p><p>Give dollars to 2 decimals.</p>",
+    "model": "<p>The put is rich by 9 − 7.88 = 1.12: sell the put, buy the call, short the stock and lend K e^(−rT); the package is worth 0 at expiry.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.1209104274250308,
+     "display": "≈ 1.12"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “This put is in the money (K = 105 &gt; S = 100), so no European put with these terms can ever trade below its intrinsic value of 5.”</p>",
+    "model": "<p>That bound holds for American puts. For a European put the no-arbitrage lower bound is max(K e^(−rT) − S, 0) = max(99.88 − 100, 0) = 0: with positive rates, waiting to receive K is costly, so a deep in-the-money European put can trade below intrinsic value. Here parity puts it at 7.88 anyway.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: the European lower bound is max(K e^(−rT) − S, 0) = 0 here, not 5",
+      "Agree"
+     ],
+     "correct": 0,
+     "display": "Disagree"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "opt-006",
@@ -6641,7 +18429,42 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Up: 130Δ + B = 20. Down: 90Δ + B = 0. Subtract: 40Δ = 20 ⇒ Δ = 0.5. Then B = −45.</p><p>The call is worth 0.5·100 − 45 = 5, matching risk-neutral pricing with q = (100 − 90)/40 = 1/4: 20/4 = 5.</p><p><b>Answer: 0.5, −45.</b></p>",
   "key": "Binomial delta = (C_up − C_down)/(S_up − S_down); the cash leg makes the hedge self-financing.",
-  "cat": "options"
+  "cat": "options",
+  "plan": {
+   "keyIdea": "Replicate: match the payoff in both states with Δ shares and B cash.",
+   "method": "Δ = payoff spread / stock spread; B from the down state.",
+   "sanityChecks": [
+    "Value Δ·S + B must equal the risk-neutral price.",
+    "0 ≤ Δ ≤ 1 for a call."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Strike 100 instead of 110. Δ and B? Answer as two numbers separated by a comma.</p>",
+    "model": "<p>Payoffs 30 and 0: Δ = 30/40 = 0.75, B = −90 × 0.75 = −67.5; call = 7.5.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      0.75,
+      -67.5
+     ],
+     "ordered": true,
+     "display": "0.75, −67.5"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Analysts give an 80% chance of the up move, so the 110 call is worth 0.8 × 20 = 16.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Replication doesn't use real-world probabilities: the hedge costs 0.5 · 100 − 45 = 5, so any other price is an arbitrage.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5.0,
+     "display": "5"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "opt-010",
@@ -6667,7 +18490,53 @@ window.PROBLEMS = [
   ],
   "solution": "<p>q = (1 − 0.8)/(1.2 − 0.8) = 1/2. After two steps the stock is 144 (prob 1/4), 96 (1/2) or 64 (1/4). Only 144 pays: 44.</p><p>C = 44/4 = 11.</p><p>Trap: up-down gives 96, not 100 — multiplicative moves do not recombine back to the start.</p><p><b>Answer: 11.</b></p>",
   "key": "In a recombining tree, price = Σ binomial(n, j) q^j (1 − q)^(n−j) × payoff.",
-  "cat": "options"
+  "cat": "options",
+  "plan": {
+   "keyIdea": "Risk-neutral q = (1 − d)/(u − d); price = expected payoff over the two-step tree.",
+   "method": "q = ½; only the 144 node pays.",
+   "sanityChecks": [
+    "Up-down ends at 96, not 100.",
+    "Put–call parity at r = 0: C = P for K = S."
+   ]
+  },
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: price the two-period 100-strike European put on the same tree.</p><p>Give a number.</p>",
+    "model": "<p>Payoffs 4 (at 96) and 36 (at 64): ½·4 + ¼·36 = 11 = C, as parity requires with r = 0 and E[S_T] = 100.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 11.0,
+     "display": "11"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Three periods instead of two. Call price?</p><p>Give a number.</p>",
+    "model": "<p>Nodes 172.8 (1/8), 115.2 (3/8): (72.8 + 3 × 15.2)/8 = 14.8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 14.8,
+     "display": "14.8"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The American version of this call is worth more than 11 because you can exercise early.”</p>",
+    "model": "<p>With zero rates and no dividends an American call is never exercised early, so it is also worth 11.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree",
+      "Disagree: early exercise never pays here, it is also 11",
+      "Disagree: it is worth less"
+     ],
+     "correct": 1,
+     "display": "Disagree: 11"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "opt-011",
@@ -6869,7 +18738,40 @@ window.PROBLEMS = [
   ],
   "solution": "<p>ATM, r = 0: P = C by parity, so the straddle is 2C ≈ 2·0.4·σ√T·S = 0.8·σ√T·S.</p><p>0.8 · 0.3 · 0.5 · 50 = 6. (Exact Black–Scholes: 5.98.) The straddle is also ≈ the expected absolute move E|S<sub>T</sub> − S| = S·σ√T·√(2/π).</p><p>Trap: using T = 3 instead of T = 0.25 years.</p><p><b>Answer: ≈ 6.</b></p>",
   "key": "ATM straddle ≈ 0.8·σ·√T·S ≈ the expected absolute move.",
-  "cat": "options"
+  "cat": "options",
+  "plan": {
+   "keyIdea": "ATM straddle ≈ 0.8 · σ√T · S (call ≈ put ≈ 0.4σ√T S).",
+   "method": "0.8 × 0.3 × √0.25 × 50.",
+   "sanityChecks": [
+    "T in years: √0.25 = 0.5.",
+    "≈ expected absolute move S σ√T √(2/π)."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same, but 1 year to expiry. Straddle?</p><p>Give a number (within 1%).</p>",
+    "model": "<p>√T doubles: 12 (Black–Scholes ≈ 11.9).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 12.0,
+     "display": "≈ 12",
+     "tolRel": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The straddle pays |S_T − K|, and the typical move is σ√T S = 7.5, so the straddle is worth 7.5.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>The expected absolute move is √(2/π) × 7.5 ≈ 0.8 × 7.5 = 6 (Black–Scholes 5.98), not one standard deviation.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5.98,
+     "display": "≈ 6",
+     "tolRel": 0.01
+    }
+   }
+  ],
+  "par": 1.5
  },
  {
   "id": "opt-018",
@@ -6897,7 +18799,40 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Since C<sub>ATM</sub> ≈ 0.4·σ√T·S is linear in σ, vega ≈ 0.4·S·√T = 40 per unit of σ, i.e. 0.40 per vol point.</p><p>A 2-point rise: 0.40 × 2 = 0.80. (Exact Black–Scholes: 8.76 − 7.97 = 0.79.)</p><p><b>Answer: ≈ 0.80.</b></p>",
   "key": "ATM vega ≈ 0.4·S·√T per unit vol (divide by 100 for per vol point).",
-  "cat": "options"
+  "cat": "options",
+  "plan": {
+   "keyIdea": "ATM call ≈ 0.4 · σ√T · S, linear in σ, so vega ≈ 0.4 · S√T.",
+   "method": "0.4 × 100 × 1 × 0.02 = 0.80.",
+   "sanityChecks": [
+    "ATM straddle ≈ 0.8σ√T S as a cross-check.",
+    "Vega per vol point here ≈ 0.4."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same move (20% → 22%) for a 3-month ATM call. Price change?</p><p>Give a number (within 2%).</p>",
+    "model": "<p>Vega scales with √T: 0.4 × 100 × 0.5 × 0.02 = 0.40.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.4,
+     "display": "≈ 0.40",
+     "tolRel": 0.02
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Vega grows linearly with time, so a 4-year ATM option has 4 times the vega of a 1-year one.”</p><p>Is that right? If not, give the ratio (within 2%).</p>",
+    "model": "<p>Vega ∝ √T, so the ratio is √4 = 2 (Black–Scholes gives ≈ 1.97 at 20% vol).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.0,
+     "display": "≈ 2",
+     "tolRel": 0.02
+    }
+   }
+  ],
+  "par": 1.5
  },
  {
   "id": "opt-019",
@@ -6981,7 +18916,38 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Payoff (6 − s) times P(S = s): s = 2: 4·1/36; s = 3: 3·2/36; s = 4: 2·3/36; s = 5: 1·4/36.</p><p>Total = (4 + 6 + 6 + 4)/36 = 20/36 = 5/9.</p><p><b>Answer: 5/9 ≈ 0.556.</b></p>",
   "key": "Price a discrete option by summing payoff × probability over the paying outcomes.",
-  "cat": "options"
+  "cat": "options",
+  "plan": {
+   "keyIdea": "Price = expected payoff over the 36 outcomes.",
+   "method": "Sum (6 − s)·P(S = s) for s = 2..5.",
+   "sanityChecks": [
+    "Parity: C − P = E[S] − K = 1.",
+    "Payoff ≤ 4."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Price the <i>call</i> max(S − 6, 0) on the same sum.</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Parity: C = P + E[S] − 6 = 5/9 + 1 = 14/9 ≈ 1.556.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.5555555555555556,
+     "display": "14/9"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “E[S] = 7 &gt; 6, so the put is worth max(6 − 7, 0) = 0.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>E[max(6 − S, 0)] ≥ max(6 − E[S], 0) by convexity: the low outcomes still pay. Price 5/9.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5555555555555556,
+     "display": "5/9"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "opt-022",
@@ -7008,7 +18974,553 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Let a, b, c be the risk-neutral probabilities of 80, 100, 120. Call: 20c = 6 ⇒ c = 0.3. Martingale: 80a + 100b + 120c = 100 with a + b + c = 1 ⇒ a = 0.3, b = 0.4.</p><p>110 put pays 30, 10, 0: price = 0.3·30 + 0.4·10 = 13.</p><p>Check with parity: C<sub>110</sub> = 10c = 3, so P<sub>110</sub> = C − S + K = 3 − 100 + 110 = 13. ✓</p><p><b>Answer: 13.</b></p>",
   "key": "Option prices pin down risk-neutral probabilities; then any payoff is priced as its expectation.",
-  "cat": "options"
+  "cat": "options",
+  "plan": {
+   "keyIdea": "Three states and two prices (the call and the forward) pin down the risk-neutral probabilities.",
+   "method": "Call ⇒ c = 0.3; martingale ⇒ a = 0.3, b = 0.4; price the put.",
+   "sanityChecks": [
+    "Probabilities in [0, 1], sum to 1.",
+    "Parity check: C₁₁₀ − P₁₁₀ = S − K."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Price a digital that pays $1 if the stock ends above 90.</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>P(100) + P(120) = 0.4 + 0.3 = 0.7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7,
+     "display": "0.7"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Price a contract that pays S_T²/100.</p><p>Give a number.</p>",
+    "model": "<p>(0.3 · 6400 + 0.4 · 10000 + 0.3 · 14400)/100 = 102.4: above 100 because the payoff is convex.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 102.4,
+     "display": "102.4"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The 110 put is in the money by 10, so it's worth 10.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Intrinsic value ignores the 80 state, where the put pays 30: price = 0.3·30 + 0.4·10 = 13.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 13.0,
+     "display": "13"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Is there a faster route to the 110 put?</p>",
+    "model": "<p>Use parity directly: C₁₁₀ = 10 · P(120) = 10 · 0.3 = 3 (P(120) from the 100 call), then P₁₁₀ = C₁₁₀ − S + K = 3 − 100 + 110 = 13.</p>"
+   }
+  ],
+  "par": 4
+ },
+ {
+  "id": "js-010",
+  "cat": "options",
+  "diff": 3,
+  "title": "Chance of touching a 95% barrier",
+  "tags": [
+   "barrier-option",
+   "reflection-principle",
+   "brownian-motion",
+   "volatility"
+  ],
+  "style": [
+   "options-desk",
+   "math-test"
+  ],
+  "prompt": "<p>A stock is at 100 with 20% annual volatility. Model its log-price as a driftless Brownian motion. A down-and-out call knocks out if the price touches 95 at any time in the next 30 calendar days (T = 30/365, continuous monitoring).</p><p>What is the probability of knock-out?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.3710147116358523,
+   "display": "2Φ(ln 0.95/(0.2√(30/365))) ≈ 0.371",
+   "tolRel": 0.01
+  },
+  "hints": [
+   "Reflection principle: P(min<sub>t≤T</sub> W<sub>t</sub> ≤ −b) = 2·P(W<sub>T</sub> ≤ −b).",
+   "Here −b = ln 0.95 ≈ −0.0513 and σ√T ≈ 0.0573."
+  ],
+  "solution": "<p>For driftless Brownian log-price with volatility σ, the reflection principle gives P(touch level ln 0.95) = 2Φ(ln(0.95)/(σ√T)).</p><p>σ√T = 0.2 × √(30/365) ≈ 0.05734 and ln 0.95 ≈ −0.05129, ratio ≈ −0.8946, Φ ≈ 0.1855.</p><p>P(knock-out) ≈ 2 × 0.1855 ≈ 0.371.</p><p>A common slip is to quote only Φ(−0.89) ≈ 19% (the chance of <i>ending</i> below 95), forgetting the paths that dip below and come back. Discrete daily monitoring would give a somewhat smaller number.</p><p><b>Answer: ≈ 0.371.</b></p>",
+  "key": "Touch probability ≈ twice the probability of finishing beyond the barrier (reflection principle).",
+  "plan": {
+   "keyIdea": "A barrier touch for Brownian motion is handled by the reflection principle.",
+   "method": "Compute the barrier distance in standard deviations, then 2Φ(−z).",
+   "sanityChecks": [
+    "Touch probability must exceed the finish-below probability (~19%)",
+    "Must be below 1 and grow with T"
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says a colleague's Monte Carlo printed “knock-out probability ≈ 15–20%” for exactly this contract. Plausible?</p>",
+    "model": "<p>No. 15–20% is roughly the probability of <i>finishing</i> below 95. The touch probability is about twice that, ≈ 37% (≈ 36% with a 5% risk-neutral drift). Only a very coarse monitoring grid could push it as low as 20%.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Yes, about 15–20%",
+      "No, about 37%",
+      "No, about 5%",
+      "No, about 60%"
+     ],
+     "correct": 1,
+     "display": "No: ≈ 37%"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Price the down-and-out call struck at 100 (barrier 95, continuous monitoring) with zero rates, i.e. under the risk-neutral measure where the log-price drifts at −σ²/2.</p>",
+    "model": "<p>With zero rates the knock-in part is (S/B)·C(B²/S, K) by the reflection/image argument, so DOC = C(100) − (100/95)·C(90.25) ≈ 2.287 − 0.084 ≈ 2.203. Little value is lost: the knocked-out paths are mostly ones that would have expired out of the money anyway.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.2030608921401296,
+     "display": "≈ 2.203",
+     "tolRel": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-020",
+  "cat": "options",
+  "diff": 2,
+  "title": "Beta hedge with index puts",
+  "tags": [
+   "hedging",
+   "beta",
+   "delta",
+   "index-options"
+  ],
+  "style": [
+   "options-desk",
+   "trading-desk"
+  ],
+  "prompt": "<p>A $10,000,000 equity portfolio has beta 1.2 to an index trading at 4,000. Index options have a multiplier of $100 per point. You want to neutralise the portfolio's market (beta) exposure for small moves.</p><p>Give the number of index contracts of delta −1 that would do it (i.e. short index-equivalent units), and the number of at-the-money puts with delta −0.5 needed instead, separated by a comma.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    30.0,
+    60.0
+   ],
+   "ordered": true,
+   "display": "30, 60"
+  },
+  "hints": [
+   "Beta-adjusted exposure = 1.2 × $10M = $12M; one contract of index = 4,000 × $100 = $400,000.",
+   "A delta −0.5 put offsets only half a contract's worth."
+  ],
+  "solution": "<p>Beta-weighted exposure: 1.2 × $10M = $12M. One index unit is 4,000 × $100 = $400,000, so 12M/400k = 30 delta-one units.</p><p>An ATM put has delta ≈ −0.5, so you need 30/0.5 = 60 puts to be delta-neutral today. As the market falls the puts' delta moves toward −1 (positive gamma) and the hedge becomes stronger; as it rises the protection fades.</p><p><b>Answer: 30, 60.</b></p>",
+  "key": "Contracts = β × portfolio value/(index level × multiplier), then divide by |delta| for options.",
+  "plan": {
+   "keyIdea": "Hedge the beta-weighted dollar exposure with index delta.",
+   "method": "Compute $β-exposure, divide by contract notional, then by the put delta.",
+   "sanityChecks": [
+    "Beta 1 and $4M portfolio would need 10 units",
+    "Puts need more contracts than futures"
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A model divides the 30 by the portfolio–index correlation 0.85 “to adjust for imperfect correlation”, getting ≈ 35 contracts. Is that right?</p>",
+    "model": "<p>No. Beta already equals ρσ<sub>P</sub>/σ<sub>M</sub>, so correlation is built in; dividing by ρ again over-hedges. Imperfect correlation leaves residual (basis) risk that no number of index contracts removes.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Yes, always divide by ρ",
+      "No: beta already contains the correlation; dividing by ρ over-hedges",
+      "No: you should multiply by ρ²",
+      "Yes, but only for puts"
+     ],
+     "correct": 1,
+     "display": "No — beta already includes ρ"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why does a put hedge need re-balancing even if beta never changes?</p>",
+    "model": "<p>Because the put's delta changes with the index level and time (gamma, charm). A futures hedge is linear and static; an option hedge is convex, so its hedge ratio drifts and the position must be re-sized or rolled.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-023",
+  "cat": "options",
+  "diff": 1,
+  "title": "Put–call parity with a dividend",
+  "tags": [
+   "put-call-parity",
+   "dividends",
+   "arbitrage",
+   "european-options"
+  ],
+  "style": [
+   "options-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>A stock trades at 50 and pays a known $0.80 dividend in 3 months. A 6-month European call struck at 50 costs 3.10. The continuously compounded rate is 4%.</p><p>What must the 6-month European put struck at 50 cost?</p><p>Give dollars to 2 decimals.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2.901973532337095,
+   "display": "≈ $2.902"
+  },
+  "hints": [
+   "With a known dividend D: C − P = S − PV(D) − K e<sup>−rT</sup>.",
+   "PV(D) = 0.80e<sup>−0.01</sup>, K e<sup>−rT</sup> = 50e<sup>−0.02</sup>."
+  ],
+  "solution": "<p>P = C − S + PV(D) + K e<sup>−rT</sup> = 3.10 − 50 + 0.80e<sup>−0.01</sup> + 50e<sup>−0.02</sup> = 3.10 − 50 + 0.7920 + 49.0099 ≈ 2.902.</p><p>Forgetting the dividend gives 2.110 and makes the put look 0.79 too cheap.</p><p><b>Answer: ≈ $2.90.</b></p>",
+  "key": "Parity with dividends: C − P = S − PV(dividends) − PV(K).",
+  "plan": {
+   "keyIdea": "Parity from two portfolios with identical payoffs at T.",
+   "method": "Rearrange for P, discount the dividend and the strike.",
+   "sanityChecks": [
+    "Dividends make puts dearer and calls cheaper",
+    "With no dividend and r = 0, C − P = S − K = 0"
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>The put actually trades at 3.20. What riskless profit per share can you lock in, and how?</p>",
+    "model": "<p>The put is rich by 3.20 − 2.902 ≈ 0.298: sell the put, buy the call, short the stock, and lend PV(K) + PV(D) (the dividend obligation on the short is covered by the lent PV(D)).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.29802646766290497,
+     "display": "≈ 0.298"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer prices the put as C − S + K e<sup>−rT</sup>. What value does that give, and what did they forget?</p>",
+    "model": "<p>3.10 − 50 + 49.010 ≈ 2.110; they forgot to add back PV(D) ≈ 0.792 — the stock's price includes a dividend the option holder never receives.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.1099336653377634,
+     "display": "≈ 2.110"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-024",
+  "cat": "options",
+  "diff": 3,
+  "title": "Implied vol from an ATM price",
+  "tags": [
+   "implied-volatility",
+   "black-scholes",
+   "atm",
+   "vol-trading"
+  ],
+  "style": [
+   "options-desk",
+   "trading-desk"
+  ],
+  "prompt": "<p>A 1-month (T = 1/12) at-the-money call on a stock at 100 trades at 3.00. Rates are zero and Black–Scholes applies.</p><p>What implied volatility does this price imply?</p><p>Give a decimal (0.20 = 20%) to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.2605578600598436,
+   "display": "≈ 0.2606",
+   "tolRel": 0.003
+  },
+  "hints": [
+   "Quick rule: ATM call ≈ 0.4·S·σ√T.",
+   "Exactly, with r = 0: C = S(2Φ(σ√T/2) − 1)."
+  ],
+  "solution": "<p>Rule of thumb: σ ≈ C/(0.4 S√T) = 3/(0.4 × 100 × 0.2887) ≈ 0.260.</p><p>Exactly (r = 0, S = K): C = S(2Φ(σ√T/2) − 1) ⇒ Φ(σ√T/2) = 0.515 ⇒ σ√T/2 ≈ 0.03761 ⇒ σ ≈ 0.07522/0.28868 ≈ 0.2606.</p><p><b>Answer: ≈ 0.261.</b></p>",
+  "key": "ATM: C ≈ 0.4Sσ√T, so σ ≈ C/(0.4S√T); with r = 0 it inverts exactly through Φ.",
+  "plan": {
+   "keyIdea": "ATM option price is almost linear in σ√T.",
+   "method": "Use 0.4Sσ√T for the estimate, then refine with the exact Φ inversion.",
+   "sanityChecks": [
+    "Price ↑ ⇒ IV ↑",
+    "√(1/12) ≈ 0.2887"
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>You think the true vol is 22%, so you sell. A colleague says the edge is “about $0.50 per contract”. What is your expected edge per standard 100-share contract?</p>",
+    "model": "<p>The 22%-vol value is ≈ 2.533, so the edge is 3.00 − 2.533 ≈ 0.467 <i>per share</i>, i.e. ≈ $46.7 per 100-share contract (and it is only realised by delta-hedging through expiry).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 46.68019623662971,
+     "display": "≈ $46.7",
+     "tolRel": 0.01
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>What does the 0.4·S·σ√T shortcut give, and why is it slightly low?</p>",
+    "model": "<p>σ ≈ 0.2598. 2Φ(x) − 1 ≈ 0.798x is the linearisation; for small x the true function is slightly concave, so the price per unit σ√T falls a little and the exact σ is a touch higher (0.2606).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2598076211353316,
+     "display": "≈ 0.2598",
+     "tolRel": 0.003
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-025",
+  "cat": "options",
+  "diff": 2,
+  "title": "Delta and gamma of a 3-month ATM call",
+  "tags": [
+   "greeks",
+   "delta",
+   "gamma",
+   "black-scholes"
+  ],
+  "style": [
+   "options-desk"
+  ],
+  "prompt": "<p>Black–Scholes, zero rates: S = K = 100, T = 0.25, σ = 20%.</p><p>Give the call's delta and gamma (per $1 move), separated by a comma.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    0.5199388058383725,
+    0.039844391409476404
+   ],
+   "ordered": true,
+   "display": "Δ ≈ 0.5199, Γ ≈ 0.0398",
+   "tolRel": 0.005
+  },
+  "hints": [
+   "d₁ = (ln(S/K) + σ²T/2)/(σ√T) = 0.05.",
+   "Δ = Φ(d₁), Γ = φ(d₁)/(Sσ√T)."
+  ],
+  "solution": "<p>σ√T = 0.1, d₁ = 0.005/0.1 = 0.05.</p><p>Δ = Φ(0.05) ≈ 0.5199. Γ = φ(0.05)/(100 × 0.1) ≈ 0.39844/10 ≈ 0.0398.</p><p>ATM delta is a bit above ½ (the σ²T/2 term), and gamma ≈ 0.4/(Sσ√T).</p><p><b>Answer: ≈ 0.520, 0.0398.</b></p>",
+  "key": "ATM: Δ ≈ ½ + 0.4·σ√T/2, Γ ≈ 0.4/(Sσ√T).",
+  "plan": {
+   "keyIdea": "Closed-form Black–Scholes Greeks.",
+   "method": "Compute d₁, then Φ(d₁) and φ(d₁)/(Sσ√T).",
+   "sanityChecks": [
+    "Δ slightly above 0.5",
+    "Γ ≈ 0.4/(Sσ√T) = 0.04"
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>You are long one call and short Δ shares. The stock instantly jumps by $2. Using gamma, approximately how much do you make?</p>",
+    "model": "<p>½ΓΔS² = ½ × 0.0398 × 4 ≈ 0.0797 per share (the exact re-pricing gives ≈ 0.079). Long gamma profits from moves in either direction.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.07968878281895281,
+     "display": "≈ 0.0797",
+     "tolRel": 0.03
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer writes the put's theta as −Sφ(d₁)σ/(2√T) − rK e<sup>−rT</sup>Φ(−d₂). What sign should the rK e<sup>−rT</sup>Φ(−d₂) term carry?</p>",
+    "model": "<p>Plus. For a put, Θ = −Sφ(d₁)σ/(2√T) + rK e<sup>−rT</sup>Φ(−d₂): the interest earned on the strike you will receive offsets part of the time decay (deep ITM European puts can even have positive theta).</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Minus, as written",
+      "Plus",
+      "It depends on the sign of d₂",
+      "The term does not appear for puts"
+     ],
+     "correct": 1,
+     "display": "Plus"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-026",
+  "cat": "options",
+  "diff": 2,
+  "title": "Vega-neutral calendar spread",
+  "tags": [
+   "vega",
+   "calendar-spread",
+   "greeks",
+   "term-structure"
+  ],
+  "style": [
+   "options-desk",
+   "trading-desk"
+  ],
+  "prompt": "<p>Zero rates, S = 100, σ = 20% flat. You buy one 3-month ATM call. How many 1-month ATM calls must you sell to make the position vega-neutral (Black–Scholes)?</p><p>Give a decimal to 2 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 1.7306080331354112,
+   "display": "≈ 1.731 (≈ √3)",
+   "tolRel": 0.005
+  },
+  "hints": [
+   "ATM vega ≈ Sφ(d₁)√T, and φ(d₁) ≈ 0.399 for both.",
+   "So the ratio is close to √(T₂/T₁)."
+  ],
+  "solution": "<p>Vega = Sφ(d₁)√T with d₁ = σ√T/2 tiny for both maturities, so vega ∝ √T approximately.</p><p>Ratio = vega(3M)/vega(1M) ≈ √3 ≈ 1.732; exactly ≈ 1.731 because φ(d₁) is very slightly smaller for the longer option.</p><p>Sell ≈ 1.73 one-month calls per 3-month call. The position is vega-flat but short gamma (short-dated options carry more gamma), so it loses on big moves.</p><p><b>Answer: ≈ 1.73.</b></p>",
+  "key": "ATM vega ∝ √T while ATM gamma ∝ 1/√T: calendars trade one against the other.",
+  "plan": {
+   "keyIdea": "Vega scales like √T at the money.",
+   "method": "Take the ratio of Sφ(d₁)√T at the two maturities.",
+   "sanityChecks": [
+    "Answer near √3",
+    "Longer options have more vega, less gamma"
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Ratio of the 1-month ATM gamma to the 3-month ATM gamma?</p>",
+    "model": "<p>Γ = φ(d₁)/(Sσ√T) ∝ 1/√T ⇒ ratio ≈ √3 ≈ 1.733. So the vega-neutral calendar is short about (1.73 × 1.73 − 1) ≈ 2 three-month gammas.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.7334947848154743,
+     "display": "≈ 1.733",
+     "tolRel": 0.005
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-027",
+  "cat": "options",
+  "diff": 2,
+  "title": "Duration and convexity on a 50bp move",
+  "tags": [
+   "bonds",
+   "duration",
+   "convexity",
+   "interest-rates"
+  ],
+  "style": [
+   "math-test",
+   "OA-speed"
+  ],
+  "prompt": "<p>A 5-year bond pays a 5% annual coupon and trades at par (yield 5%, annual compounding). Its modified duration is 4.3295 and its convexity is 23.936.</p><p>Using duration and convexity, estimate the price per 100 face after the yield rises to 5.5%.</p><p>Give a number to 2 decimals.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 97.86518164905695,
+   "display": "≈ 97.865 (exact repricing 97.865)",
+   "tolAbs": 0.02
+  },
+  "hints": [
+   "ΔP/P ≈ −D<sub>mod</sub>Δy + ½CΔy².",
+   "Δy = 0.005."
+  ],
+  "solution": "<p>ΔP/P ≈ −4.3295 × 0.005 + ½ × 23.936 × 0.005² = −0.021648 + 0.000299 = −0.021348.</p><p>Price ≈ 100 × (1 − 0.021348) ≈ 97.865. Duration alone would give 97.835; the exact repricing at 5.5% is 97.865, so the convexity term fixes almost all the error.</p><p><b>Answer: ≈ 97.87.</b></p>",
+  "key": "ΔP/P ≈ −D<sub>mod</sub>Δy + ½CΔy²; convexity always helps a long bond.",
+  "plan": {
+   "keyIdea": "Second-order Taylor expansion of price in yield.",
+   "method": "Plug Δy = 50bp into the duration and convexity terms.",
+   "sanityChecks": [
+    "Price must fall",
+    "Convexity term is positive and small (≈ 3 cents)"
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Check the given modified duration: what is the Macaulay duration of this bond?</p>",
+    "model": "<p>D<sub>mac</sub> = Σ t·CF<sub>t</sub>v<sup>t</sup>/P ≈ 4.546 years, and D<sub>mod</sub> = 4.546/1.05 ≈ 4.3295. ✓</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4.54595050416236,
+     "display": "≈ 4.546"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>What does the duration-only estimate give?</p>",
+    "model": "<p>100(1 − 4.3295 × 0.005) ≈ 97.835.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 97.83526166468457,
+     "display": "≈ 97.835",
+     "tolAbs": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-028",
+  "cat": "options",
+  "diff": 1,
+  "title": "DV01 of a 10-year zero",
+  "tags": [
+   "bonds",
+   "dv01",
+   "duration",
+   "zero-coupon"
+  ],
+  "style": [
+   "OA-speed",
+   "math-test"
+  ],
+  "prompt": "<p>A 10-year zero-coupon bond with 100 face is priced at a continuously compounded yield of 4%.</p><p>What is its DV01, the price drop for a 1 basis point rise in yield?</p><p>Give a number to 4 decimals.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.06703200460356393,
+   "display": "≈ 0.0670",
+   "tolRel": 0.003
+  },
+  "hints": [
+   "P = 100e<sup>−yT</sup>, dP/dy = −T·P.",
+   "DV01 ≈ T·P·0.0001."
+  ],
+  "solution": "<p>P = 100e<sup>−0.4</sup> ≈ 67.032. dP/dy = −TP, so DV01 ≈ 10 × 67.032 × 0.0001 ≈ 0.0670.</p><p>For a zero with continuous compounding the duration is exactly its maturity.</p><p><b>Answer: ≈ 0.0670.</b></p>",
+  "key": "Zero-coupon (continuous): duration = maturity, DV01 = T·P·10⁻⁴.",
+  "plan": {
+   "keyIdea": "Price sensitivity of e<sup>−yT</sup>.",
+   "method": "Differentiate, multiply by 1bp.",
+   "sanityChecks": [
+    "DV01 &lt; T × 100 × 10⁻⁴ = 0.1 because P &lt; 100",
+    "Positive number"
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>The 1-year zero rate is 3% and the 2-year is 4% (continuous). What is the 1y→2y forward rate?</p>",
+    "model": "<p>f = (r₂·2 − r₁·1)/(2 − 1) = 0.08 − 0.03 = 5%.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.05,
+     "display": "5%"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>A curve library says: “Linear interpolation of zero rates means forward rates are constant between nodes.” Is that right?</p>",
+    "model": "<p>No. Piecewise-constant forwards come from linear interpolation of r·t (log discount factors). Linear zero rates make r·t quadratic between nodes, so the forward rate varies linearly within each interval (and can jump at nodes).</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Yes",
+      "No — constant forwards come from linear interpolation of r·t (log discount factors)",
+      "No — forwards are always constant",
+      "Only for flat curves"
+     ],
+     "correct": 1,
+     "display": "No: linear in r·t gives constant forwards"
+    }
+   }
+  ]
  },
  {
   "id": "mm-001",
@@ -7038,7 +19550,61 @@ window.PROBLEMS = [
   ],
   "solution": "<p>By linearity, E[sum] = 3.5 + 3.5 = 7. A 2-wide market centred there is bid 6, ask 8 (\"6 at 8\").</p><p>At these prices a random counterparty loses 1 to you on average whichever side they choose.</p><p><b>Answer: 6, 8.</b></p>",
   "key": "Centre your quote on fair value; the half-width is your edge per uninformed trade.",
-  "cat": "mm"
+  "cat": "mm",
+  "plan": {
+   "keyIdea": "Centre the market on the expected value of the sum (linearity) and add ±1.",
+   "method": "E[sum] = 7, quote 6 @ 8.",
+   "sanityChecks": [
+    "Symmetric distribution: centre = 7.",
+    "Width is ask − bid = 2."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now the contract settles at the <i>product</i> of the two dice. Make a 2-wide market centred on its expected value. Answer as two numbers separated by a comma: bid, ask.</p>",
+    "model": "<p>Independence gives E[XY] = E[X]E[Y] = 12.25, so 11.25 @ 13.25.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      11.25,
+      13.25
+     ],
+     "ordered": true,
+     "display": "11.25, 13.25"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Before trading, one die is revealed: it shows 6. The interviewer says: “Your 6 @ 8 market is still fine.”</p>",
+    "model": "<p>The fair value is now 6 + 3.5 = 9.5, above your ask. You must re-centre (e.g. 8.5 @ 10.5) or you will be lifted at a loss.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: fair value is now 9.5; re-centre to 8.5 @ 10.5",
+      "Disagree: fair value is now 12",
+      "Agree"
+     ],
+     "correct": 0,
+     "display": "Disagree: 9.5"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Quote EV ∓ one standard deviation of the sum instead. Answer as two numbers separated by a comma: bid, ask (2 decimals).</p>",
+    "model": "<p>Var of one die = 35/12, of the sum 35/6, so σ = √(35/6) ≈ 2.415: 4.585 @ 9.415.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      4.58477054230176,
+      9.41522945769824
+     ],
+     "ordered": true,
+     "display": "4.585, 9.415"
+    }
+   }
+  ],
+  "par": 1
  },
  {
   "id": "mm-002",
@@ -7181,7 +19747,42 @@ window.PROBLEMS = [
   ],
   "solution": "<p>EV = 3 × 3.5 = 10.5. Var = 3 × 35/12 = 8.75, so σ = √8.75 ≈ 2.958.</p><p>Quote ≈ 7.54 @ 13.46.</p><p>Trap: adding standard deviations (3 × 1.708 = 5.12) instead of variances.</p><p><b>Answer: ≈ 7.54, 13.46.</b></p>",
   "key": "Width should scale with uncertainty: for independent pieces, add variances, then take the square root.",
-  "cat": "mm"
+  "cat": "mm",
+  "plan": {
+   "keyIdea": "Variances of independent dice add; standard deviations don't.",
+   "method": "EV 10.5, σ = √(3 × 35/12).",
+   "sanityChecks": [
+    "σ grows like √n.",
+    "Quote must be inside [3, 18]."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Four dice. Bid and ask at EV ∓ σ? Answer as two numbers separated by a comma (2 decimals).</p>",
+    "model": "<p>EV 14, σ = √(35/3) ≈ 3.416: 10.58 @ 17.42.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      10.584349744680134,
+      17.415650255319868
+     ],
+     "ordered": true,
+     "display": "10.58, 17.42"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “One die has σ ≈ 1.708, so three dice have σ ≈ 5.12.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Variances add: σ = √8.75 ≈ 2.958. Adding sds assumes perfect correlation.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.958039891549808,
+     "display": "√8.75 ≈ 2.958"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "mm-007",
@@ -7242,7 +19843,43 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Before the reveal the fair value is 5 × 7 = 35. After seeing a king, the other four cards are a random draw from 51 cards with total 351, mean 351/51 ≈ 6.882.</p><p>Fair value = 13 + 4 × 351/51 = 689/17 ≈ 40.53.</p><p>Trap: 13 + 4 × 7 = 41 — removing a high card lowers the average of what is left.</p><p><b>Answer: ≈ 40.53.</b></p>",
   "key": "After a reveal, fair value = known part + (remaining count) × (mean of the remaining cards).",
-  "cat": "mm"
+  "cat": "mm",
+  "plan": {
+   "keyIdea": "Information changes the expectation of what remains: the other four cards come from 51 cards.",
+   "method": "13 + 4 × (364 − 13)/51.",
+   "sanityChecks": [
+    "Must be below 13 + 4 × 7 = 41.",
+    "Before the reveal: 5 × 7 = 35."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Suppose the revealed card were an ace (A = 1) instead. New fair value (2 decimals)?</p>",
+    "model": "<p>1 + 4 × 363/51 = 1503/51 ≈ 29.47.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 29.470588235294116,
+     "display": "≈ 29.47"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Now the second card is also turned: another king. The interviewer says: “Fair value is 26 + 3 × 7 = 47.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Three cards remain from 50 with total 364 − 26 = 338: 26 + 3 × 338/50 = 46.28.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 46.28,
+     "display": "46.28"
+    }
+   },
+   {
+    "type": "faster",
+    "prompt": "<p>Is there a quicker way to see the re-mark?</p>",
+    "model": "<p>Remove the king's value from the deck average: the other 51 cards average (364 − 13)/51 = 7 − 6/51, so each of the 4 hidden cards loses 6/51 versus the prior 7: 13 + 28 − 24/51 ≈ 40.53.</p>"
+   }
+  ],
+  "par": 3
  },
  {
   "id": "mm-009",
@@ -7300,7 +19937,42 @@ window.PROBLEMS = [
   ],
   "solution": "<p>P(buy | 100) = 0.4 + 0.3 = 0.7, P(buy | 0) = 0.3, so P(buy) = 0.5 and P(100 | buy) = 0.35/0.5 = 0.7. Ask = 70.</p><p>Symmetrically P(100 | sell) = 0.15/0.5 = 0.3. Bid = 30.</p><p>The 40-wide spread is the price of adverse selection: you lose to informed traders exactly what you earn from noise traders.</p><p><b>Answer: 30, 70.</b></p>",
   "key": "Zero-profit quotes: ask = E[V | buy], bid = E[V | sell] (Glosten–Milgrom).",
-  "cat": "mm"
+  "cat": "mm",
+  "plan": {
+   "keyIdea": "Quotes are Bayesian posteriors: ask = E[V | buy], bid = E[V | sell].",
+   "method": "P(buy | 100) = 0.7 ⇒ P(100 | buy) = 0.7.",
+   "sanityChecks": [
+    "Symmetric around 50.",
+    "Spread = 2 × informed share × 50."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Only 20% of traders are informed. Bid and ask? Answer as two numbers separated by a comma.</p>",
+    "model": "<p>P(buy | 100) = 0.2 + 0.4 = 0.6 ⇒ 40 @ 60.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      40.0,
+      60.0
+     ],
+     "ordered": true,
+     "display": "40, 60"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>After the first trader buys, the interviewer says: “Your next ask is 70 + 40 = 110.”</p><p>Is that right? Give the next ask (2 decimals).</p>",
+    "model": "<p>Prices can't exceed 100. Update the odds: 0.49/(0.49 + 0.09) ⇒ ask ≈ 84.48.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 84.48275862068965,
+     "display": "≈ 84.48"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "mm-011",
@@ -7354,7 +20026,38 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Expected P&L per trader = 0.7·h − 0.3·(6 − h) = h − 1.8. It is zero at h = 1.8, so the width is 3.6.</p><p>Note the break-even half-spread equals (informed fraction) × (size of the move) = 0.3 × 6, the Glosten–Milgrom result.</p><p><b>Answer: 3.6.</b></p>",
   "key": "Break-even half-spread = α × (value move) when noise flow is balanced.",
-  "cat": "mm"
+  "cat": "mm",
+  "plan": {
+   "keyIdea": "Expected P&L per trader = uninformed share × h − informed share × (move − h).",
+   "method": "0.7h − 0.3(6 − h) = 0.",
+   "sanityChecks": [
+    "Half-spread = informed share × move.",
+    "No informed ⇒ zero width."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Values 90 or 110 instead. Break-even width?</p><p>Give a number.</p>",
+    "model": "<p>h = 0.3 × 10 = 3, width 6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 6.0,
+     "display": "6"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Only 70% of traders pay you, so h = 0.3 × 6 / 0.7 ≈ 2.57 and the width is 5.14.”</p><p>Is that right? Give the break-even width.</p>",
+    "model": "<p>Informed traders also pay the half-spread (they lose h against their 6 gain), so h = 1.8, width 3.6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.6,
+     "display": "3.6"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "mm-013",
@@ -7435,7 +20138,43 @@ window.PROBLEMS = [
   ],
   "solution": "<p>P(buy | up) = 0.2 + 0.8·½ = 0.6, P(buy | down) = 0.4, so P(up | buy) = 0.6. Ask = S + σ(0.6 − 0.4) = S + 0.2σ. By symmetry bid = S − 0.2σ.</p><p>Spread = 2 × 0.2 × σ: 0.32 at σ = 0.8 (check) and 0.48 at σ = 1.2.</p><p><b>Answer: 0.48.</b></p>",
   "key": "With adverse selection the zero-profit spread is proportional to how far informed traders can move value (2ασ).",
-  "cat": "mm"
+  "cat": "mm",
+  "plan": {
+   "keyIdea": "Zero-profit quotes are conditional expectations; the adverse-selection component is α·σ per side.",
+   "method": "Bayes: P(up | buy) = 0.6 ⇒ ask = S + 0.2σ.",
+   "sanityChecks": [
+    "Spread ∝ σ: check 0.32 at σ = 0.8.",
+    "No informed traders ⇒ zero spread."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Keep σ = 0.80 but now 50% of traders are informed. Total spread?</p><p>Give a number.</p>",
+    "model": "<p>Spread = 2ασ = 2 × 0.5 × 0.8 = 0.8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.8,
+     "display": "0.8"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Risk scales with variance, so going from σ = 0.8 to 1.2 multiplies the spread by 2.25, to 0.72.”</p>",
+    "model": "<p>The spread here compensates for adverse selection, which is linear in the size of the move: 2 × 0.2 × 1.2 = 0.48.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree: 0.72",
+      "Disagree: the spread is linear in σ, 0.48",
+      "Disagree: the spread is unchanged, 0.32"
+     ],
+     "correct": 1,
+     "display": "Disagree: 0.48"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "mm-016",
@@ -7490,7 +20229,38 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Likelihood of two buys: 0.7² = 0.49 if it pays 100, 0.3² = 0.09 if it pays 0. Posterior P(100) = 0.49/(0.49 + 0.09) = 0.8448.</p><p>Fair value = 84.48. After one buy it was 70; the second lift moves it another ≈ 14.5.</p><p>Trap: adding 20 per lift linearly (giving 90) — updates work multiplicatively in odds.</p><p><b>Answer: ≈ 84.48.</b></p>",
   "key": "Each trade multiplies the odds by its likelihood ratio; fair value follows the posterior.",
-  "cat": "mm"
+  "cat": "mm",
+  "plan": {
+   "keyIdea": "Bayes in odds form: each buy multiplies the odds by 0.7/0.3.",
+   "method": "Posterior = 0.49/(0.49 + 0.09).",
+   "sanityChecks": [
+    "After one buy: 70.",
+    "Updates shrink as you approach 100."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Three buys in a row. Fair value (2 decimals)?</p>",
+    "model": "<p>0.343/(0.343 + 0.027) ⇒ 92.70.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 92.70270270270271,
+     "display": "≈ 92.70"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>A buy followed by a sell. Fair value?</p><p>Give a number.</p>",
+    "model": "<p>Likelihoods 0.7·0.3 both ways: back to 50.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 50.0,
+     "display": "50"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "mm-018",
@@ -7635,7 +20405,644 @@ window.PROBLEMS = [
   ],
   "solution": "<p>For h ≤ ½, the informed trader buys on 4, 5, 6 and sells on 1, 2, 3, gaining on average [(0.5 − h) + (1.5 − h) + (2.5 − h)]/3 = 1.5 − h. Your P&L = (2/3)h − (1/3)(1.5 − h) = h − 0.5, which is negative for h &lt; ½ and zero at h = ½.</p><p>For ½ ≤ h ≤ 1.5 the informed trader skips 3 and 4 and P&L = (16h − 8)/18 ≥ 0. So the break-even half-width is ½ and the width is 1.</p><p><b>Answer: 1.</b></p>",
   "key": "Break-even spreads come from balancing noise revenue against informed losses, piecewise as the informed set changes.",
-  "cat": "mm"
+  "cat": "mm",
+  "plan": {
+   "keyIdea": "Expected P&L = uninformed edge − informed loss; informed traders only trade outside the quote.",
+   "method": "Write P&L as a function of h piecewise and find the root.",
+   "sanityChecks": [
+    "At h = 0 you lose to informed flow.",
+    "Wider than the die's range ⇒ no trades at all."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now the counterparty has peeked with probability 1/2. Smallest width 2h with expected P&L ≥ 0?</p><p>Give a number.</p>",
+    "model": "<p>For h ≤ ½: P&L = h/2 − (1.5 − h)/2 &lt; 0. For ½ ≤ h ≤ 1.5 the informed trader trades only on 1, 2, 5, 6: P&L = h/2 − (8 − 4h)/12 = (10h − 8)/12 ⇒ h = 0.8, width 1.6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.6,
+     "display": "1.6"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why does the informed trader's average gain change shape at h = ½?</p>",
+    "model": "<p>Once the ask passes 4 and the bid falls below 3, faces 3 and 4 are no longer worth trading, so the informed trader passes on them and the loss function gets a kink.</p>"
+   }
+  ],
+  "par": 6
+ },
+ {
+  "id": "js-029",
+  "cat": "mm",
+  "diff": 3,
+  "title": "Glosten–Milgrom quotes after a buy",
+  "tags": [
+   "glosten-milgrom",
+   "adverse-selection",
+   "bayesian-updating",
+   "market-making"
+  ],
+  "style": [
+   "market-making-game",
+   "math-test"
+  ],
+  "prompt": "<p>An asset is worth 100 or 120 with equal probability. 30% of arriving traders know the value (they buy if it is 120, sell if 100); the rest buy or sell with probability ½ each. You quote competitively: ask = E[value | next trade is a buy].</p><p>Give your ask for the first trade, and your ask for the second trade after the first trader bought, separated by a comma.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    113.0,
+    115.5045871559633
+   ],
+   "ordered": true,
+   "display": "113, ≈ 115.50",
+   "tolRel": 0.001
+  },
+  "hints": [
+   "P(buy | 120) = 0.3 + 0.35 = 0.65, P(buy | 100) = 0.35.",
+   "After one buy, P(120) = 0.65; a second buy updates it to 0.65²/(0.65² + 0.35²)."
+  ],
+  "solution": "<p>First ask: P(120 | buy) = 0.65·0.5/0.5 = 0.65 ⇒ ask = 100 + 20 × 0.65 = 113 (bid symmetric at 107).</p><p>After the buy the prior is P(120) = 0.65. The ask for the next trade conditions on another buy: P(120 | buy, buy) = 0.65²/(0.65² + 0.35²) = 0.4225/0.545 ≈ 0.7752 ⇒ ask ≈ 115.50.</p><p>Quotes move toward the informed side with each trade — prices learn from order flow.</p><p><b>Answer: 113, ≈ 115.50.</b></p>",
+  "key": "Glosten–Milgrom: quotes are conditional expectations given the next trade's direction; each trade is Bayesian evidence.",
+  "plan": {
+   "keyIdea": "Regret-free quotes: ask = E[V | buy].",
+   "method": "Compute P(buy | V), apply Bayes once, then again with the updated prior.",
+   "sanityChecks": [
+    "μ = 0 should give 110 both times",
+    "Second ask must exceed the first after a buy"
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>On the first trade, what is the probability that a buyer is informed?</p>",
+    "model": "<p>Informed traders buy only when the value is 120, so P(informed and buy) = 0.3 × ½ = 0.15, while P(buy) = 0.5 by symmetry. P(informed | buy) = 0.15/0.5 = 0.3 — the same as the population share, because informed buyers and informed sellers are equally likely a priori.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3,
+     "display": "0.3"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>After a buy followed by a sell, what is the ask for the third trade?</p>",
+    "model": "<p>A buy then a sell multiply the odds by 0.65/0.35 and 0.35/0.65 — back to even, so the ask returns to 113.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 113.0,
+     "display": "113"
+    }
+   }
+  ]
+ },
+ {
+  "cat": "mm",
+  "diff": 1,
+  "title": "Reading “40 at 44, 10 up”",
+  "tags": [
+   "quoting",
+   "size",
+   "pnl",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>You say “I'm 40 at 44, 10 up” on a contract. One trader says “I buy 4”. Another then says “sold” to your bid. Later the contract settles at 41.</p><p>What is your final position and your total P&amp;L? Answer as two numbers separated by a comma: position, P&amp;L.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    6.0,
+    22.0
+   ],
+   "ordered": true,
+   "display": "+6 contracts, +22"
+  },
+  "hints": [
+   "“I buy 4” takes 4 of your 10 offered at 44; “sold” hits your entire bid: you buy 10 at 40.",
+   "P&amp;L = Σ size × edge versus settlement."
+  ],
+  "solution": "<p>“40 at 44, 10 up” = you bid 40 for 10 and offer 10 at 44.</p><p>“I buy 4” lifts 4 of your offer: you sell 4 @ 44 (6 remain offered). “Sold” hits the whole bid: you buy 10 @ 40.</p><p>Position: −4 + 10 = +6. P&amp;L at 41: 4 × (44 − 41) + 10 × (41 − 40) = 12 + 10 = 22.</p><p><b>Answer: 6, 22.</b></p>",
+  "key": "A quote is a bid, an offer and a size; 'sold' / 'take 'em' trade the full size, 'I buy/sell n' trades part of it.",
+  "plan": {
+   "keyIdea": "Translate each phrase into a fill.",
+   "method": "Track position, then mark every trade against settlement.",
+   "sanityChecks": [
+    "Cash check: −400 + 176 + 6 × 41 = 22."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>After those two trades, what is still resting on your quote? Answer as two numbers separated by a comma: bid size, offer size.</p>",
+    "model": "<p>The bid was fully filled and is gone (0); 6 remain offered at 44 until you say “I'm out”.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      0.0,
+      6.0
+     ],
+     "ordered": true,
+     "display": "0, 6"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why would you say “I'm out” right after being hit for your full size?</p>",
+    "model": "<p>Your resting offer is still live and a fill tells you something; you want to re-think fair value and re-quote rather than leave a stale order for the next person to pick off.</p>"
+   }
+  ],
+  "id": "pm-018"
+ },
+ {
+  "cat": "mm",
+  "diff": 1,
+  "title": "A two-wide market on a d20",
+  "tags": [
+   "fair-value",
+   "quoting",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "OA-speed"
+  ],
+  "prompt": "<p>A contract pays $1 per pip on one roll of a fair 20-sided die. Make a market 2 wide centred on fair value.</p><p>Answer as two numbers separated by a comma: bid, ask.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    9.5,
+    11.5
+   ],
+   "ordered": true,
+   "display": "9.5 @ 11.5"
+  },
+  "hints": [
+   "E[d20] = (1 + 20)/2."
+  ],
+  "solution": "<p>Fair value 10.5, so a 2-wide market is 9.5 at 11.5. A random counterparty pays you 1 per contract in expectation on either side.</p><p><b>Answer: 9.5, 11.5.</b></p>",
+  "key": "Centre on EV; half the width is your expected edge per uninformed trade.",
+  "plan": {
+   "keyIdea": "Symmetric uniform: EV is the midpoint.",
+   "method": "EV ± 1.",
+   "sanityChecks": [
+    "Bid below fair, ask above fair."
+   ]
+  },
+  "par": 0.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Someone sells you 10 at your bid and the die shows 1. Your P&amp;L?</p>",
+    "model": "<p>10 × (1 − 9.5) = −85. Painful, but a fair price with small size: you still want this trade on average.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -85.0,
+     "display": "−85"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer: “Fair value of a d20 is 10, so you should be 9 at 11.” Correct the fair value.</p>",
+    "model": "<p>(1 + 20)/2 = 10.5, so 9.5 at 11.5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 10.5,
+     "display": "10.5"
+    }
+   }
+  ],
+  "id": "pm-019"
+ },
+ {
+  "cat": "mm",
+  "diff": 2,
+  "title": "Market on the higher of two d10s",
+  "tags": [
+   "fair-value",
+   "order-statistics",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>Two fair 10-sided dice (1–10) are rolled; a contract settles at the larger face. What is its fair value (the mid of your market)?</p><p>Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 7.15,
+   "display": "715/100 = 7.15"
+  },
+  "hints": [
+   "P(max ≤ k) = (k/10)², so P(max = k) = (2k − 1)/100.",
+   "Σ k(2k − 1) = 2Σk² − Σk."
+  ],
+  "solution": "<p>P(max = k) = (k² − (k − 1)²)/100 = (2k − 1)/100.</p><p>E = Σ k(2k − 1)/100 = (2·385 − 55)/100 = 715/100 = 7.15.</p><p>The maximum is skewed high, so your market should be centred near 7.15, well above the single-die mean of 5.5.</p><p><b>Answer: 7.15.</b></p>",
+  "key": "For a maximum, use P(max ≤ k) = P(each ≤ k), then difference to get the pmf.",
+  "plan": {
+   "keyIdea": "Order statistic of independent rolls.",
+   "method": "CDF (k/10)², difference, then average.",
+   "sanityChecks": [
+    "Must lie between 5.5 and 10.",
+    "E[max] + E[min] = 11."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>And for the lower of the two dice?</p>",
+    "model": "<p>max + min = sum of the dice, so E[min] = 11 − 7.15 = 3.85.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.85,
+     "display": "3.85"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Three d10s instead of two: fair value of the maximum?</p>",
+    "model": "<p>P(max = k) = (k³ − (k − 1)³)/1000; E = Σ k(3k² − 3k + 1)/1000 = 7975/1000 = 7.975.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 7.975,
+     "display": "7.975"
+    }
+   }
+  ],
+  "id": "pm-020"
+ },
+ {
+  "cat": "mm",
+  "diff": 2,
+  "title": "Lifted by a maybe-informed buyer",
+  "tags": [
+   "adverse-selection",
+   "bayes",
+   "updating",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>A contract is worth 20 or 60 with equal probability. Half of the traders who approach you know the value (they buy if it is 60, sell if it is 20); the other half buy or sell at random with equal chance. A trader lifts your offer.</p><p>What is the contract's fair value now? Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 50.0,
+   "display": "50"
+  },
+  "hints": [
+   "P(buy | 60) = ½ + ¼ = ¾; P(buy | 20) = ¼.",
+   "Posterior P(60 | buy) = ¾."
+  ],
+  "solution": "<p>P(buy | 60) = 0.5·1 + 0.5·0.5 = 0.75 and P(buy | 20) = 0.25. Bayes: P(60 | buy) = 0.75/(0.75 + 0.25) = 0.75.</p><p>Fair value = 0.75·60 + 0.25·20 = 50 — up 10 from the prior 40.</p><p>Being lifted is information: buyers are more common when the value is high.</p><p><b>Answer: 50.</b></p>",
+  "key": "Conditional on being lifted, the value is higher than you thought — update before re-quoting.",
+  "plan": {
+   "keyIdea": "A fill is a signal; apply Bayes to the trader's action.",
+   "method": "Likelihood of a buy under each value, posterior, then the EV.",
+   "sanityChecks": [
+    "New fair must be between 40 and 60."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Where is your new market? Quote bid = E[value | the next trader sells] and ask = E[value | the next trader buys]. Answer as two numbers separated by a comma: bid, ask.</p>",
+    "model": "<p>Start from P(60) = ¾. Next buy: (¾·¾)/(¾·¾ + ¼·¼) = 0.9 → 56. Next sell: (¾·¼)/(¾·¼ + ¼·¾) = 0.5 → 40. New market 40 at 56.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      40.0,
+      56.0
+     ],
+     "ordered": true,
+     "display": "40 @ 56"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer: “The first lift moved fair up 10, so a second lift moves it another 10, to 60.” Where is fair after two lifts?</p>",
+    "model": "<p>Updates are multiplicative in odds, not additive in price: odds 3 → 9, P(60) = 0.9, fair = 56.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 56.0,
+     "display": "56"
+    }
+   }
+  ],
+  "id": "pm-023"
+ },
+ {
+  "cat": "mm",
+  "diff": 2,
+  "title": "Bidding for a die against peekers",
+  "tags": [
+   "adverse-selection",
+   "conditional-expectation",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>A contract pays one roll of a fair die (in dollars). You bid 3 for it. Each potential seller has, with probability 0.4, already seen the roll (and sells to you only if the roll is below 3); otherwise they sell with probability ½ regardless of the roll.</p><p>Given that your bid is hit, what is the expected value of the contract? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2.8846153846153846,
+   "display": "75/26 ≈ 2.885"
+  },
+  "hints": [
+   "Weight each roll by P(sold to you | roll): 0.4·1[roll &lt; 3] + 0.3.",
+   "E[V | hit] = Σ v·P(hit | v) / Σ P(hit | v)."
+  ],
+  "solution": "<p>P(hit | v) = 0.4·1[v ≤ 2] + 0.3: 0.7 for v = 1, 2 and 0.3 for v = 3…6.</p><p>E[V | hit] = (0.7·(1 + 2) + 0.3·(3 + 4 + 5 + 6))/(0.7·2 + 0.3·4) = 7.5/2.6 = 75/26 ≈ 2.885.</p><p>Your bid of 3 is below the unconditional value 3.5, yet you lose about 0.115 per fill: the sellers who show up are disproportionately the ones holding low rolls.</p><p><b>Answer: 75/26 ≈ 2.885.</b></p>",
+  "key": "Ask “conditional on my order being filled, what is it worth?” — not “what is it worth?”",
+  "plan": {
+   "keyIdea": "Adverse selection: condition on the fill.",
+   "method": "Bayes-weight each roll by the probability it gets sold to you.",
+   "sanityChecks": [
+    "Answer must be below 3.5.",
+    "If nobody peeked it would be 3.5."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>You lower your bid to 2. Expected profit per fill now?</p>",
+    "model": "<p>Now peekers sell only on a 1: E[V | hit] = (0.7·1 + 0.3·20)/(0.7 + 0.3·5) = 6.7/2.2 = 67/22 ≈ 3.045, so profit per fill ≈ 67/22 − 2 = 23/22 ≈ 1.045.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.0454545454545454,
+     "display": "23/22 ≈ 1.045"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer: “The die is worth 3.5, so a bid of 3 makes 0.50 every time you're hit.” What is the true expected profit per fill?</p>",
+    "model": "<p>75/26 − 3 = −3/26 ≈ −0.115: a loss, because fills come disproportionately from low rolls.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.11538461538461539,
+     "display": "−3/26 ≈ −0.115"
+    }
+   }
+  ],
+  "id": "pm-024"
+ },
+ {
+  "cat": "mm",
+  "diff": 3,
+  "title": "They know whether the sum is 8+",
+  "tags": [
+   "adverse-selection",
+   "information",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>You quote a market centred on 7 on the sum of two dice. Your counterparty doesn't see the dice but is told whether the sum is at least 8, and must trade one lot: they buy at your ask if that is better for them in expectation, otherwise sell at your bid.</p><p>What is the minimum total width (ask − bid) at which your expected P&amp;L is zero? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 3.888888888888889,
+   "display": "35/9 ≈ 3.89"
+  },
+  "hints": [
+   "E[sum | ≥ 8] = 140/15 = 28/3 and E[sum | ≤ 7] = 112/21 = 16/3.",
+   "With half-width h, your P&amp;L is (15/36)(7 + h − 28/3) + (21/36)(16/3 − (7 − h))."
+  ],
+  "solution": "<p>P(sum ≥ 8) = 15/36 with conditional mean 28/3; P(sum ≤ 7) = 21/36 with conditional mean 16/3.</p><p>Quote 7 − h at 7 + h. They buy when told ≥ 8 and sell otherwise (for h &lt; 7/3). Your expected P&amp;L = (15/36)(h − 7/3) + (21/36)(h − 5/3) = h − 35/18.</p><p>Break-even half-width 35/18, so the width is 35/9 ≈ 3.89.</p><p><b>Answer: 35/9.</b></p>",
+  "key": "Width must cover the informed trader's average edge: E over their signals of |E[V | signal] − mid|.",
+  "plan": {
+   "keyIdea": "They hold a binary signal; your loss is their edge per signal.",
+   "method": "Conditional means given each signal, P&L linear in the half-width.",
+   "sanityChecks": [
+    "Width must be positive and below the gap 28/3 − 16/3 = 4."
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Instead they are told only whether the sum is even or odd. Break-even width?</p>",
+    "model": "<p>E[sum | even] = E[sum | odd] = 7 (both sets are symmetric around 7), so the signal carries no value information: any width ≥ 0 breaks even. Width 0.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.0,
+     "display": "0",
+     "tolAbs": 1e-09
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why is the answer less than the full gap of 4 between the two conditional means?</p>",
+    "model": "<p>Your loss is their edge measured from your mid: 7/3 on the high signal, 5/3 on the low one, averaged with weights 15/36 and 21/36 = 35/18 per side, which is less than 2.</p>"
+   }
+  ],
+  "id": "pm-025"
+ },
+ {
+  "cat": "mm",
+  "diff": 2,
+  "title": "Card market after a lift",
+  "tags": [
+   "updating",
+   "cards",
+   "adverse-selection",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>One card is dealt face down; a contract pays its rank (A = 1, 2–10, J = 11, Q = 12, K = 13). Half the traders have peeked: they lift your offer if the rank is 9 or more, hit your bid if it is 5 or less, and otherwise do nothing. The rest always trade, buying or selling with equal chance. A trader lifts you.</p><p>What is the fair value of the card now? Give a decimal to 2 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 8.73913043478261,
+   "display": "201/23 ≈ 8.74"
+  },
+  "hints": [
+   "P(lift | rank) = ½·1[rank ≥ 9] + ¼.",
+   "Σ P(lift | r) = 5.75 and Σ r·P(lift | r) = 50.25."
+  ],
+  "solution": "<p>Prior fair value is 7. P(lift | r) = 0.75 for r = 9…13 and 0.25 otherwise.</p><p>E[rank | lift] = (0.75·(9 + … + 13) + 0.25·(1 + … + 8))/(0.75·5 + 0.25·8) = (41.25 + 9)/5.75 = 201/23 ≈ 8.74.</p><p>A single lift moves fair up by about 1.7 — re-centre your market before the next trader arrives.</p><p><b>Answer: ≈ 8.74.</b></p>",
+  "key": "Re-weight each outcome by how likely it was to produce the trade you just saw.",
+  "plan": {
+   "keyIdea": "A lift is a noisy signal of a high card.",
+   "method": "Weight ranks by P(lift | rank), renormalise, average.",
+   "sanityChecks": [
+    "Must lie between 7 and 11 (the peekers-only answer)."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Keeping a 2-wide market centred on your new fair value, what do you quote? Answer as two numbers separated by a comma: bid, ask.</p>",
+    "model": "<p>201/23 ± 1 ≈ 7.74 at 9.74.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      7.739130434782608,
+      9.73913043478261
+     ],
+     "ordered": true,
+     "display": "≈ 7.74 @ 9.74",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>After the lift, a second independent trader (same mix) hits your bid. Fair value now?</p>",
+    "model": "<p>Weights become (lift)·(hit): 0.75·0.25 for 9–13, 0.25·0.75 for 1–5, 0.25·0.25 for 6–8. The high and low blocks have equal weight and are symmetric around 7, so fair is back to 7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 7.0,
+     "display": "7"
+    }
+   }
+  ],
+  "id": "pm-026"
+ },
+ {
+  "cat": "mm",
+  "diff": 2,
+  "title": "Three dice, one face-up",
+  "tags": [
+   "fair-value",
+   "variance",
+   "dice",
+   "quoting",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>A contract settles at the sum of three fair dice. One die is turned face-up: it shows 6. Quote fair value ± one standard deviation of the hidden part.</p><p>Answer as two numbers separated by a comma: bid, ask (2 decimals).</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    10.58477054230176,
+    15.41522945769824
+   ],
+   "ordered": true,
+   "display": "13 ∓ √(35/6) ≈ 10.58 @ 15.42",
+   "tolRel": 0.002
+  },
+  "hints": [
+   "Fair = 6 + 2 × 3.5.",
+   "Only the two hidden dice are uncertain: Var = 2 × 35/12."
+  ],
+  "solution": "<p>Fair = 6 + 7 = 13. The hidden part has variance 35/6, σ ≈ 2.415. Quote ≈ 10.58 at 15.42.</p><p>Seeing a die both moves the centre and tightens the width (from ±2.96 with nothing shown).</p><p><b>Answer: ≈ 10.58, 15.42.</b></p>",
+  "key": "Fair = known part + expected hidden part; width tracks the uncertainty that remains.",
+  "plan": {
+   "keyIdea": "Known plus unknown pieces.",
+   "method": "Mean adds; variance only from the hidden dice.",
+   "sanityChecks": [
+    "Width should shrink as more dice are revealed."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Two dice are face-up showing 6 and 2. New EV ± 1 SD market? Answer as two numbers separated by a comma.</p>",
+    "model": "<p>Fair 11.5, σ = √(35/12) ≈ 1.708: ≈ 9.79 at 13.21.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      9.792174872340066,
+      13.207825127659934
+     ],
+     "ordered": true,
+     "display": "≈ 9.79 @ 13.21",
+     "tolRel": 0.002
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>No dice face-up: what is the half-width (one SD) now?</p>",
+    "model": "<p>√(3 × 35/12) = √8.75 ≈ 2.958.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.958039891549808,
+     "display": "√8.75 ≈ 2.958",
+     "tolRel": 0.002
+    }
+   }
+  ],
+  "id": "pm-029"
+ },
+ {
+  "cat": "mm",
+  "diff": 3,
+  "title": "A trader who has seen one of three dice",
+  "tags": [
+   "adverse-selection",
+   "information",
+   "dice",
+   "pm-track"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>You make a market 9.5 at 11.5 (one lot) on the sum of three fair dice. Your counterparty has seen one of the dice. They buy if their expected value is above your ask, sell if it is below your bid, and otherwise pass.</p><p>What is your expected P&amp;L per counterparty (averaging over the die they saw)? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": -0.6666666666666666,
+   "display": "−2/3 ≈ −0.667"
+  },
+  "hints": [
+   "Seeing a die d, their EV is d + 7.",
+   "They buy on 5 or 6, sell on 1 or 2, pass on 3 or 4."
+  ],
+  "solution": "<p>Their EV given the seen die d is d + 7 ∈ {8, …, 13}.</p><p>d = 5: buy at 11.5, worth 12 → you lose 0.5. d = 6: worth 13 → −1.5. d = 2: they sell at 9.5, worth 9 → −0.5. d = 1: worth 8 → −1.5. d = 3, 4: pass.</p><p>Expected P&amp;L = (−0.5 − 1.5 − 0.5 − 1.5)/6 = −2/3.</p><p><b>Answer: −2/3.</b></p>",
+  "key": "Against someone who knows more, you only trade when you're wrong; widen, or only quote when noise flow pays for it.",
+  "plan": {
+   "keyIdea": "Their information sets their EV; they trade only when it's outside your quote.",
+   "method": "Enumerate the seen die, your loss in each case.",
+   "sanityChecks": [
+    "Answer must be ≤ 0 since they never trade at a loss in expectation."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>How wide must your market be (centred at 10.5) so they never want to trade?</p>",
+    "model": "<p>Their EV ranges over 8–13, so you need 10.5 + h ≥ 13 and 10.5 − h ≤ 8: h = 2.5, width 5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5.0,
+     "display": "5"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Keep 9.5 at 11.5, but now each counterparty is this informed trader with probability ½ and otherwise a noise trader who always trades one lot on a random side. Expected P&amp;L per counterparty?</p>",
+    "model": "<p>Noise traders pay you the half-width 1 on average. ½·(−2/3) + ½·1 = 1/6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.16666666666666666,
+     "display": "1/6 ≈ 0.167"
+    }
+   }
+  ],
+  "id": "pm-030"
  },
  {
   "id": "gt-001",
@@ -7662,7 +21069,53 @@ window.PROBLEMS = [
    "If the other hunts stag with probability q: Stag pays 4q, Hare pays 3."
   ],
   "solution": "<p>Let the opponent choose Stag with probability q. Stag earns 4q, Hare earns 3 for sure. Indifference: 4q = 3 ⇒ q = 3/4. By symmetry both mix with 3/4.</p><p>So the game has exactly three equilibria. The payoff in the mixed one is 3, no better than Hare: coordination on the risky Stag needs each to believe the other goes Stag with probability at least 3/4.</p><p><b>Answer: 3/4.</b></p>",
-  "key": "Mixed equilibrium: choose your mix to make the <i>opponent</i> indifferent."
+  "key": "Mixed equilibrium: choose your mix to make the <i>opponent</i> indifferent.",
+  "plan": {
+   "keyIdea": "In a mixed equilibrium each player makes the other indifferent.",
+   "method": "Opponent plays Stag with q: Stag pays 4q, Hare pays 3; solve 4q = 3.",
+   "sanityChecks": [
+    "q must be in (0, 1).",
+    "Symmetric game, so both mix the same way."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now (Stag, Stag) pays 6 each, everything else unchanged. Mixed-equilibrium P(Stag)?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Indifference 6q = 3 gives q = 1/2: a bigger prize lowers the trust needed to go for Stag.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “In the mixed equilibrium each hunter expects 3.5, between the Stag payoff 4 and the Hare payoff 3.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>At the mix, Hare pays exactly 3 for sure and Stag is made equal to it, so the expected payoff is 3. It is no better than (Hare, Hare).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.0,
+     "display": "3"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Which pure equilibrium is risk-dominant?</p>",
+    "model": "<p>Compare the products of the deviation losses: at (Stag, Stag) a player loses 4 − 3 = 1 by deviating, product 1; at (Hare, Hare) the loss is 3 − 0 = 3, product 9. Hare–Hare is risk-dominant, Stag–Stag payoff-dominant.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "(Stag, Stag)",
+      "(Hare, Hare)",
+      "Neither"
+     ],
+     "correct": 1,
+     "display": "(Hare, Hare)"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "gt-002",
@@ -7724,7 +21177,42 @@ window.PROBLEMS = [
    "Equalise Row's payoff against Left and Right: 3p − 2(1 − p) = −p + (1 − p)."
   ],
   "solution": "<p>Row minima are −1 and −2 (max −1); column maxima are 3 and 1 (min 1). They differ, so the solution is mixed.</p><p>With P(Top) = p: against Left Row gets 5p − 2; against Right 1 − 2p. Equalise: 5p − 2 = 1 − 2p ⇒ p = 3/7, value = 5(3/7) − 2 = 1/7.</p><p>(Column mixes Left with q: 3q − (1 − q) = −2q + (1 − q) ⇒ q = 2/7, giving the same value 1/7.)</p><p><b>Answer: 3/7, 1/7.</b></p>",
-  "key": "2×2 zero-sum without a saddle point: equalise payoffs against both opposing columns."
+  "key": "2×2 zero-sum without a saddle point: equalise payoffs against both opposing columns.",
+  "plan": {
+   "keyIdea": "No saddle point ⇒ mix so the opponent is indifferent.",
+   "method": "5p − 2 = 1 − 2p.",
+   "sanityChecks": [
+    "Check for a saddle point first (maximin −1 ≠ minimax 1).",
+    "Value lies between −1 and 1."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Change the Bottom–Right entry from 1 to 2. Row's P(Top) and the value? Answer as two numbers separated by a comma.</p>",
+    "model": "<p>Against Left 5p − 2, against Right 2 − 3p ⇒ p = 1/2, value 1/2.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      0.5,
+      0.5
+     ],
+     "ordered": true,
+     "display": "1/2, 1/2"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “By symmetry Column also plays Left with probability 3/7.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Column's mix comes from Row's indifference: 3q − (1 − q) = −2q + (1 − q) ⇒ q = 2/7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2857142857142857,
+     "display": "2/7"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "gt-004",
@@ -7935,7 +21423,52 @@ window.PROBLEMS = [
    "Solve the two linear equations."
   ],
   "solution": "<p>q<sub>1</sub> = (90 − q<sub>2</sub>)/2 and q<sub>2</sub> = (60 − q<sub>1</sub>)/2. Substituting: q<sub>1</sub> = (90 − 30 + q<sub>1</sub>/2)/2 ⇒ (3/4)q<sub>1</sub> = 30 ⇒ q<sub>1</sub> = 40, q<sub>2</sub> = 10.</p><p>General formula: q<sub>i</sub> = (a − 2c<sub>i</sub> + c<sub>j</sub>)/3. Price = 50; firm 2 still produces because 50 &gt; 40.</p><p><b>Answer: 40, 10.</b></p>",
-  "key": "Asymmetric Cournot: q<sub>i</sub> = (a − 2c<sub>i</sub> + c<sub>j</sub>)/3."
+  "key": "Asymmetric Cournot: q<sub>i</sub> = (a − 2c<sub>i</sub> + c<sub>j</sub>)/3.",
+  "plan": {
+   "keyIdea": "Each firm best-responds to the other's quantity; solve the two reaction functions.",
+   "method": "qᵢ = (a − 2cᵢ + cⱼ)/3.",
+   "sanityChecks": [
+    "Both quantities positive, else a corner.",
+    "Price must exceed firm 2's cost (50 &gt; 40)."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Firm 2's cost falls to 25 (firm 1 still 10). New equilibrium quantities? Answer as two numbers separated by a comma: q₁, q₂.</p>",
+    "model": "<p>q₁ = (100 − 20 + 25)/3 = 35, q₂ = (100 − 50 + 10)/3 = 20.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      35.0,
+      20.0
+     ],
+     "ordered": true,
+     "display": "35, 20"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Price is 50, so firm 1 earns 40 × 40 = 1 600 and firm 2 earns 10 × 40 = 400: firm 1 is only 4 times as profitable.”</p><p>Is that right? If not, give firm 2's profit.</p>",
+    "model": "<p>Profit is margin × quantity: firm 2 earns (50 − 40) × 10 = 100, so firm 1 is 16 times as profitable.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 100.0,
+     "display": "100"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Both firms have cost 10. Symmetric equilibrium quantity per firm?</p><p>Give a number.</p>",
+    "model": "<p>(100 − 10)/3 = 30 each.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 30.0,
+     "display": "30"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "gt-011",
@@ -7962,7 +21495,48 @@ window.PROBLEMS = [
    "For n uniforms on [0, 1], E[k-th smallest] = k/(n + 1)."
   ],
   "solution": "<p>The price paid is the second-highest value, i.e. the 3rd smallest of 4. E[U<sub>(3)</sub>] = 3/5 on [0, 1], so revenue = 100 × 3/5 = 60.</p><p>By revenue equivalence, a first-price auction gives the same 60 in expectation.</p><p><b>Answer: 60.</b></p>",
-  "key": "Second-price revenue = E[second-highest value] = (n − 1)/(n + 1) of the range for uniform values."
+  "key": "Second-price revenue = E[second-highest value] = (n − 1)/(n + 1) of the range for uniform values.",
+  "plan": {
+   "keyIdea": "Truthful bidding: revenue = expected second-highest value.",
+   "method": "E[U₍ₙ₋₁₎] = (n − 1)/(n + 1).",
+   "sanityChecks": [
+    "Revenue equivalence with first-price.",
+    "n → ∞ ⇒ 100."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Only 2 bidders. Expected revenue?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>100 × 1/3 ≈ 33.3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 33.333333333333336,
+     "display": "100/3"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “The seller collects the highest value on average, 100 × 4/5 = 80.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>The winner pays the second-highest value: 60.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 60.0,
+     "display": "60"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What does revenue tend to as the number of bidders → ∞?</p><p>Give a number.</p>",
+    "model": "<p>(n − 1)/(n + 1) → 1: 100.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 100.0,
+     "display": "100"
+    }
+   }
+  ],
+  "par": 2
  },
  {
   "id": "gt-012",
@@ -7989,7 +21563,38 @@ window.PROBLEMS = [
    "Maximise (60 − b)(4b/300)³."
   ],
   "solution": "<p>P(win with bid b) = (4b/300)³ for b ≤ 75. Expected profit ∝ (60 − b)b³. Derivative: 3b²(60 − b) − b³ = 0 ⇒ 180 − 3b = b ⇒ b = 45.</p><p>That confirms the equilibrium rule b = (n − 1)v/n = 3v/4. Bidding your value guarantees zero profit; the trade-off is a lower price against a lower chance of winning.</p><p><b>Answer: 45.</b></p>",
-  "key": "First-price, n uniform bidders: bid (n − 1)/n of your value."
+  "key": "First-price, n uniform bidders: bid (n − 1)/n of your value.",
+  "plan": {
+   "keyIdea": "Best response trades a lower price against a lower chance of winning.",
+   "method": "Maximise (v − b) · P(win | b) with P(win) = (4b/300)³.",
+   "sanityChecks": [
+    "Bid below value.",
+    "Equilibrium rule (n − 1)v/n."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Two bidders (the other bids v/2). Your value is 60: optimal bid?</p><p>Give a number.</p>",
+    "model": "<p>Maximise (60 − b)(2b/100) ⇒ b = 30.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 30.0,
+     "display": "30"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Bidding 45 with value 60 earns you 15.”</p><p>Is that right? Give the expected profit.</p>",
+    "model": "<p>15 is the profit if you win; you win only with probability (45/75)³ = 0.216: expected 3.24.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.24,
+     "display": "3.24"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "gt-013",
@@ -8101,7 +21706,43 @@ window.PROBLEMS = [
    "Find the heap h with h ⊕ s &lt; h and reduce it to h ⊕ s."
   ],
   "solution": "<p>Nim-sum: 4 = 0100, 6 = 0110, 9 = 1001 ⇒ 0100 ⊕ 0110 = 0010, 0010 ⊕ 1001 = 1011 = 11.</p><p>A winning move makes the nim-sum 0: reduce heap h to h ⊕ 11. For 4: 15 (not smaller), 6: 13 (no), 9: 2 (yes). So take 9 − 2 = 7 from the 9-heap, leaving 4, 6, 2 with nim-sum 0.</p><p><b>Answer: 7 (from the heap of 9).</b></p>",
-  "key": "Nim: move to nim-sum 0; only heaps containing the top bit of the nim-sum can be reduced."
+  "key": "Nim: move to nim-sum 0; only heaps containing the top bit of the nim-sum can be reduced.",
+  "plan": {
+   "keyIdea": "Nim positions are losing iff the XOR of heap sizes is 0.",
+   "method": "Nim-sum 11; reduce the heap h with h ⊕ 11 &lt; h.",
+   "sanityChecks": [
+    "The leftover position must XOR to 0.",
+    "Only heaps with the top bit of the nim-sum can move."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Heaps 3, 5, 7. How many winning first moves are there?</p><p>Give a number.</p>",
+    "model": "<p>Nim-sum 1: every heap is odd, so 3 → 2, 5 → 4, 7 → 6 all work: 3 moves.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.0,
+     "display": "3"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Heaps 1, 2, 3: three heaps, so the first player wins.”</p>",
+    "model": "<p>1 ⊕ 2 ⊕ 3 = 0: it is a loss for the player to move.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: it is a draw",
+      "Agree",
+      "Disagree: nim-sum is 0, the first player loses"
+     ],
+     "correct": 2,
+     "display": "Disagree"
+    }
+   }
+  ],
+  "par": 3
  },
  {
   "id": "gt-017",
@@ -8240,7 +21881,48 @@ window.PROBLEMS = [
    "x = 1 − δ<sub>2</sub>y and y = 1 − δ<sub>1</sub>x, where y is 2's share when 2 proposes."
   ],
   "solution": "<p>Let x = 1's share when 1 proposes, y = 2's share when 2 proposes. Each offer leaves the responder indifferent: 1 − x = δ<sub>2</sub>y and 1 − y = δ<sub>1</sub>x.</p><p>So x = 1 − δ<sub>2</sub>(1 − δ<sub>1</sub>x) ⇒ x = (1 − δ<sub>2</sub>)/(1 − δ<sub>1</sub>δ<sub>2</sub>) = 0.2/0.28 = 5/7 ≈ 0.714. The offer is accepted immediately.</p><p>Patience is power: the more patient player 1 gets more than the first-mover share 1/(1 + δ) would give with equal discounting.</p><p><b>Answer: 5/7.</b></p>",
-  "key": "Rubinstein: proposer gets (1 − δ<sub>2</sub>)/(1 − δ<sub>1</sub>δ<sub>2</sub>), agreement is immediate."
+  "key": "Rubinstein: proposer gets (1 − δ<sub>2</sub>)/(1 − δ<sub>1</sub>δ<sub>2</sub>), agreement is immediate.",
+  "plan": {
+   "keyIdea": "Stationary SPE: each proposer offers the responder exactly their discounted continuation value.",
+   "method": "1 − x = δ₂y, 1 − y = δ₁x.",
+   "sanityChecks": [
+    "Equal δ ⇒ 1/(1 + δ).",
+    "More patience ⇒ larger share."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Both discount at δ = 0.9. Player 1's share?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>1/(1 + 0.9) = 10/19 ≈ 0.526.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5263157894736842,
+     "display": "10/19"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>Equal discounting with δ → 1: player 1's share?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>1/(1 + δ) → 1/2: first-mover advantage vanishes when waiting is free.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Player 2 is more impatient, so player 2 pushes harder and ends up with 5/7.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>Impatience is weakness: player 2 gets 1 − 5/7 = 2/7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2857142857142857,
+     "display": "2/7"
+    }
+   }
+  ],
+  "par": 4
  },
  {
   "id": "gt-022",
@@ -8272,6 +21954,1013 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Low type: staying at 0 gives 1; mimicking gives 2 − 2e*. No mimicking ⇔ e* ≥ 1/2.</p><p>High type: signalling gives 2 − e*; not signalling gives 1. Signalling ⇔ e* ≤ 1.</p><p>So 1/2 ≤ e* ≤ 1 (with beliefs that anyone choosing e &lt; e* is low). The least-cost separating equilibrium is e* = 1/2: signalling works only because it is costlier for the low type.</p><p><b>Answer: 1/2, 1.</b></p>",
   "key": "A signal separates types only if it is cheaper for the type you want to be identified as."
+ },
+ {
+  "id": "js-030",
+  "cat": "micro",
+  "diff": 1,
+  "title": "ETF below its basket: redeem",
+  "tags": [
+   "etf-arbitrage",
+   "redemption",
+   "nav",
+   "fees"
+  ],
+  "style": [
+   "trading-desk",
+   "market-making-game"
+  ],
+  "prompt": "<p>An ETF is offered at 49.80. Its underlying basket can be sold at the bids for 49.95 per ETF share. A redemption unit is 40,000 ETF shares, the redemption fee is $400 per unit, and commissions on the basket are $0.002 per ETF-share equivalent. Prices do not move while you trade.</p><p>What is your profit from buying 40,000 ETF shares at the offer, redeeming them, and selling the basket?</p><p>Give a number in dollars.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 5520.000000000227,
+   "display": "$5,520"
+  },
+  "hints": [
+   "Per share: 49.95 − 49.80 − fee per share − commission.",
+   "Fee per share = 400/40,000 = 0.01."
+  ],
+  "solution": "<p>Per ETF share: sell basket 49.95 − buy ETF 49.80 − redemption fee 0.01 − commission 0.002 = 0.138.</p><p>Per unit: 0.138 × 40,000 = $5,520.</p><p>Use the prices you can actually trade at: ETF at the <i>offer</i> (you buy it) and the basket at the <i>bids</i> (you sell it), not mids or NAV.</p><p><b>Answer: $5,520.</b></p>",
+  "key": "ETF cheap vs basket ⇒ buy ETF, redeem, sell basket; profit = basket bid − ETF ask − all per-share costs.",
+  "plan": {
+   "keyIdea": "Arbitrage band: trade at executable prices and subtract every fee.",
+   "method": "Compute per-share edge, multiply by the unit size.",
+   "sanityChecks": [
+    "Direction: cheap ETF ⇒ redemption",
+    "Edge must exceed fixed fee per share to be worth it"
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer calls this a “creation” trade. Which mechanism is it?</p>",
+    "model": "<p>Redemption: you hand ETF shares to the issuer and receive the basket. Creation is the opposite (deliver basket, receive ETF shares) and is used when the ETF trades rich to its basket.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Creation",
+      "Redemption",
+      "Either, they are the same",
+      "Neither — it is a short sale"
+     ],
+     "correct": 1,
+     "display": "Redemption"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Same trade, but the ETF offer is 49.94. Profit per unit?</p>",
+    "model": "<p>(49.95 − 49.94 − 0.012) × 40,000 = −$80: inside the no-arbitrage band, don't trade.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -79.99999999979538,
+     "display": "−$80",
+     "tolAbs": 0.5
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-031",
+  "cat": "micro",
+  "diff": 2,
+  "title": "Break-even ETF premium with costs",
+  "tags": [
+   "etf-arbitrage",
+   "creation",
+   "transaction-costs",
+   "nav"
+  ],
+  "style": [
+   "trading-desk"
+  ],
+  "prompt": "<p>An ETF's basket is worth exactly 100 per ETF share. Buying the basket costs 0.30% of its value in spreads and fees; selling the ETF costs 0.10% of the ETF price. Ignore fixed fees.</p><p>Above what ETF price does the creation arbitrage (buy basket, create, sell ETF) become profitable?</p><p>Give a number to 2 decimals.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 100.4004004004004,
+   "display": "≈ 100.400",
+   "tolRel": 0.0002
+  },
+  "hints": [
+   "Receive P(1 − 0.001) from the ETF sale, pay 100 × 1.003 for the basket.",
+   "Break even when they are equal."
+  ],
+  "solution": "<p>Proceeds from selling the ETF: 0.999P. Cost of the basket: 100.3. Break-even: P = 100.3/0.999 ≈ 100.40.</p><p>So the no-arbitrage band on the rich side is about 40 bp wide here. Formulas that only include the basket cost (break-even = NAV(1 + c) = 100.30) miss the cost on the ETF leg.</p><p><b>Answer: ≈ 100.40.</b></p>",
+  "key": "No-arbitrage band: NAV(1 + c<sub>basket</sub>)/(1 − c<sub>ETF</sub>) on the rich side — include both legs' costs.",
+  "plan": {
+   "keyIdea": "An arbitrage must clear the costs on both legs.",
+   "method": "Equate ETF proceeds net of cost with basket cost.",
+   "sanityChecks": [
+    "Answer above 100.30",
+    "Zero costs ⇒ 100"
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A spreadsheet says: “The minimum profitable premium is NAV × c = 100 × 0.3% = 0.30.” What is the actual minimum premium here?</p>",
+    "model": "<p>≈ 0.40 (ETF at ≈ 100.40): the ETF sale also costs 0.1% of ≈ 100.4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.40040040040040026,
+     "display": "≈ 0.40",
+     "tolRel": 0.003
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why does the ETF price rarely drift outside this band in liquid products?</p>",
+    "model": "<p>Authorised participants and market makers arbitrage any excursion beyond the costs; their quoting keeps the ETF inside the band, and the band's width is set by basket spreads, fees, financing and hedging risk.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-032",
+  "cat": "micro",
+  "diff": 2,
+  "title": "Effective, realised spread and impact",
+  "tags": [
+   "effective-spread",
+   "realized-spread",
+   "price-impact",
+   "tca"
+  ],
+  "style": [
+   "trading-desk",
+   "research-stats"
+  ],
+  "prompt": "<p>The quote is 49.99 @ 50.01 (mid 50.000). Your buy order fills at 50.012. Five minutes later the mid is 50.010.</p><p>Give the effective spread, the realised spread and the price impact (all in dollars per share, using the 2 × convention), separated by commas.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    0.024,
+    0.004,
+    0.02
+   ],
+   "ordered": true,
+   "display": "0.024, 0.004, 0.020",
+   "tolRel": 0.001
+  },
+  "hints": [
+   "Effective = 2 × (fill − mid at the time).",
+   "Realised = 2 × (fill − later mid); impact = 2 × (later mid − mid at the time)."
+  ],
+  "solution": "<p>Effective spread = 2(50.012 − 50.000) = 0.024 (4.8 bp, above the quoted 0.02 because you walked the book).</p><p>Realised spread = 2(50.012 − 50.010) = 0.004: what the liquidity provider keeps after the price moved.</p><p>Price impact = 2(50.010 − 50.000) = 0.020. Check: effective = realised + impact.</p><p><b>Answer: 0.024, 0.004, 0.020.</b></p>",
+  "key": "Effective spread = realised spread + price impact; impact is the adverse-selection component.",
+  "plan": {
+   "keyIdea": "Decompose execution cost into the maker's revenue and the information in the trade.",
+   "method": "Apply the three definitions with the signed buy direction.",
+   "sanityChecks": [
+    "realised + impact = effective",
+    "Effective can exceed quoted when you take more than displayed size"
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "explain",
+    "prompt": "<p>A market maker sees large positive effective spreads but near-zero realised spreads on its fills. What does that say?</p>",
+    "model": "<p>Its fills are informed: the price moves against it right after trading, so the impact (adverse selection) eats the spread. It should widen, skew or reduce size against that flow.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-033",
+  "cat": "micro",
+  "diff": 2,
+  "title": "Is a passive fill worth it?",
+  "tags": [
+   "adverse-selection",
+   "maker-rebate",
+   "fill-toxicity",
+   "expected-value"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>Your resting bid is filled. You earn the half-spread $0.005 and a maker rebate of $0.002 per share. With probability 0.3 the fill is toxic and the mid moves $0.02 against you before you can exit; otherwise the mid does not move. You exit at the mid.</p><p>What is your expected P&amp;L per share per fill?</p><p>Give a number in dollars.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.001,
+   "display": "$0.001",
+   "tolRel": 0.001
+  },
+  "hints": [
+   "Revenue 0.007 per fill, expected adverse move 0.3 × 0.02."
+  ],
+  "solution": "<p>E = 0.005 + 0.002 − 0.3 × 0.02 = 0.007 − 0.006 = $0.001 per share.</p><p>Most of the edge is the rebate; a small increase in toxicity flips the sign.</p><p><b>Answer: $0.001.</b></p>",
+  "key": "Passive P&amp;L per fill = half-spread + rebate − P(toxic) × adverse move.",
+  "plan": {
+   "keyIdea": "Expected value over toxic / benign fills.",
+   "method": "Add the revenue, subtract the expected adverse move.",
+   "sanityChecks": [
+    "Without the rebate the fill loses",
+    "Break-even toxicity 0.35"
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>At what toxicity probability do you break even?</p>",
+    "model": "<p>0.007 = 0.02p ⇒ p = 0.35.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.35,
+     "display": "0.35"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>The venue removes the rebate. Expected P&amp;L per share?</p>",
+    "model": "<p>0.005 − 0.006 = −$0.001.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.001,
+     "display": "−$0.001",
+     "tolAbs": 1e-06
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-034",
+  "cat": "micro",
+  "diff": 1,
+  "title": "Cost of being picked off",
+  "tags": [
+   "latency",
+   "stale-quotes",
+   "adverse-selection",
+   "expected-value"
+  ],
+  "style": [
+   "market-making-game",
+   "OA-speed"
+  ],
+  "prompt": "<p>You quote one share each side, $0.02 either side of fair value. In each latency window (the time before you can update), fair value jumps up by $0.05 with probability 0.1, down by $0.05 with probability 0.1, and otherwise stays put. After a jump a faster trader immediately trades against your stale quote on the wrong side.</p><p>What is your expected loss per window from being picked off?</p><p>Give a positive number in dollars.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.006,
+   "display": "$0.006"
+  },
+  "hints": [
+   "Each jump costs 0.05 − 0.02 on the side that gets hit."
+  ],
+  "solution": "<p>A jump of 0.05 past fair value means your quote is 0.03 through the new fair value: loss 0.03. Jumps happen with probability 0.2 per window: expected loss 0.2 × 0.03 = $0.006.</p><p>Latency directly scales this cost: halving the window roughly halves the jump probability.</p><p><b>Answer: $0.006.</b></p>",
+  "key": "Sniping cost = P(jump within your latency) × (jump − half-spread)⁺.",
+  "plan": {
+   "keyIdea": "Expected loss from stale quotes over one latency window.",
+   "method": "Probability of a jump × loss per jump.",
+   "sanityChecks": [
+    "Half-spread ≥ jump ⇒ no loss",
+    "Two sides, each 0.1"
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Faster hardware halves your latency, halving the jump probability per window. New expected loss per window?</p>",
+    "model": "<p>0.1 × 0.03 = $0.003.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.003,
+     "display": "$0.003"
+    }
+   },
+   {
+    "type": "limit",
+    "prompt": "<p>What half-spread makes the picking-off loss zero?</p>",
+    "model": "<p>Any half-spread ≥ 0.05 — at the cost of almost never trading with anyone else.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.05,
+     "display": "$0.05"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-035",
+  "cat": "micro",
+  "diff": 2,
+  "title": "Queue position and fill probability",
+  "tags": [
+   "queue-position",
+   "poisson",
+   "order-book",
+   "fill-probability"
+  ],
+  "style": [
+   "market-making-game",
+   "research-stats"
+  ],
+  "prompt": "<p>Your 100-share bid joins a queue at the best bid with 300 shares ahead of you (FIFO, nobody cancels). Market sell orders of exactly 100 shares arrive as a Poisson process at rate 2 per second, and the price level never moves.</p><p>What is the probability your order is at least partly filled within 1 second?</p><p>Give a decimal to 3 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.14287653950145296,
+   "display": "1 − e⁻²(1 + 2 + 2 + 4/3) ≈ 0.1429"
+  },
+  "hints": [
+   "You start filling on the 4th sell order.",
+   "P(N ≥ 4) for N ~ Poisson(2)."
+  ],
+  "solution": "<p>Three orders clear the 300 shares ahead; the 4th hits you. So you need N ≥ 4 arrivals in 1 second with N ~ Poisson(2):</p><p>P = 1 − e<sup>−2</sup>(1 + 2 + 2 + 4/3) ≈ 1 − 0.8571 = 0.1429.</p><p><b>Answer: ≈ 0.143.</b></p>",
+  "key": "Queue position converts into 'number of arrivals needed': fill probability is a Poisson tail.",
+  "plan": {
+   "keyIdea": "FIFO queue: you fill after the volume ahead of you trades.",
+   "method": "Count required arrivals, compute a Poisson tail.",
+   "sanityChecks": [
+    "Being first in the queue would give 1 − e⁻²",
+    "Expected wait for 4 arrivals is 2 s"
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the expected waiting time until your first share fills?</p>",
+    "model": "<p>Time of the 4th arrival ~ Gamma(4, rate 2): mean 4/2 = 2 seconds.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.0,
+     "display": "2 s"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why do market makers pay for queue priority?</p>",
+    "model": "<p>Front-of-queue orders fill more often and, crucially, are filled by the small/uninformed flow first; back-of-queue orders tend to fill only when a large (often informed) order sweeps the level, so their fills are more toxic.</p>"
+   }
+  ]
+ },
+ {
+  "id": "mi-001",
+  "diff": 1,
+  "title": "EV of a perfect scratcher",
+  "tags": [
+   "scratching",
+   "fees",
+   "expected-value",
+   "queue-position"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>A trader joins every new price level first. Once filled, each trade ends one of two ways: with probability 0.55 it earns one tick (1 cent per share); otherwise it is <i>scratched</i> — closed at the entry price for 0. The exchange charges 0.2 cents per share on every execution (entry and exit).</p><p>What is the expected P&amp;L per share per round trip, in cents? Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.15,
+   "display": "0.15 cents"
+  },
+  "hints": [
+   "Two executions per round trip, so two fees.",
+   "EV = p·tick − 2·fee."
+  ],
+  "solution": "<p>The gross outcome is +1 cent with probability 0.55 and 0 otherwise, so the gross EV is 0.55 cents. Every round trip pays the fee twice: 2 × 0.2 = 0.4 cents.</p><p>EV = 0.55 − 0.4 = 0.15 cents per share.</p><p>Trap: charging the fee once, or subtracting a full tick for the scratches (a scratch is 0 before fees, not −1).</p><p><b>Answer: 0.15 cents per share.</b></p>",
+  "key": "Scratching turns the losing side of a 50/50 bet into 0, so EV = p·tick − 2·fee.",
+  "plan": {
+   "keyIdea": "Outcomes are +1 tick or 0, never −1; fees hit both legs.",
+   "method": "Gross EV p·tick, minus two fees.",
+   "sanityChecks": [
+    "With zero fees EV = 0.55 c > 0.",
+    "If fee ≥ p/2 the edge vanishes."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>The fee rises to 0.3 cents per execution. EV per share now?</p>",
+    "model": "<p>0.55 − 0.6 = −0.05 cents: a fee above p/2 = 0.275 c kills the edge.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -0.05,
+     "display": "−0.05 cents"
+    }
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-002",
+  "diff": 1,
+  "title": "Break-even fee for the 0+ trader",
+  "tags": [
+   "fees",
+   "tick-size",
+   "break-even",
+   "scratching"
+  ],
+  "style": [
+   "trading-desk",
+   "OA-speed"
+  ],
+  "prompt": "<p>A trader's round trips either gain one tick (probability 0.52) or are scratched at 0. The tick is 1 cent. The same fee c is paid per share on entry and on exit.</p><p>What is the largest fee c (in cents per share, per side) at which the trader still breaks even? Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.26,
+   "display": "0.26 cents"
+  },
+  "hints": [
+   "Set p·tick − 2c = 0."
+  ],
+  "solution": "<p>EV = 0.52 × 1 − 2c ≥ 0 ⇔ c ≤ 0.26 cents.</p><p>So the fee per side must be below about a quarter of the tick — the reason the idea needs exchange fees far below the tick (or rebates).</p><p><b>Answer: 0.26 cents per side.</b></p>",
+  "key": "Break-even fee per side = p·tick / 2.",
+  "plan": {
+   "keyIdea": "Two fees per round trip against an expected gain p·tick.",
+   "method": "Solve p·tick − 2c = 0.",
+   "sanityChecks": [
+    "At p = 1 the trader could pay up to half a tick per side."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “So with a 52% win rate you can pay up to 0.52 cents per execution.” Correct them: what is the right number (cents per execution)?</p>",
+    "model": "<p>0.52 cents is the whole expected gain per round trip, but there are two executions: the limit is 0.26 cents each.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.26,
+     "display": "0.26 cents"
+    }
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-003",
+  "diff": 2,
+  "title": "Why retail can't scratch",
+  "tags": [
+   "fees",
+   "retail",
+   "scratching",
+   "tick-size"
+  ],
+  "style": [
+   "trading-desk",
+   "market-making-game"
+  ],
+  "prompt": "<p>A retail trader copies the scratching strategy on a $40 stock with a 1-cent tick. The broker charges 5 basis points of the trade value on every execution. Assume a win (+1 tick) rate of 60% and that all other trades are scratched at 0.</p><p>What is the expected P&amp;L per share per round trip, in cents? Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": -3.4,
+   "display": "−3.4 cents"
+  },
+  "hints": [
+   "5 bp of $40 = 0.0005 × 40 dollars.",
+   "That fee is paid twice."
+  ],
+  "solution": "<p>Fee per execution: 0.0005 × $40 = $0.02 = 2 cents, i.e. 2 ticks. A round trip costs 4 cents.</p><p>EV = 0.6 × 1 − 4 = −3.4 cents per share.</p><p>Even a 100% win rate would lose 3 cents: when the fee per side exceeds half a tick, a strategy that earns at most one tick cannot work.</p><p><b>Answer: −3.4 cents per share.</b></p>",
+  "key": "Percentage fees on a low-priced, small-tick stock can be several ticks per side — larger than anything a one-tick strategy can earn.",
+  "plan": {
+   "keyIdea": "Convert the fee into ticks first.",
+   "method": "Fee = 5 bp × price; EV = p·tick − 2·fee.",
+   "sanityChecks": [
+    "Is the fee per side above half a tick? Then no win rate saves it."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "explain",
+    "prompt": "<p>Why does the professional version of this strategy survive the same tick size?</p>",
+    "model": "<p>Exchange members pay fractions of a cent per share, and passive (maker) orders often earn a rebate, so a scratch costs about 0 and a win nets roughly the full tick. The edge only exists where fees are far below the tick.</p>"
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-004",
+  "diff": 2,
+  "title": "Maker rebates, taker fees and stop-outs",
+  "tags": [
+   "maker-taker",
+   "fees",
+   "expected-value",
+   "scratching"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>A queue trader enters with a passive (maker) order. Outcomes per share: with probability 0.4 the exit is passive at +1 tick; with probability 0.5 the trader scratches at 0 by taking liquidity; with probability 0.1 the level breaks and the trader is stopped out at −1 tick, also by taking liquidity. The tick is 1 cent. Makers receive a rebate of 0.2 cents per share; takers pay 0.3 cents.</p><p>What is the expected P&amp;L per share per trade, in cents? Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.4,
+   "display": "0.40 cents"
+  },
+  "hints": [
+   "Entry always earns the 0.2 rebate.",
+   "Win: +1 + 0.2 + 0.2; scratch: 0 + 0.2 − 0.3; loss: −1 + 0.2 − 0.3."
+  ],
+  "solution": "<p>Net per outcome: win 1 + 0.2 + 0.2 = 1.4; scratch 0.2 − 0.3 = −0.1; loss −1 + 0.2 − 0.3 = −1.1.</p><p>EV = 0.4 × 1.4 + 0.5 × (−0.1) + 0.1 × (−1.1) = 0.56 − 0.05 − 0.11 = 0.40 cents.</p><p>Trap: applying the rebate to the taker exits, or forgetting the entry rebate.</p><p><b>Answer: 0.40 cents per share.</b></p>",
+  "key": "Track each leg separately: passive legs earn the rebate, aggressive legs pay the fee.",
+  "plan": {
+   "keyIdea": "Three outcomes, each with its own pair of fees.",
+   "method": "Net per outcome, then the probability-weighted sum.",
+   "sanityChecks": [
+    "Probabilities sum to 1.",
+    "With zero fees EV = 0.4 − 0.1 = 0.3."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: with no fees or rebates at all, what is the EV in cents?</p>",
+    "model": "<p>0.4 × 1 − 0.1 × 1 = 0.3 cents; the fee structure added 0.1 cent.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.3,
+     "display": "0.3 cents"
+    }
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-005",
+  "diff": 2,
+  "title": "Filled before the price leaves you?",
+  "tags": [
+   "queue-position",
+   "first-step",
+   "probability",
+   "order-book"
+  ],
+  "style": [
+   "trading-desk",
+   "market-making-game"
+  ],
+  "prompt": "<p>You rest a 1-lot bid behind 3 lots (three 1-lot orders) at the best bid. Each subsequent event is independently either a 1-lot market sell (probability 2/3), which fills the order at the head of the queue, or the price ticks <i>up</i> away from your bid (probability 1/3), after which you will not be filled.</p><p>What is the probability that you are filled? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.19753086419753085,
+   "display": "16/81 ≈ 0.198"
+  },
+  "hints": [
+   "You need four market sells in a row: three for the orders ahead, one for you."
+  ],
+  "solution": "<p>FIFO: the first three sells fill the three orders ahead, the fourth fills you. You are filled iff the first four events are all sells: (2/3)<sup>4</sup> = 16/81 ≈ 0.198.</p><p>Being #1 instead gives 2/3 — queue position is worth a lot.</p><p><b>Answer: 16/81 ≈ 0.198.</b></p>",
+  "key": "Under time priority, P(fill before the price moves away) decays geometrically with the size ahead of you.",
+  "plan": {
+   "keyIdea": "FIFO turns the race into 'k + 1 sells before one up-tick'.",
+   "method": "Independent events: product of probabilities.",
+   "sanityChecks": [
+    "0 ahead → 2/3.",
+    "More size ahead → lower probability."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>You were fast enough to be #1 at a new level (nothing ahead). Probability of a fill now?</p>",
+    "model": "<p>One sell before an up-tick: 2/3 — more than three times better.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6666666666666666,
+     "display": "2/3"
+    }
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-006",
+  "diff": 2,
+  "title": "How much informed flow can you take?",
+  "tags": [
+   "adverse-selection",
+   "informed-trading",
+   "break-even",
+   "market-making"
+  ],
+  "style": [
+   "market-making-game",
+   "trading-desk"
+  ],
+  "prompt": "<p>You buy at the bid, half a tick below the mid. If the seller is uninformed the mid does not move, so you are up 0.5 tick. If the seller is informed the mid drops 2 ticks right after the trade. A fraction π of sellers is informed.</p><p>At what π does your expected P&amp;L per fill equal zero? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.25,
+   "display": "1/4"
+  },
+  "hints": [
+   "Against an informed seller you lose 2 − 0.5 = 1.5 ticks."
+  ],
+  "solution": "<p>EV = 0.5(1 − π) − 1.5π = 0.5 − 2π, which is zero at π = 1/4.</p><p>So the half-spread pays for informed flow only while fewer than a quarter of fills are informed. This is why fills at the back of a dying queue (often informed sweeps) are so expensive.</p><p><b>Answer: π = 1/4.</b></p>",
+  "key": "Adverse selection: the spread you earn from noise traders must cover what informed traders take.",
+  "plan": {
+   "keyIdea": "Two kinds of counterparty with different post-trade mids.",
+   "method": "Expected P&L per fill, set to zero.",
+   "sanityChecks": [
+    "π = 0 → +0.5 tick.",
+    "π = 1 → −1.5 ticks."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Informed sellers now move the mid 3 ticks. New break-even π?</p>",
+    "model": "<p>0.5(1 − π) = 2.5π ⇒ π = 1/6.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.16666666666666666,
+     "display": "1/6"
+    }
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-007",
+  "diff": 1,
+  "title": "Winning the race to a new level",
+  "tags": [
+   "latency",
+   "probability",
+   "order-book",
+   "uniform"
+  ],
+  "style": [
+   "OA-speed",
+   "trading-desk"
+  ],
+  "prompt": "<p>When a new price level appears, the first order to arrive is first in the queue. Your latency is 40 µs. Three rivals have latencies that are independent and uniform on [20, 60] µs (fresh each time).</p><p>What is the probability that you are first? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.125,
+   "display": "1/8"
+  },
+  "hints": [
+   "Each rival is slower than you with probability (60 − 40)/(60 − 20)."
+  ],
+  "solution": "<p>Each rival is slower with probability 20/40 = 1/2, independently, so P(you beat all three) = (1/2)<sup>3</sup> = 1/8.</p><p>An “average” latency wins the race rarely; the 0+ idea needs you to be the fastest almost always.</p><p><b>Answer: 1/8.</b></p>",
+  "key": "The race to the front of a queue is a min of rivals' latencies: you need to beat every one.",
+  "plan": {
+   "keyIdea": "You are first iff every rival is slower.",
+   "method": "Independence: multiply the per-rival probabilities.",
+   "sanityChecks": [
+    "One rival → 1/2.",
+    "More rivals → probability falls geometrically."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Two more rivals with the same latency distribution join. Probability now?</p>",
+    "model": "<p>(1/2)<sup>5</sup> = 1/32.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.03125,
+     "display": "1/32"
+    }
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-008",
+  "diff": 2,
+  "title": "Effective, realized spread and impact",
+  "tags": [
+   "effective-spread",
+   "realized-spread",
+   "price-impact",
+   "transaction-costs"
+  ],
+  "style": [
+   "trading-desk",
+   "research-stats"
+  ],
+  "prompt": "<p>The market is 50.00 @ 50.04. A buyer pays 50.03 (inside the ask, against hidden liquidity). Five minutes later the mid is 50.05. Use effective spread = 2(P − M<sub>0</sub>), realized spread = 2(P − M<sub>5</sub>) and price impact = 2(M<sub>5</sub> − M<sub>0</sub>) for a buyer-initiated trade, where M is the mid.</p><p>Give the effective spread, realized spread and price impact in cents, separated by commas.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    2,
+    -4,
+    6
+   ],
+   "ordered": true,
+   "display": "2, −4, 6 cents"
+  },
+  "hints": [
+   "M<sub>0</sub> = 50.02.",
+   "Check: effective = realized + impact."
+  ],
+  "solution": "<p>M<sub>0</sub> = (50.00 + 50.04)/2 = 50.02. Effective spread = 2(50.03 − 50.02) = 2 cents.</p><p>Realized spread = 2(50.03 − 50.05) = −4 cents: the liquidity provider lost money on this trade. Price impact = 2(50.05 − 50.02) = 6 cents.</p><p>Check: 2 = −4 + 6 ✓. A negative realized spread is what adverse selection looks like in the data.</p><p><b>Answer: 2, −4, 6.</b></p>",
+  "key": "Effective spread splits into what the liquidity provider keeps (realized spread) and what the market moved (price impact).",
+  "plan": {
+   "keyIdea": "Measure everything against the mid, before and after.",
+   "method": "Plug into the three definitions.",
+   "sanityChecks": [
+    "effective = realized + impact.",
+    "Effective spread ≤ quoted spread (4 c) here."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "explain",
+    "prompt": "<p>What does a persistently negative realized spread tell a market maker?</p>",
+    "model": "<p>The flow they trade with is informed: prices move against them after fills by more than the half-spread they earn. They should widen, size down, or stop quoting to that flow.</p>"
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-009",
+  "diff": 3,
+  "title": "Queue position with cancellations",
+  "tags": [
+   "queue-position",
+   "markov-chain",
+   "first-step",
+   "cancellations"
+  ],
+  "style": [
+   "math-test",
+   "trading-desk"
+  ],
+  "prompt": "<p>You are third in the bid queue: two 1-lot orders are ahead of you. Each event is independently: a 1-lot market sell (probability 1/2), which fills the head order; a cancellation (probability 1/4) — if any order is ahead of you, one of them leaves, otherwise someone behind you cancels; or the price ticks up away from you (probability 1/4), ending your chance.</p><p>What is the probability that you are filled? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.375,
+   "display": "3/8"
+  },
+  "hints": [
+   "Let f(k) = P(filled | k ahead). For k ≥ 1 both a sell and a cancel move you up.",
+   "At the head: f(0) = 1/2 + 1/4·f(0)."
+  ],
+  "solution": "<p>For k ≥ 1: f(k) = (1/2 + 1/4) f(k − 1) = (3/4) f(k − 1). At the head a cancellation does not help: f(0) = 1/2 + (1/4) f(0) ⇒ f(0) = 2/3.</p><p>f(2) = (3/4)<sup>2</sup> × 2/3 = 3/8.</p><p>Trap: treating the head like the other states (cancellations behind you do not move you up).</p><p><b>Answer: 3/8.</b></p>",
+  "key": "First-step analysis on 'size ahead of you': sells and cancels both advance you, but only a sell fills you.",
+  "plan": {
+   "keyIdea": "The state is the number of orders ahead.",
+   "method": "First-step equations; solve the head state, then go up.",
+   "sanityChecks": [
+    "f decreases in k.",
+    "f(0) < 1 because an up-tick can still beat the next sell."
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same flow, but four orders are ahead of you. Probability of a fill?</p>",
+    "model": "<p>(3/4)<sup>4</sup> × 2/3 = 27/128 ≈ 0.211.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2109375,
+     "display": "27/128 ≈ 0.211"
+    }
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-010",
+  "diff": 2,
+  "title": "Post passively or take the offer?",
+  "tags": [
+   "maker-taker",
+   "rebates",
+   "execution",
+   "expected-value"
+  ],
+  "style": [
+   "trading-desk",
+   "market-making-game"
+  ],
+  "prompt": "<p>You must buy a stock quoted 20.00 @ 20.01. Taking the offer costs 20.01 plus a 0.3-cent taker fee. Alternatively you post at 20.00 as a maker and earn a 0.2-cent rebate; you get filled with probability 0.6, otherwise the price moves and you buy later at 20.02 plus the taker fee.</p><p>How many cents per share does posting save on average versus taking now? Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.5,
+   "display": "0.5 cents",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "Passive: 0.6 × (20.00 − 0.002) + 0.4 × (20.02 + 0.003)."
+  ],
+  "solution": "<p>Taking: 20.01 + 0.003 = 20.013. Posting: 0.6 × 19.998 + 0.4 × 20.023 = 11.9988 + 8.0092 = 20.008.</p><p>Saving = 20.013 − 20.008 = 0.005 dollars = 0.5 cents per share.</p><p>The miss case is not free: when you miss, the price has usually moved against you.</p><p><b>Answer: 0.5 cents per share.</b></p>",
+  "key": "Passive execution saves the spread and earns the rebate, but pays an opportunity cost when it misses.",
+  "plan": {
+   "keyIdea": "Expected cost of each route, fees included.",
+   "method": "Probability-weighted price of the passive route vs the sure taker price.",
+   "sanityChecks": [
+    "Fill probability 1 → saving 1.5 cents.",
+    "Fill probability 0 → posting costs 1 cent more."
+   ]
+  },
+  "par": 2,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A colleague concludes: “Posting is always better.” Find the fill probability at which the two routes cost the same.</p>",
+    "model": "<p>f × 19.998 + (1 − f) × 20.023 = 20.013 ⇒ f = 0.010/0.025 = 0.4. Below a 40% fill rate, take.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.4,
+     "display": "0.4"
+    }
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-011",
+  "diff": 3,
+  "title": "Highest maker fee the strategy survives",
+  "tags": [
+   "maker-taker",
+   "fees",
+   "break-even",
+   "scratching"
+  ],
+  "style": [
+   "trading-desk",
+   "math-test"
+  ],
+  "prompt": "<p>A queue trader's trades end as: +1 tick with a passive exit (probability 0.5), a scratch at 0 with an aggressive exit (0.4), or −1 tick with an aggressive exit (0.1). Entries are passive. The tick is 1 cent and the taker fee is 0.3 cents per share. The maker fee is m cents per share (negative m would be a rebate).</p><p>What is the largest m for which the expected P&amp;L per trade is non-negative? Give a fraction or decimal (cents).</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.16666666666666666,
+   "display": "1/6 ≈ 0.167 cents"
+  },
+  "hints": [
+   "Passive legs per outcome: 2, 1, 1 — so EV is linear in m with slope −(2·0.5 + 0.4 + 0.1)."
+  ],
+  "solution": "<p>EV = 0.5(1 − 2m) + 0.4(−m − 0.3) + 0.1(−1 − m − 0.3) = 0.5 − 0.12 − 0.13 − 1.5m = 0.25 − 1.5m.</p><p>EV ≥ 0 ⇔ m ≤ 1/6 ≈ 0.167 cents.</p><p><b>Answer: 1/6 cent ≈ 0.167.</b></p>",
+  "key": "Write EV as a linear function of the fee, then read off the root; count how many legs each fee touches.",
+  "plan": {
+   "keyIdea": "EV is linear in the maker fee.",
+   "method": "Expected number of maker legs = 1.5; constant term from ticks and taker fees.",
+   "sanityChecks": [
+    "m = 0 → EV 0.25 c > 0.",
+    "Slope −1.5: each extra 0.1 c of maker fee costs 0.15 c."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Suppose the trader never loses: win 0.5, scratch 0.5, same fees. Largest maker fee now?</p>",
+    "model": "<p>EV = 0.5(1 − 2m) + 0.5(−m − 0.3) = 0.35 − 1.5m ⇒ m ≤ 7/30 ≈ 0.233 cents.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.23333333333333334,
+     "display": "7/30 ≈ 0.233"
+    }
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-012",
+  "diff": 3,
+  "title": "Will the queue behind you hold?",
+  "tags": [
+   "queue-strength",
+   "gamblers-ruin",
+   "random-walk",
+   "order-book"
+  ],
+  "style": [
+   "math-test",
+   "trading-desk"
+  ],
+  "prompt": "<p>After your fill, 3 lots remain at your price. Each event either adds a lot (a new order joins, probability 0.4) or removes one (a sell or a cancel, probability 0.6). If the size reaches 0 the level ticks through and you lose; if it reaches 6 you consider the queue strong and hold for the tick.</p><p>What is the probability that the size reaches 6 before 0? Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.22857142857142856,
+   "display": "≈ 0.229"
+  },
+  "hints": [
+   "Gambler's ruin with r = q/p = 1.5: P = (1 − r<sup>3</sup>)/(1 − r<sup>6</sup>)."
+  ],
+  "solution": "<p>Gambler's ruin from 3 with absorbing barriers 0 and 6, up-probability p = 0.4, r = 0.6/0.4 = 1.5:</p><p>P = (1 − 1.5<sup>3</sup>)/(1 − 1.5<sup>6</sup>) = (1 − 3.375)/(1 − 11.390625) ≈ 0.229.</p><p>With a drift toward depletion the queue usually dies — which is why the queue trader scratches early instead of hoping.</p><p><b>Answer: ≈ 0.229.</b></p>",
+  "key": "Queue size as a biased random walk: a mild drift toward depletion makes recovery unlikely.",
+  "plan": {
+   "keyIdea": "Size behind you is a random walk with two absorbing barriers.",
+   "method": "Gambler's-ruin formula with r = q/p.",
+   "sanityChecks": [
+    "p = 1/2 → 3/6 = 1/2.",
+    "Negative drift → below 1/2."
+   ]
+  },
+  "par": 3,
+  "followups": [
+   {
+    "type": "limit",
+    "prompt": "<p>What is the probability if adds and removes are equally likely?</p>",
+    "model": "<p>The fair-walk case: 3/6 = 1/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "1/2"
+    }
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-013",
+  "diff": 1,
+  "title": "A basis-point fee in ticks",
+  "tags": [
+   "fees",
+   "tick-size",
+   "retail",
+   "transaction-costs"
+  ],
+  "style": [
+   "OA-speed"
+  ],
+  "prompt": "<p>A broker charges 5 basis points of trade value per execution. The stock trades at $20 with a 1-cent tick.</p><p>How many ticks per share does a round trip (buy and sell) cost in fees? Give a number.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 2,
+   "display": "2 ticks"
+  },
+  "hints": [
+   "5 bp of $20 = $0.01."
+  ],
+  "solution": "<p>0.0005 × $20 = $0.01 = one tick per execution, so two ticks per round trip.</p><p>A strategy that makes at most one tick per trade cannot pay this.</p><p><b>Answer: 2 ticks.</b></p>",
+  "key": "Always translate percentage costs into ticks before judging a tick-sized edge.",
+  "plan": {
+   "keyIdea": "Fee = bp × price, compared with the tick.",
+   "method": "One multiplication, doubled.",
+   "sanityChecks": [
+    "Higher price → more ticks per side."
+   ]
+  },
+  "par": 0.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same fee, but the stock trades at $100. Ticks per round trip?</p>",
+    "model": "<p>5 cents per side = 5 ticks, so 10 ticks per round trip.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 10,
+     "display": "10 ticks"
+    }
+   }
+  ],
+  "cat": "micro"
+ },
+ {
+  "id": "mi-014",
+  "diff": 2,
+  "title": "When an order type jumps the queue",
+  "tags": [
+   "rule-risk",
+   "queue-position",
+   "order-types",
+   "probability"
+  ],
+  "style": [
+   "trading-desk",
+   "market-making-game"
+  ],
+  "prompt": "<p>You are #1 at a new bid level. Each event is a 1-lot market sell (probability 3/4) or an up-tick that ends your chance (1/4). A new exchange order type now lets another firm place a 5-lot order (five 1-lot orders) ahead of you at every new level.</p><p>What is your probability of being filled now? Give a fraction or decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.177978515625,
+   "display": "729/4096 ≈ 0.178"
+  },
+  "hints": [
+   "You now need 6 sells before an up-tick."
+  ],
+  "solution": "<p>Before: one sell first, probability 3/4. After: six sells in a row, (3/4)<sup>6</sup> = 729/4096 ≈ 0.178 — roughly a quarter of the old fill rate, and the fills you still get are the late ones.</p><p>Nothing about your speed changed; the rule did. That is rule risk: a queue edge depends on the exchange honouring time priority.</p><p><b>Answer: 729/4096 ≈ 0.178.</b></p>",
+  "key": "Queue priority is a rule, not a law of nature: an order type that jumps the line can erase a speed edge.",
+  "plan": {
+   "keyIdea": "The privileged size is simply more size ahead of you.",
+   "method": "Geometric probability with 6 sells needed.",
+   "sanityChecks": [
+    "0 lots ahead → 3/4.",
+    "Fill probability falls by (3/4)<sup>5</sup>."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "explain",
+    "prompt": "<p>Why might the remaining fills also be worse, not just rarer?</p>",
+    "model": "<p>The small, uninformed sells now fill the privileged order; you are reached only when a lot of size trades — often an informed sweep just before the level breaks — so there is less queue behind you to scratch into (adverse selection).</p>"
+   }
+  ],
+  "cat": "micro"
  },
  {
   "id": "py-001",
@@ -8435,6 +23124,47 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Each lambda refers to the name <code>i</code> in the comprehension's scope. The lookup happens when the lambda is <b>called</b> (late binding).</p><p>By the time we call them, the loop has finished and <code>i == 2</code>, so all three return 2.</p><p>Fix: bind the current value as a default, <code>lambda i=i: i</code>, or use <code>functools.partial</code>.</p><p>Answer: <code>[2, 2, 2]</code>.</p>",
   "key": "Closures look variables up at call time (late binding); freeze values with default arguments.",
+  "plan": {
+   "keyIdea": "Closures look names up at call time (late binding).",
+   "method": "When are the lambdas called, and what is i then?",
+   "sanityChecks": [
+    "After the comprehension, i is 2.",
+    "Default arguments are evaluated at definition time."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What does this print? Answer as numbers separated by commas.</p><pre><code>fs = [lambda x, i=i: x * i for i in range(3)]\nprint([f(10) for f in fs])</code></pre>",
+    "model": "<p>The default freezes each i: [0, 10, 20].</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      0.0,
+      10.0,
+      20.0
+     ],
+     "ordered": true,
+     "display": "0, 10, 20"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Switching to a generator expression doesn't help — this still prints [2, 2, 2].”</p><pre><code>fs = (lambda: i for i in range(3))\nprint([f() for f in fs])</code></pre><p>Is that right? Give the printed values, separated by commas.</p>",
+    "model": "<p>The generator is lazy: each lambda is called right after it is produced, while i still has its current value, so it prints [0, 1, 2]. Same late binding, different timing.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      0.0,
+      1.0,
+      2.0
+     ],
+     "ordered": true,
+     "display": "0, 1, 2"
+    }
+   }
+  ],
+  "par": 1,
   "style": [
    "coding-screen"
   ]
@@ -8462,6 +23192,45 @@ window.PROBLEMS = [
   ],
   "solution": "<p>The first <code>sum(g)</code> consumes the generator: 0 + 1 + 4 + 9 = 14.</p><p>The generator is now exhausted; iterating it again yields nothing, and the sum of an empty iterable is 0.</p><p>If you need several passes, materialise it (<code>list(...)</code>) or recreate the generator.</p><p>Answer: <code>14 0</code>.</p>",
   "key": "Generators are single-pass iterators; a second pass sees nothing.",
+  "plan": {
+   "keyIdea": "A generator is a one-shot iterator.",
+   "method": "The first sum exhausts it; the second sees nothing.",
+   "sanityChecks": [
+    "sum([]) = 0.",
+    "list(...) materialises for re-use."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What does this print? Answer as two numbers separated by a comma.</p><pre><code>g = (x for x in range(5))\na = list(g)\nprint(len(a), len(list(g)))</code></pre>",
+    "model": "<p>5 and 0.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      5.0,
+      0.0
+     ],
+     "ordered": true,
+     "display": "5, 0"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “A list comprehension behaves the same way, so <code>xs = [x * x for x in range(4)]; print(sum(xs), sum(xs))</code> also prints 14 0.”</p><p>Is that right? Give the two printed numbers, separated by a comma.</p>",
+    "model": "<p>Lists can be iterated many times: 14 14.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      14.0,
+      14.0
+     ],
+     "ordered": true,
+     "display": "14, 14"
+    }
+   }
+  ],
+  "par": 1,
   "style": [
    "coding-screen"
   ]
@@ -8603,6 +23372,42 @@ window.PROBLEMS = [
   ],
   "solution": "<p>In iteration i, the slice copies n−i−1 elements (O(n)) and the membership test scans up to n−i−1 elements (O(n)). Those are sequential, so each iteration costs O(n).</p><p>With n iterations in the worst case (no duplicates), total work is ∑(n−i) ≈ n²/2 → <b>O(n²)</b>, not O(n³).</p><p>Fix: <code>return len(set(xs)) != len(xs)</code>, or insert into a set while scanning — O(n) expected time, since set membership is O(1) on average.</p>",
   "key": "Sequential linear steps add; only nested loops multiply. Sets give O(1) average membership.",
+  "plan": {
+   "keyIdea": "Sequential linear steps add; only nested loops multiply.",
+   "method": "Iteration i costs O(n − i): sum ≈ n²/2.",
+   "sanityChecks": [
+    "No duplicates is the worst case.",
+    "Set membership is O(1) on average."
+   ]
+  },
+  "followups": [
+   {
+    "type": "complexity",
+    "prompt": "<p>For n = 10 distinct elements, how many element comparisons do the <code>in</code> tests perform in total?</p><p>Give a number.</p>",
+    "model": "<p>Σ (n − i − 1) = 9 + 8 + … + 0 = 45 = n(n − 1)/2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 45.0,
+     "display": "45"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Sorting first and comparing neighbours is also O(n²).”</p>",
+    "model": "<p>Sorting is O(n log n) and the neighbour scan O(n): O(n log n) overall.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree",
+      "Disagree: it is O(n log n)",
+      "Disagree: it is O(n)"
+     ],
+     "correct": 1,
+     "display": "Disagree: O(n log n)"
+    }
+   }
+  ],
+  "par": 1.5,
   "style": [
    "coding-screen"
   ]
@@ -8963,6 +23768,46 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Index 0: x = 2 is even → remove it; list = [4, 5, 6, 8].</p><p>Index 1: x = 5 (4 was skipped because it slid to index 0) → keep.</p><p>Index 2: x = 6 → remove; list = [4, 5, 8].</p><p>Index 3: past the end → loop stops. Result <code>[4, 5, 8]</code>.</p><p>Correct approach: build a new list, <code>xs = [x for x in xs if x % 2]</code>, or iterate over a copy <code>for x in xs[:]</code>.</p><p>Answer: <code>[4, 5, 8]</code>.</p>",
   "key": "Never mutate a list while iterating over it; filter into a new list instead.",
+  "plan": {
+   "keyIdea": "Removing from a list while iterating shifts later items left; the iterator's index skips them.",
+   "method": "Trace index by index.",
+   "sanityChecks": [
+    "Skipped elements sit right after a removed one.",
+    "Iterate over a copy or build a new list."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same loop but iterating over a copy, on new data. What does it print? Answer as numbers separated by commas.</p><pre><code>xs = [2, 4, 5, 6, 8, 9]\nfor x in xs[:]:\n    if x % 2 == 0:\n        xs.remove(x)\nprint(xs)</code></pre>",
+    "model": "<p>The copy is never modified, so every even number is removed: [5, 9].</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      5.0,
+      9.0
+     ],
+     "ordered": true,
+     "display": "5, 9"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>The original (buggy) loop on <code>xs = [1, 2, 4, 7]</code>. What does it print? Answer as numbers separated by commas.</p>",
+    "model": "<p>Index 1: 2 removed → [1, 4, 7]; index 2 is now 7, so 4 is skipped: [1, 4, 7].</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      1.0,
+      4.0,
+      7.0
+     ],
+     "ordered": true,
+     "display": "1, 4, 7"
+    }
+   }
+  ],
+  "par": 2,
   "style": [
    "coding-screen"
   ]
@@ -9657,7 +24502,7 @@ window.PROBLEMS = [
    "f1",
    "confusion-matrix"
   ],
-  "prompt": "<p>Same classifier as before:</p><table><thead><tr><th></th><th>Pred +</th><th>Pred −</th></tr></thead><tbody><tr><th>Actual +</th><td>40</td><td>20</td></tr><tr><th>Actual −</th><td>10</td><td>930</td></tr></tbody></table><p>What is its <b>F1 score</b>? Give a fraction or decimal.</p>",
+  "prompt": "<p>A fraud classifier is evaluated on 1,000 transactions:</p><table><thead><tr><th></th><th>Pred +</th><th>Pred −</th></tr></thead><tbody><tr><th>Actual +</th><td>40</td><td>20</td></tr><tr><th>Actual −</th><td>10</td><td>930</td></tr></tbody></table><p>What is its <b>F1 score</b>? Give a fraction or decimal.</p>",
   "answer": {
    "type": "numeric",
    "value": 0.7272727272727273,
@@ -9669,6 +24514,37 @@ window.PROBLEMS = [
   ],
   "solution": "<p>Precision P = 40/50 = 0.8. Recall R = TP/(TP+FN) = 40/60 = 2/3.</p><p>F1 = 2PR/(P+R) = 2·0.8·(2/3) / (0.8 + 2/3) = (16/15)/(22/15) = 16/22 = 8/11.</p><p>Shortcut: F1 = 2TP / (2TP + FP + FN) = 80 / (80 + 10 + 20) = 80/110 = 8/11.</p><p>Answer: 8/11 ≈ 0.727.</p>",
   "key": "F1 = 2TP/(2TP+FP+FN), the harmonic mean of precision and recall; it ignores TN.",
+  "plan": {
+   "keyIdea": "F1 is the harmonic mean of precision and recall = 2TP/(2TP + FP + FN).",
+   "method": "80/(80 + 10 + 20).",
+   "sanityChecks": [
+    "F1 lies between P and R, nearer the smaller.",
+    "TN doesn't enter."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>A new threshold gives TP = 50, FN = 10, FP = 30. F1?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>100/(100 + 30 + 10) = 5/7 ≈ 0.714.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7142857142857143,
+     "display": "5/7"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “F1 is just the average of precision and recall: (0.8 + 0.667)/2 ≈ 0.733.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>It is the harmonic mean: 8/11 ≈ 0.727.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.7272727272727273,
+     "display": "8/11"
+    }
+   }
+  ],
+  "par": 1.5,
   "style": [
    "research-stats",
    "OA-speed"
@@ -9723,6 +24599,42 @@ window.PROBLEMS = [
   ],
   "solution": "<p>All 12 pairs:</p><ul><li>Positive 0.9 beats all 4 negatives → 4.</li><li>Positive 0.8 ties 0.8 (½) and beats 0.3, 0.2, 0.1 → 3.5.</li><li>Positive 0.4 loses to 0.8, beats 0.3, 0.2, 0.1 → 3.</li></ul><p>AUC = (4 + 3.5 + 3)/12 = 10.5/12 = 0.875.</p><p>This equals the area under the ROC curve (it is the Mann–Whitney U statistic divided by n₊n₋). AUC only depends on the <i>ranking</i> of scores, not on their calibration.</p><p>Answer: 0.875.</p>",
   "key": "AUC = probability a random positive is scored above a random negative (ties ½) — a pure ranking metric.",
+  "plan": {
+   "keyIdea": "AUC = P(score of a random positive &gt; a random negative), ties ½.",
+   "method": "Count wins over the 12 pairs.",
+   "sanityChecks": [
+    "Depends only on the ranking.",
+    "Perfect ranking ⇒ 1, random ⇒ ½."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>The negative scored 0.8 drops to 0.5. New AUC?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>Pairs won: 4 + 4 + 3 = 11 of 12.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.9166666666666666,
+     "display": "11/12"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “If we square every score the AUC changes, because the scores change.”</p>",
+    "model": "<p>Squaring is strictly increasing on [0, 1], so the ranking — and the AUC 0.875 — is unchanged.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Agree",
+      "Disagree: monotone transforms keep the AUC at 0.875",
+      "Disagree: the AUC becomes 1"
+     ],
+     "correct": 1,
+     "display": "Disagree"
+    }
+   }
+  ],
+  "par": 3,
   "style": [
    "research-stats"
   ]
@@ -9862,6 +24774,37 @@ window.PROBLEMS = [
   ],
   "solution": "<p>d/dβ: −2Σxᵢ(yᵢ − βxᵢ) + 2λβ = 0 ⇒ β̂ = Σxᵢyᵢ / (Σxᵢ² + λ).</p><p>Σxy = 2 + 6 + 15 = 23. Σx² = 1 + 4 + 9 = 14.</p><p>β̂ = 23/(14 + 2) = 23/16 = 1.4375, versus OLS 23/14 ≈ 1.643: the penalty shrinks the slope toward 0. In matrix form this is β̂ = (XᵀX + λI)⁻¹Xᵀy.</p><p>Answer: 23/16 = 1.4375.</p>",
   "key": "Ridge adds λ to the diagonal of XᵀX: β̂ = (XᵀX + λI)⁻¹Xᵀy, shrinking toward zero.",
+  "plan": {
+   "keyIdea": "Ridge in one dimension: β̂ = Σxy/(Σx² + λ).",
+   "method": "23/(14 + 2).",
+   "sanityChecks": [
+    "λ = 0 gives OLS 23/14.",
+    "Shrinks toward 0 as λ grows."
+   ]
+  },
+  "followups": [
+   {
+    "type": "sanity",
+    "prompt": "<p>Sanity check: λ = 0. β̂?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>OLS: 23/14 ≈ 1.643.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.6428571428571428,
+     "display": "23/14"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “λ = 7 halves the OLS slope.”</p><p>Is that right? If not, give the λ that halves it.</p>",
+    "model": "<p>Halving needs Σx² + λ = 2Σx², i.e. λ = 14.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 14.0,
+     "display": "14"
+    }
+   }
+  ],
+  "par": 1.5,
   "style": [
    "research-stats"
   ]
@@ -10008,6 +24951,52 @@ window.PROBLEMS = [
   ],
   "solution": "<p>f′(w) = 10(w − 1), so with e = w − 1: e<sub>t+1</sub> = e<sub>t</sub> − 10η e<sub>t</sub> = (1 − 10η)e<sub>t</sub>.</p><p>Convergence ⇔ |1 − 10η| &lt; 1 ⇔ 0 &lt; η &lt; 0.2. At η = 0.2 the factor is −1 (oscillates forever between ±e₀); above it, the iterates oscillate with growing amplitude and diverge.</p><p>General rule: for a quadratic with curvature L = f″ (largest Hessian eigenvalue in many dimensions), GD converges iff η &lt; 2/L; η = 1/L is the one-step optimum here (factor 0). Ill-conditioned problems (large L/μ) force a small η and slow progress along flat directions — one reason to scale features.</p><p>Answer: η* = 0.2.</p>",
   "key": "GD on a quadratic converges iff η < 2/L where L is the largest curvature; too large a step oscillates and diverges.",
+  "plan": {
+   "keyIdea": "On a quadratic, the error is multiplied by (1 − ηf″) each step.",
+   "method": "|1 − 10η| &lt; 1 ⇔ η &lt; 0.2.",
+   "sanityChecks": [
+    "η = 1/f″ converges in one step.",
+    "η = 2/f″ oscillates forever."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>f(w) = 2(w − 3)². Critical learning rate?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>f″ = 4: η* = 2/4 = 0.5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "0.5"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Back to 5(w − 1)²: which η reaches the minimum in one step?</p><p>Give a fraction or decimal.</p>",
+    "model": "<p>1/f″ = 0.1.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.1,
+     "display": "0.1"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “η = 0.15 is above 1/L = 0.1, so gradient descent diverges.”</p>",
+    "model": "<p>The factor is 1 − 1.5 = −0.5: the iterates oscillate but shrink. Divergence starts at 2/L = 0.2.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Disagree: it converges monotonically",
+      "Agree",
+      "Disagree: the factor is −0.5, it converges"
+     ],
+     "correct": 2,
+     "display": "Disagree"
+    }
+   }
+  ],
+  "par": 2,
   "style": [
    "research-stats",
    "math-test"
@@ -10226,6 +25215,38 @@ window.PROBLEMS = [
   ],
   "solution": "<p>A point is in the interior iff every coordinate is in [0.05, 0.95], probability 0.9 each, independently: 0.9¹⁰ ≈ 0.349.</p><p>So ≈ 1 − 0.349 = 0.651 of the points are within 0.05 of the boundary. In d = 100 it is 1 − 0.9¹⁰⁰ ≈ 99.997%.</p><p>In high dimensions volume concentrates near the boundary, distances between random points become similar, and neighbourhoods must be huge to contain any data — which is why k-NN and kernel methods degrade and why feature selection/regularization matter.</p><p>Answer: ≈ 0.651.</p>",
   "key": "In d dimensions the interior fraction is (1−2ε)^d → 0: almost all volume is near the edge.",
+  "plan": {
+   "keyIdea": "Interior probability is a product over independent coordinates: 0.9ᵈ.",
+   "method": "1 − 0.9¹⁰.",
+   "sanityChecks": [
+    "d = 1 ⇒ 0.1.",
+    "Grows to 1 as d → ∞."
+   ]
+  },
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>d = 100. Fraction within 0.05 of the boundary (5 decimals)?</p>",
+    "model": "<p>1 − 0.9¹⁰⁰ ≈ 0.99997.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.9999734386011124,
+     "display": "≈ 0.99997",
+     "tolRel": 1e-05
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “In 2 dimensions it's 2 × 0.1 = 0.2.”</p><p>Is that right? If not, give the correct value.</p>",
+    "model": "<p>That double-counts the corners: 1 − 0.9² = 0.19.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.19,
+     "display": "0.19"
+    }
+   }
+  ],
+  "par": 1.5,
   "style": [
    "research-stats",
    "OA-speed"
@@ -10321,6 +25342,12007 @@ window.PROBLEMS = [
   "key": "Distance-, penalty- and gradient-based models need scaling; tree-based models are invariant to it.",
   "style": [
    "research-stats"
+  ]
+ },
+ {
+  "id": "ci-011",
+  "cat": "ml",
+  "diff": 1,
+  "title": "Trace of the hat matrix",
+  "tags": [
+   "linear-algebra",
+   "projection-matrix",
+   "regression",
+   "leverage"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>You fit OLS with n = 50 observations and a design matrix X with 4 linearly independent columns (an intercept and 3 features). What is the trace of the hat matrix H = X(XᵀX)<sup>−1</sup>Xᵀ?</p><p>Give an integer.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 4.0,
+   "display": "4",
+   "tolAbs": 0.01
+  },
+  "hints": [
+   "H is the orthogonal projection onto the column space of X.",
+   "trace(AB) = trace(BA)."
+  ],
+  "solution": "<p>trace H = trace((XᵀX)<sup>−1</sup>XᵀX) = trace(I<sub>4</sub>) = 4. Equivalently, H is a projection (H² = H, Hᵀ = H) onto a 4-dimensional space, so its eigenvalues are four 1s and forty-six 0s.</p><p><b>Answer: 4.</b></p>",
+  "key": "The hat matrix is a projection: trace = rank = number of fitted parameters.",
+  "plan": {
+   "keyIdea": "H projects onto col(X); a projection's trace is its rank.",
+   "method": "Cyclic trace property, or eigenvalues 0/1.",
+   "sanityChecks": [
+    "With only an intercept, H = J/n and the trace is 1.",
+    "trace(I − H) is the residual degrees of freedom."
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What is the average leverage h<sub>ii</sub> over the 50 observations?</p><p>Give a decimal.</p>",
+    "model": "<p>Average of diagonal entries = trace/n = 4/50 = 0.08. A common flag for high leverage is h<sub>ii</sub> &gt; 2p/n = 0.16.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.08,
+     "display": "0.08"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>What is the rank (= trace) of the residual-maker I − H?</p>",
+    "model": "<p>50 − 4 = 46: the residual degrees of freedom, which is why σ̂² divides RSS by n − p.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 46.0,
+     "display": "46",
+     "tolAbs": 0.01
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'H's eigenvalues are spread across (0, 1), so its trace could be anything up to 50.' What can its eigenvalues be?</p>",
+    "model": "<p>H² = H, so every eigenvalue λ satisfies λ² = λ: only 0 or 1. The trace counts the 1s: exactly 4.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Any value in [0, 1]",
+      "Only 0 or 1",
+      "Only 1",
+      "Any non-negative value"
+     ],
+     "correct": 1,
+     "display": "Only 0 or 1"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-012",
+  "cat": "ml",
+  "diff": 1,
+  "title": "Eigenvalues from trace and determinant",
+  "tags": [
+   "linear-algebra",
+   "eigenvalues",
+   "trace",
+   "determinant"
+  ],
+  "style": [
+   "OA-speed",
+   "math-test"
+  ],
+  "prompt": "<p>Find the eigenvalues of A = [[4, 1], [2, 3]] (rows listed).</p><p>Give the two eigenvalues, comma-separated, any order.</p>",
+  "answer": {
+   "type": "multi",
+   "values": [
+    5.0,
+    2.0
+   ],
+   "ordered": false,
+   "display": "5, 2"
+  },
+  "hints": [
+   "The eigenvalues sum to the trace and multiply to the determinant.",
+   "trace = 7, det = 12 − 2 = 10."
+  ],
+  "solution": "<p>λ<sub>1</sub> + λ<sub>2</sub> = 7 and λ<sub>1</sub>λ<sub>2</sub> = 10, so λ² − 7λ + 10 = 0, λ = 5 or 2.</p><p>Check: (A − 5I) = [[−1, 1], [2, −2]] has rank one ✓.</p><p><b>Answer: 5, 2.</b></p>",
+  "key": "For 2 × 2 matrices, eigenvalues are the roots of λ² − (trace)λ + det.",
+  "plan": {
+   "keyIdea": "Trace = sum, determinant = product of eigenvalues.",
+   "method": "Solve λ² − 7λ + 10 = 0.",
+   "sanityChecks": [
+    "A − λI must be singular.",
+    "Row sums are 5: (1, 1) is an eigenvector."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>What are the eigenvalues of A²?</p><p>Comma-separated, any order.</p>",
+    "model": "<p>Squares of the eigenvalues: 25 and 4 (same eigenvectors).</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      25.0,
+      4.0
+     ],
+     "ordered": false,
+     "display": "25, 4"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Adding 3I multiplies each eigenvalue by 3, so A + 3I has eigenvalues 15 and 6.'</p><p>Give the correct eigenvalues of A + 3I.</p>",
+    "model": "<p>Adding cI <i>shifts</i> each eigenvalue by c: 8 and 5. (Multiplying A by 3 would scale them.)</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      8.0,
+      5.0
+     ],
+     "ordered": false,
+     "display": "8, 5"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>And the eigenvalues of A<sup>−1</sup>?</p><p>Comma-separated, any order.</p>",
+    "model": "<p>Reciprocals: 1/5 and 1/2.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      0.2,
+      0.5
+     ],
+     "ordered": false,
+     "display": "0.2, 0.5"
+    }
+   }
+  ]
+ },
+ {
+  "id": "ci-047",
+  "cat": "ml",
+  "diff": 1,
+  "title": "Variance explained by the first PC",
+  "tags": [
+   "pca",
+   "eigenvalues",
+   "covariance-matrix",
+   "linear-algebra"
+  ],
+  "style": [
+   "research-stats",
+   "OA-speed"
+  ],
+  "prompt": "<p>Two features have covariance matrix [[3, 1], [1, 3]]. What fraction of the total variance is explained by the first principal component?</p><p>Give a fraction.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.6666666666666666,
+   "display": "4/6 = 2/3"
+  },
+  "hints": [
+   "Eigenvalues of [[a, b], [b, a]] are a + b and a − b.",
+   "Fraction = largest eigenvalue / trace."
+  ],
+  "solution": "<p>Eigenvalues 3 + 1 = 4 (direction (1, 1)) and 3 − 1 = 2 (direction (1, −1)). Share = 4/(4 + 2) = 2/3.</p><p><b>Answer: 2/3.</b></p>",
+  "key": "PC variance shares are eigenvalues divided by the trace.",
+  "plan": {
+   "keyIdea": "PCA = eigen-decomposition of the covariance matrix.",
+   "method": "Symmetric 2 × 2 with equal diagonal: eigenvalues a ± b.",
+   "sanityChecks": [
+    "Trace must equal 6.",
+    "Uncorrelated equal-variance features ⇒ 1/2."
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Ten standardised features with common correlation 0.5. Share of the first PC?</p><p>Give a decimal.</p>",
+    "model": "<p>(1 + 9·0.5)/10 = 0.55 (the equicorrelation eigenvalue over the trace).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.55,
+     "display": "0.55"
+    }
+   },
+   {
+    "type": "correct",
+    "prompt": "<p>Interviewer: 'Rescaling a feature doesn't change PCA, so if the first feature is measured in units 10× smaller (variance ×100), the first PC still explains 2/3.'</p><p>Give the new share (covariance [[300, 10], [10, 3]]).</p>",
+    "model": "<p>PCA on covariances is <i>not</i> scale-invariant: eigenvalues ≈ 300.34 and 2.66, so the first PC is essentially feature 1, share ≈ 0.991. Standardise (use the correlation matrix) if units are arbitrary.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.9912089752219571,
+     "display": "≈ 0.991",
+     "tolRel": 0.001
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-038",
+  "cat": "ml",
+  "diff": 3,
+  "title": "Best of 20 worthless backtests",
+  "tags": [
+   "multiple-testing",
+   "overfitting",
+   "order-statistics",
+   "backtesting"
+  ],
+  "style": [
+   "research-stats",
+   "math-test"
+  ],
+  "prompt": "<p>You backtest 20 independent strategy variants that all have true Sharpe 0. Each one's backtest t-statistic is standard normal. You report the best.</p><p>What is the expected t-statistic of the best variant?</p><p>Give a decimal to 2 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 1.8674750597982988,
+   "display": "E[max of 20 N(0,1)] ≈ 1.867",
+   "tolRel": 0.005
+  },
+  "hints": [
+   "E[max] = ∫ x · n φ(x) Φ(x)<sup>n−1</sup> dx.",
+   "A rough rule: E[max of n] ≈ √(2 ln n) − small correction (≈ 1.87 for n = 20)."
+  ],
+  "solution": "<p>The density of the maximum of n standard normals is nφ(x)Φ(x)<sup>n−1</sup>; numerically E[max of 20] ≈ 1.867.</p><p>So the 'best' of 20 noise strategies shows a t-stat near 1.9 — almost the 1.96 bar — on average, and exceeds it about 40% of the time. Multiple testing must be priced in (Bonferroni, deflated Sharpe, hold-out data).</p><p><b>Answer: ≈ 1.87.</b></p>",
+  "key": "Selection inflates statistics: E[max of n N(0,1)] grows like √(2 ln n).",
+  "plan": {
+   "keyIdea": "Order statistics of i.i.d. normals.",
+   "method": "Integrate x against the density of the maximum (or recall the table value).",
+   "sanityChecks": [
+    "n = 1 gives 0, n = 2 gives 1/√π ≈ 0.564",
+    "Grows slowly with n"
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same with 100 variants?</p>",
+    "model": "<p>≈ 2.51 — beating 2 is now the expected outcome of pure noise.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2.507593636441676,
+     "display": "≈ 2.508",
+     "tolRel": 0.005
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Name two remedies.</p>",
+    "model": "<p>Raise the bar with the number of trials (Bonferroni / Holm, or a deflated Sharpe ratio that subtracts the expected maximum), and judge only on data never used for selection (true hold-out or walk-forward). Also log every variant you tried.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-039",
+  "cat": "ml",
+  "diff": 2,
+  "title": "Bonferroni bar for 50 strategies",
+  "tags": [
+   "multiple-testing",
+   "bonferroni",
+   "hypothesis-testing",
+   "false-positives"
+  ],
+  "style": [
+   "research-stats"
+  ],
+  "prompt": "<p>You test 50 strategies and want the probability of <i>any</i> false positive to be at most 5% (one-sided z-tests, Bonferroni).</p><p>What z-score must a strategy exceed to be declared significant?</p><p>Give a decimal to 2 places.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 3.090232306167805,
+   "display": "Φ⁻¹(1 − 0.001) ≈ 3.090",
+   "tolRel": 0.003
+  },
+  "hints": [
+   "Each test at level 0.05/50 = 0.001.",
+   "Φ⁻¹(0.999)."
+  ],
+  "solution": "<p>Bonferroni: per-test level 0.05/50 = 0.001, so z > Φ⁻¹(0.999) ≈ 3.09.</p><p><b>Answer: ≈ 3.09.</b></p>",
+  "key": "Bonferroni: test each of m hypotheses at α/m.",
+  "plan": {
+   "keyIdea": "Union bound on the family-wise error.",
+   "method": "Divide α by 50 and invert Φ.",
+   "sanityChecks": [
+    "Must exceed 1.645",
+    "1000 tests should push it near 3.9"
+   ]
+  },
+  "par": 1.5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Without correction (each at 5%), what is the probability of at least one false positive if all 50 are worthless and independent?</p>",
+    "model": "<p>1 − 0.95<sup>50</sup> ≈ 0.923.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.9230550247232868,
+     "display": "≈ 0.923"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Bar for 1,000 strategies?</p>",
+    "model": "<p>Φ⁻¹(1 − 0.00005) ≈ 3.89.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3.8905918864129854,
+     "display": "≈ 3.891",
+     "tolRel": 0.003
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-040",
+  "cat": "ml",
+  "diff": 1,
+  "title": "Overlapping labels are correlated",
+  "tags": [
+   "overlapping-labels",
+   "autocorrelation",
+   "leakage",
+   "cross-validation"
+  ],
+  "style": [
+   "research-stats",
+   "coding-screen"
+  ],
+  "prompt": "<p>You label each day with its 5-day forward return (sum of the next 5 daily returns, which are i.i.d.). Consecutive labels share 4 of their 5 days.</p><p>What is the correlation between two consecutive labels?</p><p>Give a decimal.</p>",
+  "answer": {
+   "type": "numeric",
+   "value": 0.8,
+   "display": "4/5 = 0.8"
+  },
+  "hints": [
+   "Cov = 4σ², Var = 5σ²."
+  ],
+  "solution": "<p>Y<sub>t</sub> and Y<sub>t+1</sub> share 4 i.i.d. terms: Cov = 4σ², each variance 5σ², correlation 4/5 = 0.8 (lag k: (5 − k)/5).</p><p>Consequences: a random train/test split leaks (test labels overlap training labels), standard errors computed as if samples were independent are far too small, and CV folds need purging/embargo of at least 5 days.</p><p><b>Answer: 0.8.</b></p>",
+  "key": "Overlapping h-period labels have lag-k correlation (h − k)/h: purge and embargo, and shrink your effective sample size.",
+  "plan": {
+   "keyIdea": "Covariance of sums of i.i.d. terms counts the shared terms.",
+   "method": "Shared terms / total terms.",
+   "sanityChecks": [
+    "Lag 5 should give 0",
+    "Lag 0 gives 1"
+   ]
+  },
+  "par": 1,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>With 1,000 consecutive overlapping 5-day labels, what is the effective number of independent labels for estimating their mean (n<sub>eff</sub> = n²·Var(Y)/Var(ΣY))?</p>",
+    "model": "<p>Var(ΣY) counts each daily return as many times as it is covered (up to 5), giving n<sub>eff</sub> ≈ 200.3 — roughly n/5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 200.32051282051282,
+     "display": "≈ 200.3",
+     "tolRel": 0.01
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-001",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Target Sum: count ± assignments",
+  "tags": [
+   "dynamic-programming",
+   "subset-sum",
+   "memoisation"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def target_sum_ways(nums, target):</code></p><p>You are given a list of non-negative integers <code>nums</code> and an integer <code>target</code>. Put a <code>+</code> or a <code>-</code> sign in front of <b>every</b> element; return the number of sign assignments whose signed sum equals <code>target</code>.</p><p>Constraints: 0 ≤ len(nums) ≤ 20, 0 ≤ nums[i] ≤ 1000, |target| ≤ 1000. Zeros count twice (+0 and −0 are different assignments). An empty list has exactly one assignment (sum 0).</p><p><b>Example:</b></p><pre><code>target_sum_ways([1, 1, 1, 1, 1], 3) → 5</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "target_sum_ways",
+   "signature": "def target_sum_ways(nums, target):",
+   "starter": "def target_sum_ways(nums, target):\n    \"\"\"Count the ways to put + or - in front of every element of nums\n    so that the signed sum equals target.\n    \"\"\"\n    pass\n",
+   "reference": "def target_sum_ways(nums, target):\n    ways = {0: 1}                      # running sum -> number of assignments\n    for x in nums:\n        nxt = {}\n        for s, cnt in ways.items():\n            nxt[s + x] = nxt.get(s + x, 0) + cnt\n            nxt[s - x] = nxt.get(s - x, 0) + cnt\n        ways = nxt\n    return ways.get(target, 0)\n",
+   "tests": [
+    {
+     "args": [
+      [
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      3
+     ],
+     "expected": 5
+    },
+    {
+     "args": [
+      [
+       1
+      ],
+      1
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [
+       1
+      ],
+      2
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [],
+      0
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [
+       0,
+       0,
+       1
+      ],
+      1
+     ],
+     "expected": 4
+    },
+    {
+     "args": [
+      [
+       2,
+       3,
+       5
+      ],
+      0
+     ],
+     "expected": 2
+    },
+    {
+     "args": [
+      [
+       1,
+       1,
+       1
+      ],
+      -1
+     ],
+     "expected": 3
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10
+      ],
+      5
+     ],
+     "expected": 39
+    },
+    {
+     "args": [
+      [
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4
+      ],
+      12
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1000
+      ],
+      -1000
+     ],
+     "expected": 1
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n·S), S = sum(nums)",
+    "space": "O(S)",
+    "naive": "O(2^n)",
+    "why": "Plain DFS tries both signs at every index, 2^n leaves. The same (index, running sum) state is reached along many paths — overlapping subproblems — so memoise on (i, sum) or use the subset-sum DP with P = (S + T)/2."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>target_sum_ways([1, 2, 1, 2], 2)</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 3,
+      "display": "3",
+      "tolRel": 0.0001
+     }
+    },
+    {
+     "prompt": "<p>Without memoisation, how many leaves does the plain ± DFS visit for n = 20 elements?</p>",
+     "answer": {
+      "type": "choice",
+      "options": [
+       "20",
+       "400",
+       "2<sup>20</sup> ≈ 10<sup>6</sup>",
+       "20!"
+      ],
+      "correct": 2,
+      "display": "2<sup>20</sup> ≈ 10<sup>6</sup>"
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Write the brute-force DFS first: at index i you either add or subtract nums[i]. How many distinct (i, running sum) pairs can there be?",
+   "Algebra shortcut: if P is the sum of the + elements, then P − (S − P) = T, so P = (S + T)/2 — count subsets with sum P."
+  ],
+  "solution": "<p><b>Approach.</b> Sweep the elements and keep a dictionary <i>running sum → number of sign assignments reaching it</i>. Each element splits every entry into s + x and s − x. The dictionary has at most 2S + 1 keys, so this is the memoised DFS turned bottom-up. Equivalent: count subsets with sum P = (S + T)/2 (zero if S + T is odd or negative) with a 1-D subset-sum table.</p><pre><code>def target_sum_ways(nums, target):\n    ways = {0: 1}                      # running sum -&gt; number of assignments\n    for x in nums:\n        nxt = {}\n        for s, cnt in ways.items():\n            nxt[s + x] = nxt.get(s + x, 0) + cnt\n            nxt[s - x] = nxt.get(s - x, 0) + cnt\n        ways = nxt\n    return ways.get(target, 0)</code></pre><p><b>Complexity:</b> time O(n·S), S = sum(nums), space O(S). The naive approach is O(2^n): Plain DFS tries both signs at every index, 2^n leaves. The same (index, running sum) state is reached along many paths — overlapping subproblems — so memoise on (i, sum) or use the subset-sum DP with P = (S + T)/2.</p><p><b>Answer:</b> a function passing all 10 tests (see the reference above).</p>",
+  "key": "Overlapping subproblems: the state is (index, running sum), so 2^n paths collapse into O(n·S) states.",
+  "plan": {
+   "keyIdea": "Each element contributes ±x; only the running sum matters, not the path that produced it.",
+   "method": "Brute-force DFS → notice repeated (i, sum) states → dictionary DP over sums (or subset-sum with P = (S+T)/2).",
+   "sanityChecks": [
+    "Empty list: 1 way for target 0, 0 otherwise.",
+    "[1,1,1,1,1], 3 → choose which single 1 is negative: 5 ways.",
+    "If |target| > sum(nums) the answer is 0."
+   ]
+  },
+  "par": 12,
+  "followups": [
+   {
+    "type": "complexity",
+    "prompt": "<p>Your DFS is 2<sup>n</sup> — why is it slow and what's the fix?</p>",
+    "model": "<p>The recursion re-solves the same subproblem many times: the pair (index, running sum) fully determines the remaining count, and there are only (n+1)·(2S+1) such pairs while there are 2<sup>n</sup> paths. Memoise on (i, running sum), or reduce to subset-sum: P = (S + T)/2 and count subsets summing to P with a 1-D table, O(n·S) time and O(S) space.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Python recursion is slow — rewrite the DFS as a loop with an explicit stack",
+      "Overlapping subproblems: memoise on (i, running sum) or use the subset-sum DP with P = (S+T)/2, O(n·S)",
+      "Sort nums and prune with binary search, O(n log n)",
+      "Greedily give the largest elements a + sign"
+     ],
+     "correct": 1,
+     "display": "Overlapping subproblems: memoise on (i, running sum) or use the subset-sum DP with P = (S+T)/2, O(n·S)"
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>Using the reduction, for nums = [1, 1, 1, 1, 1] and target 3 we need subsets with sum P = (5 + 3)/2 = 4. How many subsets of the five 1s have sum 4?</p>",
+    "model": "<p>C(5, 4) = 5 — the same 5 as the original answer, as it must be.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5,
+     "display": "5",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-002",
+  "cat": "coding",
+  "diff": 1,
+  "title": "Coin change: number of ways",
+  "tags": [
+   "dynamic-programming",
+   "coin-change"
+  ],
+  "style": [
+   "coding-screen",
+   "OA-speed"
+  ],
+  "prompt": "<p>Implement <code>def coin_change_ways(coins, amount):</code></p><p>Given distinct positive coin denominations <code>coins</code> (unlimited supply of each) and an integer <code>amount</code> ≥ 0, return the number of <b>combinations</b> (multisets — order does not matter) that sum exactly to <code>amount</code>.</p><p>Constraints: up to 10 denominations, amount ≤ 1000. There is exactly one way to make 0 (use no coins), even when <code>coins</code> is empty.</p><p><b>Example:</b></p><pre><code>coin_change_ways([1, 2, 5], 5) → 4</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "coin_change_ways",
+   "signature": "def coin_change_ways(coins, amount):",
+   "starter": "def coin_change_ways(coins, amount):\n    \"\"\"Number of combinations (order does not matter) of coins that sum to amount.\n    Each coin denomination may be used any number of times.\n    \"\"\"\n    pass\n",
+   "reference": "def coin_change_ways(coins, amount):\n    ways = [1] + [0] * amount\n    for coin in coins:                 # coins in the OUTER loop -> combinations\n        for a in range(coin, amount + 1):\n            ways[a] += ways[a - coin]\n    return ways[amount]\n",
+   "tests": [
+    {
+     "args": [
+      [
+       1,
+       2,
+       5
+      ],
+      5
+     ],
+     "expected": 4
+    },
+    {
+     "args": [
+      [
+       2
+      ],
+      3
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       10
+      ],
+      10
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       5
+      ],
+      0
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [],
+      0
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [],
+      7
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       3,
+       5,
+       7
+      ],
+      50
+     ],
+     "expected": 16
+    },
+    {
+     "args": [
+      [
+       1,
+       5,
+       10,
+       25
+      ],
+      100
+     ],
+     "expected": 242
+    },
+    {
+     "args": [
+      [
+       7,
+       3
+      ],
+      2
+     ],
+     "expected": 0
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(len(coins)·amount)",
+    "space": "O(amount)",
+    "naive": "exponential",
+    "why": "Recursing on 'use this coin again or move to the next coin' revisits the same (coin index, remaining amount) states; a table over amounts removes the repetition."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>coin_change_ways([2, 3], 12)</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 3,
+      "display": "3",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Let ways[a] be the number of combinations making a using only the coins processed so far.",
+   "Loop over coins on the outside and amounts on the inside — swapping the loops counts ordered sequences instead."
+  ],
+  "solution": "<p><b>Approach.</b> Unbounded-knapsack counting. Process one denomination at a time; after processing coin c, <code>ways[a]</code> counts combinations of the coins seen so far. Adding c gives <code>ways[a] += ways[a − c]</code> for increasing a (increasing order lets c be reused). Putting coins in the outer loop guarantees each multiset is counted once, in the canonical order of denominations.</p><pre><code>def coin_change_ways(coins, amount):\n    ways = [1] + [0] * amount\n    for coin in coins:                 # coins in the OUTER loop -&gt; combinations\n        for a in range(coin, amount + 1):\n            ways[a] += ways[a - coin]\n    return ways[amount]</code></pre><p><b>Complexity:</b> time O(len(coins)·amount), space O(amount). The naive approach is exponential: Recursing on &#x27;use this coin again or move to the next coin&#x27; revisits the same (coin index, remaining amount) states; a table over amounts removes the repetition.</p><p><b>Answer:</b> a function passing all 9 tests (see the reference above).</p>",
+  "key": "Coins outer, amounts inner counts combinations; the reverse loop order counts ordered sequences.",
+  "plan": {
+   "keyIdea": "A combination is determined by how many of each coin; fix an order of denominations to avoid double counting.",
+   "method": "1-D DP: ways[0] = 1; for each coin, for a from coin to amount, ways[a] += ways[a − coin].",
+   "sanityChecks": [
+    "amount 0 → 1.",
+    "[1,2,5], 5 → {5}, {2,2,1}, {2,1,1,1}, {1×5}: 4.",
+    "A single coin that doesn't divide the amount → 0."
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now order matters (1+2+2 and 2+1+2 are different). How many ordered sequences of coins from [1, 2, 5] sum to 5?</p>",
+    "model": "<p>Swap the loops: f(a) = f(a−1) + f(a−2) + f(a−5) with f(0) = 1, giving 1, 1, 2, 3, 5, 9. Answer 9.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 9,
+     "display": "9",
+     "tolRel": 0.0001
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why does putting the <i>amount</i> loop outside count ordered sequences?</p>",
+    "model": "<p>With amounts outer, ways[a] sums over the <i>last</i> coin used, and any coin can be last — so 1+2 and 2+1 are both counted. With coins outer, coins are added in a fixed order of denominations, so each multiset appears once.</p>"
+   }
+  ]
+ },
+ {
+  "id": "cd-003",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Coin change: fewest coins",
+  "tags": [
+   "dynamic-programming",
+   "coin-change",
+   "greedy"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def min_coins(coins, amount):</code></p><p>Given positive coin denominations <code>coins</code> (unlimited supply) and <code>amount</code> ≥ 0, return the minimum number of coins whose values sum to <code>amount</code>, or <code>-1</code> if it cannot be made.</p><p>Constraints: up to 12 denominations, amount ≤ 10<sup>4</sup>. Amount 0 needs 0 coins.</p><p><b>Example:</b></p><pre><code>min_coins([1, 2, 5], 11) → 3</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "min_coins",
+   "signature": "def min_coins(coins, amount):",
+   "starter": "def min_coins(coins, amount):\n    \"\"\"Fewest coins summing to amount (unlimited supply), or -1 if impossible.\n    \"\"\"\n    pass\n",
+   "reference": "def min_coins(coins, amount):\n    INF = amount + 1                   # more than any feasible answer\n    best = [0] + [INF] * amount\n    for a in range(1, amount + 1):\n        for coin in coins:\n            if coin <= a and best[a - coin] + 1 < best[a]:\n                best[a] = best[a - coin] + 1\n    return best[amount] if best[amount] != INF else -1\n",
+   "tests": [
+    {
+     "args": [
+      [
+       1,
+       2,
+       5
+      ],
+      11
+     ],
+     "expected": 3
+    },
+    {
+     "args": [
+      [
+       2
+      ],
+      3
+     ],
+     "expected": -1
+    },
+    {
+     "args": [
+      [
+       1
+      ],
+      0
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1,
+       3,
+       4
+      ],
+      6
+     ],
+     "expected": 2
+    },
+    {
+     "args": [
+      [
+       5,
+       10
+      ],
+      3
+     ],
+     "expected": -1
+    },
+    {
+     "args": [
+      [
+       186,
+       419,
+       83,
+       408
+      ],
+      6249
+     ],
+     "expected": 20
+    },
+    {
+     "args": [
+      [
+       7
+      ],
+      49
+     ],
+     "expected": 7
+    },
+    {
+     "args": [
+      [
+       2,
+       5,
+       10,
+       1
+      ],
+      27
+     ],
+     "expected": 4
+    },
+    {
+     "args": [
+      [
+       9,
+       6,
+       5,
+       1
+      ],
+      11
+     ],
+     "expected": 2
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(len(coins)·amount)",
+    "space": "O(amount)",
+    "naive": "exponential (or wrong, if greedy)",
+    "why": "Greedy 'largest coin first' is only optimal for special coin systems; plain recursion recomputes best[a] for the same a many times."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>min_coins([1, 3, 4], 6)</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 2,
+      "display": "2",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "best[a] = 1 + min over coins c ≤ a of best[a − c].",
+   "Test greedy on coins [1, 3, 4] and amount 6 before trusting it."
+  ],
+  "solution": "<p><b>Approach.</b> Bottom-up DP over amounts: <code>best[a] = 1 + min(best[a − c])</code> over coins c ≤ a, with best[0] = 0 and an 'infinity' sentinel for unreachable amounts. Equivalently, BFS on amounts where each edge adds a coin — the first time you reach <code>amount</code> is the minimum count.</p><pre><code>def min_coins(coins, amount):\n    INF = amount + 1                   # more than any feasible answer\n    best = [0] + [INF] * amount\n    for a in range(1, amount + 1):\n        for coin in coins:\n            if coin &lt;= a and best[a - coin] + 1 &lt; best[a]:\n                best[a] = best[a - coin] + 1\n    return best[amount] if best[amount] != INF else -1</code></pre><p><b>Complexity:</b> time O(len(coins)·amount), space O(amount). The naive approach is exponential (or wrong, if greedy): Greedy &#x27;largest coin first&#x27; is only optimal for special coin systems; plain recursion recomputes best[a] for the same a many times.</p><p><b>Answer:</b> a function passing all 9 tests (see the reference above).</p>",
+  "key": "Fewest coins is a shortest-path / DP problem; greedy fails on non-canonical coin systems like [1, 3, 4].",
+  "plan": {
+   "keyIdea": "Optimal substructure: the last coin c leaves an optimal solution for a − c.",
+   "method": "Table best[0..amount] with an infinity sentinel; return −1 if still infinite.",
+   "sanityChecks": [
+    "amount 0 → 0.",
+    "[2], 3 → −1 (parity).",
+    "[1,3,4], 6 → 2 (3+3), not greedy's 3 (4+1+1)."
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “Just take the largest coin that fits each time — for coins [1, 3, 4] and amount 6 that gives the optimum.” How many coins does greedy actually use here?</p>",
+    "model": "<p>Greedy takes 4, then 1, then 1 → 3 coins, while 3 + 3 uses only 2. Greedy is not optimal for this coin system.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3,
+     "display": "3",
+     "tolRel": 0.0001
+    }
+   },
+   {
+    "type": "complexity",
+    "prompt": "<p>amount = 10<sup>9</sup> with coins [1, 3, 4]. Is the O(amount) table still the right tool?</p>",
+    "model": "<p>No — 10<sup>9</sup> cells is too much memory and time. Use structure: beyond a small threshold the optimal solution uses mostly the largest coin, so solve the remainder modulo 4 with a small DP (or BFS on residues) and add amount // 4 style counts.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Yes, a list of 10^9 ints is fine in Python",
+      "No — exploit the periodic structure: small DP on residues modulo the largest coin plus a count of largest coins",
+      "Use recursion with lru_cache instead"
+     ],
+     "correct": 1,
+     "display": "No — exploit the periodic structure: small DP on residues modulo the largest coin plus a count of largest coins"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-004",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Longest increasing subsequence",
+  "tags": [
+   "dynamic-programming",
+   "binary-search",
+   "patience-sorting"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def lis_length(nums):</code></p><p>Return the length of the longest <b>strictly</b> increasing subsequence (not necessarily contiguous) of the integer list <code>nums</code> — e.g. the longest run of rising prints you could pick out of a price series.</p><p>Constraints: 0 ≤ len(nums) ≤ 10<sup>5</sup>, so an O(n log n) solution is expected. Empty list → 0.</p><p><b>Example:</b></p><pre><code>lis_length([10, 9, 2, 5, 3, 7, 101, 18]) → 4</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "lis_length",
+   "signature": "def lis_length(nums):",
+   "starter": "def lis_length(nums):\n    \"\"\"Length of the longest strictly increasing subsequence of nums.\n    \"\"\"\n    pass\n",
+   "reference": "from bisect import bisect_left\n\ndef lis_length(nums):\n    tails = []          # tails[k] = smallest tail of an increasing subsequence of length k+1\n    for x in nums:\n        i = bisect_left(tails, x)      # bisect_left -> strictly increasing\n        if i == len(tails):\n            tails.append(x)\n        else:\n            tails[i] = x\n    return len(tails)\n",
+   "tests": [
+    {
+     "args": [
+      [
+       10,
+       9,
+       2,
+       5,
+       3,
+       7,
+       101,
+       18
+      ]
+     ],
+     "expected": 4
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       7,
+       7,
+       7
+      ]
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       3,
+       4
+      ]
+     ],
+     "expected": 4
+    },
+    {
+     "args": [
+      [
+       4,
+       3,
+       2,
+       1
+      ]
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [
+       0,
+       1,
+       0,
+       3,
+       2,
+       3
+      ]
+     ],
+     "expected": 4
+    },
+    {
+     "args": [
+      [
+       1,
+       3,
+       3,
+       2,
+       4
+      ]
+     ],
+     "expected": 3
+    },
+    {
+     "args": [
+      [
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241,
+       241
+      ]
+     ],
+     "expected": 1
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)",
+    "naive": "O(n²)",
+    "why": "The classic DP L[i] = 1 + max L[j] over j < i with a[j] < a[i] scans all earlier elements; keeping only the best tail per length makes the list sorted, so each element needs one binary search."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>lis_length([3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5])</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 4,
+      "display": "4",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "O(n²) first: L[i] = 1 + max(L[j]) over j < i with nums[j] < nums[i].",
+   "Keep tails[k] = the smallest possible last element of an increasing subsequence of length k + 1. That list is sorted."
+  ],
+  "solution": "<p><b>Approach.</b> Patience sorting. Maintain <code>tails</code>, where tails[k] is the smallest tail value of any increasing subsequence of length k + 1 seen so far; it is strictly increasing. For each x, binary-search the first tail ≥ x and replace it (or append if x beats every tail). The length of <code>tails</code> is the answer. Using <code>bisect_left</code> enforces strictness; <code>bisect_right</code> would give the longest non-decreasing subsequence.</p><pre><code>from bisect import bisect_left\n\ndef lis_length(nums):\n    tails = []          # tails[k] = smallest tail of an increasing subsequence of length k+1\n    for x in nums:\n        i = bisect_left(tails, x)      # bisect_left -&gt; strictly increasing\n        if i == len(tails):\n            tails.append(x)\n        else:\n            tails[i] = x\n    return len(tails)</code></pre><p><b>Complexity:</b> time O(n log n), space O(n). The naive approach is O(n²): The classic DP L[i] = 1 + max L[j] over j &lt; i with a[j] &lt; a[i] scans all earlier elements; keeping only the best tail per length makes the list sorted, so each element needs one binary search.</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Keep the smallest tail for every length; the tails list is sorted, so each step is a binary search.",
+  "plan": {
+   "keyIdea": "Only the smallest achievable tail for each length matters for extending later.",
+   "method": "State the O(n²) DP, then the tails array + bisect_left for O(n log n).",
+   "sanityChecks": [
+    "Strictly decreasing input → 1.",
+    "All equal → 1 (strict).",
+    "Already sorted → n."
+   ]
+  },
+  "par": 12,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now <i>non-decreasing</i> subsequences count (equal values allowed). What is the answer for [7, 7, 7]?</p>",
+    "model": "<p>Use <code>bisect_right</code> instead of <code>bisect_left</code>: equal values extend the run. All three 7s → 3.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 3,
+     "display": "3",
+     "tolRel": 0.0001
+    }
+   },
+   {
+    "type": "complexity",
+    "prompt": "<p>n = 10<sup>5</sup>. Roughly how many basic steps does the O(n²) DP take versus the bisect version?</p>",
+    "model": "<p>O(n²) ≈ 10<sup>10</sup>/2 comparisons — minutes in Python. The bisect version does about n·log₂ n ≈ 1.7·10<sup>6</sup> steps — well under a second.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Both ≈ 10^5",
+      "≈ 5·10^9 vs ≈ 1.7·10^6",
+      "≈ 10^10 vs ≈ 10^10",
+      "≈ 10^7 vs ≈ 10^5"
+     ],
+     "correct": 1,
+     "display": "≈ 5·10^9 vs ≈ 1.7·10^6"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-005",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Edit distance between tickers",
+  "tags": [
+   "dynamic-programming",
+   "strings"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def edit_distance(a, b):</code></p><p>Return the Levenshtein distance between strings <code>a</code> and <code>b</code>: the minimum number of single-character insertions, deletions or substitutions (each cost 1) that turn <code>a</code> into <code>b</code>. Useful for fuzzy-matching mistyped symbols.</p><p>Constraints: lengths ≤ 500. Use O(min(len a, len b)) extra memory if you can.</p><p><b>Example:</b></p><pre><code>edit_distance('horse', 'ros') → 3</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "edit_distance",
+   "signature": "def edit_distance(a, b):",
+   "starter": "def edit_distance(a, b):\n    \"\"\"Minimum number of single-character inserts, deletes and substitutions turning a into b.\n    \"\"\"\n    pass\n",
+   "reference": "def edit_distance(a, b):\n    if len(a) < len(b):\n        a, b = b, a                    # keep the row as short as possible\n    prev = list(range(len(b) + 1))     # distances from \"\" prefix of a\n    for i, ca in enumerate(a, 1):\n        cur = [i] + [0] * len(b)\n        for j, cb in enumerate(b, 1):\n            cur[j] = min(prev[j] + 1,              # delete ca\n                         cur[j - 1] + 1,           # insert cb\n                         prev[j - 1] + (ca != cb)) # substitute / match\n        prev = cur\n    return prev[-1]\n",
+   "tests": [
+    {
+     "args": [
+      "horse",
+      "ros"
+     ],
+     "expected": 3
+    },
+    {
+     "args": [
+      "",
+      ""
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      "abc",
+      ""
+     ],
+     "expected": 3
+    },
+    {
+     "args": [
+      "",
+      "ab"
+     ],
+     "expected": 2
+    },
+    {
+     "args": [
+      "intention",
+      "execution"
+     ],
+     "expected": 5
+    },
+    {
+     "args": [
+      "kitten",
+      "sitting"
+     ],
+     "expected": 3
+    },
+    {
+     "args": [
+      "same",
+      "same"
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      "AAPL",
+      "APPL"
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      "GOOG",
+      "GOOGL"
+     ],
+     "expected": 1
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(|a|·|b|)",
+    "space": "O(min(|a|, |b|))",
+    "naive": "O(3^(|a|+|b|))",
+    "why": "The naive recursion branches three ways at every step and recomputes the same (i, j) prefix pairs; a table over (i, j) solves each pair once."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>edit_distance(\"sunday\", \"saturday\")</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 3,
+      "display": "3",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Let D[i][j] be the distance between the first i characters of a and the first j of b.",
+   "D[i][j] = min(D[i−1][j] + 1, D[i][j−1] + 1, D[i−1][j−1] + [a[i−1] ≠ b[j−1]]); only the previous row is needed."
+  ],
+  "solution": "<p><b>Approach.</b> Classic Wagner–Fischer DP over prefixes with the three moves (delete, insert, substitute/match). Each row depends only on the previous row, so keep two rows of length min(|a|, |b|) + 1. Base cases: transforming a prefix into the empty string costs its length.</p><pre><code>def edit_distance(a, b):\n    if len(a) &lt; len(b):\n        a, b = b, a                    # keep the row as short as possible\n    prev = list(range(len(b) + 1))     # distances from \"\" prefix of a\n    for i, ca in enumerate(a, 1):\n        cur = [i] + [0] * len(b)\n        for j, cb in enumerate(b, 1):\n            cur[j] = min(prev[j] + 1,              # delete ca\n                         cur[j - 1] + 1,           # insert cb\n                         prev[j - 1] + (ca != cb)) # substitute / match\n        prev = cur\n    return prev[-1]</code></pre><p><b>Complexity:</b> time O(|a|·|b|), space O(min(|a|, |b|)). The naive approach is O(3^(|a|+|b|)): The naive recursion branches three ways at every step and recomputes the same (i, j) prefix pairs; a table over (i, j) solves each pair once.</p><p><b>Answer:</b> a function passing all 9 tests (see the reference above).</p>",
+  "key": "Prefix DP with three moves; keep one row to cut memory to O(min(m, n)).",
+  "plan": {
+   "keyIdea": "The last characters are either matched/substituted, deleted or inserted — three subproblems on shorter prefixes.",
+   "method": "Two-row DP, swapping so the row is over the shorter string.",
+   "sanityChecks": [
+    "Distance to the empty string = length.",
+    "Identical strings → 0.",
+    "Distance ≤ max(|a|, |b|) and ≥ ||a| − |b||."
+   ]
+  },
+  "par": 12,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Substitutions are now forbidden (only inserts and deletes, cost 1 each). What is the distance between \"kitten\" and \"sitting\"?</p>",
+    "model": "<p>Then the distance is |a| + |b| − 2·LCS(a, b). LCS(kitten, sitting) = 4 (\"ittn\"), so 6 + 7 − 8 = 5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 5,
+     "display": "5",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-006",
+  "cat": "coding",
+  "diff": 1,
+  "title": "Best contiguous P&L run (Kadane)",
+  "tags": [
+   "dynamic-programming",
+   "kadane",
+   "arrays"
+  ],
+  "style": [
+   "coding-screen",
+   "OA-speed"
+  ],
+  "prompt": "<p>Implement <code>def max_subarray(pnl):</code></p><p>Given a non-empty list <code>pnl</code> of daily P&amp;L values (integers, possibly negative), return the largest total of a <b>non-empty contiguous</b> run of days.</p><p>Constraints: 1 ≤ len ≤ 10<sup>5</sup>. If every day is negative, the answer is the least negative single day.</p><p><b>Example:</b></p><pre><code>max_subarray([-2, 1, -3, 4, -1, 2, 1, -5, 4]) → 6</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "max_subarray",
+   "signature": "def max_subarray(pnl):",
+   "starter": "def max_subarray(pnl):\n    \"\"\"Largest sum of a non-empty contiguous block of daily P&L values.\n    \"\"\"\n    pass\n",
+   "reference": "def max_subarray(pnl):\n    best = cur = pnl[0]\n    for x in pnl[1:]:\n        cur = max(x, cur + x)          # extend the run or restart at x\n        best = max(best, cur)\n    return best\n",
+   "tests": [
+    {
+     "args": [
+      [
+       -2,
+       1,
+       -3,
+       4,
+       -1,
+       2,
+       1,
+       -5,
+       4
+      ]
+     ],
+     "expected": 6
+    },
+    {
+     "args": [
+      [
+       -3
+      ]
+     ],
+     "expected": -3
+    },
+    {
+     "args": [
+      [
+       -5,
+       -2,
+       -8
+      ]
+     ],
+     "expected": -2
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       3
+      ]
+     ],
+     "expected": 6
+    },
+    {
+     "args": [
+      [
+       0
+      ]
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       5,
+       -10,
+       6
+      ]
+     ],
+     "expected": 6
+    },
+    {
+     "args": [
+      [
+       3,
+       -1,
+       3,
+       -10,
+       2,
+       2,
+       2
+      ]
+     ],
+     "expected": 6
+    },
+    {
+     "args": [
+      [
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23,
+       23
+      ]
+     ],
+     "expected": 4600
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "naive": "O(n²) (or O(n³))",
+    "why": "Trying every (start, end) pair is quadratic; the best run ending at day i only needs the best run ending at day i − 1."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>max_subarray([2, -3, 4, -1, 2, -6, 5])</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 5,
+      "display": "5",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "What is the best sum of a run that must end exactly at day i?",
+   "It is either just pnl[i] or (best ending at i − 1) + pnl[i]."
+  ],
+  "solution": "<p><b>Approach.</b> Kadane's algorithm: <code>cur</code> is the best sum of a run ending at the current day — either start fresh at x or extend the previous run. Track the maximum <code>cur</code>. Initialising with the first element (not 0) handles the all-negative case.</p><pre><code>def max_subarray(pnl):\n    best = cur = pnl[0]\n    for x in pnl[1:]:\n        cur = max(x, cur + x)          # extend the run or restart at x\n        best = max(best, cur)\n    return best</code></pre><p><b>Complexity:</b> time O(n), space O(1). The naive approach is O(n²) (or O(n³)): Trying every (start, end) pair is quadratic; the best run ending at day i only needs the best run ending at day i − 1.</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Best run ending here = max(x, best ending at previous + x); initialise with the first element so all-negative inputs work.",
+  "plan": {
+   "keyIdea": "A run with a negative prefix is never optimal — drop it.",
+   "method": "One pass with cur/best; initialise from pnl[0].",
+   "sanityChecks": [
+    "All negative → max element.",
+    "All positive → total sum.",
+    "Single element → itself."
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now an empty run (sitting out entirely, total 0) is allowed. What is the answer for [-5, -2, -8]?</p>",
+    "model": "<p>Initialise best = cur = 0 and use cur = max(0, cur + x). For an all-negative list the answer becomes 0.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0,
+     "display": "0",
+     "tolAbs": 1e-09
+    }
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>The interviewer asks for the start and end indices of the best run of [-2, 1, -3, 4, -1, 2, 1, -5, 4]. Give them as start, end (0-based, inclusive), separated by a comma.</p>",
+    "model": "<p>Remember the index where cur last restarted; when best improves, record (restart, i). The best run is 4, −1, 2, 1 at indices 3..6.</p>",
+    "answer": {
+     "type": "multi",
+     "values": [
+      3,
+      6
+     ],
+     "ordered": true,
+     "display": "3, 6"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-007",
+  "cat": "coding",
+  "diff": 1,
+  "title": "Buy once, sell once",
+  "tags": [
+   "arrays",
+   "stock-trading",
+   "greedy"
+  ],
+  "style": [
+   "coding-screen",
+   "OA-speed"
+  ],
+  "prompt": "<p>Implement <code>def max_profit_one(prices):</code></p><p><code>prices[i]</code> is the price on day i. You may buy one unit on one day and sell it on a <b>later</b> day. Return the maximum profit, or 0 if no trade makes money (you may also not trade).</p><p>Constraints: 0 ≤ len ≤ 10<sup>5</sup>.</p><p><b>Example:</b></p><pre><code>max_profit_one([7, 1, 5, 3, 6, 4]) → 5</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "max_profit_one",
+   "signature": "def max_profit_one(prices):",
+   "starter": "def max_profit_one(prices):\n    \"\"\"Best profit from one buy followed later by one sell (0 if no profit is possible).\n    \"\"\"\n    pass\n",
+   "reference": "def max_profit_one(prices):\n    best, low = 0, float(\"inf\")\n    for p in prices:\n        low = min(low, p)              # cheapest buy so far\n        best = max(best, p - low)      # sell today\n    return best\n",
+   "tests": [
+    {
+     "args": [
+      [
+       7,
+       1,
+       5,
+       3,
+       6,
+       4
+      ]
+     ],
+     "expected": 5
+    },
+    {
+     "args": [
+      [
+       7,
+       6,
+       4,
+       3,
+       1
+      ]
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       5
+      ]
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1,
+       2
+      ]
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [
+       2,
+       4,
+       1,
+       7
+      ]
+     ],
+     "expected": 6
+    },
+    {
+     "args": [
+      [
+       3,
+       3,
+       3
+      ]
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       9,
+       11,
+       8,
+       5,
+       7,
+       10
+      ]
+     ],
+     "expected": 5
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "naive": "O(n²)",
+    "why": "Checking every buy/sell pair is quadratic; for each sell day only the minimum earlier price matters."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>max_profit_one([4, 8, 2, 5, 3, 9, 1])</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 7,
+      "display": "7",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "If you sell on day j, which buy day is best?",
+   "Track the running minimum price."
+  ],
+  "solution": "<p><b>Approach.</b> Scan once, keeping the minimum price seen so far; the best profit selling today is today's price minus that minimum.</p><pre><code>def max_profit_one(prices):\n    best, low = 0, float(\"inf\")\n    for p in prices:\n        low = min(low, p)              # cheapest buy so far\n        best = max(best, p - low)      # sell today\n    return best</code></pre><p><b>Complexity:</b> time O(n), space O(1). The naive approach is O(n²): Checking every buy/sell pair is quadratic; for each sell day only the minimum earlier price matters.</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Running minimum: for every sell day the best buy is the cheapest earlier day.",
+  "plan": {
+   "keyIdea": "Profit(j) = p[j] − min(p[0..j]).",
+   "method": "Single pass with running minimum and best.",
+   "sanityChecks": [
+    "Falling prices → 0.",
+    "Fewer than 2 days → 0.",
+    "Answer never negative."
+   ]
+  },
+  "par": 4,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now you may trade as many times as you like (hold at most one unit). What is the best profit for [7, 1, 5, 3, 6, 4]?</p>",
+    "model": "<p>Collect every up-move: (5−1) + (6−3) = 7.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 7,
+     "display": "7",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-008",
+  "cat": "coding",
+  "diff": 3,
+  "title": "Trading with a cooldown day",
+  "tags": [
+   "dynamic-programming",
+   "state-machine",
+   "stock-trading"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def max_profit_cooldown(prices):</code></p><p>You may trade any number of times, holding at most one unit at a time, but after you sell you must wait one full day before buying again (no buying the day right after a sale). Buying and selling on the same day is not allowed. Return the maximum profit.</p><p>Constraints: 0 ≤ len ≤ 10<sup>5</sup>.</p><p><b>Example:</b></p><pre><code>max_profit_cooldown([1, 2, 3, 0, 2]) → 3</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "max_profit_cooldown",
+   "signature": "def max_profit_cooldown(prices):",
+   "starter": "def max_profit_cooldown(prices):\n    \"\"\"Max profit with unlimited trades, at most one unit held, and a one-day\n    cooldown after every sell (no buy on the day after a sell).\n    \"\"\"\n    pass\n",
+   "reference": "def max_profit_cooldown(prices):\n    hold, sold, rest = float(\"-inf\"), 0, 0   # best P&L in each state at end of day\n    for p in prices:\n        hold, sold, rest = max(hold, rest - p), hold + p, max(rest, sold)\n    return max(sold, rest)\n",
+   "tests": [
+    {
+     "args": [
+      [
+       1,
+       2,
+       3,
+       0,
+       2
+      ]
+     ],
+     "expected": 3
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1
+      ]
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1,
+       2
+      ]
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [
+       2,
+       1
+      ]
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       4
+      ]
+     ],
+     "expected": 3
+    },
+    {
+     "args": [
+      [
+       1,
+       4,
+       2,
+       7
+      ]
+     ],
+     "expected": 6
+    },
+    {
+     "args": [
+      [
+       6,
+       1,
+       3,
+       2,
+       4,
+       7
+      ]
+     ],
+     "expected": 6
+    },
+    {
+     "args": [
+      [
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4,
+       4
+      ]
+     ],
+     "expected": 0
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "naive": "O(3^n)",
+    "why": "Trying buy/sell/wait on every day explodes; the future only depends on the current state (holding, just sold, free), so three numbers per day suffice."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>max_profit_cooldown([1, 3, 1, 3, 1, 3])</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 4,
+      "display": "4",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Name the states at the end of a day: holding, just sold today, resting (flat, allowed to buy).",
+   "hold' = max(hold, rest − p), sold' = hold + p, rest' = max(rest, sold)."
+  ],
+  "solution": "<p><b>Approach.</b> A three-state machine. <i>hold</i>: best P&amp;L while holding a unit; <i>sold</i>: best P&amp;L having sold today (so tomorrow is a cooldown); <i>rest</i>: best P&amp;L while flat and free to buy. Buying is only allowed from <i>rest</i>, which enforces the cooldown. Update all three simultaneously each day; the answer is max(sold, rest).</p><pre><code>def max_profit_cooldown(prices):\n    hold, sold, rest = float(\"-inf\"), 0, 0   # best P&amp;L in each state at end of day\n    for p in prices:\n        hold, sold, rest = max(hold, rest - p), hold + p, max(rest, sold)\n    return max(sold, rest)</code></pre><p><b>Complexity:</b> time O(n), space O(1). The naive approach is O(3^n): Trying buy/sell/wait on every day explodes; the future only depends on the current state (holding, just sold, free), so three numbers per day suffice.</p><p><b>Answer:</b> a function passing all 9 tests (see the reference above).</p>",
+  "key": "Model the constraint as states (hold / sold / rest) and transition once per day.",
+  "plan": {
+   "keyIdea": "The cooldown is just a state you must pass through after selling.",
+   "method": "Write the three-state recurrences, update with tuple assignment, return max(sold, rest).",
+   "sanityChecks": [
+    "Monotone rising prices → last − first (one trade).",
+    "Empty or one day → 0.",
+    "[1,2,3,0,2] → 3 (buy1 sell2, cool, buy0 sell2)."
+   ]
+  },
+  "par": 15,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Drop the cooldown but charge a fee of 2 per completed round trip. What is the best profit for [1, 3, 2, 8, 4, 9]?</p>",
+    "model": "<p>States hold/cash with sell paying p − fee: buy 1 sell 8 (+5), buy 4 sell 9 (+3) = 8.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 8,
+     "display": "8",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-009",
+  "cat": "coding",
+  "diff": 3,
+  "title": "At most k round trips",
+  "tags": [
+   "dynamic-programming",
+   "stock-trading"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def max_profit_k(prices, k):</code></p><p>You may complete at most <code>k</code> round trips (buy, then later sell), holding at most one unit at a time. Return the maximum profit.</p><p>Constraints: 0 ≤ len(prices) ≤ 1000, 0 ≤ k ≤ 10<sup>9</sup> — note that a huge k must not create a huge table.</p><p><b>Example:</b></p><pre><code>max_profit_k([2, 4, 1], 2) → 2</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "max_profit_k",
+   "signature": "def max_profit_k(prices, k):",
+   "starter": "def max_profit_k(prices, k):\n    \"\"\"Max profit with at most k buy-then-sell round trips, holding at most one unit.\n    \"\"\"\n    pass\n",
+   "reference": "def max_profit_k(prices, k):\n    n = len(prices)\n    if k == 0 or n < 2:\n        return 0\n    if 2 * k >= n:                     # k is not binding: take every up-move\n        return sum(max(0, prices[i] - prices[i - 1]) for i in range(1, n))\n    buy = [float(\"-inf\")] * (k + 1)    # buy[j]: holding, j-th trip opened\n    sell = [0] * (k + 1)               # sell[j]: flat, j trips completed\n    for p in prices:\n        for j in range(1, k + 1):\n            buy[j] = max(buy[j], sell[j - 1] - p)\n            sell[j] = max(sell[j], buy[j] + p)\n    return sell[k]\n",
+   "tests": [
+    {
+     "args": [
+      [
+       2,
+       4,
+       1
+      ],
+      2
+     ],
+     "expected": 2
+    },
+    {
+     "args": [
+      [
+       3,
+       2,
+       6,
+       5,
+       0,
+       3
+      ],
+      2
+     ],
+     "expected": 7
+    },
+    {
+     "args": [
+      [],
+      3
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       3
+      ],
+      0
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1,
+       3,
+       2,
+       8,
+       4,
+       9
+      ],
+      1
+     ],
+     "expected": 8
+    },
+    {
+     "args": [
+      [
+       1,
+       3,
+       2,
+       8,
+       4,
+       9
+      ],
+      2
+     ],
+     "expected": 12
+    },
+    {
+     "args": [
+      [
+       1,
+       3,
+       2,
+       8,
+       4,
+       9
+      ],
+      1000000000
+     ],
+     "expected": 13
+    },
+    {
+     "args": [
+      [
+       5,
+       4,
+       3,
+       2,
+       1
+      ],
+      3
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       15,
+       15,
+       15,
+       15,
+       15,
+       15,
+       15,
+       15,
+       15,
+       15,
+       15,
+       15
+      ],
+      3
+     ],
+     "expected": 0
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n·min(k, n))",
+    "space": "O(min(k, n))",
+    "naive": "exponential",
+    "why": "Enumerating trade sets is exponential; the DP over (trips used, holding?) is O(n·k), and once 2k ≥ n the limit cannot bind, so fall back to the O(n) greedy instead of allocating a k-sized table."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>max_profit_k([1, 3, 2, 8, 4, 9], 2)</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 12,
+      "display": "12",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "States: buy[j] = best P&L while holding during trip j, sell[j] = best P&L flat after j trips.",
+   "If 2k ≥ n you can take every positive day-to-day move — no table needed."
+  ],
+  "solution": "<p><b>Approach.</b> DP over the number of trips: for each day and j = 1..k, <code>buy[j] = max(buy[j], sell[j−1] − p)</code> and <code>sell[j] = max(sell[j], buy[j] + p)</code>. Updating j upward in the same day is safe because a same-day buy-then-sell adds 0. Guard the big-k case: with n prices there are at most n/2 useful trips, so if 2k ≥ n return the sum of all positive moves.</p><pre><code>def max_profit_k(prices, k):\n    n = len(prices)\n    if k == 0 or n &lt; 2:\n        return 0\n    if 2 * k &gt;= n:                     # k is not binding: take every up-move\n        return sum(max(0, prices[i] - prices[i - 1]) for i in range(1, n))\n    buy = [float(\"-inf\")] * (k + 1)    # buy[j]: holding, j-th trip opened\n    sell = [0] * (k + 1)               # sell[j]: flat, j trips completed\n    for p in prices:\n        for j in range(1, k + 1):\n            buy[j] = max(buy[j], sell[j - 1] - p)\n            sell[j] = max(sell[j], buy[j] + p)\n    return sell[k]</code></pre><p><b>Complexity:</b> time O(n·min(k, n)), space O(min(k, n)). The naive approach is exponential: Enumerating trade sets is exponential; the DP over (trips used, holding?) is O(n·k), and once 2k ≥ n the limit cannot bind, so fall back to the O(n) greedy instead of allocating a k-sized table.</p><p><b>Answer:</b> a function passing all 9 tests (see the reference above).</p>",
+  "key": "DP over (trips used, holding); cap k at n/2 and use the greedy when the limit can't bind.",
+  "plan": {
+   "keyIdea": "A round trip is a buy state followed by a sell state; count completed trips.",
+   "method": "buy/sell arrays of size k+1, with the 2k ≥ n shortcut.",
+   "sanityChecks": [
+    "k = 0 → 0.",
+    "k = 1 equals the single-trade problem.",
+    "Huge k equals the unlimited-trades greedy."
+   ]
+  },
+  "par": 18,
+  "followups": [
+   {
+    "type": "complexity",
+    "prompt": "<p>k = 10<sup>9</sup> and n = 1000. What goes wrong without the 2k ≥ n guard?</p>",
+    "model": "<p>You would allocate arrays of 10<sup>9</sup> entries and loop n·k = 10<sup>12</sup> times. At most n/2 trips are ever useful, so cap k or switch to the O(n) greedy.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Nothing, the DP is O(n)",
+      "Memory/time blow up: O(k) arrays and O(n·k) work; cap k at n/2 or use the greedy",
+      "Integer overflow in the profits",
+      "Recursion depth exceeded"
+     ],
+     "correct": 1,
+     "display": "Memory/time blow up: O(k) arrays and O(n·k) work; cap k at n/2 or use the greedy"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-010",
+  "cat": "coding",
+  "diff": 2,
+  "title": "0/1 knapsack: capital allocation",
+  "tags": [
+   "dynamic-programming",
+   "knapsack"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def knapsack(costs, values, budget):</code></p><p>You have <code>n</code> strategies; strategy i needs <code>costs[i]</code> units of capital (positive integer) and has expected value <code>values[i]</code> (non-negative integer). Each can be funded at most once. Return the maximum total value with total cost ≤ <code>budget</code>.</p><p>Constraints: n ≤ 100, budget ≤ 10<sup>4</sup>.</p><p><b>Example:</b></p><pre><code>knapsack([1, 3, 4, 5], [1, 4, 5, 7], 7) → 9</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "knapsack",
+   "signature": "def knapsack(costs, values, budget):",
+   "starter": "def knapsack(costs, values, budget):\n    \"\"\"Max total value of a subset of projects whose total cost is <= budget (each used at most once).\n    \"\"\"\n    pass\n",
+   "reference": "def knapsack(costs, values, budget):\n    best = [0] * (budget + 1)          # best[b] = max value with capital b\n    for c, v in zip(costs, values):\n        for b in range(budget, c - 1, -1):   # downward: each item used once\n            if best[b - c] + v > best[b]:\n                best[b] = best[b - c] + v\n    return best[budget]\n",
+   "tests": [
+    {
+     "args": [
+      [
+       1,
+       3,
+       4,
+       5
+      ],
+      [
+       1,
+       4,
+       5,
+       7
+      ],
+      7
+     ],
+     "expected": 9
+    },
+    {
+     "args": [
+      [],
+      [],
+      10
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       5
+      ],
+      [
+       10
+      ],
+      4
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       5
+      ],
+      [
+       10
+      ],
+      5
+     ],
+     "expected": 10
+    },
+    {
+     "args": [
+      [
+       2,
+       2,
+       2
+      ],
+      [
+       3,
+       3,
+       3
+      ],
+      5
+     ],
+     "expected": 6
+    },
+    {
+     "args": [
+      [
+       10,
+       20,
+       30
+      ],
+      [
+       60,
+       100,
+       120
+      ],
+      50
+     ],
+     "expected": 220
+    },
+    {
+     "args": [
+      [
+       10,
+       10,
+       10,
+       10,
+       10,
+       10,
+       10,
+       10,
+       10,
+       10,
+       10,
+       10,
+       10,
+       10
+      ],
+      [
+       14,
+       14,
+       14,
+       14,
+       14,
+       14,
+       14,
+       14,
+       14,
+       14,
+       14,
+       14,
+       14,
+       14
+      ],
+      40
+     ],
+     "expected": 56
+    },
+    {
+     "args": [
+      [
+       3,
+       4
+      ],
+      [
+       5,
+       6
+      ],
+      0
+     ],
+     "expected": 0
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n·budget)",
+    "space": "O(budget)",
+    "naive": "O(2^n)",
+    "why": "Every subset is a candidate (2^n); the DP only remembers, for each budget level, the best value — overlapping subproblems again."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>knapsack([2, 3, 4], [3, 4, 6], 6)</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 9,
+      "display": "9",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "best[b] = best value achievable with capital b using the items seen so far.",
+   "Iterate b downwards so an item is not used twice in the same pass."
+  ],
+  "solution": "<p><b>Approach.</b> Classic 0/1 knapsack in one dimension: for each item, sweep the budget from high to low and set <code>best[b] = max(best[b], best[b − c] + v)</code>. Sweeping downward means <code>best[b − c]</code> still refers to the table <i>before</i> this item, so each item is used at most once (an upward sweep would solve the unbounded version).</p><pre><code>def knapsack(costs, values, budget):\n    best = [0] * (budget + 1)          # best[b] = max value with capital b\n    for c, v in zip(costs, values):\n        for b in range(budget, c - 1, -1):   # downward: each item used once\n            if best[b - c] + v &gt; best[b]:\n                best[b] = best[b - c] + v\n    return best[budget]</code></pre><p><b>Complexity:</b> time O(n·budget), space O(budget). The naive approach is O(2^n): Every subset is a candidate (2^n); the DP only remembers, for each budget level, the best value — overlapping subproblems again.</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Downward sweep = each item once; upward sweep = unlimited copies.",
+  "plan": {
+   "keyIdea": "Item i is either in or out; the remaining budget is the only state.",
+   "method": "1-D DP with a downward inner loop.",
+   "sanityChecks": [
+    "Budget 0 → 0.",
+    "Single item too expensive → 0.",
+    "Answer ≥ best single affordable item."
+   ]
+  },
+  "par": 10,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now each strategy can be funded any number of times (unbounded). With costs [2, 3, 4], values [3, 4, 6] and budget 6, what is the best value?</p>",
+    "model": "<p>Sweep b upward instead: 2+2+2 → 9 (or 2+4 → 9). Answer 9.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 9,
+     "display": "9",
+     "tolRel": 0.0001
+    }
+   },
+   {
+    "type": "complexity",
+    "prompt": "<p>Costs are now real numbers like 1.37 million. Is O(n·budget) still pseudo-polynomial-friendly?</p>",
+    "model": "<p>The DP indexes by budget, so it needs integer costs; scaling to cents makes the budget huge. Alternatives: DP over value instead of cost, meet-in-the-middle for n ≤ 40, or branch and bound.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Yes, just use a dict keyed by float budget",
+      "No — the table is indexed by integer budget; rescale (huge), DP over value, or meet-in-the-middle for small n",
+      "Sort by value/cost and take greedily — that is optimal"
+     ],
+     "correct": 1,
+     "display": "No — the table is indexed by integer budget; rescale (huge), DP over value, or meet-in-the-middle for small n"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-011",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Pairs of prices within a budget",
+  "tags": [
+   "two-pointers",
+   "sorting",
+   "arrays"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def count_pairs_within(prices, budget):</code></p><p><code>prices</code> is sorted in non-decreasing order. Count the index pairs <code>i &lt; j</code> with <code>prices[i] + prices[j] ≤ budget</code> (e.g. how many two-leg baskets fit a budget).</p><p>Constraints: len ≤ 10<sup>5</sup>, so O(n²) is too slow; aim for O(n).</p><p><b>Example:</b></p><pre><code>count_pairs_within([1, 2, 3, 4, 5], 6) → 6</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "count_pairs_within",
+   "signature": "def count_pairs_within(prices, budget):",
+   "starter": "def count_pairs_within(prices, budget):\n    \"\"\"prices is sorted ascending. Count index pairs i < j with prices[i] + prices[j] <= budget.\n    \"\"\"\n    pass\n",
+   "reference": "def count_pairs_within(prices, budget):\n    i, j, count = 0, len(prices) - 1, 0\n    while i < j:\n        if prices[i] + prices[j] <= budget:\n            count += j - i             # prices[i] pairs with every index in (i, j]\n            i += 1\n        else:\n            j -= 1\n    return count\n",
+   "tests": [
+    {
+     "args": [
+      [
+       1,
+       2,
+       3,
+       4,
+       5
+      ],
+      6
+     ],
+     "expected": 6
+    },
+    {
+     "args": [
+      [],
+      10
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       5
+      ],
+      10
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1,
+       1,
+       1,
+       1
+      ],
+      2
+     ],
+     "expected": 6
+    },
+    {
+     "args": [
+      [
+       1,
+       1,
+       1,
+       1
+      ],
+      1
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       2,
+       5,
+       8,
+       11
+      ],
+      13
+     ],
+     "expected": 4
+    },
+    {
+     "args": [
+      [
+       -3,
+       -1,
+       0,
+       4
+      ],
+      0
+     ],
+     "expected": 3
+    },
+    {
+     "args": [
+      [
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61,
+       61
+      ],
+      100
+     ],
+     "expected": 0
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "naive": "O(n²)",
+    "why": "All pairs is quadratic. With the array sorted, if prices[i] + prices[j] fits then every j' between i and j also fits, so one comparison settles j − i pairs at once."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>count_pairs_within([1, 3, 4, 6, 9], 10)</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 7,
+      "display": "7",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Put one pointer at each end. If the two ends fit the budget, what about the left end with everything in between?",
+   "When they fit, add j − i and move i right; otherwise move j left."
+  ],
+  "solution": "<p><b>Approach.</b> Two pointers on the sorted array. If <code>prices[i] + prices[j] ≤ budget</code>, then prices[i] also fits with every index between i and j (they are smaller), so add j − i and advance i. Otherwise prices[j] is too big for every remaining i, so retreat j. Each step moves a pointer, so it is linear.</p><pre><code>def count_pairs_within(prices, budget):\n    i, j, count = 0, len(prices) - 1, 0\n    while i &lt; j:\n        if prices[i] + prices[j] &lt;= budget:\n            count += j - i             # prices[i] pairs with every index in (i, j]\n            i += 1\n        else:\n            j -= 1\n    return count</code></pre><p><b>Complexity:</b> time O(n), space O(1). The naive approach is O(n²): All pairs is quadratic. With the array sorted, if prices[i] + prices[j] fits then every j&#x27; between i and j also fits, so one comparison settles j − i pairs at once.</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Sorted input + monotonicity: each two-pointer comparison counts a whole block of pairs.",
+  "plan": {
+   "keyIdea": "Sortedness makes the feasibility of (i, j) monotone in both indices.",
+   "method": "Two pointers from the ends, counting j − i on success.",
+   "sanityChecks": [
+    "n < 2 → 0.",
+    "All pairs fit → n(n−1)/2.",
+    "Compare with a brute-force double loop on a small case."
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "faster",
+    "prompt": "<p>The prices are <i>not</i> sorted. What is the best you can do?</p>",
+    "model": "<p>Sort first, O(n log n), then the O(n) two-pointer pass. (Binary search per element is also O(n log n).)</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "O(n) with a hash set",
+      "O(n log n): sort, then two pointers",
+      "O(n²) is optimal",
+      "O(log n)"
+     ],
+     "correct": 1,
+     "display": "O(n log n): sort, then two pointers"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-012",
+  "cat": "coding",
+  "diff": 1,
+  "title": "Merge two sorted trade streams",
+  "tags": [
+   "two-pointers",
+   "merge",
+   "streams"
+  ],
+  "style": [
+   "coding-screen",
+   "OA-speed"
+  ],
+  "prompt": "<p>Implement <code>def merge_streams(a, b):</code></p><p>Two venues send trades as lists of <code>[timestamp, qty]</code>, each sorted by timestamp. Merge them into one list sorted by timestamp. Ties: all trades from <code>a</code> with that timestamp come before those from <code>b</code>; within a stream the original order is kept.</p><p>Constraints: up to 10<sup>6</sup> trades per stream — do it in O(len a + len b) without calling sort.</p><p><b>Example:</b></p><pre><code>merge_streams([[1, 10], [4, 5]], [[2, 7], [4, 1]]) → [[1, 10], [2, 7], [4, 5], [4, 1]]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "merge_streams",
+   "signature": "def merge_streams(a, b):",
+   "starter": "def merge_streams(a, b):\n    \"\"\"a and b are lists of [timestamp, qty] sorted by timestamp. Merge them into one\n    list sorted by timestamp; on equal timestamps, trades from a come first.\n    \"\"\"\n    pass\n",
+   "reference": "def merge_streams(a, b):\n    out, i, j = [], 0, 0\n    while i < len(a) and j < len(b):\n        if a[i][0] <= b[j][0]:         # <= keeps a first on ties (stable)\n            out.append(a[i]); i += 1\n        else:\n            out.append(b[j]); j += 1\n    out.extend(a[i:])\n    out.extend(b[j:])\n    return out\n",
+   "tests": [
+    {
+     "args": [
+      [
+       [
+        1,
+        10
+       ],
+       [
+        4,
+        5
+       ]
+      ],
+      [
+       [
+        2,
+        7
+       ],
+       [
+        4,
+        1
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       1,
+       10
+      ],
+      [
+       2,
+       7
+      ],
+      [
+       4,
+       5
+      ],
+      [
+       4,
+       1
+      ]
+     ]
+    },
+    {
+     "args": [
+      [],
+      []
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        1
+       ]
+      ],
+      []
+     ],
+     "expected": [
+      [
+       1,
+       1
+      ]
+     ]
+    },
+    {
+     "args": [
+      [],
+      [
+       [
+        3,
+        2
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       3,
+       2
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        5,
+        1
+       ],
+       [
+        5,
+        2
+       ]
+      ],
+      [
+       [
+        5,
+        3
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       5,
+       1
+      ],
+      [
+       5,
+       2
+      ],
+      [
+       5,
+       3
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        1
+       ],
+       [
+        2,
+        1
+       ],
+       [
+        3,
+        1
+       ]
+      ],
+      [
+       [
+        0,
+        9
+       ],
+       [
+        10,
+        9
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       0,
+       9
+      ],
+      [
+       1,
+       1
+      ],
+      [
+       2,
+       1
+      ],
+      [
+       3,
+       1
+      ],
+      [
+       10,
+       9
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ],
+       [
+        16,
+        1
+       ]
+      ],
+      [
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ],
+       [
+        6,
+        2
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       6,
+       2
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ],
+      [
+       16,
+       1
+      ]
+     ]
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n + m)",
+    "space": "O(n + m) for the output",
+    "naive": "O((n+m) log(n+m)) with sort",
+    "why": "Concatenating and sorting ignores that both inputs are already sorted; the merge step of merge sort is linear."
+   },
+   "predict": [
+    {
+     "prompt": "<p>For <code>merge_streams([[1, 5], [3, 6]], [[1, 7], [2, 8]])</code>, give the quantities of the merged output in order, separated by commas.</p>",
+     "answer": {
+      "type": "multi",
+      "values": [
+       5,
+       7,
+       8,
+       6
+      ],
+      "ordered": true,
+      "display": "5, 7, 8, 6"
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Keep an index into each stream and repeatedly take the smaller head.",
+   "Use <= so that a wins ties."
+  ],
+  "solution": "<p><b>Approach.</b> The merge step of merge sort: two indices, take the head with the smaller timestamp, using <code>&lt;=</code> so a wins ties (stability). When one stream runs out, append the rest of the other.</p><pre><code>def merge_streams(a, b):\n    out, i, j = [], 0, 0\n    while i &lt; len(a) and j &lt; len(b):\n        if a[i][0] &lt;= b[j][0]:         # &lt;= keeps a first on ties (stable)\n            out.append(a[i]); i += 1\n        else:\n            out.append(b[j]); j += 1\n    out.extend(a[i:])\n    out.extend(b[j:])\n    return out</code></pre><p><b>Complexity:</b> time O(n + m), space O(n + m) for the output. The naive approach is O((n+m) log(n+m)) with sort: Concatenating and sorting ignores that both inputs are already sorted; the merge step of merge sort is linear.</p><p><b>Answer:</b> a function passing all 7 tests (see the reference above).</p>",
+  "key": "Merging sorted inputs is linear; use <= for a stable tie-break.",
+  "plan": {
+   "keyIdea": "Both inputs are sorted, so the next output is always one of the two heads.",
+   "method": "Two-pointer merge, then extend with the leftovers.",
+   "sanityChecks": [
+    "One empty stream → the other unchanged.",
+    "Equal timestamps → a's trades first.",
+    "Output length = len a + len b."
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now there are k = 50 venues. What data structure keeps the merge at O(N log k)?</p>",
+    "model": "<p>A min-heap holding the current head of each stream, keyed by (timestamp, stream index, position) — see the k-way merge problem. <code>heapq.merge</code> does exactly this.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "A sorted list re-sorted after each pop",
+      "A min-heap of the k stream heads",
+      "A hash map keyed by timestamp",
+      "A stack"
+     ],
+     "correct": 1,
+     "display": "A min-heap of the k stream heads"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-013",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Container with most water",
+  "tags": [
+   "two-pointers",
+   "greedy",
+   "arrays"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def max_container(heights):</code></p><p>Vertical lines stand at x = 0, 1, …, n−1 with heights <code>heights</code>. Choose two lines i &lt; j; together with the x-axis they hold <code>min(h[i], h[j]) · (j − i)</code> units of water. Return the maximum.</p><p>Constraints: n ≤ 10<sup>5</sup>; fewer than two lines → 0.</p><p><b>Example:</b></p><pre><code>max_container([1, 8, 6, 2, 5, 4, 8, 3, 7]) → 49</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "max_container",
+   "signature": "def max_container(heights):",
+   "starter": "def max_container(heights):\n    \"\"\"Max of min(h[i], h[j]) * (j - i) over i < j (0 if fewer than two lines).\n    \"\"\"\n    pass\n",
+   "reference": "def max_container(heights):\n    i, j, best = 0, len(heights) - 1, 0\n    while i < j:\n        best = max(best, min(heights[i], heights[j]) * (j - i))\n        if heights[i] < heights[j]:    # the shorter side can never do better\n            i += 1\n        else:\n            j -= 1\n    return best\n",
+   "tests": [
+    {
+     "args": [
+      [
+       1,
+       8,
+       6,
+       2,
+       5,
+       4,
+       8,
+       3,
+       7
+      ]
+     ],
+     "expected": 49
+    },
+    {
+     "args": [
+      [
+       1,
+       1
+      ]
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       5
+      ]
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       1
+      ]
+     ],
+     "expected": 2
+    },
+    {
+     "args": [
+      [
+       4,
+       3,
+       2,
+       1,
+       4
+      ]
+     ],
+     "expected": 16
+    },
+    {
+     "args": [
+      [
+       2,
+       3,
+       10,
+       5,
+       7,
+       8,
+       9
+      ]
+     ],
+     "expected": 36
+    },
+    {
+     "args": [
+      [
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26,
+       26
+      ]
+     ],
+     "expected": 3094
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "naive": "O(n²)",
+    "why": "Checking all pairs is quadratic. The shorter line limits every container it is part of with a closer partner, so it can be discarded after one comparison."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>max_container([3, 1, 2, 4, 5])</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 12,
+      "display": "12",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Start with the widest container. Which pointer is safe to move?",
+   "Moving the taller side can only shrink width without raising the min."
+  ],
+  "solution": "<p><b>Approach.</b> Two pointers from the ends. The area is limited by the shorter line; every other container using that shorter line is narrower and no taller, so it can be discarded. Move the shorter pointer inward, recording the best area. Linear time.</p><pre><code>def max_container(heights):\n    i, j, best = 0, len(heights) - 1, 0\n    while i &lt; j:\n        best = max(best, min(heights[i], heights[j]) * (j - i))\n        if heights[i] &lt; heights[j]:    # the shorter side can never do better\n            i += 1\n        else:\n            j -= 1\n    return best</code></pre><p><b>Complexity:</b> time O(n), space O(1). The naive approach is O(n²): Checking all pairs is quadratic. The shorter line limits every container it is part of with a closer partner, so it can be discarded after one comparison.</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Discard the shorter line: it can't be part of a better container with a closer partner.",
+  "plan": {
+   "keyIdea": "Width only shrinks, so only a taller limiting line can help.",
+   "method": "Two pointers, move the shorter one.",
+   "sanityChecks": [
+    "n < 2 → 0.",
+    "Equal heights h → h·(n−1).",
+    "Brute force on small random arrays."
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "explain",
+    "prompt": "<p>Prove that moving the <i>taller</i> pointer can't be necessary.</p>",
+    "model": "<p>Say h[i] ≤ h[j]. Any container (i, j') with i &lt; j' &lt; j has width &lt; j − i and height ≤ h[i], so its area ≤ the area just measured. Hence index i is done and can be discarded; the symmetric argument covers the other case.</p>"
+   }
+  ]
+ },
+ {
+  "id": "cd-014",
+  "cat": "coding",
+  "diff": 1,
+  "title": "Top-k symbols by volume",
+  "tags": [
+   "heaps",
+   "hash-map",
+   "top-k"
+  ],
+  "style": [
+   "coding-screen",
+   "OA-speed"
+  ],
+  "prompt": "<p>Implement <code>def top_k_symbols(trades, k):</code></p><p><code>trades</code> is a list of <code>[symbol, qty]</code>. Return the <code>k</code> symbols with the highest total quantity, highest first. Ties in volume go alphabetically (\"ABC\" before \"ABD\"). If there are fewer than k symbols, return them all in that order.</p><p>Constraints: up to 10<sup>6</sup> trades, up to 10<sup>4</sup> symbols, k small.</p><p><b>Example:</b></p><pre><code>top_k_symbols([['A', 5], ['B', 3], ['A', 1], ['C', 6]], 2) → ['A', 'C']</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "top_k_symbols",
+   "signature": "def top_k_symbols(trades, k):",
+   "starter": "def top_k_symbols(trades, k):\n    \"\"\"trades: list of [symbol, qty]. Return the k symbols with the largest total qty,\n    largest first; ties broken alphabetically. Fewer than k symbols -> return all.\n    \"\"\"\n    pass\n",
+   "reference": "import heapq\nfrom collections import Counter\n\ndef top_k_symbols(trades, k):\n    vol = Counter()\n    for sym, qty in trades:\n        vol[sym] += qty\n    best = heapq.nsmallest(k, vol.items(), key=lambda kv: (-kv[1], kv[0]))\n    return [sym for sym, _ in best]\n",
+   "tests": [
+    {
+     "args": [
+      [
+       [
+        "A",
+        5
+       ],
+       [
+        "B",
+        3
+       ],
+       [
+        "A",
+        1
+       ],
+       [
+        "C",
+        6
+       ]
+      ],
+      2
+     ],
+     "expected": [
+      "A",
+      "C"
+     ]
+    },
+    {
+     "args": [
+      [],
+      3
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        "X",
+        1
+       ]
+      ],
+      0
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        "B",
+        2
+       ],
+       [
+        "A",
+        2
+       ],
+       [
+        "C",
+        2
+       ]
+      ],
+      2
+     ],
+     "expected": [
+      "A",
+      "B"
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "Q",
+        4
+       ],
+       [
+        "R",
+        9
+       ]
+      ],
+      5
+     ],
+     "expected": [
+      "R",
+      "Q"
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ],
+       [
+        "CCC",
+        34
+       ]
+      ],
+      3
+     ],
+     "expected": [
+      "CCC"
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "AA",
+        1
+       ],
+       [
+        "AB",
+        1
+       ],
+       [
+        "AA",
+        0
+       ]
+      ],
+      1
+     ],
+     "expected": [
+      "AA"
+     ]
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(N + M log k) for N trades, M symbols",
+    "space": "O(M)",
+    "naive": "O(N + M log M) full sort",
+    "why": "Sorting all M symbols is fine for small M; a size-k heap avoids the full sort when M is large and k small."
+   },
+   "predict": [
+    {
+     "prompt": "<p>For <code>top_k_symbols([[\"B\", 4], [\"A\", 4], [\"C\", 1], [\"B\", 1]], 2)</code> the result is a list of two symbols. How many units of total volume do they have together?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 9,
+      "display": "9",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Aggregate first with a dictionary / Counter.",
+   "A heap of size k (or heapq.nsmallest with key (−volume, symbol)) gives the top k."
+  ],
+  "solution": "<p><b>Approach.</b> Aggregate volumes in a <code>Counter</code>, then select the k best by the key (−volume, symbol) with <code>heapq.nsmallest</code>, which keeps a heap of size k. The key handles both the descending volume and the alphabetical tie-break.</p><pre><code>import heapq\nfrom collections import Counter\n\ndef top_k_symbols(trades, k):\n    vol = Counter()\n    for sym, qty in trades:\n        vol[sym] += qty\n    best = heapq.nsmallest(k, vol.items(), key=lambda kv: (-kv[1], kv[0]))\n    return [sym for sym, _ in best]</code></pre><p><b>Complexity:</b> time O(N + M log k) for N trades, M symbols, space O(M). The naive approach is O(N + M log M) full sort: Sorting all M symbols is fine for small M; a size-k heap avoids the full sort when M is large and k small.</p><p><b>Answer:</b> a function passing all 7 tests (see the reference above).</p>",
+  "key": "Aggregate with a hash map, then a size-k heap with a composite key (−volume, symbol).",
+  "plan": {
+   "keyIdea": "Top-k doesn't need a full sort.",
+   "method": "Counter → heapq.nsmallest(k, items, key=(−vol, sym)).",
+   "sanityChecks": [
+    "k = 0 → [].",
+    "k larger than #symbols → all symbols.",
+    "Ties sorted alphabetically."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>The trades now arrive as an endless stream and you need the top 10 every second. What changes?</p>",
+    "model": "<p>Keep the running Counter; recompute top-10 with a size-10 heap over the M symbols each second (O(M log 10)), or keep a sorted structure keyed by volume that you update per trade. For approximate answers on huge symbol sets: Count-Min sketch + heap.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Re-sort all trades every second",
+      "Running Counter plus a size-10 heap (or an ordered index) refreshed each second",
+      "Store every trade in a list and scan it"
+     ],
+     "correct": 1,
+     "display": "Running Counter plus a size-10 heap (or an ordered index) refreshed each second"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-015",
+  "cat": "coding",
+  "diff": 3,
+  "title": "Running median of prices",
+  "tags": [
+   "heaps",
+   "median",
+   "streams"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def running_median(prices):</code></p><p>For a stream of prices, return a list whose i-th entry is the median of the first i + 1 prices (as a float; with an even count, the average of the two middle values).</p><p>Constraints: up to 10<sup>5</sup> prices, so re-sorting each prefix (O(n² log n)) is too slow — aim for O(n log n).</p><p><b>Example:</b></p><pre><code>running_median([5, 15, 1, 3]) → [5.0, 10.0, 5.0, 4.0]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "running_median",
+   "signature": "def running_median(prices):",
+   "starter": "def running_median(prices):\n    \"\"\"Return a list with the median of prices[:i+1] for every i (floats;\n    the mean of the two middle values when the count is even).\n    \"\"\"\n    pass\n",
+   "reference": "import heapq\n\ndef running_median(prices):\n    low, high = [], []                 # low: max-heap (negated), high: min-heap\n    out = []\n    for x in prices:\n        if low and x > -low[0]:\n            heapq.heappush(high, x)\n        else:\n            heapq.heappush(low, -x)\n        if len(low) > len(high) + 1:   # rebalance: len(low) in {len(high), len(high)+1}\n            heapq.heappush(high, -heapq.heappop(low))\n        elif len(high) > len(low):\n            heapq.heappush(low, -heapq.heappop(high))\n        if len(low) > len(high):\n            out.append(float(-low[0]))\n        else:\n            out.append((-low[0] + high[0]) / 2)\n    return out\n",
+   "tests": [
+    {
+     "args": [
+      [
+       5,
+       15,
+       1,
+       3
+      ]
+     ],
+     "expected": [
+      5.0,
+      10.0,
+      5.0,
+      4.0
+     ]
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       7
+      ]
+     ],
+     "expected": [
+      7.0
+     ]
+    },
+    {
+     "args": [
+      [
+       2,
+       2,
+       2,
+       2
+      ]
+     ],
+     "expected": [
+      2.0,
+      2.0,
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ]
+     ],
+     "expected": [
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      3.5
+     ]
+    },
+    {
+     "args": [
+      [
+       6,
+       5,
+       4,
+       3,
+       2,
+       1
+      ]
+     ],
+     "expected": [
+      6.0,
+      5.5,
+      5.0,
+      4.5,
+      4.0,
+      3.5
+     ]
+    },
+    {
+     "args": [
+      [
+       100.5,
+       99.5,
+       101.25,
+       100.0
+      ]
+     ],
+     "expected": [
+      100.5,
+      100.0,
+      100.5,
+      100.25
+     ]
+    },
+    {
+     "args": [
+      [
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27,
+       -27
+      ]
+     ],
+     "expected": [
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0,
+      -27.0
+     ]
+    }
+   ],
+   "cmp": "float",
+   "complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)",
+    "naive": "O(n² log n)",
+    "why": "Sorting every prefix repeats work; two heaps keep the lower and upper halves so each new price costs O(log n)."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What is the <b>last</b> value returned by <code>running_median([4, 1, 7, 2, 9, 3])</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 3.5,
+      "display": "3.5",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Split the numbers seen so far into a lower half and an upper half.",
+   "Keep the lower half in a max-heap (store negatives with heapq) and the upper half in a min-heap; sizes differ by at most one."
+  ],
+  "solution": "<p><b>Approach.</b> Two heaps: <code>low</code> (max-heap via negation) holds the smaller half, <code>high</code> (min-heap) the larger half. Insert into the correct side, then rebalance so len(low) is len(high) or len(high) + 1. The median is the top of <code>low</code> (odd count) or the average of both tops (even count).</p><pre><code>import heapq\n\ndef running_median(prices):\n    low, high = [], []                 # low: max-heap (negated), high: min-heap\n    out = []\n    for x in prices:\n        if low and x &gt; -low[0]:\n            heapq.heappush(high, x)\n        else:\n            heapq.heappush(low, -x)\n        if len(low) &gt; len(high) + 1:   # rebalance: len(low) in {len(high), len(high)+1}\n            heapq.heappush(high, -heapq.heappop(low))\n        elif len(high) &gt; len(low):\n            heapq.heappush(low, -heapq.heappop(high))\n        if len(low) &gt; len(high):\n            out.append(float(-low[0]))\n        else:\n            out.append((-low[0] + high[0]) / 2)\n    return out</code></pre><p><b>Complexity:</b> time O(n log n), space O(n). The naive approach is O(n² log n): Sorting every prefix repeats work; two heaps keep the lower and upper halves so each new price costs O(log n).</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Two heaps split the data at the median; each insert is O(log n).",
+  "plan": {
+   "keyIdea": "The median only depends on the boundary between the lower and upper halves.",
+   "method": "Max-heap + min-heap with a size invariant; read the tops.",
+   "sanityChecks": [
+    "Single price → itself.",
+    "Even count → mean of the two middle values.",
+    "Sorted input → medians increase."
+   ]
+  },
+  "par": 15,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now you need the median of only the last W = 1000 prices (a rolling median). What extra operation do the heaps need, and how is it usually done?</p>",
+    "model": "<p>Deleting the price that leaves the window. heapq can't delete arbitrary items, so use lazy deletion (a 'to-delete' counter, popped when it reaches the top) or a sorted list with bisect insert/remove (O(W) per update, fine for W = 1000).</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Nothing — the same two heaps work",
+      "Removing the outgoing price: lazy deletion with a counter, or a bisect-maintained sorted window",
+      "Sort the window each time — that is O(log W)"
+     ],
+     "correct": 1,
+     "display": "Removing the outgoing price: lazy deletion with a counter, or a bisect-maintained sorted window"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-016",
+  "cat": "coding",
+  "diff": 3,
+  "title": "Order book: best bid and ask",
+  "tags": [
+   "heaps",
+   "order-book",
+   "lazy-deletion"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def book_top(messages):</code></p><p>Process a feed of order-book messages:</p><ul><li><code>[\"add\", oid, side, price, qty]</code> — a new resting order (side <code>\"B\"</code> bid or <code>\"S\"</code> ask, integer price, qty &gt; 0; ids are unique);</li><li><code>[\"cancel\", oid]</code> — remove that order (ignore unknown or already-cancelled ids).</li></ul><p>Orders never match here (just track the book). After every message, append <code>[best_bid, best_ask]</code>: the highest live bid price and the lowest live ask price, <code>None</code> for an empty side.</p><p>Constraints: up to 10<sup>6</sup> messages — scanning all live orders after each message is too slow.</p><p><b>Example:</b></p><pre><code>book_top([['add', 1, 'B', 100, 5], ['add', 2, 'S', 102, 3], ['add', 3, 'B', 101, 1], ['cancel', 3], ['cancel', 1]]) → [[100, None], [100, 102], [101, 102], [100, 102], [None, 102]]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "book_top",
+   "signature": "def book_top(messages):",
+   "starter": "def book_top(messages):\n    \"\"\"messages: ['add', oid, side, price, qty] with side 'B' or 'S', or ['cancel', oid].\n    After each message append [best_bid, best_ask] (None for an empty side).\n    \"\"\"\n    pass\n",
+   "reference": "import heapq\n\ndef book_top(messages):\n    live = {}                          # oid -> (side, price)\n    count = {}                         # (side, price) -> number of live orders\n    bids, asks = [], []                # heaps of prices (bids negated); may hold stale levels\n    out = []\n    for m in messages:\n        if m[0] == \"add\":\n            _, oid, side, price, qty = m\n            live[oid] = (side, price)\n            key = (side, price)\n            if count.get(key, 0) == 0:\n                heapq.heappush(bids if side == \"B\" else asks, -price if side == \"B\" else price)\n            count[key] = count.get(key, 0) + 1\n        elif m[0] == \"cancel\" and m[1] in live:\n            count[live.pop(m[1])] -= 1\n        while bids and count.get((\"B\", -bids[0]), 0) == 0:   # lazy deletion\n            heapq.heappop(bids)\n        while asks and count.get((\"S\", asks[0]), 0) == 0:\n            heapq.heappop(asks)\n        out.append([-bids[0] if bids else None, asks[0] if asks else None])\n    return out\n",
+   "tests": [
+    {
+     "args": [
+      [
+       [
+        "add",
+        1,
+        "B",
+        100,
+        5
+       ],
+       [
+        "add",
+        2,
+        "S",
+        102,
+        3
+       ],
+       [
+        "add",
+        3,
+        "B",
+        101,
+        1
+       ],
+       [
+        "cancel",
+        3
+       ],
+       [
+        "cancel",
+        1
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       100,
+       null
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       101,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       null,
+       102
+      ]
+     ]
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        "cancel",
+        9
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       null,
+       null
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "add",
+        1,
+        "S",
+        50,
+        1
+       ],
+       [
+        "add",
+        2,
+        "S",
+        50,
+        2
+       ],
+       [
+        "cancel",
+        1
+       ],
+       [
+        "cancel",
+        2
+       ],
+       [
+        "add",
+        3,
+        "S",
+        51,
+        1
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       null,
+       50
+      ],
+      [
+       null,
+       50
+      ],
+      [
+       null,
+       50
+      ],
+      [
+       null,
+       null
+      ],
+      [
+       null,
+       51
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "add",
+        1,
+        "B",
+        10,
+        1
+       ],
+       [
+        "cancel",
+        1
+       ],
+       [
+        "cancel",
+        1
+       ],
+       [
+        "add",
+        2,
+        "B",
+        10,
+        1
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       10,
+       null
+      ],
+      [
+       null,
+       null
+      ],
+      [
+       null,
+       null
+      ],
+      [
+       10,
+       null
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "add",
+        1,
+        "B",
+        99,
+        1
+       ],
+       [
+        "add",
+        2,
+        "B",
+        98,
+        1
+       ],
+       [
+        "add",
+        3,
+        "S",
+        101,
+        1
+       ],
+       [
+        "add",
+        4,
+        "S",
+        103,
+        1
+       ],
+       [
+        "cancel",
+        3
+       ],
+       [
+        "cancel",
+        2
+       ],
+       [
+        "add",
+        5,
+        "S",
+        100,
+        4
+       ],
+       [
+        "cancel",
+        1
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       99,
+       null
+      ],
+      [
+       99,
+       null
+      ],
+      [
+       99,
+       101
+      ],
+      [
+       99,
+       101
+      ],
+      [
+       99,
+       103
+      ],
+      [
+       99,
+       103
+      ],
+      [
+       99,
+       100
+      ],
+      [
+       null,
+       100
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "add",
+        1,
+        "S",
+        104,
+        9
+       ],
+       [
+        "cancel",
+        999
+       ],
+       [
+        "add",
+        2,
+        "B",
+        96,
+        6
+       ],
+       [
+        "cancel",
+        999
+       ],
+       [
+        "add",
+        3,
+        "B",
+        99,
+        3
+       ],
+       [
+        "cancel",
+        2
+       ],
+       [
+        "add",
+        4,
+        "S",
+        100,
+        3
+       ],
+       [
+        "add",
+        5,
+        "S",
+        100,
+        5
+       ],
+       [
+        "add",
+        6,
+        "B",
+        99,
+        9
+       ],
+       [
+        "add",
+        7,
+        "B",
+        98,
+        1
+       ],
+       [
+        "add",
+        8,
+        "S",
+        105,
+        6
+       ],
+       [
+        "cancel",
+        4
+       ],
+       [
+        "cancel",
+        7
+       ],
+       [
+        "cancel",
+        5
+       ],
+       [
+        "add",
+        9,
+        "B",
+        99,
+        4
+       ],
+       [
+        "add",
+        10,
+        "B",
+        96,
+        4
+       ],
+       [
+        "add",
+        11,
+        "B",
+        95,
+        8
+       ],
+       [
+        "add",
+        12,
+        "B",
+        96,
+        4
+       ],
+       [
+        "add",
+        13,
+        "B",
+        98,
+        6
+       ],
+       [
+        "add",
+        14,
+        "S",
+        102,
+        9
+       ],
+       [
+        "add",
+        15,
+        "B",
+        95,
+        1
+       ],
+       [
+        "add",
+        16,
+        "S",
+        101,
+        8
+       ],
+       [
+        "cancel",
+        16
+       ],
+       [
+        "add",
+        17,
+        "B",
+        98,
+        8
+       ],
+       [
+        "add",
+        18,
+        "B",
+        96,
+        8
+       ],
+       [
+        "add",
+        19,
+        "B",
+        96,
+        3
+       ],
+       [
+        "cancel",
+        9
+       ],
+       [
+        "add",
+        20,
+        "B",
+        97,
+        3
+       ],
+       [
+        "add",
+        21,
+        "B",
+        96,
+        3
+       ],
+       [
+        "cancel",
+        13
+       ],
+       [
+        "cancel",
+        18
+       ],
+       [
+        "add",
+        22,
+        "S",
+        102,
+        5
+       ],
+       [
+        "add",
+        23,
+        "B",
+        100,
+        7
+       ],
+       [
+        "add",
+        24,
+        "B",
+        96,
+        3
+       ],
+       [
+        "cancel",
+        1
+       ],
+       [
+        "cancel",
+        22
+       ],
+       [
+        "add",
+        25,
+        "S",
+        102,
+        9
+       ],
+       [
+        "add",
+        26,
+        "S",
+        104,
+        8
+       ],
+       [
+        "cancel",
+        3
+       ],
+       [
+        "add",
+        27,
+        "B",
+        99,
+        1
+       ],
+       [
+        "add",
+        28,
+        "S",
+        105,
+        2
+       ],
+       [
+        "cancel",
+        28
+       ],
+       [
+        "add",
+        29,
+        "B",
+        97,
+        1
+       ],
+       [
+        "cancel",
+        11
+       ],
+       [
+        "cancel",
+        15
+       ],
+       [
+        "add",
+        30,
+        "B",
+        95,
+        6
+       ],
+       [
+        "add",
+        31,
+        "S",
+        104,
+        7
+       ],
+       [
+        "add",
+        32,
+        "B",
+        97,
+        1
+       ],
+       [
+        "add",
+        33,
+        "B",
+        98,
+        8
+       ],
+       [
+        "cancel",
+        30
+       ],
+       [
+        "cancel",
+        26
+       ],
+       [
+        "cancel",
+        31
+       ],
+       [
+        "add",
+        34,
+        "S",
+        100,
+        4
+       ],
+       [
+        "add",
+        35,
+        "S",
+        105,
+        3
+       ],
+       [
+        "add",
+        36,
+        "S",
+        100,
+        9
+       ],
+       [
+        "add",
+        37,
+        "B",
+        95,
+        3
+       ],
+       [
+        "add",
+        38,
+        "S",
+        100,
+        4
+       ],
+       [
+        "add",
+        39,
+        "S",
+        103,
+        6
+       ],
+       [
+        "cancel",
+        37
+       ],
+       [
+        "add",
+        40,
+        "B",
+        96,
+        7
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       null,
+       104
+      ],
+      [
+       null,
+       104
+      ],
+      [
+       96,
+       104
+      ],
+      [
+       96,
+       104
+      ],
+      [
+       99,
+       104
+      ],
+      [
+       99,
+       104
+      ],
+      [
+       99,
+       100
+      ],
+      [
+       99,
+       100
+      ],
+      [
+       99,
+       100
+      ],
+      [
+       99,
+       100
+      ],
+      [
+       99,
+       100
+      ],
+      [
+       99,
+       100
+      ],
+      [
+       99,
+       100
+      ],
+      [
+       99,
+       104
+      ],
+      [
+       99,
+       104
+      ],
+      [
+       99,
+       104
+      ],
+      [
+       99,
+       104
+      ],
+      [
+       99,
+       104
+      ],
+      [
+       99,
+       104
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       99,
+       101
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       99,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       102
+      ],
+      [
+       100,
+       100
+      ],
+      [
+       100,
+       100
+      ],
+      [
+       100,
+       100
+      ],
+      [
+       100,
+       100
+      ],
+      [
+       100,
+       100
+      ],
+      [
+       100,
+       100
+      ],
+      [
+       100,
+       100
+      ],
+      [
+       100,
+       100
+      ]
+     ]
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(log L) amortised per message (L = price levels)",
+    "space": "O(N)",
+    "naive": "O(N) per message (scan all live orders)",
+    "why": "Recomputing max/min over all live orders after each message is O(N) each; heaps give the top in O(1) and lazy deletion pops stale levels only once."
+   },
+   "predict": [
+    {
+     "prompt": "<p>Feed: add 1 B 100, add 2 B 101, add 3 S 104, add 4 S 103, cancel 2, cancel 4 (qty 1 each). What are best bid and best ask after the last message? Answer as two numbers separated by a comma.</p>",
+     "answer": {
+      "type": "multi",
+      "values": [
+       100,
+       104
+      ],
+      "ordered": true,
+      "display": "100, 104"
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Keep a dict of live orders and a count of live orders per (side, price) level.",
+   "Use a max-heap of bid levels and a min-heap of ask levels; don't delete on cancel — pop stale tops later (lazy deletion)."
+  ],
+  "solution": "<p><b>Approach.</b> Store live orders in a dict and the number of live orders per (side, price). Push a price level onto the bid max-heap (negated) or ask min-heap when it becomes non-empty. On cancel just decrement the level count. Before reading the top, pop levels whose count is 0 (lazy deletion) — every pushed level is popped at most once, so the cost is amortised O(log L).</p><pre><code>import heapq\n\ndef book_top(messages):\n    live = {}                          # oid -&gt; (side, price)\n    count = {}                         # (side, price) -&gt; number of live orders\n    bids, asks = [], []                # heaps of prices (bids negated); may hold stale levels\n    out = []\n    for m in messages:\n        if m[0] == \"add\":\n            _, oid, side, price, qty = m\n            live[oid] = (side, price)\n            key = (side, price)\n            if count.get(key, 0) == 0:\n                heapq.heappush(bids if side == \"B\" else asks, -price if side == \"B\" else price)\n            count[key] = count.get(key, 0) + 1\n        elif m[0] == \"cancel\" and m[1] in live:\n            count[live.pop(m[1])] -= 1\n        while bids and count.get((\"B\", -bids[0]), 0) == 0:   # lazy deletion\n            heapq.heappop(bids)\n        while asks and count.get((\"S\", asks[0]), 0) == 0:\n            heapq.heappop(asks)\n        out.append([-bids[0] if bids else None, asks[0] if asks else None])\n    return out</code></pre><p><b>Complexity:</b> time O(log L) amortised per message (L = price levels), space O(N). The naive approach is O(N) per message (scan all live orders): Recomputing max/min over all live orders after each message is O(N) each; heaps give the top in O(1) and lazy deletion pops stale levels only once.</p><p><b>Answer:</b> a function passing all 7 tests (see the reference above).</p>",
+  "key": "Heaps for the best price + a level-count map + lazy deletion of stale tops.",
+  "plan": {
+   "keyIdea": "The book only needs fast max (bids) / min (asks) with deletions.",
+   "method": "Dict of live orders, per-level counts, two heaps, lazy pop of empty levels.",
+   "sanityChecks": [
+    "Empty book → [None, None].",
+    "Cancelling an unknown id changes nothing.",
+    "Two orders at one price: cancelling one keeps the level."
+   ]
+  },
+  "par": 20,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>The feed now also needs the total quantity at the best bid. What do you add?</p>",
+    "model": "<p>Track qty per level (dict (side, price) → total qty) alongside the order count; adds add qty, cancels subtract the order's qty (store it in <code>live</code>). The top level's qty is a dict lookup.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Scan all bids at the top price each time",
+      "A per-level total-quantity map updated on add/cancel",
+      "A second heap of quantities"
+     ],
+     "correct": 1,
+     "display": "A per-level total-quantity map updated on add/cancel"
+    }
+   },
+   {
+    "type": "complexity",
+    "prompt": "<p>Prices are integer ticks in a narrow band (say 1,000 ticks). Is there something simpler than heaps?</p>",
+    "model": "<p>An array indexed by tick with level quantities, plus a best-price pointer that moves when a level empties. Updates are O(1) and the scan to the next non-empty level is short in practice — this is what many real books do.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "No, heaps are always required",
+      "An array indexed by tick with a moving best-price pointer",
+      "A linked list of all orders sorted by time"
+     ],
+     "correct": 1,
+     "display": "An array indexed by tick with a moving best-price pointer"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-017",
+  "cat": "coding",
+  "diff": 2,
+  "title": "k-way merge of sorted feeds",
+  "tags": [
+   "heaps",
+   "merge",
+   "streams"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def k_way_merge(feeds):</code></p><p>You receive k sorted lists of timestamps (numbers), one per feed. Return a single sorted list containing every value (duplicates kept).</p><p>Constraints: k ≤ 10<sup>4</sup>, N total values ≤ 10<sup>6</sup>. Aim for O(N log k) — use a heap, not a full sort.</p><p><b>Example:</b></p><pre><code>k_way_merge([[1, 4, 7], [2, 5, 8], [3, 6, 9]]) → [1, 2, 3, 4, 5, 6, 7, 8, 9]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "k_way_merge",
+   "signature": "def k_way_merge(feeds):",
+   "starter": "def k_way_merge(feeds):\n    \"\"\"feeds: list of sorted lists of numbers. Return one sorted list with all values.\n    \"\"\"\n    pass\n",
+   "reference": "import heapq\n\ndef k_way_merge(feeds):\n    heap = [(f[0], i, 0) for i, f in enumerate(feeds) if f]\n    heapq.heapify(heap)\n    out = []\n    while heap:\n        val, i, j = heapq.heappop(heap)\n        out.append(val)\n        if j + 1 < len(feeds[i]):\n            heapq.heappush(heap, (feeds[i][j + 1], i, j + 1))\n    return out\n",
+   "tests": [
+    {
+     "args": [
+      [
+       [
+        1,
+        4,
+        7
+       ],
+       [
+        2,
+        5,
+        8
+       ],
+       [
+        3,
+        6,
+        9
+       ]
+      ]
+     ],
+     "expected": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ]
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [],
+       []
+      ]
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        5
+       ]
+      ]
+     ],
+     "expected": [
+      5
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        1,
+        2
+       ],
+       [
+        1
+       ],
+       [],
+       [
+        0,
+        3
+       ]
+      ]
+     ],
+     "expected": [
+      0,
+      1,
+      1,
+      1,
+      2,
+      3
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        -5,
+        0,
+        5
+       ],
+       [
+        -10,
+        10
+       ]
+      ]
+     ],
+     "expected": [
+      -10,
+      -5,
+      0,
+      5,
+      10
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86
+       ],
+       [],
+       [
+        21,
+        21
+       ],
+       [
+        17,
+        17,
+        17,
+        17,
+        17
+       ],
+       [
+        99,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99
+       ],
+       [
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91
+       ],
+       [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+       ],
+       [
+        95,
+        95
+       ]
+      ]
+     ],
+     "expected": [
+      17,
+      17,
+      17,
+      17,
+      17,
+      21,
+      21,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      86,
+      86,
+      86,
+      86,
+      86,
+      86,
+      86,
+      86,
+      86,
+      91,
+      91,
+      91,
+      91,
+      91,
+      91,
+      91,
+      91,
+      91,
+      91,
+      95,
+      95,
+      99,
+      99,
+      99,
+      99,
+      99,
+      99,
+      99,
+      99,
+      99,
+      99,
+      99
+     ]
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(N log k)",
+    "space": "O(k) heap + O(N) output",
+    "naive": "O(N log N) (concatenate + sort) or O(N·k) (scan all heads)",
+    "why": "Scanning every head for the minimum costs k per output; a min-heap of heads costs log k."
+   },
+   "predict": [
+    {
+     "prompt": "<p>With k = 1024 feeds in the heap, roughly how many comparisons does one pop-and-refill (heapreplace) cost?</p>",
+     "answer": {
+      "type": "choice",
+      "options": [
+       "1",
+       "about log₂ 1024 = 10",
+       "about 1024",
+       "about 1024²"
+      ],
+      "correct": 1,
+      "display": "about log₂ 1024 = 10"
+     }
+    },
+    {
+     "prompt": "<p>What is the 5th value (index 4) of <code>k_way_merge([[2, 9], [1, 3, 10], [4, 4]])</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 4,
+      "display": "4",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "The next output is always one of the k current heads.",
+   "Keep (value, feed index, position) tuples in a heap; the index breaks ties without comparing lists."
+  ],
+  "solution": "<p><b>Approach.</b> Push the first element of each non-empty feed as <code>(value, feed, position)</code> into a min-heap. Pop the smallest, output it, and push the next element of the same feed. The feed index in the tuple breaks ties so Python never has to compare anything else. This is what <code>heapq.merge</code> does.</p><pre><code>import heapq\n\ndef k_way_merge(feeds):\n    heap = [(f[0], i, 0) for i, f in enumerate(feeds) if f]\n    heapq.heapify(heap)\n    out = []\n    while heap:\n        val, i, j = heapq.heappop(heap)\n        out.append(val)\n        if j + 1 &lt; len(feeds[i]):\n            heapq.heappush(heap, (feeds[i][j + 1], i, j + 1))\n    return out</code></pre><p><b>Complexity:</b> time O(N log k), space O(k) heap + O(N) output. The naive approach is O(N log N) (concatenate + sort) or O(N·k) (scan all heads): Scanning every head for the minimum costs k per output; a min-heap of heads costs log k.</p><p><b>Answer:</b> a function passing all 7 tests (see the reference above).</p>",
+  "key": "A min-heap of the k heads gives O(log k) per output element.",
+  "plan": {
+   "keyIdea": "Only the k heads can be the next minimum.",
+   "method": "Heap of (value, feed, pos); pop and refill from the same feed.",
+   "sanityChecks": [
+    "Empty feeds are skipped.",
+    "Output length = total length.",
+    "Output is sorted and a permutation of the input."
+   ]
+  },
+  "par": 10,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>The feeds are infinite generators. Does your approach still work?</p>",
+    "model": "<p>Yes — the heap only ever holds one head per feed, so it streams. Replace position indices by iterators and call <code>next()</code> to refill; <code>heapq.merge(*feeds)</code> is lazy too.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "No, you must read everything first",
+      "Yes: the heap holds one head per feed; refill with next(iterator)",
+      "Only if k = 2"
+     ],
+     "correct": 1,
+     "display": "Yes: the heap holds one head per feed; refill with next(iterator)"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-018",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Rolling VWAP over the last N trades",
+  "tags": [
+   "sliding-window",
+   "vwap",
+   "deque"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def rolling_vwap(trades, n):</code></p><p><code>trades</code> is a list of <code>[price, qty]</code> (qty &gt; 0). After each trade, output the volume-weighted average price of the last <code>n</code> trades (all trades so far if there are fewer than n): Σ price·qty / Σ qty over the window.</p><p>Constraints: up to 10<sup>6</sup> trades, n up to 10<sup>5</sup> — recomputing each window from scratch is O(N·n), too slow. Outputs are compared with 1e-6 tolerance.</p><p><b>Example:</b></p><pre><code>rolling_vwap([[10, 1], [20, 1], [30, 2]], 2) → [10.0, 15.0, 26.666666666666668]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "rolling_vwap",
+   "signature": "def rolling_vwap(trades, n):",
+   "starter": "def rolling_vwap(trades, n):\n    \"\"\"trades: list of [price, qty]. After each trade append the VWAP of the last n\n    trades (or of all trades so far if fewer than n).\n    \"\"\"\n    pass\n",
+   "reference": "from collections import deque\n\ndef rolling_vwap(trades, n):\n    window = deque()\n    pv = vol = 0.0\n    out = []\n    for price, qty in trades:\n        window.append((price, qty))\n        pv += price * qty\n        vol += qty\n        if len(window) > n:\n            p0, q0 = window.popleft()\n            pv -= p0 * q0\n            vol -= q0\n        out.append(pv / vol)\n    return out\n",
+   "tests": [
+    {
+     "args": [
+      [
+       [
+        10,
+        1
+       ],
+       [
+        20,
+        1
+       ],
+       [
+        30,
+        2
+       ]
+      ],
+      2
+     ],
+     "expected": [
+      10.0,
+      15.0,
+      26.666666666666668
+     ]
+    },
+    {
+     "args": [
+      [],
+      3
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        100,
+        5
+       ]
+      ],
+      1
+     ],
+     "expected": [
+      100.0
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        100,
+        1
+       ],
+       [
+        102,
+        3
+       ],
+       [
+        101,
+        2
+       ],
+       [
+        99,
+        4
+       ]
+      ],
+      1
+     ],
+     "expected": [
+      100.0,
+      102.0,
+      101.0,
+      99.0
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        100,
+        1
+       ],
+       [
+        102,
+        3
+       ],
+       [
+        101,
+        2
+       ],
+       [
+        99,
+        4
+       ]
+      ],
+      10
+     ],
+     "expected": [
+      100.0,
+      101.5,
+      101.33333333333333,
+      100.4
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        50.5,
+        2
+       ],
+       [
+        50.25,
+        2
+       ],
+       [
+        50.75,
+        4
+       ],
+       [
+        51,
+        1
+       ]
+      ],
+      3
+     ],
+     "expected": [
+      50.5,
+      50.375,
+      50.5625,
+      50.642857142857146
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ],
+       [
+        105.25,
+        3
+       ]
+      ],
+      7
+     ],
+     "expected": [
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25,
+      105.25
+     ]
+    }
+   ],
+   "cmp": "float",
+   "complexity": {
+    "time": "O(N)",
+    "space": "O(n)",
+    "naive": "O(N·n)",
+    "why": "Each new trade changes the window by one trade in and one out; running sums of price·qty and qty update in O(1) instead of re-summing n trades."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What is the last value of <code>rolling_vwap([[10, 1], [20, 1], [30, 2]], 2)</code>? (VWAP of the last two trades.)</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 26.666666666666668,
+      "display": "26.6667",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Keep running totals of price·qty and qty for the window.",
+   "A deque holds the window; when it exceeds n, pop the oldest trade and subtract it."
+  ],
+  "solution": "<p><b>Approach.</b> Maintain the window in a <code>deque</code> plus two running sums (Σ p·q and Σ q). Each trade adds itself; if the window is longer than n, the oldest trade is popped and subtracted. VWAP = Σ p·q / Σ q. For very long streams, periodically recompute the sums to stop floating-point drift (or use integer ticks).</p><pre><code>from collections import deque\n\ndef rolling_vwap(trades, n):\n    window = deque()\n    pv = vol = 0.0\n    out = []\n    for price, qty in trades:\n        window.append((price, qty))\n        pv += price * qty\n        vol += qty\n        if len(window) &gt; n:\n            p0, q0 = window.popleft()\n            pv -= p0 * q0\n            vol -= q0\n        out.append(pv / vol)\n    return out</code></pre><p><b>Complexity:</b> time O(N), space O(n). The naive approach is O(N·n): Each new trade changes the window by one trade in and one out; running sums of price·qty and qty update in O(1) instead of re-summing n trades.</p><p><b>Answer:</b> a function passing all 7 tests (see the reference above).</p>",
+  "key": "Sliding window with running sums: O(1) per trade instead of O(n).",
+  "plan": {
+   "keyIdea": "Adjacent windows differ by one trade in, one trade out.",
+   "method": "Deque + running Σpq and Σq.",
+   "sanityChecks": [
+    "n = 1 → each trade's own price.",
+    "n ≥ total → cumulative VWAP.",
+    "VWAP lies between the min and max price in the window."
+   ]
+  },
+  "par": 10,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now the window is the last 5 <i>minutes</i> of trades (time-based) and there are 10<sup>6</sup> trades. What changes?</p>",
+    "model": "<p>Store timestamps in the deque and pop from the left while the oldest is older than t − 5 min — the window length varies but each trade is still pushed and popped once, so it stays O(N). Watch float drift in the running sums: recompute occasionally or use integer price ticks.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Nothing, still pop exactly one trade per step",
+      "Pop while the oldest timestamp is out of the window; still O(N) amortised",
+      "Must re-sum each window: O(N·window)"
+     ],
+     "correct": 1,
+     "display": "Pop while the oldest timestamp is out of the window; still O(N) amortised"
+    }
+   },
+   {
+    "type": "sanity",
+    "prompt": "<p>For trades [[100, 1], [102, 3]] with n = 5, what is the VWAP after the second trade?</p>",
+    "model": "<p>(100·1 + 102·3)/4 = 406/4 = 101.5 — closer to 102 because it has more volume.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 101.5,
+     "display": "101.5",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-019",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Rolling max with a monotonic deque",
+  "tags": [
+   "sliding-window",
+   "deque",
+   "monotonic-queue"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def rolling_max(xs, w):</code></p><p>Return the maximum of every full window of length <code>w</code> (w ≥ 1) of <code>xs</code>, in order — <code>len(xs) − w + 1</code> values, or an empty list if <code>w &gt; len(xs)</code>.</p><p>Constraints: len ≤ 10<sup>6</sup>, w ≤ 10<sup>5</sup>; O(n·w) is too slow — aim for O(n).</p><p><b>Example:</b></p><pre><code>rolling_max([1, 3, -1, -3, 5, 3, 6, 7], 3) → [3, 3, 5, 5, 6, 7]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "rolling_max",
+   "signature": "def rolling_max(xs, w):",
+   "starter": "def rolling_max(xs, w):\n    \"\"\"Return [max(xs[i:i+w]) for every full window], in order. [] if w > len(xs).\n    \"\"\"\n    pass\n",
+   "reference": "from collections import deque\n\ndef rolling_max(xs, w):\n    dq = deque()                       # indices; xs values strictly decreasing front->back\n    out = []\n    for i, x in enumerate(xs):\n        while dq and xs[dq[-1]] <= x:  # dominated: older and not larger\n            dq.pop()\n        dq.append(i)\n        if dq[0] <= i - w:             # front fell out of the window\n            dq.popleft()\n        if i >= w - 1:\n            out.append(xs[dq[0]])\n    return out\n",
+   "tests": [
+    {
+     "args": [
+      [
+       1,
+       3,
+       -1,
+       -3,
+       5,
+       3,
+       6,
+       7
+      ],
+      3
+     ],
+     "expected": [
+      3,
+      3,
+      5,
+      5,
+      6,
+      7
+     ]
+    },
+    {
+     "args": [
+      [],
+      2
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       4
+      ],
+      1
+     ],
+     "expected": [
+      4
+     ]
+    },
+    {
+     "args": [
+      [
+       1,
+       2
+      ],
+      3
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       5,
+       4,
+       3,
+       2,
+       1
+      ],
+      2
+     ],
+     "expected": [
+      5,
+      4,
+      3,
+      2
+     ]
+    },
+    {
+     "args": [
+      [
+       2,
+       2,
+       2,
+       2
+      ],
+      2
+     ],
+     "expected": [
+      2,
+      2,
+      2
+     ]
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       3
+      ],
+      3
+     ],
+     "expected": [
+      3
+     ]
+    },
+    {
+     "args": [
+      [
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2,
+       -2
+      ],
+      6
+     ],
+     "expected": [
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2,
+      -2
+     ]
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n) amortised",
+    "space": "O(w)",
+    "naive": "O(n·w)",
+    "why": "Taking max of each slice re-scans w values; the deque discards elements that can never be a future maximum, and each index is pushed and popped at most once."
+   },
+   "predict": [
+    {
+     "prompt": "<p>For <code>rolling_max([2, 7, 3, 1, 5, 2, 6], 3)</code>, give the output separated by commas.</p>",
+     "answer": {
+      "type": "multi",
+      "values": [
+       7,
+       7,
+       5,
+       5,
+       6
+      ],
+      "ordered": true,
+      "display": "7, 7, 5, 5, 6"
+     }
+    },
+    {
+     "prompt": "<p>Over a full run on n elements, at most how many deque pops (from either end) can happen in total?</p>",
+     "answer": {
+      "type": "choice",
+      "options": [
+       "n",
+       "n·w",
+       "w",
+       "n²"
+      ],
+      "correct": 0,
+      "display": "n"
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "If a newer element is ≥ an older one, the older one can never be the max of any later window.",
+   "Keep a deque of indices whose values are decreasing; the front is the current max."
+  ],
+  "solution": "<p><b>Approach.</b> Monotonic deque of indices with decreasing values. For each new x, pop from the back every index whose value is ≤ x (they are dominated), append i, and drop the front if it left the window. The front is the window max. Each index enters and leaves once, so the total work is O(n).</p><pre><code>from collections import deque\n\ndef rolling_max(xs, w):\n    dq = deque()                       # indices; xs values strictly decreasing front-&gt;back\n    out = []\n    for i, x in enumerate(xs):\n        while dq and xs[dq[-1]] &lt;= x:  # dominated: older and not larger\n            dq.pop()\n        dq.append(i)\n        if dq[0] &lt;= i - w:             # front fell out of the window\n            dq.popleft()\n        if i &gt;= w - 1:\n            out.append(xs[dq[0]])\n    return out</code></pre><p><b>Complexity:</b> time O(n) amortised, space O(w). The naive approach is O(n·w): Taking max of each slice re-scans w values; the deque discards elements that can never be a future maximum, and each index is pushed and popped at most once.</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "A decreasing deque drops dominated elements; amortised O(1) per step.",
+  "plan": {
+   "keyIdea": "An element older and not larger than a newer one is useless.",
+   "method": "Deque of indices, pop back while ≤ x, pop front when out of window.",
+   "sanityChecks": [
+    "w = 1 → xs itself.",
+    "w = len → [max(xs)].",
+    "w > len → []."
+   ]
+  },
+  "par": 12,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now you need both the rolling max and the rolling min (for a rolling range). What do you change?</p>",
+    "model": "<p>Run a second deque with the comparison reversed (pop while xs[back] ≥ x). Two deques, still O(n).</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Sort each window",
+      "Add a second deque with the comparison reversed",
+      "Use one deque and read its back for the min"
+     ],
+     "correct": 1,
+     "display": "Add a second deque with the comparison reversed"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-020",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Moving-average crossover signals",
+  "tags": [
+   "sliding-window",
+   "moving-average",
+   "signals"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def crossover_count(prices, short, long):</code></p><p>Let SMA<sub>s</sub>(t) and SMA<sub>l</sub>(t) be the simple moving averages of the last <code>short</code> and <code>long</code> prices ending at index t (short &lt; long; defined from t = long − 1 on). Count the bullish crossovers: indices t ≥ long such that SMA<sub>s</sub>(t − 1) ≤ SMA<sub>l</sub>(t − 1) and SMA<sub>s</sub>(t) &gt; SMA<sub>l</sub>(t).</p><p>Prices are integers; up to 10<sup>6</sup> of them, so maintain the moving sums in O(1) per step.</p><p><b>Example:</b></p><pre><code>crossover_count([5, 4, 3, 2, 3, 4, 5, 4, 3, 2, 3, 4], 2, 4) → 2</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "crossover_count",
+   "signature": "def crossover_count(prices, short, long):",
+   "starter": "def crossover_count(prices, short, long):\n    \"\"\"Count bullish crossovers: times t where the short SMA moves from <= the long SMA\n    at t-1 to strictly above it at t (both SMAs defined at t-1 and t).\n    \"\"\"\n    pass\n",
+   "reference": "def crossover_count(prices, short, long):\n    if len(prices) <= long:\n        return 0\n    s_sum = sum(prices[long - short:long])\n    l_sum = sum(prices[:long])\n    prev_above = s_sum * long > l_sum * short      # exact: compare s/short vs l/long\n    count = 0\n    for t in range(long, len(prices)):\n        s_sum += prices[t] - prices[t - short]\n        l_sum += prices[t] - prices[t - long]\n        above = s_sum * long > l_sum * short\n        if above and not prev_above:\n            count += 1\n        prev_above = above\n    return count\n",
+   "tests": [
+    {
+     "args": [
+      [
+       5,
+       4,
+       3,
+       2,
+       3,
+       4,
+       5,
+       4,
+       3,
+       2,
+       3,
+       4
+      ],
+      2,
+      4
+     ],
+     "expected": 2
+    },
+    {
+     "args": [
+      [],
+      2,
+      3
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       3
+      ],
+      2,
+      3
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      2,
+      3
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       3,
+       2,
+       1,
+       2,
+       3
+      ],
+      1,
+      2
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [
+       10,
+       9,
+       8,
+       7,
+       8,
+       9,
+       10,
+       11
+      ],
+      2,
+      3
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [
+       101,
+       102,
+       103,
+       104,
+       105,
+       106,
+       107,
+       108,
+       109,
+       110,
+       111,
+       112,
+       113,
+       114,
+       115,
+       116,
+       117,
+       118,
+       119,
+       120,
+       121,
+       122,
+       123,
+       124,
+       125,
+       126,
+       127,
+       128,
+       129,
+       130,
+       131,
+       132,
+       133,
+       134,
+       135,
+       136,
+       137,
+       138,
+       139,
+       140,
+       141,
+       142,
+       143,
+       144,
+       145,
+       146,
+       147,
+       148,
+       149,
+       150,
+       151,
+       152,
+       153,
+       154,
+       155,
+       156,
+       157,
+       158,
+       159,
+       160,
+       161,
+       162,
+       163,
+       164,
+       165,
+       166,
+       167,
+       168,
+       169,
+       170,
+       171,
+       172,
+       173,
+       174,
+       175,
+       176,
+       177,
+       178,
+       179,
+       180,
+       181,
+       182,
+       183,
+       184,
+       185,
+       186,
+       187,
+       188,
+       189,
+       190,
+       191,
+       192,
+       193,
+       194,
+       195,
+       196,
+       197,
+       198,
+       199,
+       200,
+       201,
+       202,
+       203,
+       204,
+       205,
+       206,
+       207,
+       208,
+       209,
+       210,
+       211,
+       212,
+       213,
+       214,
+       215,
+       216,
+       217,
+       218,
+       219,
+       220
+      ],
+      5,
+      20
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       101,
+       102,
+       103,
+       104,
+       105,
+       106,
+       107,
+       108,
+       109,
+       110,
+       111,
+       112,
+       113,
+       114,
+       115,
+       116,
+       117,
+       118,
+       119,
+       120,
+       121,
+       122,
+       123,
+       124,
+       125,
+       126,
+       127,
+       128,
+       129,
+       130,
+       131,
+       132,
+       133,
+       134,
+       135,
+       136,
+       137,
+       138,
+       139,
+       140,
+       141,
+       142,
+       143,
+       144,
+       145,
+       146,
+       147,
+       148,
+       149,
+       150,
+       151,
+       152,
+       153,
+       154,
+       155,
+       156,
+       157,
+       158,
+       159,
+       160,
+       161,
+       162,
+       163,
+       164,
+       165,
+       166,
+       167,
+       168,
+       169,
+       170,
+       171,
+       172,
+       173,
+       174,
+       175,
+       176,
+       177,
+       178,
+       179,
+       180,
+       181,
+       182,
+       183,
+       184,
+       185,
+       186,
+       187,
+       188,
+       189,
+       190,
+       191,
+       192,
+       193,
+       194,
+       195,
+       196,
+       197,
+       198,
+       199,
+       200,
+       201,
+       202,
+       203,
+       204,
+       205,
+       206,
+       207,
+       208,
+       209,
+       210,
+       211,
+       212,
+       213,
+       214,
+       215,
+       216,
+       217,
+       218,
+       219,
+       220
+      ],
+      3,
+      10
+     ],
+     "expected": 0
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "naive": "O(n·long)",
+    "why": "Recomputing both averages from scratch at each t costs O(long); rolling sums update each in O(1)."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>crossover_count([4, 3, 2, 3, 4, 3, 2, 3, 4], 1, 3)</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 2,
+      "display": "2",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Keep the two window sums and update them as t advances (add the new price, subtract the one that left).",
+   "Compare s_sum·long with l_sum·short to avoid floating-point ties."
+  ],
+  "solution": "<p><b>Approach.</b> Maintain the short and long window sums; at each step add prices[t] and subtract the element that left each window. Compare averages exactly by cross-multiplying (s_sum·long vs l_sum·short) — integers, no float ties. Count transitions from 'not above' to 'above'.</p><pre><code>def crossover_count(prices, short, long):\n    if len(prices) &lt;= long:\n        return 0\n    s_sum = sum(prices[long - short:long])\n    l_sum = sum(prices[:long])\n    prev_above = s_sum * long &gt; l_sum * short      # exact: compare s/short vs l/long\n    count = 0\n    for t in range(long, len(prices)):\n        s_sum += prices[t] - prices[t - short]\n        l_sum += prices[t] - prices[t - long]\n        above = s_sum * long &gt; l_sum * short\n        if above and not prev_above:\n            count += 1\n        prev_above = above\n    return count</code></pre><p><b>Complexity:</b> time O(n), space O(1). The naive approach is O(n·long): Recomputing both averages from scratch at each t costs O(long); rolling sums update each in O(1).</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Rolling sums for both windows; compare by cross-multiplication to avoid float equality issues.",
+  "plan": {
+   "keyIdea": "A crossover is a sign change of SMA_s − SMA_l from ≤ 0 to > 0.",
+   "method": "Rolling sums, exact comparison, count up-transitions.",
+   "sanityChecks": [
+    "Fewer than long + 1 prices → 0.",
+    "Flat prices → 0 (never strictly above).",
+    "Brute-force recompute on a small series."
+   ]
+  },
+  "par": 12,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A colleague's float version reports a crossover at a point where SMA<sub>s</sub>(t−1) and SMA<sub>l</sub>(t−1) are mathematically equal but differ in the last bit. For prices [1, 1, 1, 1, 2] with short = 2, long = 4, how many bullish crossovers are there exactly?</p>",
+    "model": "<p>At t = 3 both averages are 1 (equal, so 'not above'); at t = 4 short = 1.5 &gt; long = 1.25. Exactly one crossover. Exact integer comparison avoids spurious ones from rounding.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1,
+     "display": "1",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-021",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Rolling z-score",
+  "tags": [
+   "sliding-window",
+   "statistics",
+   "z-score"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def rolling_zscore(xs, w):</code></p><p>For each index t, return the z-score of <code>xs[t]</code> relative to the trailing window <code>xs[t−w+1 … t]</code> (inclusive, w ≥ 2): (x<sub>t</sub> − mean) / std with the <b>population</b> standard deviation (divide by w). Output <code>None</code> while fewer than w values are available, or when the window's variance is exactly 0.</p><p>Inputs are integers (e.g. prices in ticks). Up to 10<sup>6</sup> values — keep O(1) work per step. Outputs are compared with 1e-6 tolerance.</p><p><b>Example:</b></p><pre><code>rolling_zscore([1, 2, 3, 4, 5], 3) → [None, None, 1.2247448713915892, 1.2247448713915892, 1.2247448713915892]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "rolling_zscore",
+   "signature": "def rolling_zscore(xs, w):",
+   "starter": "def rolling_zscore(xs, w):\n    \"\"\"For each t, the z-score of xs[t] within the window xs[t-w+1..t] using the\n    population std; None if t < w-1 or the window has zero variance.\n    \"\"\"\n    pass\n",
+   "reference": "import math\n\ndef rolling_zscore(xs, w):\n    out = []\n    s1 = s2 = 0                        # integer running sums of x and x^2\n    for t, x in enumerate(xs):\n        s1 += x\n        s2 += x * x\n        if t >= w:\n            old = xs[t - w]\n            s1 -= old\n            s2 -= old * old\n        if t < w - 1:\n            out.append(None)\n            continue\n        d = w * s2 - s1 * s1           # = w^2 * variance, exact integer\n        out.append(None if d == 0 else (w * x - s1) / math.sqrt(d))\n    return out\n",
+   "tests": [
+    {
+     "args": [
+      [
+       1,
+       2,
+       3,
+       4,
+       5
+      ],
+      3
+     ],
+     "expected": [
+      null,
+      null,
+      1.2247448713915892,
+      1.2247448713915892,
+      1.2247448713915892
+     ]
+    },
+    {
+     "args": [
+      [],
+      3
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       5,
+       5,
+       5,
+       5
+      ],
+      2
+     ],
+     "expected": [
+      null,
+      null,
+      null,
+      null
+     ]
+    },
+    {
+     "args": [
+      [
+       1,
+       3
+      ],
+      2
+     ],
+     "expected": [
+      null,
+      1.0
+     ]
+    },
+    {
+     "args": [
+      [
+       10,
+       12,
+       11,
+       15,
+       9,
+       9,
+       9
+      ],
+      3
+     ],
+     "expected": [
+      null,
+      null,
+      0.0,
+      1.3728129459672884,
+      -1.0690449676496976,
+      -0.7071067811865476,
+      null
+     ]
+    },
+    {
+     "args": [
+      [
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102
+      ],
+      10
+     ],
+     "expected": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ]
+    },
+    {
+     "args": [
+      [
+       0,
+       0,
+       0,
+       7
+      ],
+      4
+     ],
+     "expected": [
+      null,
+      null,
+      null,
+      1.7320508075688774
+     ]
+    }
+   ],
+   "cmp": "float",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(1) beyond the output",
+    "naive": "O(n·w)",
+    "why": "Recomputing mean and std over each window is O(w); running sums of x and x² give both in O(1). With integers, w·Σx² − (Σx)² is exact, so the zero-variance test is reliable."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What is the last value of <code>rolling_zscore([1, 2, 3, 4, 5], 3)</code>? (window [3, 4, 5], x = 5)</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 1.2247448713915892,
+      "display": "1.22474",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "mean = S₁/w and variance = S₂/w − (S₁/w)², with S₁ = Σx and S₂ = Σx² over the window.",
+   "Multiply through by w: z = (w·x − S₁)/√(w·S₂ − S₁²)."
+  ],
+  "solution": "<p><b>Approach.</b> Keep running sums S₁ = Σx and S₂ = Σx² over the window (integers, so exact). Then w²·Var = w·S₂ − S₁² and z = (w·x − S₁)/√(w·S₂ − S₁²). The zero-variance check is an exact integer comparison. With floats, prefer Welford-style updates — the naive S₂/w − mean² formula cancels catastrophically when the values are large and close together.</p><pre><code>import math\n\ndef rolling_zscore(xs, w):\n    out = []\n    s1 = s2 = 0                        # integer running sums of x and x^2\n    for t, x in enumerate(xs):\n        s1 += x\n        s2 += x * x\n        if t &gt;= w:\n            old = xs[t - w]\n            s1 -= old\n            s2 -= old * old\n        if t &lt; w - 1:\n            out.append(None)\n            continue\n        d = w * s2 - s1 * s1           # = w^2 * variance, exact integer\n        out.append(None if d == 0 else (w * x - s1) / math.sqrt(d))\n    return out</code></pre><p><b>Complexity:</b> time O(n), space O(1) beyond the output. The naive approach is O(n·w): Recomputing mean and std over each window is O(w); running sums of x and x² give both in O(1). With integers, w·Σx² − (Σx)² is exact, so the zero-variance test is reliable.</p><p><b>Answer:</b> a function passing all 7 tests (see the reference above).</p>",
+  "key": "Running Σx and Σx² give rolling mean/variance in O(1); exact integer arithmetic avoids cancellation and makes 'variance = 0' testable.",
+  "plan": {
+   "keyIdea": "Window statistics are sums, and sums update in O(1).",
+   "method": "Integer S₁, S₂ with add/remove, closed-form z.",
+   "sanityChecks": [
+    "Constant window → None.",
+    "Window [1,2,3], x = 3 → (3−2)/√(2/3) ≈ 1.2247.",
+    "z of the window's mean value is 0."
+   ]
+  },
+  "par": 12,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A colleague computes the variance of [10<sup>9</sup>+1, 10<sup>9</sup>+2, 10<sup>9</sup>+3] in float as mean(x²) − mean(x)² and claims it's a reliable 0.6667. What is the exact population variance?</p>",
+    "model": "<p>The exact population variance is 2/3 ≈ 0.6667, but the float formula subtracts two numbers ≈ 10<sup>18</sup> whose difference is below the float spacing (128 at 10<sup>18</sup>), so it returns garbage (often 0 or a multiple of 128). Use integers, shift by the first value, or Welford.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.6666666666666666,
+     "display": "0.666667",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-022",
+  "cat": "coding",
+  "diff": 1,
+  "title": "Deterministic LCG random walk",
+  "tags": [
+   "simulation",
+   "random-numbers",
+   "lcg"
+  ],
+  "style": [
+   "coding-screen",
+   "OA-speed"
+  ],
+  "prompt": "<p>Implement <code>def lcg_walk(seed, steps):</code></p><p>Implement a reproducible random walk driven by a linear congruential generator (no <code>random</code> module): x<sub>0</sub> = <code>seed</code>, x<sub>k+1</sub> = (1103515245·x<sub>k</sub> + 12345) mod 2<sup>31</sup>. The walk starts at 0; at step k (k = 1..steps) it moves +1 if x<sub>k</sub> ≥ 2<sup>30</sup> (the top bit) and −1 otherwise.</p><p>Return <code>[final_position, max_position]</code>, where the maximum includes the starting 0. Constraints: steps ≤ 10<sup>6</sup>.</p><p><b>Example:</b></p><pre><code>lcg_walk(42, 10) → [2, 2]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "lcg_walk",
+   "signature": "def lcg_walk(seed, steps):",
+   "starter": "def lcg_walk(seed, steps):\n    \"\"\"x_{k+1} = (1103515245 * x_k + 12345) % 2**31, x_0 = seed. Step +1 if\n    x_{k+1} >= 2**30 else -1. Return [final_position, max_position] (start at 0).\n    \"\"\"\n    pass\n",
+   "reference": "def lcg_walk(seed, steps):\n    x, pos, best = seed, 0, 0\n    for _ in range(steps):\n        x = (1103515245 * x + 12345) % 2**31\n        pos += 1 if x >= 2**30 else -1\n        best = max(best, pos)\n    return [pos, best]\n",
+   "tests": [
+    {
+     "args": [
+      42,
+      10
+     ],
+     "expected": [
+      2,
+      2
+     ]
+    },
+    {
+     "args": [
+      0,
+      0
+     ],
+     "expected": [
+      0,
+      0
+     ]
+    },
+    {
+     "args": [
+      0,
+      1
+     ],
+     "expected": [
+      -1,
+      0
+     ]
+    },
+    {
+     "args": [
+      1,
+      5
+     ],
+     "expected": [
+      1,
+      1
+     ]
+    },
+    {
+     "args": [
+      12345,
+      1000
+     ],
+     "expected": [
+      -4,
+      9
+     ]
+    },
+    {
+     "args": [
+      2147483647,
+      50
+     ],
+     "expected": [
+      -8,
+      0
+     ]
+    },
+    {
+     "args": [
+      7,
+      20000
+     ],
+     "expected": [
+      -128,
+      18
+     ]
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(steps)",
+    "space": "O(1)"
+   },
+   "predict": [
+    {
+     "prompt": "<p>With seed 0, x<sub>1</sub> = 12345. What final position (first element) does <code>lcg_walk(0, 1)</code> return?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": -1,
+      "display": "-1",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Python integers don't overflow, but take the modulus every step to keep them small.",
+   "Use the high bit (x ≥ 2³⁰), not x % 2 — the low bits of a power-of-two LCG are very non-random."
+  ],
+  "solution": "<p><b>Approach.</b> Iterate the recurrence, keeping x reduced modulo 2³¹ every step. The direction uses the top bit of the 31-bit state. Track position and running maximum. Everything is integer arithmetic, so the result is identical on every machine — that's the point of a seeded generator in tests.</p><pre><code>def lcg_walk(seed, steps):\n    x, pos, best = seed, 0, 0\n    for _ in range(steps):\n        x = (1103515245 * x + 12345) % 2**31\n        pos += 1 if x &gt;= 2**30 else -1\n        best = max(best, pos)\n    return [pos, best]</code></pre><p><b>Complexity:</b> time O(steps), space O(1).</p><p><b>Answer:</b> a function passing all 7 tests (see the reference above).</p>",
+  "key": "Seeded generators make simulations testable; use high bits of an LCG — the low bits cycle with short periods.",
+  "plan": {
+   "keyIdea": "Determinism: same seed → same path.",
+   "method": "Loop with the recurrence; reduce mod 2³¹; step on the top bit.",
+   "sanityChecks": [
+    "steps = 0 → [0, 0].",
+    "|final| ≤ steps and final ≡ steps (mod 2).",
+    "max ≥ max(0, final)."
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "explain",
+    "prompt": "<p>Why not take the direction from <code>x % 2</code>?</p>",
+    "model": "<p>For an LCG modulo 2<sup>m</sup> with odd multiplier and increment, the lowest bit simply alternates 0, 1, 0, 1 — the walk would zig-zag deterministically. Low bits have short periods; use high bits.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "x % 2 is equally good",
+      "The lowest bit of this LCG alternates 0,1,0,1 — period 2",
+      "x % 2 is slower"
+     ],
+     "correct": 1,
+     "display": "The lowest bit of this LCG alternates 0,1,0,1 — period 2"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-023",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Parse a trade feed: volume & VWAP",
+  "tags": [
+   "parsing",
+   "vwap",
+   "hash-map"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def parse_trades(lines):</code></p><p>Each line should look like <code>SYMBOL,PRICE,QTY</code>, e.g. <code>\"ABC,101.5,200\"</code>. Fields may have surrounding spaces (strip them). A line is <b>valid</b> only if it has exactly 3 fields, a non-empty symbol, a price written as digits with an optional decimal part (e.g. <code>101</code> or <code>101.25</code>) and &gt; 0, and a quantity written as digits and &gt; 0. Skip everything else (headers, blanks, negative or zero values, extra fields, text in numeric fields).</p><p>Return a dict <code>{symbol: [total_qty, vwap]}</code> over valid lines (vwap = Σ price·qty / Σ qty). Floats are compared with 1e-6 tolerance.</p><p><b>Example:</b></p><pre><code>parse_trades(['ABC,10,100', 'ABC,12,100', 'XYZ,5.5,10']) → {'ABC': [200, 11.0], 'XYZ': [10, 5.5]}</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "parse_trades",
+   "signature": "def parse_trades(lines):",
+   "starter": "def parse_trades(lines):\n    \"\"\"lines: strings 'SYMBOL,PRICE,QTY'. Skip malformed lines. Return\n    {symbol: [total_qty, vwap]} over the valid lines.\n    \"\"\"\n    pass\n",
+   "reference": "def parse_trades(lines):\n    def is_price(s):\n        a, dot, b = s.partition(\".\")\n        return a.isdigit() and (not dot or b.isdigit())\n\n    agg = {}                           # sym -> [qty, notional]\n    for line in lines:\n        parts = [f.strip() for f in line.split(\",\")]\n        if len(parts) != 3:\n            continue\n        sym, ps, qs = parts\n        if not sym or not is_price(ps) or not qs.isdigit():\n            continue\n        price, qty = float(ps), int(qs)\n        if price <= 0 or qty <= 0:\n            continue\n        rec = agg.setdefault(sym, [0, 0.0])\n        rec[0] += qty\n        rec[1] += price * qty\n    return {s: [q, notional / q] for s, (q, notional) in agg.items()}\n",
+   "tests": [
+    {
+     "args": [
+      [
+       "ABC,10,100",
+       "ABC,12,100",
+       "XYZ,5.5,10"
+      ]
+     ],
+     "expected": {
+      "ABC": [
+       200,
+       11.0
+      ],
+      "XYZ": [
+       10,
+       5.5
+      ]
+     }
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": {}
+    },
+    {
+     "args": [
+      [
+       "symbol,price,qty",
+       "",
+       "ABC,1,1"
+      ]
+     ],
+     "expected": {
+      "ABC": [
+       1,
+       1.0
+      ]
+     }
+    },
+    {
+     "args": [
+      [
+       "ABC,10,0",
+       "ABC,-1,5",
+       "ABC,0,5",
+       "ABC,abc,5",
+       "ABC,10,5.5",
+       ",10,5"
+      ]
+     ],
+     "expected": {}
+    },
+    {
+     "args": [
+      [
+       " ABC , 100.25 , 3 ",
+       "ABC,100.75,1",
+       "ABC,100,1,extra",
+       "DEF,7.,2"
+      ]
+     ],
+     "expected": {
+      "ABC": [
+       4,
+       100.375
+      ]
+     }
+    },
+    {
+     "args": [
+      [
+       "Q,1.5,2",
+       "Q,2.5,2",
+       "R,3,1",
+       "R,3",
+       "Q;1;1"
+      ]
+     ],
+     "expected": {
+      "Q": [
+       4,
+       2.0
+      ],
+      "R": [
+       1,
+       3.0
+      ]
+     }
+    },
+    {
+     "args": [
+      [
+       "AAA,100.10,5",
+       "BBB,20,1",
+       "AAA,100.20,15",
+       "bad line",
+       "BBB,22,3",
+       "CCC,1.000,1000"
+      ]
+     ],
+     "expected": {
+      "AAA": [
+       20,
+       100.175
+      ],
+      "BBB": [
+       4,
+       21.5
+      ],
+      "CCC": [
+       1000,
+       1.0
+      ]
+     }
+    }
+   ],
+   "cmp": "float",
+   "complexity": {
+    "time": "O(total characters)",
+    "space": "O(#symbols)"
+   },
+   "predict": [
+    {
+     "prompt": "<p>For lines <code>[\"A,10,1\", \"A,20,3\", \"A,x,5\", \"B,4,0\"]</code>, what is A's VWAP in the reference output?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 17.5,
+      "display": "17.5",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Split on commas, strip each field, and reject the line unless every check passes — don't let one bad line raise an exception.",
+   "Accumulate quantity and notional (Σ price·qty) per symbol; divide at the end."
+  ],
+  "solution": "<p><b>Approach.</b> Split each line on commas and strip fields; validate the field count, the symbol, the number formats (digits with an optional '.digits' for price, digits for quantity) and positivity, skipping the line on any failure. Accumulate total quantity and notional per symbol in a dict and compute VWAP = notional / quantity at the end. Validating explicitly (rather than wrapping <code>float()</code> in try/except) avoids surprises such as <code>float(\"nan\")</code>, <code>\"1e3\"</code> or <code>\"1_000\"</code> being accepted.</p><pre><code>def parse_trades(lines):\n    def is_price(s):\n        a, dot, b = s.partition(\".\")\n        return a.isdigit() and (not dot or b.isdigit())\n\n    agg = {}                           # sym -&gt; [qty, notional]\n    for line in lines:\n        parts = [f.strip() for f in line.split(\",\")]\n        if len(parts) != 3:\n            continue\n        sym, ps, qs = parts\n        if not sym or not is_price(ps) or not qs.isdigit():\n            continue\n        price, qty = float(ps), int(qs)\n        if price &lt;= 0 or qty &lt;= 0:\n            continue\n        rec = agg.setdefault(sym, [0, 0.0])\n        rec[0] += qty\n        rec[1] += price * qty\n    return {s: [q, notional / q] for s, (q, notional) in agg.items()}</code></pre><p><b>Complexity:</b> time O(total characters), space O(#symbols).</p><p><b>Answer:</b> a function passing all 7 tests (see the reference above).</p>",
+  "key": "Validate every field explicitly, skip bad lines, aggregate notional and quantity, divide once at the end.",
+  "plan": {
+   "keyIdea": "Robust parsing: the happy path is easy; the spec is in the rejection rules.",
+   "method": "Split/strip, validate, aggregate per symbol, divide at the end.",
+   "sanityChecks": [
+    "Header and blank lines skipped.",
+    "VWAP between min and max price per symbol.",
+    "Empty input → {}."
+   ]
+  },
+  "par": 12,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A colleague averages the prices instead of weighting by quantity. For A: 10 × 1 and 20 × 3, they report 15. What is the correct VWAP?</p>",
+    "model": "<p>(10·1 + 20·3)/4 = 70/4 = 17.5. The simple average ignores that most volume traded at 20.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 17.5,
+     "display": "17.5",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-024",
+  "cat": "coding",
+  "diff": 3,
+  "title": "Realised P&L with FIFO lots",
+  "tags": [
+   "pnl",
+   "fifo",
+   "deque"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def fifo_realized_pnl(fills):</code></p><p>Process fills <code>[side, qty, price]</code> in order (side <code>\"B\"</code> buy or <code>\"S\"</code> sell, qty &gt; 0). Open positions are kept as lots. A fill in the direction <i>opposite</i> to the current position closes the oldest lots first (FIFO), realising (exit − entry)·qty for longs and (entry − exit)·qty for shorts. If the fill is larger than the open position, the remainder opens a new lot in the other direction.</p><p>Return the total realised P&amp;L (compared with 1e-6 tolerance). Up to 10<sup>5</sup> fills.</p><p><b>Example:</b></p><pre><code>fifo_realized_pnl([['B', 10, 100], ['S', 4, 105], ['S', 6, 102]]) → 32.0</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "fifo_realized_pnl",
+   "signature": "def fifo_realized_pnl(fills):",
+   "starter": "def fifo_realized_pnl(fills):\n    \"\"\"fills: list of [side, qty, price], side 'B' or 'S'. Match closing fills\n    against open lots first-in-first-out (long or short). Return realised P&L.\n    \"\"\"\n    pass\n",
+   "reference": "from collections import deque\n\ndef fifo_realized_pnl(fills):\n    lots = deque()                     # [signed_qty, price]; all lots share one sign\n    pnl = 0.0\n    for side, qty, price in fills:\n        sign = 1 if side == \"B\" else -1\n        while qty > 0 and lots and lots[0][0] * sign < 0:   # closing opposite lots\n            lot = lots[0]\n            take = min(qty, abs(lot[0]))\n            pnl += take * (price - lot[1]) * (-sign)        # long closed by sell: sign=-1\n            lot[0] += take * sign\n            qty -= take\n            if lot[0] == 0:\n                lots.popleft()\n        if qty > 0:\n            lots.append([sign * qty, price])\n    return pnl\n",
+   "tests": [
+    {
+     "args": [
+      [
+       [
+        "B",
+        10,
+        100
+       ],
+       [
+        "S",
+        4,
+        105
+       ],
+       [
+        "S",
+        6,
+        102
+       ]
+      ]
+     ],
+     "expected": 32.0
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": 0.0
+    },
+    {
+     "args": [
+      [
+       [
+        "B",
+        5,
+        10
+       ]
+      ]
+     ],
+     "expected": 0.0
+    },
+    {
+     "args": [
+      [
+       [
+        "S",
+        3,
+        50
+       ],
+       [
+        "B",
+        3,
+        45
+       ]
+      ]
+     ],
+     "expected": 15.0
+    },
+    {
+     "args": [
+      [
+       [
+        "B",
+        5,
+        10
+       ],
+       [
+        "B",
+        5,
+        20
+       ],
+       [
+        "S",
+        7,
+        15
+       ]
+      ]
+     ],
+     "expected": 15.0
+    },
+    {
+     "args": [
+      [
+       [
+        "B",
+        2,
+        100
+       ],
+       [
+        "S",
+        5,
+        110
+       ],
+       [
+        "B",
+        3,
+        90
+       ]
+      ]
+     ],
+     "expected": 80.0
+    },
+    {
+     "args": [
+      [
+       [
+        "B",
+        1,
+        100.5
+       ],
+       [
+        "S",
+        1,
+        100.25
+       ]
+      ]
+     ],
+     "expected": -0.25
+    },
+    {
+     "args": [
+      [
+       [
+        "B",
+        6,
+        98
+       ],
+       [
+        "S",
+        5,
+        103
+       ],
+       [
+        "B",
+        2,
+        102
+       ],
+       [
+        "B",
+        6,
+        105
+       ],
+       [
+        "B",
+        6,
+        101
+       ],
+       [
+        "B",
+        6,
+        101
+       ],
+       [
+        "B",
+        6,
+        95
+       ],
+       [
+        "B",
+        2,
+        97
+       ],
+       [
+        "B",
+        5,
+        102
+       ],
+       [
+        "S",
+        3,
+        98
+       ],
+       [
+        "B",
+        1,
+        99
+       ],
+       [
+        "B",
+        5,
+        95
+       ],
+       [
+        "B",
+        4,
+        104
+       ],
+       [
+        "S",
+        3,
+        105
+       ],
+       [
+        "S",
+        4,
+        98
+       ],
+       [
+        "B",
+        3,
+        98
+       ],
+       [
+        "S",
+        4,
+        104
+       ],
+       [
+        "B",
+        1,
+        96
+       ],
+       [
+        "B",
+        2,
+        103
+       ],
+       [
+        "B",
+        1,
+        101
+       ],
+       [
+        "B",
+        3,
+        104
+       ],
+       [
+        "B",
+        5,
+        100
+       ],
+       [
+        "B",
+        4,
+        95
+       ],
+       [
+        "S",
+        6,
+        102
+       ],
+       [
+        "B",
+        1,
+        100
+       ]
+      ]
+     ],
+     "expected": 11.0
+    }
+   ],
+   "cmp": "float",
+   "complexity": {
+    "time": "O(number of fills + lots)",
+    "space": "O(open lots)"
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>fifo_realized_pnl([[\"B\", 5, 10], [\"B\", 5, 20], [\"S\", 7, 15]])</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 15.0,
+      "display": "15",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "A deque of [signed qty, price] lots; all open lots have the same sign.",
+   "While the incoming fill is opposite to the front lot, close min(qty, lot size) and realise P&L; any remainder opens a new lot."
+  ],
+  "solution": "<p><b>Approach.</b> Keep open lots in a <code>deque</code> as [signed qty, price]. A fill with the same sign as the position (or when flat) appends a lot. An opposite fill consumes lots from the left: take = min(remaining, lot size), realise take·(exit − entry) for a long or take·(entry − exit) for a short, shrink or pop the lot. Leftover quantity flips the position and becomes a new lot at the fill price. Each lot is created and destroyed once, so the work is linear.</p><pre><code>from collections import deque\n\ndef fifo_realized_pnl(fills):\n    lots = deque()                     # [signed_qty, price]; all lots share one sign\n    pnl = 0.0\n    for side, qty, price in fills:\n        sign = 1 if side == \"B\" else -1\n        while qty &gt; 0 and lots and lots[0][0] * sign &lt; 0:   # closing opposite lots\n            lot = lots[0]\n            take = min(qty, abs(lot[0]))\n            pnl += take * (price - lot[1]) * (-sign)        # long closed by sell: sign=-1\n            lot[0] += take * sign\n            qty -= take\n            if lot[0] == 0:\n                lots.popleft()\n        if qty &gt; 0:\n            lots.append([sign * qty, price])\n    return pnl</code></pre><p><b>Complexity:</b> time O(number of fills + lots), space O(open lots).</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "FIFO = a queue of lots; opposite fills consume from the front, leftovers flip the position.",
+  "plan": {
+   "keyIdea": "Realised P&L only appears when a fill reduces the position.",
+   "method": "Deque of signed lots; consume from the front; remainder flips.",
+   "sanityChecks": [
+    "Only buys → 0 realised.",
+    "Flat round trip B q@p1, S q@p2 → q·(p2 − p1).",
+    "Shorts: S 3@50, B 3@45 → +15."
+   ]
+  },
+  "par": 18,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Same fills, but use LIFO (close the newest lot first): B 5@10, B 5@20, S 7@15. What is the realised P&amp;L?</p>",
+    "model": "<p>LIFO closes 5@20 (−25) then 2@10 (+10): −15, versus FIFO's 5·5 + 2·(−5) = +15. Accounting method changes realised P&amp;L, not total P&amp;L.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -15,
+     "display": "-15",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-025",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Average-cost position & unrealised P&L",
+  "tags": [
+   "pnl",
+   "average-cost",
+   "positions"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def avg_cost_position(fills, mark):</code></p><p>Track a position under <b>average-cost</b> accounting. Fills are <code>[side, qty, price]</code> (side \"B\" or \"S\"). Rules:</p><ul><li>Adding to the position (or opening from flat): avg becomes the quantity-weighted average of the old avg and the fill price.</li><li>Reducing the position: avg is unchanged.</li><li>Crossing through zero: the remainder opens at the fill price (avg = fill price).</li><li>Flat: avg = 0.0.</li></ul><p>Return <code>[position, avg_cost, unrealized]</code> with unrealized = position·(mark − avg_cost). Shorts have negative position. Floats are compared with 1e-6 tolerance.</p><p><b>Example:</b></p><pre><code>avg_cost_position([['B', 10, 100], ['B', 10, 110]], 120) → [20, 105.0, 300.0]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "avg_cost_position",
+   "signature": "def avg_cost_position(fills, mark):",
+   "starter": "def avg_cost_position(fills, mark):\n    \"\"\"Average-cost accounting. Return [position, avg_cost, unrealized] after all fills,\n    with unrealized = position * (mark - avg_cost); avg_cost = 0.0 when flat.\n    \"\"\"\n    pass\n",
+   "reference": "def avg_cost_position(fills, mark):\n    pos, avg = 0, 0.0\n    for side, qty, price in fills:\n        q = qty if side == \"B\" else -qty\n        if pos == 0 or (pos > 0) == (q > 0):           # open or add\n            avg = (abs(pos) * avg + abs(q) * price) / (abs(pos) + abs(q))\n            pos += q\n        elif abs(q) <= abs(pos):                         # reduce\n            pos += q\n            if pos == 0:\n                avg = 0.0\n        else:                                            # flip through zero\n            pos += q\n            avg = float(price)\n    return [pos, avg, pos * (mark - avg)]\n",
+   "tests": [
+    {
+     "args": [
+      [
+       [
+        "B",
+        10,
+        100
+       ],
+       [
+        "B",
+        10,
+        110
+       ]
+      ],
+      120
+     ],
+     "expected": [
+      20,
+      105.0,
+      300.0
+     ]
+    },
+    {
+     "args": [
+      [],
+      50
+     ],
+     "expected": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "B",
+        4,
+        10
+       ],
+       [
+        "S",
+        4,
+        12
+       ]
+      ],
+      11
+     ],
+     "expected": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "B",
+        10,
+        100
+       ],
+       [
+        "S",
+        4,
+        130
+       ]
+      ],
+      90
+     ],
+     "expected": [
+      6,
+      100.0,
+      -60.0
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "S",
+        5,
+        20
+       ],
+       [
+        "S",
+        5,
+        22
+       ]
+      ],
+      19
+     ],
+     "expected": [
+      -10,
+      21.0,
+      20.0
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "B",
+        3,
+        10
+       ],
+       [
+        "S",
+        5,
+        12
+       ]
+      ],
+      11
+     ],
+     "expected": [
+      -2,
+      12.0,
+      2.0
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "B",
+        1,
+        100.5
+       ],
+       [
+        "B",
+        3,
+        100.25
+       ]
+      ],
+      100.0
+     ],
+     "expected": [
+      4,
+      100.3125,
+      -1.25
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        "S",
+        3,
+        50
+       ],
+       [
+        "B",
+        1,
+        48
+       ],
+       [
+        "S",
+        5,
+        50
+       ],
+       [
+        "S",
+        3,
+        51
+       ],
+       [
+        "B",
+        2,
+        49
+       ],
+       [
+        "S",
+        1,
+        52
+       ],
+       [
+        "B",
+        5,
+        51
+       ],
+       [
+        "S",
+        1,
+        51
+       ],
+       [
+        "S",
+        1,
+        51
+       ],
+       [
+        "S",
+        2,
+        52
+       ],
+       [
+        "S",
+        5,
+        49
+       ],
+       [
+        "B",
+        1,
+        51
+       ],
+       [
+        "S",
+        1,
+        52
+       ],
+       [
+        "B",
+        2,
+        51
+       ],
+       [
+        "B",
+        3,
+        52
+       ],
+       [
+        "B",
+        2,
+        48
+       ],
+       [
+        "S",
+        2,
+        50
+       ],
+       [
+        "S",
+        1,
+        50
+       ],
+       [
+        "S",
+        4,
+        50
+       ],
+       [
+        "B",
+        3,
+        49
+       ]
+      ],
+      50
+     ],
+     "expected": [
+      -10,
+      50.16786527082385,
+      1.6786527082385305
+     ]
+    }
+   ],
+   "cmp": "float",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+   },
+   "predict": [
+    {
+     "prompt": "<p>What is the unrealised P&amp;L returned by <code>avg_cost_position([[\"S\", 5, 20], [\"S\", 5, 22]], 19)</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 20.0,
+      "display": "20",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Separate three cases: open/add, reduce, flip.",
+   "Only adding changes the average; a flip resets it to the fill price."
+  ],
+  "solution": "<p><b>Approach.</b> Keep a signed position and the average cost. Same-direction fills (or from flat) update the weighted average; opposite fills that don't cross zero leave the average unchanged (and reset it to 0 when flat); a fill that crosses zero leaves a new position at the fill price. Unrealised P&amp;L = position·(mark − avg), which is automatically correct for shorts because the position is negative.</p><pre><code>def avg_cost_position(fills, mark):\n    pos, avg = 0, 0.0\n    for side, qty, price in fills:\n        q = qty if side == \"B\" else -qty\n        if pos == 0 or (pos &gt; 0) == (q &gt; 0):           # open or add\n            avg = (abs(pos) * avg + abs(q) * price) / (abs(pos) + abs(q))\n            pos += q\n        elif abs(q) &lt;= abs(pos):                         # reduce\n            pos += q\n            if pos == 0:\n                avg = 0.0\n        else:                                            # flip through zero\n            pos += q\n            avg = float(price)\n    return [pos, avg, pos * (mark - avg)]</code></pre><p><b>Complexity:</b> time O(n), space O(1).</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Average cost changes only when you add; reducing keeps it, flipping resets it to the fill price.",
+  "plan": {
+   "keyIdea": "Three cases — add, reduce, flip — handled by sign comparison.",
+   "method": "Signed position + avg with case analysis, then position·(mark − avg).",
+   "sanityChecks": [
+    "Flat → [0, 0.0, 0.0].",
+    "Short marked lower than avg → positive unrealised.",
+    "Two equal buys → avg is the midpoint."
+   ]
+  },
+  "par": 10,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Buy 10 @ 100, buy 10 @ 110, sell 5 @ 120. Under average cost, how much P&amp;L does the sale <i>realise</i>?</p>",
+    "model": "<p>Average cost is 105, so the sale realises 5·(120 − 105) = 75 (FIFO would give 5·(120 − 100) = 100).</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 75,
+     "display": "75",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-026",
+  "cat": "coding",
+  "diff": 1,
+  "title": "Maximum drawdown of an equity curve",
+  "tags": [
+   "drawdown",
+   "risk",
+   "arrays"
+  ],
+  "style": [
+   "coding-screen",
+   "OA-speed"
+  ],
+  "prompt": "<p>Implement <code>def max_drawdown(equity):</code></p><p>Given a positive equity curve, return the maximum drawdown as a fraction: the largest value of (peak − later value)/peak, where the peak is any earlier (or the same) point. Return 0.0 if the curve never falls (or has fewer than 2 points).</p><p>Constraints: up to 10<sup>6</sup> points — one pass. Floats compared with 1e-6 tolerance.</p><p><b>Example:</b></p><pre><code>max_drawdown([100, 120, 90, 130, 104]) → 0.25</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "max_drawdown",
+   "signature": "def max_drawdown(equity):",
+   "starter": "def max_drawdown(equity):\n    \"\"\"Largest peak-to-trough decline as a fraction of the peak: max over i <= j\n    of (equity[i] - equity[j]) / equity[i]. 0.0 for fewer than 2 points.\n    \"\"\"\n    pass\n",
+   "reference": "def max_drawdown(equity):\n    peak, mdd = float(\"-inf\"), 0.0\n    for v in equity:\n        peak = max(peak, v)\n        mdd = max(mdd, (peak - v) / peak)\n    return mdd\n",
+   "tests": [
+    {
+     "args": [
+      [
+       100,
+       120,
+       90,
+       130,
+       104
+      ]
+     ],
+     "expected": 0.25
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": 0.0
+    },
+    {
+     "args": [
+      [
+       50
+      ]
+     ],
+     "expected": 0.0
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       3,
+       4
+      ]
+     ],
+     "expected": 0.0
+    },
+    {
+     "args": [
+      [
+       100,
+       50,
+       25
+      ]
+     ],
+     "expected": 0.75
+    },
+    {
+     "args": [
+      [
+       100,
+       80,
+       120,
+       60,
+       150
+      ]
+     ],
+     "expected": 0.5
+    },
+    {
+     "args": [
+      [
+       100.0,
+       97.6777,
+       95.5142,
+       96.0716,
+       94.2158,
+       92.1383,
+       91.9398,
+       91.4851,
+       89.9115,
+       89.3271,
+       91.1615,
+       89.1437,
+       87.4727,
+       84.9944,
+       83.6679,
+       81.6347,
+       84.009,
+       83.0743,
+       85.5118,
+       83.6106,
+       85.6373,
+       85.6705,
+       86.6501,
+       87.4935,
+       86.2897,
+       84.905,
+       85.8192,
+       83.9214,
+       81.4704,
+       82.7954,
+       83.4563,
+       82.2551,
+       82.3555,
+       84.381,
+       83.2616,
+       81.3823,
+       80.9782,
+       79.3629,
+       78.7349,
+       76.527,
+       77.738,
+       79.1675,
+       78.5673,
+       77.99,
+       76.8553,
+       78.9483,
+       80.7376,
+       81.5243,
+       79.9343,
+       78.3629,
+       79.6197,
+       78.1376,
+       79.0215,
+       78.6471,
+       76.4342,
+       75.0477,
+       76.9089,
+       76.0892,
+       76.8865,
+       78.0934,
+       77.6182,
+       77.6141,
+       79.2914,
+       80.3714,
+       80.4724,
+       80.688,
+       80.4374,
+       80.0828,
+       80.9046,
+       79.66,
+       81.407,
+       80.4026,
+       79.1065,
+       81.3073,
+       78.9418,
+       78.5018,
+       78.7494,
+       78.4652,
+       80.0165,
+       80.8496,
+       80.8703
+      ]
+     ],
+     "expected": 0.24952299999999994
+    }
+   ],
+   "cmp": "float",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "naive": "O(n²)",
+    "why": "All (peak, trough) pairs is quadratic; for each point only the running maximum before it matters."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>max_drawdown([100, 80, 120, 60, 150])</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 0.5,
+      "display": "0.5",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "For each day, the worst drawdown ending there is measured from the highest earlier value.",
+   "Track the running peak."
+  ],
+  "solution": "<p><b>Approach.</b> One pass with a running peak; the drawdown at each point is (peak − v)/peak and the answer is the maximum. Note the trap: the max drawdown need not start at the global maximum or end at the global minimum.</p><pre><code>def max_drawdown(equity):\n    peak, mdd = float(\"-inf\"), 0.0\n    for v in equity:\n        peak = max(peak, v)\n        mdd = max(mdd, (peak - v) / peak)\n    return mdd</code></pre><p><b>Complexity:</b> time O(n), space O(1). The naive approach is O(n²): All (peak, trough) pairs is quadratic; for each point only the running maximum before it matters.</p><p><b>Answer:</b> a function passing all 7 tests (see the reference above).</p>",
+  "key": "Running peak: drawdown at t = (max so far − value)/max so far.",
+  "plan": {
+   "keyIdea": "The relevant peak for a trough is the highest earlier point.",
+   "method": "Running max + max of relative drop.",
+   "sanityChecks": [
+    "Monotone rising → 0.",
+    "Halving → 0.5.",
+    "Answer in [0, 1)."
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>The interviewer says: “max drawdown = (global max − global min)/global max = (150 − 60)/150 = 0.6 for [100, 80, 120, 60, 150].” What is the correct max drawdown?</p>",
+    "model": "<p>The global max (150) comes <i>after</i> the global min, so that pair isn't a drawdown. The worst decline is 120 → 60: 0.5.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.5,
+     "display": "0.5",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-027",
+  "cat": "coding",
+  "diff": 3,
+  "title": "Mini matching engine (price-time)",
+  "tags": [
+   "matching-engine",
+   "heaps",
+   "order-book"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def match_orders(orders):</code></p><p>Implement a tiny continuous matching engine. Orders arrive in sequence as <code>[oid, side, kind, qty, price]</code>: side <code>\"B\"</code>/<code>\"S\"</code>, kind <code>\"L\"</code> (limit) or <code>\"M\"</code> (market, price <code>None</code>).</p><ul><li>An incoming order trades against the opposite side while it has quantity left and the best resting price is acceptable (a limit buy at P accepts asks ≤ P, a limit sell at P accepts bids ≥ P; market orders accept any price).</li><li><b>Price-time priority</b>: best price first; at equal price, the order that arrived first.</li><li>Each trade executes at the <b>resting</b> order's price and is reported as <code>[buy_oid, sell_oid, price, qty]</code>.</li><li>Unfilled limit quantity rests in the book; unfilled market quantity is cancelled.</li></ul><p>Return the list of trades in execution order. Up to 10<sup>5</sup> orders.</p><p><b>Example:</b></p><pre><code>match_orders([[1, 'S', 'L', 5, 101], [2, 'S', 'L', 5, 100], [3, 'B', 'L', 7, 101]]) → [[3, 2, 100, 5], [3, 1, 101, 2]]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "match_orders",
+   "signature": "def match_orders(orders):",
+   "starter": "def match_orders(orders):\n    \"\"\"orders: [oid, side, kind, qty, price]; side 'B'/'S', kind 'L' (limit) or 'M' (market,\n    price None). Match with price-time priority; return trades [buy_oid, sell_oid, price, qty].\n    \"\"\"\n    pass\n",
+   "reference": "import heapq\n\ndef match_orders(orders):\n    bids, asks = [], []                # heap entries: [key_price, seq, oid, qty]\n    trades = []\n    for seq, (oid, side, kind, qty, price) in enumerate(orders):\n        book, other = (bids, asks) if side == \"B\" else (asks, bids)\n        while qty > 0 and other:\n            top = other[0]\n            best = top[0] if side == \"B\" else -top[0]       # real price of best resting order\n            if kind == \"L\" and (best > price if side == \"B\" else best < price):\n                break\n            fill = min(qty, top[3])\n            trades.append([oid, top[2], best, fill] if side == \"B\" else [top[2], oid, best, fill])\n            qty -= fill\n            top[3] -= fill\n            if top[3] == 0:\n                heapq.heappop(other)\n        if qty > 0 and kind == \"L\":\n            heapq.heappush(book, [-price if side == \"B\" else price, seq, oid, qty])\n    return trades\n",
+   "tests": [
+    {
+     "args": [
+      [
+       [
+        1,
+        "S",
+        "L",
+        5,
+        101
+       ],
+       [
+        2,
+        "S",
+        "L",
+        5,
+        100
+       ],
+       [
+        3,
+        "B",
+        "L",
+        7,
+        101
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       3,
+       2,
+       100,
+       5
+      ],
+      [
+       3,
+       1,
+       101,
+       2
+      ]
+     ]
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        "B",
+        "M",
+        5,
+        null
+       ]
+      ]
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        "B",
+        "L",
+        3,
+        99
+       ],
+       [
+        2,
+        "S",
+        "L",
+        3,
+        100
+       ]
+      ]
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        "S",
+        "L",
+        2,
+        100
+       ],
+       [
+        2,
+        "S",
+        "L",
+        2,
+        100
+       ],
+       [
+        3,
+        "B",
+        "M",
+        3,
+        null
+       ],
+       [
+        4,
+        "B",
+        "L",
+        5,
+        100
+       ],
+       [
+        5,
+        "S",
+        "M",
+        10,
+        null
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       3,
+       1,
+       100,
+       2
+      ],
+      [
+       3,
+       2,
+       100,
+       1
+      ],
+      [
+       4,
+       2,
+       100,
+       1
+      ],
+      [
+       4,
+       5,
+       100,
+       4
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        "B",
+        "L",
+        4,
+        50
+       ],
+       [
+        2,
+        "B",
+        "L",
+        4,
+        51
+       ],
+       [
+        3,
+        "S",
+        "L",
+        6,
+        50
+       ],
+       [
+        4,
+        "S",
+        "L",
+        1,
+        52
+       ],
+       [
+        5,
+        "B",
+        "L",
+        2,
+        53
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       2,
+       3,
+       51,
+       4
+      ],
+      [
+       1,
+       3,
+       50,
+       2
+      ],
+      [
+       5,
+       4,
+       52,
+       1
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        "S",
+        "L",
+        3,
+        101
+       ],
+       [
+        2,
+        "S",
+        "L",
+        7,
+        102
+       ],
+       [
+        3,
+        "B",
+        "L",
+        1,
+        101
+       ],
+       [
+        4,
+        "B",
+        "L",
+        6,
+        99
+       ],
+       [
+        5,
+        "S",
+        "L",
+        1,
+        98
+       ],
+       [
+        6,
+        "B",
+        "L",
+        5,
+        99
+       ],
+       [
+        7,
+        "B",
+        "L",
+        8,
+        99
+       ],
+       [
+        8,
+        "B",
+        "M",
+        3,
+        null
+       ],
+       [
+        9,
+        "B",
+        "M",
+        6,
+        null
+       ],
+       [
+        10,
+        "B",
+        "L",
+        3,
+        101
+       ],
+       [
+        11,
+        "B",
+        "L",
+        3,
+        98
+       ],
+       [
+        12,
+        "B",
+        "L",
+        8,
+        101
+       ],
+       [
+        13,
+        "B",
+        "M",
+        3,
+        null
+       ],
+       [
+        14,
+        "B",
+        "L",
+        7,
+        101
+       ],
+       [
+        15,
+        "S",
+        "L",
+        1,
+        101
+       ],
+       [
+        16,
+        "S",
+        "M",
+        2,
+        null
+       ],
+       [
+        17,
+        "B",
+        "L",
+        2,
+        99
+       ],
+       [
+        18,
+        "S",
+        "L",
+        2,
+        102
+       ],
+       [
+        19,
+        "S",
+        "L",
+        2,
+        99
+       ],
+       [
+        20,
+        "B",
+        "L",
+        8,
+        101
+       ],
+       [
+        21,
+        "S",
+        "M",
+        5,
+        null
+       ],
+       [
+        22,
+        "B",
+        "L",
+        4,
+        100
+       ],
+       [
+        23,
+        "S",
+        "L",
+        6,
+        102
+       ],
+       [
+        24,
+        "S",
+        "L",
+        5,
+        101
+       ],
+       [
+        25,
+        "B",
+        "L",
+        3,
+        99
+       ],
+       [
+        26,
+        "B",
+        "L",
+        8,
+        99
+       ],
+       [
+        27,
+        "B",
+        "L",
+        3,
+        101
+       ],
+       [
+        28,
+        "S",
+        "M",
+        7,
+        null
+       ],
+       [
+        29,
+        "B",
+        "L",
+        8,
+        102
+       ],
+       [
+        30,
+        "B",
+        "L",
+        8,
+        101
+       ],
+       [
+        31,
+        "S",
+        "L",
+        6,
+        98
+       ],
+       [
+        32,
+        "B",
+        "L",
+        3,
+        99
+       ],
+       [
+        33,
+        "B",
+        "L",
+        2,
+        98
+       ],
+       [
+        34,
+        "S",
+        "L",
+        7,
+        100
+       ],
+       [
+        35,
+        "S",
+        "M",
+        7,
+        null
+       ],
+       [
+        36,
+        "B",
+        "L",
+        5,
+        102
+       ],
+       [
+        37,
+        "S",
+        "L",
+        8,
+        99
+       ],
+       [
+        38,
+        "B",
+        "L",
+        8,
+        99
+       ],
+       [
+        39,
+        "S",
+        "M",
+        8,
+        null
+       ],
+       [
+        40,
+        "S",
+        "M",
+        8,
+        null
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       3,
+       1,
+       101,
+       1
+      ],
+      [
+       4,
+       5,
+       99,
+       1
+      ],
+      [
+       8,
+       1,
+       101,
+       2
+      ],
+      [
+       8,
+       2,
+       102,
+       1
+      ],
+      [
+       9,
+       2,
+       102,
+       6
+      ],
+      [
+       10,
+       15,
+       101,
+       1
+      ],
+      [
+       10,
+       16,
+       101,
+       2
+      ],
+      [
+       12,
+       19,
+       101,
+       2
+      ],
+      [
+       12,
+       21,
+       101,
+       5
+      ],
+      [
+       12,
+       24,
+       101,
+       1
+      ],
+      [
+       14,
+       24,
+       101,
+       4
+      ],
+      [
+       14,
+       28,
+       101,
+       3
+      ],
+      [
+       20,
+       28,
+       101,
+       4
+      ],
+      [
+       29,
+       18,
+       102,
+       2
+      ],
+      [
+       29,
+       23,
+       102,
+       6
+      ],
+      [
+       20,
+       31,
+       101,
+       4
+      ],
+      [
+       27,
+       31,
+       101,
+       2
+      ],
+      [
+       27,
+       34,
+       101,
+       1
+      ],
+      [
+       30,
+       34,
+       101,
+       6
+      ],
+      [
+       30,
+       35,
+       101,
+       2
+      ],
+      [
+       22,
+       35,
+       100,
+       4
+      ],
+      [
+       4,
+       35,
+       99,
+       1
+      ],
+      [
+       36,
+       37,
+       102,
+       5
+      ],
+      [
+       4,
+       37,
+       99,
+       3
+      ],
+      [
+       4,
+       39,
+       99,
+       1
+      ],
+      [
+       6,
+       39,
+       99,
+       5
+      ],
+      [
+       7,
+       39,
+       99,
+       2
+      ],
+      [
+       7,
+       40,
+       99,
+       6
+      ],
+      [
+       17,
+       40,
+       99,
+       2
+      ]
+     ]
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(log N) per resting insert / fill",
+    "space": "O(N)",
+    "naive": "O(N) per order (scan the book)",
+    "why": "Scanning all resting orders to find the best price and earliest time is linear per order; heaps keyed by (price, arrival) give the best order in O(1) and updates in O(log N)."
+   },
+   "predict": [
+    {
+     "prompt": "<p>For <code>[[1, \"S\", \"L\", 5, 101], [2, \"S\", \"L\", 5, 100], [3, \"B\", \"L\", 7, 101]]</code>, the buy fills 5 at 100 then 2 at 101. What is the buyer's total cost (Σ price·qty)?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 702,
+      "display": "702",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Two heaps: bids keyed by (−price, arrival) and asks by (price, arrival).",
+   "Loop while the incoming order has quantity and the best opposite price is acceptable; trade at the resting price."
+  ],
+  "solution": "<p><b>Approach.</b> Keep bids in a heap keyed by (−price, sequence) and asks by (price, sequence), so the top is always the best price and, among equals, the earliest order. For each incoming order, repeatedly match against the opposite top while it is marketable (market orders always are), trading min(remaining, resting qty) at the resting price; pop fully filled resting orders. Leftover limit quantity is pushed into its own side's heap; leftover market quantity is dropped.</p><pre><code>import heapq\n\ndef match_orders(orders):\n    bids, asks = [], []                # heap entries: [key_price, seq, oid, qty]\n    trades = []\n    for seq, (oid, side, kind, qty, price) in enumerate(orders):\n        book, other = (bids, asks) if side == \"B\" else (asks, bids)\n        while qty &gt; 0 and other:\n            top = other[0]\n            best = top[0] if side == \"B\" else -top[0]       # real price of best resting order\n            if kind == \"L\" and (best &gt; price if side == \"B\" else best &lt; price):\n                break\n            fill = min(qty, top[3])\n            trades.append([oid, top[2], best, fill] if side == \"B\" else [top[2], oid, best, fill])\n            qty -= fill\n            top[3] -= fill\n            if top[3] == 0:\n                heapq.heappop(other)\n        if qty &gt; 0 and kind == \"L\":\n            heapq.heappush(book, [-price if side == \"B\" else price, seq, oid, qty])\n    return trades</code></pre><p><b>Complexity:</b> time O(log N) per resting insert / fill, space O(N). The naive approach is O(N) per order (scan the book): Scanning all resting orders to find the best price and earliest time is linear per order; heaps keyed by (price, arrival) give the best order in O(1) and updates in O(log N).</p><p><b>Answer:</b> a function passing all 7 tests (see the reference above).</p>",
+  "key": "Heaps keyed by (price, arrival time) implement price-time priority; trades print at the resting price.",
+  "plan": {
+   "keyIdea": "The top of each side's priority queue is the next order to trade.",
+   "method": "Two heaps of mutable entries [key, seq, oid, qty]; marketability check; partial fills.",
+   "sanityChecks": [
+    "Non-crossing limits → no trades.",
+    "Market order on an empty book → no trades.",
+    "Total traded qty ≤ incoming qty."
+   ]
+  },
+  "par": 25,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Support cancels by order id efficiently. What do you add?</p>",
+    "model": "<p>A dict oid → heap entry; cancel sets the entry's qty to 0 (or a 'dead' flag), and the matching loop pops dead entries at the top (lazy deletion). O(1) cancel, amortised O(log N) cleanup.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Linear search of the heap and heapify again",
+      "A dict oid → entry plus lazy deletion of dead tops",
+      "Rebuild the whole book on every cancel"
+     ],
+     "correct": 1,
+     "display": "A dict oid → entry plus lazy deletion of dead tops"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-028",
+  "cat": "coding",
+  "diff": 1,
+  "title": "Merge overlapping trading sessions",
+  "tags": [
+   "intervals",
+   "sorting"
+  ],
+  "style": [
+   "coding-screen",
+   "OA-speed"
+  ],
+  "prompt": "<p>Implement <code>def merge_sessions(sessions):</code></p><p>Given trading sessions as <code>[start, end]</code> (integers, start ≤ end, in any order), merge sessions that overlap or touch (<code>[1, 3]</code> and <code>[3, 5]</code> become <code>[1, 5]</code>) and return the merged list sorted by start.</p><p>Constraints: up to 10<sup>5</sup> sessions.</p><p><b>Example:</b></p><pre><code>merge_sessions([[1, 3], [2, 6], [8, 10], [15, 18]]) → [[1, 6], [8, 10], [15, 18]]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "merge_sessions",
+   "signature": "def merge_sessions(sessions):",
+   "starter": "def merge_sessions(sessions):\n    \"\"\"sessions: list of [start, end] with start <= end. Merge overlapping or touching\n    sessions; return them sorted by start.\n    \"\"\"\n    pass\n",
+   "reference": "def merge_sessions(sessions):\n    out = []\n    for s, e in sorted(sessions):\n        if out and s <= out[-1][1]:\n            out[-1][1] = max(out[-1][1], e)\n        else:\n            out.append([s, e])\n    return out\n",
+   "tests": [
+    {
+     "args": [
+      [
+       [
+        1,
+        3
+       ],
+       [
+        2,
+        6
+       ],
+       [
+        8,
+        10
+       ],
+       [
+        15,
+        18
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       1,
+       6
+      ],
+      [
+       8,
+       10
+      ],
+      [
+       15,
+       18
+      ]
+     ]
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        4,
+        4
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       4,
+       4
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        3
+       ],
+       [
+        3,
+        5
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       1,
+       5
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        5,
+        6
+       ],
+       [
+        1,
+        2
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       1,
+       2
+      ],
+      [
+       5,
+       6
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        10
+       ],
+       [
+        2,
+        3
+       ],
+       [
+        4,
+        5
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       1,
+       10
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        2
+       ],
+       [
+        4,
+        5
+       ],
+       [
+        2,
+        4
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       1,
+       5
+      ]
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        70,
+        71
+       ],
+       [
+        44,
+        48
+       ],
+       [
+        11,
+        19
+       ],
+       [
+        44,
+        50
+       ],
+       [
+        53,
+        53
+       ],
+       [
+        4,
+        5
+       ],
+       [
+        56,
+        59
+       ],
+       [
+        44,
+        45
+       ],
+       [
+        63,
+        68
+       ],
+       [
+        77,
+        85
+       ],
+       [
+        53,
+        56
+       ],
+       [
+        57,
+        59
+       ],
+       [
+        28,
+        34
+       ],
+       [
+        100,
+        106
+       ],
+       [
+        86,
+        94
+       ],
+       [
+        25,
+        33
+       ],
+       [
+        86,
+        92
+       ],
+       [
+        38,
+        42
+       ],
+       [
+        65,
+        68
+       ],
+       [
+        52,
+        59
+       ],
+       [
+        66,
+        68
+       ],
+       [
+        96,
+        100
+       ],
+       [
+        96,
+        100
+       ],
+       [
+        75,
+        82
+       ],
+       [
+        50,
+        51
+       ]
+      ]
+     ],
+     "expected": [
+      [
+       4,
+       5
+      ],
+      [
+       11,
+       19
+      ],
+      [
+       25,
+       34
+      ],
+      [
+       38,
+       42
+      ],
+      [
+       44,
+       51
+      ],
+      [
+       52,
+       59
+      ],
+      [
+       63,
+       68
+      ],
+      [
+       70,
+       71
+      ],
+      [
+       75,
+       85
+      ],
+      [
+       86,
+       94
+      ],
+      [
+       96,
+       106
+      ]
+     ]
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)",
+    "naive": "O(n²)",
+    "why": "Repeatedly merging any overlapping pair until none remain is quadratic or worse; after sorting by start, each session only needs comparing with the last merged one."
+   },
+   "predict": [
+    {
+     "prompt": "<p>How many sessions does <code>merge_sessions([[9, 12], [1, 4], [2, 5], [6, 8], [8, 9], [14, 15]])</code> return?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 3,
+      "display": "3",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Sort by start time first.",
+   "After sorting, a session either extends the last merged session or starts a new one."
+  ],
+  "solution": "<p><b>Approach.</b> Sort by start, then sweep: if the next session starts at or before the end of the last merged session, extend that end to the max; otherwise start a new merged session. The <code>max</code> handles sessions nested inside earlier ones.</p><pre><code>def merge_sessions(sessions):\n    out = []\n    for s, e in sorted(sessions):\n        if out and s &lt;= out[-1][1]:\n            out[-1][1] = max(out[-1][1], e)\n        else:\n            out.append([s, e])\n    return out</code></pre><p><b>Complexity:</b> time O(n log n), space O(n). The naive approach is O(n²): Repeatedly merging any overlapping pair until none remain is quadratic or worse; after sorting by start, each session only needs comparing with the last merged one.</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Sort by start, then a single sweep comparing against the last merged interval.",
+  "plan": {
+   "keyIdea": "After sorting, overlaps can only involve the most recent merged interval.",
+   "method": "sorted() + sweep with max on the end.",
+   "sanityChecks": [
+    "Nested session doesn't shrink the end.",
+    "Touching sessions merge.",
+    "Output is sorted and non-overlapping."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now return the total covered time of [[1, 3], [2, 6], [8, 10], [15, 18]] (sum of merged lengths end − start).</p>",
+    "model": "<p>Merged: [1, 6], [8, 10], [15, 18] → 5 + 2 + 3 = 10.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 10,
+     "display": "10",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-029",
+  "cat": "coding",
+  "diff": 2,
+  "title": "When did volume reach X?",
+  "tags": [
+   "binary-search",
+   "prefix-sums"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def first_time_volume(times, vols, queries):</code></p><p><code>times</code> (strictly increasing) and <code>vols</code> (non-negative) describe trades. For each threshold X in <code>queries</code> (X ≥ 1), return the earliest <code>times[i]</code> at which the cumulative volume vols[0] + … + vols[i] reaches at least X, or <code>-1</code> if it never does.</p><p>Constraints: up to 10<sup>6</sup> trades and 10<sup>5</sup> queries — one linear scan per query is too slow.</p><p><b>Example:</b></p><pre><code>first_time_volume([1, 2, 3, 4], [10, 0, 5, 20], [1, 10, 11, 15, 16, 35, 36]) → [1, 1, 3, 3, 4, 4, -1]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "first_time_volume",
+   "signature": "def first_time_volume(times, vols, queries):",
+   "starter": "def first_time_volume(times, vols, queries):\n    \"\"\"times strictly increasing, vols >= 0. For each X in queries return the first time\n    at which cumulative volume >= X, or -1 if never.\n    \"\"\"\n    pass\n",
+   "reference": "from bisect import bisect_left\nfrom itertools import accumulate\n\ndef first_time_volume(times, vols, queries):\n    cum = list(accumulate(vols))       # non-decreasing, so binary-searchable\n    out = []\n    for x in queries:\n        i = bisect_left(cum, x)        # first index with cum[i] >= x\n        out.append(times[i] if i < len(cum) else -1)\n    return out\n",
+   "tests": [
+    {
+     "args": [
+      [
+       1,
+       2,
+       3,
+       4
+      ],
+      [
+       10,
+       0,
+       5,
+       20
+      ],
+      [
+       1,
+       10,
+       11,
+       15,
+       16,
+       35,
+       36
+      ]
+     ],
+     "expected": [
+      1,
+      1,
+      3,
+      3,
+      4,
+      4,
+      -1
+     ]
+    },
+    {
+     "args": [
+      [],
+      [],
+      [
+       5
+      ]
+     ],
+     "expected": [
+      -1
+     ]
+    },
+    {
+     "args": [
+      [
+       7
+      ],
+      [
+       3
+      ],
+      [
+       3,
+       4
+      ]
+     ],
+     "expected": [
+      7,
+      -1
+     ]
+    },
+    {
+     "args": [
+      [
+       1,
+       5,
+       9
+      ],
+      [
+       0,
+       0,
+       4
+      ],
+      [
+       1,
+       4
+      ]
+     ],
+     "expected": [
+      9,
+      9
+     ]
+    },
+    {
+     "args": [
+      [
+       2,
+       4
+      ],
+      [
+       5,
+       5
+      ],
+      []
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       0,
+       3,
+       6,
+       9,
+       12,
+       15,
+       18,
+       21,
+       24,
+       27,
+       30,
+       33,
+       36,
+       39,
+       42,
+       45,
+       48,
+       51,
+       54,
+       57,
+       60,
+       63,
+       66,
+       69,
+       72,
+       75,
+       78,
+       81,
+       84,
+       87,
+       90,
+       93,
+       96,
+       99,
+       102,
+       105,
+       108,
+       111,
+       114,
+       117,
+       120,
+       123,
+       126,
+       129,
+       132,
+       135,
+       138,
+       141,
+       144,
+       147,
+       150,
+       153,
+       156,
+       159,
+       162,
+       165,
+       168,
+       171,
+       174,
+       177,
+       180,
+       183,
+       186,
+       189,
+       192,
+       195,
+       198,
+       201,
+       204,
+       207,
+       210,
+       213,
+       216,
+       219,
+       222,
+       225,
+       228,
+       231,
+       234,
+       237,
+       240,
+       243,
+       246,
+       249,
+       252,
+       255,
+       258,
+       261,
+       264,
+       267,
+       270,
+       273,
+       276,
+       279,
+       282,
+       285,
+       288,
+       291,
+       294,
+       297
+      ],
+      [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       1,
+       50,
+       100,
+       250,
+       400,
+       1000000
+      ]
+     ],
+     "expected": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+     ]
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(N + Q log N)",
+    "space": "O(N)",
+    "naive": "O(N·Q)",
+    "why": "Scanning the trades for every query repeats the same additions; prefix sums are sorted (volumes ≥ 0), so each query is one binary search."
+   },
+   "predict": [
+    {
+     "prompt": "<p>For times [10, 20, 30, 40], vols [5, 0, 7, 3] and query X = 12, what does the reference return?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 30,
+      "display": "30",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Build cumulative volumes once.",
+   "They are non-decreasing, so bisect_left finds the first index with cum ≥ X."
+  ],
+  "solution": "<p><b>Approach.</b> Prefix-sum the volumes with <code>itertools.accumulate</code>. Because volumes are non-negative the prefix sums are sorted, so <code>bisect_left(cum, X)</code> returns the first index whose cumulative volume is ≥ X; map it to the timestamp or −1 if past the end. Zero-volume trades are handled correctly: bisect_left lands on the first index that reaches X.</p><pre><code>from bisect import bisect_left\nfrom itertools import accumulate\n\ndef first_time_volume(times, vols, queries):\n    cum = list(accumulate(vols))       # non-decreasing, so binary-searchable\n    out = []\n    for x in queries:\n        i = bisect_left(cum, x)        # first index with cum[i] &gt;= x\n        out.append(times[i] if i &lt; len(cum) else -1)\n    return out</code></pre><p><b>Complexity:</b> time O(N + Q log N), space O(N). The naive approach is O(N·Q): Scanning the trades for every query repeats the same additions; prefix sums are sorted (volumes ≥ 0), so each query is one binary search.</p><p><b>Answer:</b> a function passing all 6 tests (see the reference above).</p>",
+  "key": "Non-negative increments make prefix sums sorted — binary search them.",
+  "plan": {
+   "keyIdea": "Monotone prefix sums turn 'first time ≥ X' into a binary search.",
+   "method": "accumulate + bisect_left per query.",
+   "sanityChecks": [
+    "X above total → −1.",
+    "A zero-volume trade is never the answer (its cumulative volume equals the previous one).",
+    "X ≤ vols[0] → times[0]."
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Volumes can now be negative (busted trades are reversed). Does bisect still work?</p>",
+    "model": "<p>No — the prefix sums are no longer monotone, so binary search can return the wrong index. Use a linear scan, or precompute the running maximum of the prefix sums (which <i>is</i> monotone) and bisect that.</p>",
+    "answer": {
+     "type": "choice",
+     "options": [
+      "Yes, unchanged",
+      "No; bisect the running maximum of the prefix sums instead",
+      "Only if you sort the volumes"
+     ],
+     "correct": 1,
+     "display": "No; bisect the running maximum of the prefix sums instead"
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-030",
+  "cat": "coding",
+  "diff": 1,
+  "title": "Two orders that sum to a target size",
+  "tags": [
+   "hash-map",
+   "two-sum"
+  ],
+  "style": [
+   "coding-screen",
+   "OA-speed"
+  ],
+  "prompt": "<p>Implement <code>def two_sum_ids(orders, target):</code></p><p><code>orders</code> is a list of <code>[oid, qty]</code>. Find two different orders i &lt; j (positions in the list) whose quantities sum to <code>target</code>. If several pairs exist, choose the one with the smallest j, and among those the smallest i. Return <code>[oid_i, oid_j]</code>, or <code>[]</code> if no pair exists.</p><p>Constraints: up to 10<sup>6</sup> orders — O(n²) is too slow.</p><p><b>Example:</b></p><pre><code>two_sum_ids([[11, 2], [12, 7], [13, 11], [14, 15]], 9) → [11, 12]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "two_sum_ids",
+   "signature": "def two_sum_ids(orders, target):",
+   "starter": "def two_sum_ids(orders, target):\n    \"\"\"orders: list of [oid, qty]. Return [oid_i, oid_j] for the pair i < j with\n    qty_i + qty_j == target, choosing the smallest j, then the smallest i. [] if none.\n    \"\"\"\n    pass\n",
+   "reference": "def two_sum_ids(orders, target):\n    first = {}                         # qty -> oid of its earliest occurrence\n    for oid, qty in orders:\n        need = target - qty\n        if need in first:\n            return [first[need], oid]\n        first.setdefault(qty, oid)\n    return []\n",
+   "tests": [
+    {
+     "args": [
+      [
+       [
+        11,
+        2
+       ],
+       [
+        12,
+        7
+       ],
+       [
+        13,
+        11
+       ],
+       [
+        14,
+        15
+       ]
+      ],
+      9
+     ],
+     "expected": [
+      11,
+      12
+     ]
+    },
+    {
+     "args": [
+      [],
+      5
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        5
+       ]
+      ],
+      10
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        5
+       ],
+       [
+        2,
+        5
+       ]
+      ],
+      10
+     ],
+     "expected": [
+      1,
+      2
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        1,
+        3
+       ],
+       [
+        2,
+        4
+       ],
+       [
+        3,
+        3
+       ],
+       [
+        4,
+        3
+       ]
+      ],
+      6
+     ],
+     "expected": [
+      1,
+      3
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        7,
+        1
+       ],
+       [
+        8,
+        2
+       ],
+       [
+        9,
+        3
+       ]
+      ],
+      100
+     ],
+     "expected": []
+    },
+    {
+     "args": [
+      [
+       [
+        5,
+        4
+       ],
+       [
+        6,
+        1
+       ],
+       [
+        7,
+        3
+       ],
+       [
+        8,
+        0
+       ],
+       [
+        9,
+        4
+       ]
+      ],
+      4
+     ],
+     "expected": [
+      6,
+      7
+     ]
+    },
+    {
+     "args": [
+      [
+       [
+        100,
+        3
+       ],
+       [
+        101,
+        3
+       ],
+       [
+        102,
+        3
+       ],
+       [
+        103,
+        3
+       ],
+       [
+        104,
+        3
+       ],
+       [
+        105,
+        3
+       ],
+       [
+        106,
+        3
+       ],
+       [
+        107,
+        3
+       ],
+       [
+        108,
+        3
+       ],
+       [
+        109,
+        3
+       ],
+       [
+        110,
+        3
+       ],
+       [
+        111,
+        3
+       ],
+       [
+        112,
+        3
+       ],
+       [
+        113,
+        3
+       ],
+       [
+        114,
+        3
+       ],
+       [
+        115,
+        3
+       ],
+       [
+        116,
+        3
+       ],
+       [
+        117,
+        3
+       ],
+       [
+        118,
+        3
+       ],
+       [
+        119,
+        3
+       ],
+       [
+        120,
+        3
+       ],
+       [
+        121,
+        3
+       ],
+       [
+        122,
+        3
+       ],
+       [
+        123,
+        3
+       ],
+       [
+        124,
+        3
+       ],
+       [
+        125,
+        3
+       ],
+       [
+        126,
+        3
+       ],
+       [
+        127,
+        3
+       ],
+       [
+        128,
+        3
+       ],
+       [
+        129,
+        3
+       ],
+       [
+        130,
+        3
+       ],
+       [
+        131,
+        3
+       ],
+       [
+        132,
+        3
+       ],
+       [
+        133,
+        3
+       ],
+       [
+        134,
+        3
+       ],
+       [
+        135,
+        3
+       ],
+       [
+        136,
+        3
+       ],
+       [
+        137,
+        3
+       ],
+       [
+        138,
+        3
+       ],
+       [
+        139,
+        3
+       ]
+      ],
+      31
+     ],
+     "expected": []
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(n)",
+    "naive": "O(n²)",
+    "why": "Checking all pairs is quadratic; a hash map from quantity to its earliest order answers 'have I seen target − qty?' in O(1)."
+   },
+   "predict": [
+    {
+     "prompt": "<p>For <code>two_sum_ids([[1, 3], [2, 4], [3, 3], [4, 3]], 6)</code>, give the two ids returned, separated by a comma.</p>",
+     "answer": {
+      "type": "multi",
+      "values": [
+       1,
+       3
+      ],
+      "ordered": true,
+      "display": "1, 3"
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Walk j from left to right; you need some earlier i with qty_i = target − qty_j.",
+   "Store only the first oid for each quantity (setdefault) so ties pick the smallest i."
+  ],
+  "solution": "<p><b>Approach.</b> Scan once, keeping a dict quantity → oid of its first occurrence. At position j, if target − qty<sub>j</sub> is already in the dict, that's the pair with the smallest j, and the stored oid is the smallest i. Insert after checking so an order can't pair with itself.</p><pre><code>def two_sum_ids(orders, target):\n    first = {}                         # qty -&gt; oid of its earliest occurrence\n    for oid, qty in orders:\n        need = target - qty\n        if need in first:\n            return [first[need], oid]\n        first.setdefault(qty, oid)\n    return []</code></pre><p><b>Complexity:</b> time O(n), space O(n). The naive approach is O(n²): Checking all pairs is quadratic; a hash map from quantity to its earliest order answers &#x27;have I seen target − qty?&#x27; in O(1).</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Hash map of complements; check before inserting, keep the first occurrence.",
+  "plan": {
+   "keyIdea": "For each j only one complement value matters.",
+   "method": "Dict qty → first oid; check, then setdefault.",
+   "sanityChecks": [
+    "Single order equal to target/2 → no pair with itself.",
+    "Duplicates: two halves pair.",
+    "No pair → []."
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Now count <i>all</i> index pairs i &lt; j with qty<sub>i</sub> + qty<sub>j</sub> = 6 for quantities [3, 4, 3, 3, 2].</p>",
+    "model": "<p>Use a Counter of seen quantities and add count[target − q] before inserting q: pairs of 3s give C(3, 2) = 3, plus (4, 2) = 1. Total 4.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 4,
+     "display": "4",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-031",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Distinct price pairs k ticks apart",
+  "tags": [
+   "hash-map",
+   "counting",
+   "sets"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def count_k_diff_pairs(prices, k):</code></p><p>Count the <b>distinct</b> value pairs (a, b) such that both a and b occur in <code>prices</code> and b − a = k. Each pair of values counts once, however many times the values repeat. For k = 0, a value counts if it appears at least twice. Negative k → 0.</p><p>Constraints: up to 10<sup>6</sup> prices.</p><p><b>Example:</b></p><pre><code>count_k_diff_pairs([3, 1, 4, 1, 5], 2) → 2</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "count_k_diff_pairs",
+   "signature": "def count_k_diff_pairs(prices, k):",
+   "starter": "def count_k_diff_pairs(prices, k):\n    \"\"\"Number of distinct value pairs (a, b) with a, b in prices and b - a == k.\n    For k == 0 a value must appear at least twice. k < 0 -> 0.\n    \"\"\"\n    pass\n",
+   "reference": "from collections import Counter\n\ndef count_k_diff_pairs(prices, k):\n    if k < 0:\n        return 0\n    cnt = Counter(prices)\n    if k == 0:\n        return sum(1 for c in cnt.values() if c >= 2)\n    return sum(1 for v in cnt if v + k in cnt)\n",
+   "tests": [
+    {
+     "args": [
+      [
+       3,
+       1,
+       4,
+       1,
+       5
+      ],
+      2
+     ],
+     "expected": 2
+    },
+    {
+     "args": [
+      [
+       1,
+       2,
+       3,
+       4,
+       5
+      ],
+      1
+     ],
+     "expected": 4
+    },
+    {
+     "args": [
+      [
+       1,
+       3,
+       1,
+       5,
+       4
+      ],
+      0
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [],
+      1
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       1,
+       1,
+       1
+      ],
+      0
+     ],
+     "expected": 1
+    },
+    {
+     "args": [
+      [
+       1,
+       2
+      ],
+      -1
+     ],
+     "expected": 0
+    },
+    {
+     "args": [
+      [
+       5,
+       5,
+       7,
+       7,
+       9
+      ],
+      2
+     ],
+     "expected": 2
+    },
+    {
+     "args": [
+      [
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18,
+       18
+      ],
+      3
+     ],
+     "expected": 0
+    }
+   ],
+   "cmp": "exact",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(n)",
+    "naive": "O(n²)",
+    "why": "Comparing all index pairs and deduplicating with a set is quadratic; counting values once lets you test each candidate partner in O(1)."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>count_k_diff_pairs([1, 7, 5, 9, 2, 12, 3], 2)</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 4,
+      "display": "4",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Work with distinct values (a Counter), not indices.",
+   "k = 0 is special: you need a value with count ≥ 2."
+  ],
+  "solution": "<p><b>Approach.</b> Count the values. For k &gt; 0, each distinct v with v + k also present gives one pair (anchoring on the smaller value avoids double counting). For k = 0, count values occurring at least twice. Negative k has no pairs by definition.</p><pre><code>from collections import Counter\n\ndef count_k_diff_pairs(prices, k):\n    if k &lt; 0:\n        return 0\n    cnt = Counter(prices)\n    if k == 0:\n        return sum(1 for c in cnt.values() if c &gt;= 2)\n    return sum(1 for v in cnt if v + k in cnt)</code></pre><p><b>Complexity:</b> time O(n), space O(n). The naive approach is O(n²): Comparing all index pairs and deduplicating with a set is quadratic; counting values once lets you test each candidate partner in O(1).</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Deduplicate first; anchor each pair on its smaller value; k = 0 needs multiplicity.",
+  "plan": {
+   "keyIdea": "Distinct pairs of values → reason on the set of values.",
+   "method": "Counter; separate k = 0 and k > 0.",
+   "sanityChecks": [
+    "k = 0 with all distinct → 0.",
+    "[1,2,3,4,5], k = 1 → 4.",
+    "Duplicates don't inflate the count."
+   ]
+  },
+  "par": 6,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A candidate counts index pairs instead of value pairs. For [3, 1, 4, 1, 5] and k = 2 they get 3. What is the correct number of distinct value pairs?</p>",
+    "model": "<p>Index pairs: (1,3) twice and (3,5) → 3. Distinct value pairs: (1, 3) and (3, 5) → 2.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 2,
+     "display": "2",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-032",
+  "cat": "coding",
+  "diff": 2,
+  "title": "Welford's online mean and variance",
+  "tags": [
+   "statistics",
+   "streams",
+   "numerical-stability"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Implement <code>def welford(xs):</code></p><p>Compute the mean and the <b>sample</b> variance (divisor n − 1) of a stream in a single pass, using O(1) memory and a numerically stable update (values can be large, e.g. 10<sup>9</sup> + small noise). Return <code>[mean, variance]</code>; for an empty input return <code>[0.0, 0.0]</code> and for one value <code>[x, 0.0]</code>.</p><p>Results are compared with 1e-6 relative/absolute tolerance — the naive Σx² − n·mean² formula fails the large-offset tests.</p><p><b>Example:</b></p><pre><code>welford([2, 4, 4, 4, 5, 5, 7, 9]) → [5.0, 4.571428571428571]</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "welford",
+   "signature": "def welford(xs):",
+   "starter": "def welford(xs):\n    \"\"\"One pass over xs. Return [mean, sample_variance] (divide by n-1).\n    n == 0 -> [0.0, 0.0]; n == 1 -> [x, 0.0].\n    \"\"\"\n    pass\n",
+   "reference": "def welford(xs):\n    n, mean, m2 = 0, 0.0, 0.0\n    for x in xs:\n        n += 1\n        delta = x - mean\n        mean += delta / n\n        m2 += delta * (x - mean)       # uses the updated mean\n    return [mean, m2 / (n - 1) if n > 1 else 0.0]\n",
+   "tests": [
+    {
+     "args": [
+      [
+       2,
+       4,
+       4,
+       4,
+       5,
+       5,
+       7,
+       9
+      ]
+     ],
+     "expected": [
+      5.0,
+      4.571428571428571
+     ]
+    },
+    {
+     "args": [
+      []
+     ],
+     "expected": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "args": [
+      [
+       3.5
+      ]
+     ],
+     "expected": [
+      3.5,
+      0.0
+     ]
+    },
+    {
+     "args": [
+      [
+       1,
+       2
+      ]
+     ],
+     "expected": [
+      1.5,
+      0.5
+     ]
+    },
+    {
+     "args": [
+      [
+       1000000004.0,
+       1000000007.0,
+       1000000013.0,
+       1000000016.0
+      ]
+     ],
+     "expected": [
+      1000000010.0,
+      30.0
+     ]
+    },
+    {
+     "args": [
+      [
+       5,
+       5,
+       5
+      ]
+     ],
+     "expected": [
+      5.0,
+      0.0
+     ]
+    },
+    {
+     "args": [
+      [
+       -1.5,
+       2.5,
+       0.25,
+       7.75
+      ]
+     ],
+     "expected": [
+      2.25,
+      16.124999999999996
+     ]
+    },
+    {
+     "args": [
+      [
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75,
+       8.75
+      ]
+     ],
+     "expected": [
+      8.75,
+      0.0
+     ]
+    }
+   ],
+   "cmp": "float",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "naive": "O(n) but unstable",
+    "why": "Σx² − n·mean² subtracts two nearly equal huge numbers (catastrophic cancellation); Welford updates the mean and the sum of squared deviations incrementally."
+   },
+   "predict": [
+    {
+     "prompt": "<p>What sample variance does the reference return for <code>[1e9 + 4, 1e9 + 7, 1e9 + 13, 1e9 + 16]</code>?</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 30.0,
+      "display": "30",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Keep n, the running mean and M₂ = Σ (x − mean)².",
+   "delta = x − mean_old; mean += delta/n; M₂ += delta·(x − mean_new)."
+  ],
+  "solution": "<p><b>Approach.</b> Welford's algorithm: for each x, update n, compute delta = x − mean, update mean += delta/n, then M₂ += delta·(x − new mean). Sample variance = M₂/(n − 1). Each update works with deviations, not raw squares, so it stays accurate when the values share a large offset.</p><pre><code>def welford(xs):\n    n, mean, m2 = 0, 0.0, 0.0\n    for x in xs:\n        n += 1\n        delta = x - mean\n        mean += delta / n\n        m2 += delta * (x - mean)       # uses the updated mean\n    return [mean, m2 / (n - 1) if n &gt; 1 else 0.0]</code></pre><p><b>Complexity:</b> time O(n), space O(1). The naive approach is O(n) but unstable: Σx² − n·mean² subtracts two nearly equal huge numbers (catastrophic cancellation); Welford updates the mean and the sum of squared deviations incrementally.</p><p><b>Answer:</b> a function passing all 8 tests (see the reference above).</p>",
+  "key": "Update mean and M₂ = Σ(x − mean)² incrementally; never subtract huge raw sums of squares.",
+  "plan": {
+   "keyIdea": "Variance is shift-invariant — compute with deviations, not raw squares.",
+   "method": "Welford recurrences; divide by n − 1 at the end.",
+   "sanityChecks": [
+    "[2,4,4,4,5,5,7,9] → mean 5, sample variance 32/7.",
+    "Constant input → 0.",
+    "Adding 10⁹ to every value changes only the mean."
+   ]
+  },
+  "par": 10,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Two desks computed (n, mean, M₂) separately: (2, 1.0, 2.0) for [0, 2] and (2, 5.0, 2.0) for [4, 6]. What is the combined sample variance?</p>",
+    "model": "<p>Chan's merge: δ = 4, M₂ = 2 + 2 + δ²·n₁n₂/(n₁+n₂) = 4 + 16·4/4 = 20, variance = 20/3 ≈ 6.667 — matches [0, 2, 4, 6] directly.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 6.666666666666667,
+     "display": "6.66667",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "cd-033",
+  "cat": "coding",
+  "diff": 1,
+  "title": "Annualised Sharpe ratio",
+  "tags": [
+   "statistics",
+   "sharpe",
+   "returns"
+  ],
+  "style": [
+   "coding-screen",
+   "OA-speed"
+  ],
+  "prompt": "<p>Implement <code>def sharpe(returns, periods_per_year):</code></p><p>Given periodic returns (e.g. daily) and the number of periods per year, return the annualised Sharpe ratio with a zero risk-free rate: mean / (sample standard deviation, divisor n − 1) × √periods_per_year. Return 0.0 when there are fewer than two returns or the standard deviation is 0.</p><p>Floats compared with 1e-6 relative/absolute tolerance.</p><p><b>Example:</b></p><pre><code>sharpe([0.01, 0.02, -0.01, 0.03], 252) → 11.618950038622254</code></pre><p>Write the function in Python 3 (standard library only). It must return the value — not print it — and pass every test, including edge cases.</p>",
+  "answer": {
+   "type": "code",
+   "fn": "sharpe",
+   "signature": "def sharpe(returns, periods_per_year):",
+   "starter": "def sharpe(returns, periods_per_year):\n    \"\"\"mean(returns) / sample_std(returns) * sqrt(periods_per_year), zero risk-free rate.\n    Return 0.0 if fewer than 2 returns or the std is 0.\n    \"\"\"\n    pass\n",
+   "reference": "import math\n\ndef sharpe(returns, periods_per_year):\n    n = len(returns)\n    if n < 2:\n        return 0.0\n    mean = sum(returns) / n\n    var = sum((r - mean) ** 2 for r in returns) / (n - 1)\n    if var == 0:\n        return 0.0\n    return mean / math.sqrt(var) * math.sqrt(periods_per_year)\n",
+   "tests": [
+    {
+     "args": [
+      [
+       0.01,
+       0.02,
+       -0.01,
+       0.03
+      ],
+      252
+     ],
+     "expected": 11.618950038622254
+    },
+    {
+     "args": [
+      [],
+      252
+     ],
+     "expected": 0.0
+    },
+    {
+     "args": [
+      [
+       0.05
+      ],
+      12
+     ],
+     "expected": 0.0
+    },
+    {
+     "args": [
+      [
+       0.01,
+       0.01,
+       0.01
+      ],
+      252
+     ],
+     "expected": 0.0
+    },
+    {
+     "args": [
+      [
+       0.02,
+       -0.02
+      ],
+      52
+     ],
+     "expected": 0.0
+    },
+    {
+     "args": [
+      [
+       -0.01,
+       -0.02,
+       0.0,
+       -0.03
+      ],
+      12
+     ],
+     "expected": -4.024922359499621
+    },
+    {
+     "args": [
+      [
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128,
+       -0.015390199982724128
+      ],
+      252
+     ],
+     "expected": 0.0
+    }
+   ],
+   "cmp": "float",
+   "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+   },
+   "predict": [
+    {
+     "prompt": "<p>What does the reference return for <code>sharpe([0.01, 0.03], 4)</code>? (mean 0.02, sample std ≈ 0.01414)</p>",
+     "answer": {
+      "type": "numeric",
+      "value": 2.8284271247461903,
+      "display": "2.82843",
+      "tolRel": 0.0001
+     }
+    }
+   ],
+   "display": "Passes all tests"
+  },
+  "hints": [
+   "Two passes (mean, then squared deviations) are clean and stable; use n − 1.",
+   "Annualise by multiplying by √(periods per year), not by the number of periods."
+  ],
+  "solution": "<p><b>Approach.</b> Compute the mean, the sample variance with divisor n − 1 (two-pass for stability), guard the degenerate cases, and scale mean/std by √(periods per year): the mean grows like T and the std like √T, so their ratio grows like √T.</p><pre><code>import math\n\ndef sharpe(returns, periods_per_year):\n    n = len(returns)\n    if n &lt; 2:\n        return 0.0\n    mean = sum(returns) / n\n    var = sum((r - mean) ** 2 for r in returns) / (n - 1)\n    if var == 0:\n        return 0.0\n    return mean / math.sqrt(var) * math.sqrt(periods_per_year)</code></pre><p><b>Complexity:</b> time O(n), space O(1).</p><p><b>Answer:</b> a function passing all 7 tests (see the reference above).</p>",
+  "key": "Sharpe scales with √(periods): mean ∝ T, volatility ∝ √T.",
+  "plan": {
+   "keyIdea": "Per-period Sharpe × √(periods per year).",
+   "method": "Mean, sample std (n − 1), guards, scale.",
+   "sanityChecks": [
+    "Constant returns → 0.0 (std 0, by the spec).",
+    "Symmetric ±r returns → mean 0 → Sharpe 0.",
+    "Negative mean → negative Sharpe."
+   ]
+  },
+  "par": 5,
+  "followups": [
+   {
+    "type": "correct",
+    "prompt": "<p>A colleague annualises a daily Sharpe of 0.1 by multiplying by 252. What is the correct annualised Sharpe (252 trading days)?</p>",
+    "model": "<p>Multiply by √252 ≈ 15.87, not 252: 0.1·√252 ≈ 1.587.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 1.5874507866387546,
+     "display": "1.58745",
+     "tolRel": 0.0001
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-041",
+  "cat": "systems",
+  "diff": 2,
+  "title": "Design a limit order book",
+  "tags": [
+   "order-book",
+   "data-structures",
+   "low-latency",
+   "complexity"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Design the in-memory data structure for one instrument's limit order book in a matching engine or a market-data handler. It must support: add a limit order, cancel by order id, reduce quantity, match an incoming aggressive order with price–time priority, and read the best bid/ask at any moment.</p><p>Describe the structures, the complexity of each operation, and what you would change for a very hot instrument with a fixed tick size.</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Two sides, each a map from price level to a level object (bids best = highest, asks best = lowest)",
+    "Each price level holds a FIFO queue of orders (intrusive doubly linked list) plus aggregate quantity",
+    "A hash map order id → order node gives O(1) cancel/reduce without searching",
+    "Best bid/ask cached (pointer to the top level) so top-of-book reads are O(1)",
+    "Add: O(log L) with a balanced tree of L levels, O(1) at an existing level; match walks levels from the top",
+    "Fixed tick: replace the tree by an array indexed by (price − base)/tick, track best index; scan only on level depletion",
+    "Integer prices in ticks (never floating-point keys), pre-allocated object pools, no allocation on the hot path",
+    "Reduce-quantity keeps queue priority; price change or size increase = cancel/replace (loses priority)"
+   ],
+   "outline": "<ul><li><b>Order</b>: id, side, price (ticks), qty, prev/next pointers, owner.</li><li><b>Level</b>: price, total qty, count, head/tail of FIFO.</li><li><b>Side</b>: sorted map price→Level (red-black tree / skip list) or tick-indexed array; cached best.</li><li><b>Index</b>: hash map id→Order.</li><li><b>Ops</b>: add O(log L) or O(1); cancel O(1) (+O(log L) if a level empties in a tree); match O(k) for k fills; best O(1).</li><li><b>Hot path</b>: pools, cache-friendly arrays, single writer thread, publish deltas by sequence number.</li></ul>",
+   "pitfalls": [
+    "Keying price levels by floating-point prices",
+    "Searching a list to cancel (O(n)) instead of indexing by id",
+    "Letting a quantity increase keep time priority",
+    "Scanning all levels to find the new best after every cancel",
+    "Allocating memory per message on the hot path"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "Separate 'which price level' (sorted) from 'which order within a level' (FIFO).",
+   "How do you cancel an order without searching for it?"
+  ],
+  "solution": "<p><b>Structures.</b> Per side keep a sorted container of price levels — a balanced tree keyed by integer tick price, or for a fixed tick grid an array indexed by price offset. Each level stores its aggregate quantity and an intrusive doubly linked FIFO of order nodes. A hash map from order id to node lets you unlink any order in O(1). Cache a pointer/index to the best level of each side.</p><p><b>Operations.</b> Add at an existing level is O(1) (append to the tail, bump the aggregate); creating a level costs O(log L) in a tree or O(1) in an array. Cancel/reduce: look up the node, unlink, adjust the aggregate — O(1); if the level empties remove it and, if it was the best, move the best pointer (next tree node, or scan the array to the next non-empty index, which is short in practice). Matching pops from the head of the best opposite level until the aggressor is filled or prices stop crossing: O(number of fills). Best bid/ask is a cached read.</p><p><b>Hot instruments.</b> Use the tick array (contiguous, cache-friendly), integer prices, pre-allocated pools for orders and levels, a single writer thread per book (no locks), and publish incremental updates with sequence numbers so consumers can detect gaps. Size increases and price changes are cancel/replace and lose priority; size decreases keep it.</p>",
+  "key": "Sorted price levels + FIFO per level + id→order hash map: O(1) cancel and top-of-book, O(log L) or O(1) level insertion.",
+  "plan": {
+   "keyIdea": "Two orthogonal orderings: price (sorted map) and time (FIFO per level), plus random access by id.",
+   "method": "State the structures, then walk each operation with its complexity, then optimise for fixed ticks and the hot path.",
+   "sanityChecks": [
+    "Can you cancel in O(1)?",
+    "What happens to the best price when the top level empties?"
+   ]
+  },
+  "par": 15,
+  "followups": [
+   {
+    "type": "complexity",
+    "prompt": "<p>Why is a plain sorted array of orders (or a heap of orders) a poor choice, and what does a heap get wrong in particular?</p>",
+    "model": "<p>A sorted array makes insert/cancel O(n) (shifting). A heap gives O(1) best price and O(log n) insert, but arbitrary cancels are O(n) to find (or need lazy deletion) and it does not keep FIFO order among equal prices without a sequence tie-break; you also lose cheap access to depth by level. Price-level aggregation keeps the sorted structure small (L levels, not n orders).</p>"
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>A tick-array book spans 2,000 price levels; each level object is 64 bytes. How many kilobytes does the level array take per side (1 KB = 1,024 bytes)?</p>",
+    "model": "<p>2,000 × 64 = 128,000 bytes = 125 KB per side — small enough to sit largely in L2 cache.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 125.0,
+     "display": "125 KB"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-042",
+  "cat": "systems",
+  "diff": 2,
+  "title": "Design an order management system",
+  "tags": [
+   "oms",
+   "order-lifecycle",
+   "risk-checks",
+   "state-machine"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Design the order management system (OMS) that sits between your strategies and several exchanges. Strategies submit, amend and cancel orders; exchanges send acknowledgements, fills, rejects and cancels.</p><p>Describe the order state machine, the pre-trade checks, how you keep positions correct, and what happens when a connection drops.</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Explicit order state machine: New → PendingNew → Acked → PartiallyFilled → Filled / PendingCancel → Cancelled / Rejected",
+    "Client order ids (unique, idempotent) mapped to exchange order ids; every message carries both",
+    "Synchronous pre-trade risk checks: price collars, max order size, position/notional limits, rate limits, fat-finger",
+    "Positions and P&amp;L updated from fills only (not from acks), with exposure counted for open orders",
+    "Durable, sequenced event log (journal) so state can be rebuilt and audited",
+    "Disconnect handling: mark orders unknown, cancel-on-disconnect, reconcile with exchange on reconnect",
+    "Handle races: fill arriving after a cancel request, amend in flight, duplicate/out-of-order messages",
+    "Kill switch that blocks new orders and mass-cancels"
+   ],
+   "outline": "<ul><li><b>API</b>: submit/amend/cancel with client ids; responses are events.</li><li><b>State machine</b> per order with legal transitions only.</li><li><b>Risk gate</b> before the wire, in-process, microseconds.</li><li><b>Position keeper</b> from fills; open-order exposure for limits.</li><li><b>Gateways</b> per venue translating protocols (sequence numbers, heartbeats).</li><li><b>Journal + recovery</b>: replay log; reconcile open orders and fills on reconnect.</li><li><b>Controls</b>: throttles, kill switch, drop-copy comparison.</li></ul>",
+   "pitfalls": [
+    "Updating positions on acknowledgement instead of on fills",
+    "Assuming a cancel always succeeds (fills can race it)",
+    "Non-idempotent order ids causing duplicates on retry",
+    "Risk checks that run after the order is sent",
+    "No reconciliation after reconnect"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "List every message an exchange can send about one order; each is a state transition.",
+   "Which events change your position, and which only change exposure?"
+  ],
+  "solution": "<p><b>Lifecycle.</b> Every order is a small state machine. The strategy sends New (with a client id); the OMS validates, moves it to PendingNew, sends it, and waits for Ack/Reject. Fills move it to PartiallyFilled/Filled; cancel requests go PendingCancel → Cancelled, but a fill can still arrive while the cancel is in flight, so PendingCancel must accept fills. Illegal transitions raise alerts.</p><p><b>Pre-trade checks</b> run inline before anything leaves the box: price within a collar of a reference price, size and notional caps, position and gross-exposure limits counting open orders, message-rate throttles, duplicate detection.</p><p><b>Positions</b> change only on fills (executions), not on acks; open orders contribute potential exposure. P&amp;L is marked from market data separately.</p><p><b>Durability and recovery.</b> All inbound/outbound events go to a sequenced journal. On a disconnect, orders become 'unknown'; rely on exchange cancel-on-disconnect where available, and on reconnect request order status / replay missed messages using sequence numbers, then reconcile with a drop copy. A kill switch blocks new orders and mass-cancels per strategy, venue or globally.</p>",
+  "key": "An OMS is a set of per-order state machines + an inline risk gate + a fill-driven position keeper + a durable journal for recovery.",
+  "plan": {
+   "keyIdea": "Model orders as state machines and treat every exchange message as an event.",
+   "method": "Lifecycle → pre-trade risk → positions → persistence/recovery → failure cases.",
+   "sanityChecks": [
+    "What if a fill arrives after you asked to cancel?",
+    "What is the source of truth after a crash?"
+   ]
+  },
+  "par": 15,
+  "followups": [
+   {
+    "type": "explain",
+    "prompt": "<p>A strategy sends cancel, then immediately a new order assuming the cancel succeeded. What can go wrong and how does the OMS protect against it?</p>",
+    "model": "<p>The original order may fill before the cancel lands, so both orders can execute and the position overshoots. The OMS should count the pending-cancel order's remaining quantity in exposure until the cancel is confirmed (or a fill closes it): limit checks use filled + open + pending quantity.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-043",
+  "cat": "systems",
+  "diff": 1,
+  "title": "Backtesting pitfalls checklist",
+  "tags": [
+   "backtesting",
+   "look-ahead-bias",
+   "survivorship-bias",
+   "overfitting"
+  ],
+  "style": [
+   "research-stats"
+  ],
+  "prompt": "<p>A colleague's daily equity strategy backtests at Sharpe 3.0. Before believing it, list the checks you would run. For each, say what bias it guards against and how you would detect or fix it.</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Look-ahead bias: features use only data available at decision time (timestamps, report dates, restated data)",
+    "Survivorship bias: point-in-time universe including delisted/bankrupt names",
+    "Transaction costs: spreads, fees, market impact, borrow costs for shorts, capacity",
+    "Execution realism: fill at prices you could trade (next open/VWAP), not the close that generated the signal",
+    "Overfitting / multiple testing: count variants tried, deflate the Sharpe, true hold-out period",
+    "Out-of-sample and walk-forward validation; stability across sub-periods and parameters",
+    "Data errors and outliers (bad ticks, split/dividend adjustments)",
+    "Concentration: how much P&amp;L comes from a few days or one episode"
+   ],
+   "outline": "<ol><li>Timestamp audit of every input (as-of joins).</li><li>Point-in-time universe.</li><li>Cost model + capacity.</li><li>Realistic fills and delays.</li><li>Trials log, deflated Sharpe, hold-out.</li><li>Walk-forward, parameter heat-maps.</li><li>Data cleaning checks.</li><li>P&amp;L concentration and regime breakdown.</li></ol>",
+   "pitfalls": [
+    "Using today's index constituents for the whole history",
+    "Trading at the same close that generated the signal",
+    "Ignoring short borrow availability and cost",
+    "Re-using the 'test' period after looking at it",
+    "Using revised fundamental data instead of as-first-reported"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "Ask 'could I have known this at that moment?' and 'could I have traded at that price?'.",
+   "How many versions did they try before this one?"
+  ],
+  "solution": "<p>A Sharpe of 3 on daily equities is a red flag; go through:</p><ul><li><b>Look-ahead</b>: every feature must be computed from data stamped before the decision. Fundamentals by announcement date, not period end; no revised data; no centred moving averages; normalisations fit on past data only.</li><li><b>Survivorship</b>: use the universe as it was on each date, including stocks that later delisted; today's constituents bias returns up.</li><li><b>Costs and capacity</b>: half-spread, fees, impact that grows with size and turnover, short borrow fees and availability. Report Sharpe after costs and the breakeven cost.</li><li><b>Execution realism</b>: a signal computed at the close cannot fill at that close; use the next open/VWAP and add latency.</li><li><b>Overfitting</b>: how many variants were tried? Deflate the Sharpe for the number of trials and keep a never-touched hold-out.</li><li><b>Robustness</b>: walk-forward performance, sub-period and parameter stability, P&amp;L concentration (a few days?), sensitivity to data cleaning.</li></ul>",
+  "key": "Information timing, universe, costs, execution and selection: each can create a Sharpe of 3 from nothing.",
+  "plan": {
+   "keyIdea": "Every backtest bias is either 'knew something too early', 'traded at an impossible price', or 'picked the lucky one'.",
+   "method": "Group the checks into data timing, universe, costs/execution, and statistical selection.",
+   "sanityChecks": [
+    "Does the Sharpe survive realistic costs?",
+    "Is there a hold-out that was never used to choose anything?"
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>The strategy turns over its whole book once a day (a full round trip of capital daily). With round-trip costs of 10 bp on traded value and 252 days, what fraction of capital do costs consume per year?</p>",
+    "model": "<p>10 bp × 252 ≈ 25.2% of capital per year — enough to sink most gross Sharpe-3 strategies with ordinary volatility.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.252,
+     "display": "≈ 25.2% per year"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-044",
+  "cat": "systems",
+  "diff": 3,
+  "title": "A real-time risk system",
+  "tags": [
+   "risk-management",
+   "real-time",
+   "limits",
+   "greeks"
+  ],
+  "style": [
+   "coding-screen",
+   "research-stats"
+  ],
+  "prompt": "<p>Design a real-time risk system for a trading desk running many automated strategies across equities and options. It should show live positions, P&amp;L and Greeks, enforce limits, and stop trading automatically when something goes wrong.</p><p>Describe the architecture, which checks are pre-trade vs post-trade, how risk numbers are computed fast enough, and how you test it.</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Pre-trade checks inline in the order path (size, price collar, position and exposure limits) vs post-trade aggregation outside it",
+    "Event-driven: consume fills (drop copy) and market data, maintain positions incrementally",
+    "Fast risk: incremental Greeks (delta, gamma, vega) and scenario grids, not a full Monte Carlo VaR on each tick",
+    "Hierarchical limits (strategy → desk → firm) with warning and hard thresholds",
+    "Automated actions: block new orders, cancel resting orders, flatten or hedge; human escalation",
+    "Independent source of truth (exchange drop copy) and reconciliation with the OMS",
+    "Fail-safe behaviour: if risk data is stale or the risk service is down, trading stops",
+    "Testing: replay historical days, inject faults, exercise kill switches regularly"
+   ],
+   "outline": "<ul><li><b>Inputs</b>: fills (drop copy), orders, market data, reference data.</li><li><b>Position service</b>: incremental, per account/strategy.</li><li><b>Pricing</b>: cached vols/Greeks; delta–gamma approximations between full revaluations; scenario ladders (spot ± x%, vol ± y).</li><li><b>Limits engine</b>: hierarchical, warning/hard, per-symbol and aggregate.</li><li><b>Actions</b>: throttle → block → cancel → flatten; alerting.</li><li><b>Safety</b>: heartbeat/staleness → stop; independent of strategy code.</li><li><b>Testing</b>: replay, chaos tests, scheduled kill-switch drills.</li></ul>",
+   "pitfalls": [
+    "Running a 10,000-path Monte Carlo VaR on every position update",
+    "A risk system that fails open (keeps trading when it crashes)",
+    "Trusting the strategy's own position count instead of an independent drop copy",
+    "One global limit with no per-strategy granularity",
+    "Automated hedging that can itself run away without limits"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "Split what must be microseconds (pre-trade, in the order path) from what can be milliseconds or seconds (aggregation, scenarios).",
+   "What should happen if the risk system itself stops updating?"
+  ],
+  "solution": "<p><b>Two layers.</b> Pre-trade checks live inside the order path (OMS/gateway): per-order size, price collar, per-symbol position and notional limits, message throttles. They must be deterministic and microsecond-fast. Post-trade risk runs as a separate service consuming an independent drop copy of fills plus market data.</p><p><b>Computation.</b> Positions update incrementally per fill. Greeks are computed per instrument from cached vol surfaces and aggregated; between full revaluations use delta–gamma(–vega) approximations; run scenario grids (spot ±1/5/10%, vol ±5 points) periodically. Historical or Monte Carlo VaR runs on a slower cadence, not per tick.</p><p><b>Limits and actions.</b> Hierarchical limits (strategy, desk, firm; symbol, sector, gross, net, Greeks, loss/drawdown) with warning and hard levels. Breaches trigger graded actions: alert, block new orders, cancel resting orders, flatten/hedge — each action itself rate-limited and logged.</p><p><b>Fail safe.</b> Heartbeats between components; stale risk data or a dead risk process blocks trading. Reconcile positions with the exchange drop copy and the OMS continuously.</p><p><b>Testing.</b> Replay recorded days through the system, inject faults (dropped messages, bad prices, duplicate fills), and exercise the kill switch on a schedule.</p>",
+  "key": "Inline deterministic pre-trade checks + an independent, event-driven post-trade risk service with fail-safe defaults and graded automated actions.",
+  "plan": {
+   "keyIdea": "Separate latency tiers: what must block an order vs what monitors the book.",
+   "method": "Inputs → position keeping → fast risk numbers → limits → actions → failure modes → testing.",
+   "sanityChecks": [
+    "What does the system do if it crashes?",
+    "Does any check depend on the strategy's own bookkeeping?"
+   ]
+  },
+  "par": 20,
+  "followups": [
+   {
+    "type": "explain",
+    "prompt": "<p>Why not just compute a full Monte Carlo VaR every time a position changes?</p>",
+    "model": "<p>It is far too slow and noisy for the order path (thousands of paths × all positions per update), and it adds little over Greek and scenario limits for intraday control. Use closed-form or delta–gamma approximations in real time and run full VaR/stress on a schedule.</p>"
+   },
+   {
+    "type": "variant",
+    "prompt": "<p>A desk's delta is +$2,000,000 per 1% move and its gamma adds +$150,000 per (1%)². Using delta–gamma, what is the P&amp;L for a −3% move?</p>",
+    "model": "<p>ΔP ≈ δ·x + ½γ·x² with x = −3: −6,000,000 + ½ × 150,000 × 9 = −$5,325,000.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": -5325000.0,
+     "display": "−$5,325,000"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-045",
+  "cat": "systems",
+  "diff": 2,
+  "title": "Storing tick data",
+  "tags": [
+   "market-data",
+   "storage",
+   "columnar",
+   "time-series"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>You must store every quote and trade message for 5,000 US equities (years of history) so researchers can run fast queries like “all trades in these 50 symbols between 10:00 and 10:05 for the last 3 years” and replay a full day in order.</p><p>Describe the storage layout, file formats, partitioning, compression and how replay works.</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Separate raw capture (append-only, exact wire messages) from the normalised research store",
+    "Columnar format (Parquet-style files or a column-oriented time-series database) for analytical queries",
+    "Partition by date and by symbol (or symbol bucket); sort by timestamp within partitions",
+    "Compression: delta-encode timestamps and prices, dictionary-encode symbols; integer prices in ticks",
+    "Keep exchange timestamps and receive timestamps plus sequence numbers, as integer nanoseconds in UTC",
+    "Replay: merge per-symbol sorted files by timestamp/sequence (k-way merge) to reproduce the feed",
+    "Reference data side tables (corporate actions, symbol changes) applied point-in-time",
+    "Data quality checks: gaps in sequence numbers, crossed books, outliers"
+   ],
+   "outline": "<ul><li><b>Raw</b>: packet captures / binary journal per feed per day, immutable.</li><li><b>Normalised</b>: trades, quotes, book deltas; columnar files partitioned date/symbol; sorted by (ts, seq).</li><li><b>Encoding</b>: int64 ns timestamps (delta), integer prices in ticks, dictionary symbols; heavy compression.</li><li><b>Query</b>: partition pruning + column projection; time-range index.</li><li><b>Replay</b>: k-way merge across partitions by (exchange ts, seq).</li><li><b>Reference</b>: point-in-time corporate actions and symbology.</li></ul>",
+   "pitfalls": [
+    "Storing floats for prices or local-time timestamps without a time zone",
+    "One huge row-oriented table scanned for every query",
+    "Losing the original raw messages (cannot reprocess after a parser bug)",
+    "Partitioning only by symbol so a daily replay touches every file",
+    "Applying today's symbology to historical data"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "What do typical queries filter on? Partition along those.",
+   "Row-oriented vs column-oriented: which wins for 'give me price and size for a time range'?"
+  ],
+  "solution": "<p>Keep two layers. <b>Raw capture</b> is the immutable source of truth: the exact messages per feed per day (with receive timestamps), so everything can be re-parsed when a bug is found. <b>Normalised research data</b> holds trades, quotes and book updates in a columnar store.</p><p><b>Layout.</b> Partition by date, then by symbol (or hash bucket of symbols); inside a partition sort by (exchange timestamp, sequence number). Queries prune to a few partitions and read only the needed columns. Timestamps are int64 nanoseconds in UTC (exchange and receive time both kept), prices are integer ticks, symbols are dictionary-encoded; delta encoding plus a general compressor typically shrinks tick data several-fold.</p><p><b>Replay</b> of a day is a k-way merge of the per-symbol sorted streams by (timestamp, sequence), feeding the same handler code as production. Reference data (splits, symbol changes, listings) is stored point-in-time and joined as-of. Quality checks flag sequence gaps, crossed quotes and outliers at load time.</p>",
+  "key": "Immutable raw capture + columnar, date/symbol-partitioned, time-sorted normalised store with integer encodings; replay by k-way merge.",
+  "plan": {
+   "keyIdea": "Design around the access patterns: time-range scans of few columns, and ordered full-day replay.",
+   "method": "Layers → partitioning → encoding/compression → indexes → replay → reference data and QA.",
+   "sanityChecks": [
+    "Can you reprocess after a parser bug?",
+    "Does a 5-minute query read only a few files?"
+   ]
+  },
+  "par": 15,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Estimate raw volume: 2 billion messages per day at 40 bytes each before compression. How many gigabytes per day (1 GB = 10⁹ bytes)?</p>",
+    "model": "<p>2 × 10⁹ × 40 = 8 × 10¹⁰ bytes = 80 GB per day uncompressed; with ~5× compression about 16 GB per day, a few TB per year.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 80.0,
+     "display": "80 GB"
+    }
+   },
+   {
+    "type": "complexity",
+    "prompt": "<p>What is the cost of merging k sorted per-symbol streams with n messages in total for replay?</p>",
+    "model": "<p>O(n log k) with a min-heap keyed by (timestamp, sequence); memory O(k) for the heap heads.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-046",
+  "cat": "systems",
+  "diff": 2,
+  "title": "Machine learning on market data",
+  "tags": [
+   "machine-learning",
+   "leakage",
+   "walk-forward",
+   "non-stationarity"
+  ],
+  "style": [
+   "research-stats"
+  ],
+  "prompt": "<p>You are asked to build a model that predicts the next 5-minute return of liquid stocks from order-book and trade features. Explain how you would set up the data, labels and validation so that the out-of-sample estimate is honest, and which modelling choices matter most in this domain.</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Strict time ordering: features computed only from data before the prediction time (as-of joins, no centred windows)",
+    "Walk-forward / expanding-window validation instead of random K-fold",
+    "Purging and embargo around fold boundaries because labels overlap in time",
+    "Non-stationarity: regimes change; retrain on a schedule, monitor drift, prefer robust/simple models",
+    "Low signal-to-noise: strong regularisation, few well-motivated features, evaluate with IC / P&amp;L after costs",
+    "Fit scalers, feature selection and hyper-parameters on training windows only",
+    "Count and penalise the number of experiments (multiple testing); final untouched hold-out",
+    "Translate predictions into trades with realistic costs, latency and capacity before judging"
+   ],
+   "outline": "<ul><li><b>Data</b>: point-in-time features, aligned timestamps, survivorship-free universe.</li><li><b>Label</b>: forward 5-min return (maybe residualised vs market); overlapping ⇒ purge/embargo.</li><li><b>Validation</b>: walk-forward folds; hyper-parameters chosen inside each training window.</li><li><b>Model</b>: regularised linear / small GBMs; IC and turnover-aware metrics.</li><li><b>Evaluation</b>: P&amp;L after costs, stability over time, decay monitoring.</li><li><b>Governance</b>: experiment log, final hold-out.</li></ul>",
+   "pitfalls": [
+    "Random train/test split on time series (leaks future regimes and overlapping labels)",
+    "Fitting the scaler or feature selection on the full dataset",
+    "Judging by accuracy on a 3-class label instead of P&amp;L after costs",
+    "Using a feature that is only known after the bar closes",
+    "Endless tuning on the same validation period"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "Where can information from the future sneak into a training row?",
+   "Why is K-fold cross-validation dangerous here?"
+  ],
+  "solution": "<p><b>Data and labels.</b> Build features with as-of joins so each row uses only information time-stamped before the prediction instant, including realistic feed latency. The label (5-minute forward return, ideally market-residualised) overlaps with neighbouring labels, so samples are not independent.</p><p><b>Validation.</b> Use walk-forward folds (train on the past, test on the next block), purge training samples whose label windows overlap the test block, and embargo a gap after it. Fit every preprocessing step (scalers, feature selection, hyper-parameters) inside the training window. Keep a final period untouched until the end, and log how many variants you tried.</p><p><b>Modelling.</b> Signal-to-noise is tiny and the data are non-stationary, so favour heavily regularised linear models or shallow tree ensembles, a handful of well-motivated features, and frequent retraining with drift monitoring. Evaluate with information coefficient, turnover and simulated P&amp;L after spreads, fees and latency — classification accuracy is nearly meaningless.</p>",
+  "key": "Honest ML in trading = point-in-time features + walk-forward with purge/embargo + cost-aware evaluation, under heavy regularisation because the signal is weak and drifting.",
+  "plan": {
+   "keyIdea": "Most failures are leakage and selection, not model choice.",
+   "method": "Data timing → label overlap → validation scheme → model class → evaluation in P&amp;L terms.",
+   "sanityChecks": [
+    "Could any feature be computed only after the label window starts?",
+    "Is the test period ever used for choices?"
+   ]
+  },
+  "par": 12,
+  "followups": [
+   {
+    "type": "explain",
+    "prompt": "<p>Your random 5-fold CV shows 58% directional accuracy; walk-forward shows 51%. Explain the gap.</p>",
+    "model": "<p>Random folds put neighbouring, overlapping samples (and the same regime) in both train and test, so the model is graded on near-copies of its training data. Walk-forward removes that leakage and reveals the real, much weaker predictability.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-047",
+  "cat": "systems",
+  "diff": 3,
+  "title": "Market-data feed handler",
+  "tags": [
+   "feed-handler",
+   "multicast",
+   "sequence-numbers",
+   "low-latency"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Design a feed handler for an exchange's binary market-data feed delivered over UDP multicast on two redundant lines (A and B), with a separate TCP snapshot/recovery service. The output is a correct order book per instrument for downstream strategies.</p><p>Cover gap detection, line arbitration, recovery, threading and how you measure it.</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Per-channel sequence numbers: detect gaps and duplicates",
+    "A/B line arbitration: take the first copy of each sequence number, discard the duplicate",
+    "Gap handling: buffer later packets, request retransmission or snapshot, mark affected books stale",
+    "Snapshot + replay of buffered deltas after the snapshot's sequence to rebuild the book",
+    "Publish book updates with a stale/valid flag so strategies stop quoting on bad books",
+    "Threading: pin the receive thread to a core, busy-poll, lock-free single-producer queues downstream; kernel bypass optional",
+    "Zero-copy parsing of fixed-layout binary messages; no allocation on the hot path",
+    "Measure latency with hardware/NIC timestamps and percentiles; record raw packets for replay tests"
+   ],
+   "outline": "<ul><li><b>Receive</b>: two sockets (A/B), busy-poll, NIC timestamps.</li><li><b>Arbitrate</b>: per channel next-expected seq; first arrival wins.</li><li><b>Gap</b>: buffer, timer, retransmit request or snapshot; book flagged stale.</li><li><b>Recover</b>: apply snapshot, then buffered deltas with seq &gt; snapshot seq.</li><li><b>Decode</b>: zero-copy structs, integer prices.</li><li><b>Book build</b>: order-level book per symbol.</li><li><b>Publish</b>: SPSC ring buffers, sequence numbers, validity flags.</li><li><b>Ops</b>: packet capture, replay harness, latency histograms.</li></ul>",
+   "pitfalls": [
+    "Applying packets out of order or ignoring a gap",
+    "Letting strategies trade on a book that is known to be stale",
+    "Doing heavy work (logging, allocation) on the receive thread",
+    "Arbitrating A/B by line instead of by sequence number",
+    "Measuring only average latency"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "UDP can drop, duplicate and reorder. What field lets you notice?",
+   "How do you rebuild a book when you missed a packet you cannot get back?"
+  ],
+  "solution": "<p><b>Arbitration.</b> Each multicast channel carries a sequence number. Listen on both lines; for each channel keep the next expected sequence. The first copy of a packet to arrive (from A or B) is processed; later copies are dropped. This removes most loss without any recovery.</p><p><b>Gaps.</b> If a packet arrives with a sequence beyond the expected one, buffer it and start a short timer waiting for the other line. If the gap persists, request a retransmission or a snapshot over TCP, and flag the affected instruments' books as stale so downstream logic stops quoting them. Rebuild from the snapshot (which states the sequence it is valid at) and apply buffered deltas with later sequence numbers.</p><p><b>Performance.</b> A receive thread pinned to an isolated core busy-polls the sockets (optionally via kernel bypass), decodes fixed-layout binary messages in place (zero-copy, integer prices), updates order-level books, and pushes updates into single-producer single-consumer ring buffers. No locks, logging or allocation on the hot path.</p><p><b>Measurement and testing.</b> NIC hardware timestamps on arrival and timestamps at publication give wire-to-book latency distributions (median, p99, p99.9). Record raw packets so any day can be replayed deterministically through the handler for regression tests, including injected drops and reorders.</p>",
+  "key": "Sequence numbers drive everything: arbitrate A/B by first arrival, detect gaps, flag stale books, recover via snapshot + buffered deltas.",
+  "plan": {
+   "keyIdea": "Correctness first (ordering, gaps, recovery), then latency (threading, parsing).",
+   "method": "Arbitration → gap detection → recovery → book build → publication → measurement/testing.",
+   "sanityChecks": [
+    "What does a strategy see while a book is being recovered?",
+    "How would you reproduce a production bug?"
+   ]
+  },
+  "par": 20,
+  "followups": [
+   {
+    "type": "complexity",
+    "prompt": "<p>Why is a single-producer single-consumer ring buffer preferred over a mutex-protected queue between the feed thread and a strategy thread?</p>",
+    "model": "<p>With one writer and one reader, head and tail indices can be advanced with plain atomic loads/stores (acquire/release) — no locks, no system calls, no priority inversion, predictable tail latency and a contiguous cache-friendly array. A mutex queue risks contention and context switches that show up as latency spikes.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-048",
+  "cat": "systems",
+  "diff": 1,
+  "title": "Strategy monitor and kill switch",
+  "tags": [
+   "kill-switch",
+   "monitoring",
+   "risk-controls",
+   "alerting"
+  ],
+  "style": [
+   "coding-screen",
+   "research-stats"
+  ],
+  "prompt": "<p>An automated strategy runs unattended for hours. Design the monitoring and the kill switch: what you watch, what thresholds trigger what actions, and how you make sure the kill switch actually works when needed.</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Watch P&amp;L and drawdown vs expectation, position/exposure, order and message rates, fill ratios, reject rates",
+    "Watch health: heartbeats, market-data staleness, latency, clock sync, error logs",
+    "Graded responses: alert → reduce size/widen → stop new orders → cancel all → flatten",
+    "Kill switch independent of the strategy process (gateway level, cancel-on-disconnect)",
+    "Hard limits enforced outside the strategy (gateway/OMS), not only inside its own code",
+    "Restart requires a human decision and a post-mortem",
+    "Regular drills of the kill switch and alert paths"
+   ],
+   "outline": "<ul><li><b>Metrics</b>: P&amp;L/drawdown, positions, order rate, cancel/fill ratio, rejects, self-trade attempts.</li><li><b>Health</b>: heartbeats, data staleness, latency percentiles, clock drift.</li><li><b>Ladder</b>: warn → throttle → no new orders → mass cancel → flatten.</li><li><b>Independence</b>: kill at gateway/venue level; fail closed.</li><li><b>Process</b>: manual restart, post-mortem, drills.</li></ul>",
+   "pitfalls": [
+    "Kill switch implemented inside the strategy that is misbehaving",
+    "Only watching P&amp;L (a runaway order loop can be flat at first)",
+    "Alerts nobody receives at night",
+    "Never testing the kill path"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "Many disasters start as an order-rate problem, not a P&amp;L problem.",
+   "Where should the off-switch live if the strategy process is the thing that is broken?"
+  ],
+  "solution": "<p><b>What to watch.</b> Economic signals (P&amp;L, drawdown vs a model of normal variability, position and gross exposure), behavioural signals (orders and cancels per second, fill ratio, rejects, repeated identical orders, self-match attempts) and health signals (heartbeats, market-data age, latency percentiles, clock sync).</p><p><b>Actions.</b> A ladder: warn a human; automatically reduce size or widen; block new orders; cancel all resting orders; flatten positions with limits on the flattening itself. Thresholds come from the strategy's historical distribution (e.g. a drawdown beyond k standard deviations of daily P&amp;L, an order rate above a hard cap).</p><p><b>Independence.</b> The kill switch must not depend on the strategy process: enforce it at the gateway/OMS and use exchange cancel-on-disconnect, so killing the connection pulls all quotes. Fail closed: if monitoring loses heartbeats, trading stops.</p><p><b>Process.</b> Restarts need a human and a short post-mortem. Test the kill path regularly in production-like conditions.</p>",
+  "key": "Monitor behaviour and health, not just P&amp;L; act on a graded ladder; put the kill switch outside the strategy and fail closed; drill it.",
+  "plan": {
+   "keyIdea": "Failures show up first in behaviour (order rates) or health (stale data), later in P&amp;L.",
+   "method": "Metrics → thresholds → graded actions → independence of the switch → testing.",
+   "sanityChecks": [
+    "Does the switch work if the strategy process hangs?",
+    "Would you notice a runaway order loop before it costs money?"
+   ]
+  },
+  "par": 8,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>A strategy's daily P&amp;L has standard deviation $40,000. Your intraday stop is set at 3 standard deviations of the daily distribution. At what loss does it trigger?</p>",
+    "model": "<p>3 × 40,000 = $120,000. For normal daily P&amp;L that is roughly a 1-in-740 day; fat tails make it more frequent.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 120000.0,
+     "display": "$120,000"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-049",
+  "cat": "systems",
+  "diff": 2,
+  "title": "Measuring latency properly",
+  "tags": [
+   "latency",
+   "percentiles",
+   "timestamps",
+   "benchmarking"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Management asks “how fast is our trading system?”. Explain how you would measure tick-to-trade latency and report it: where you timestamp, which clocks, which statistics, and the common ways latency measurements lie.</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Define the span: e.g. market-data packet on the wire → order packet on the wire (tick-to-trade)",
+    "Timestamp with hardware/NIC or switch taps at the wire; same clock domain or PTP-synchronised clocks",
+    "Report distributions: median, p99, p99.9, max — not the mean",
+    "Measure under realistic load and bursts (market open, news), not idle",
+    "Coordinated omission: closed-loop load generators hide queueing delay; use open-loop rates",
+    "Break down by stage (feed decode, strategy, risk check, gateway) to find the bottleneck",
+    "Keep the measurement overhead out of the hot path (timestamps into a ring buffer, aggregate elsewhere)"
+   ],
+   "outline": "<ul><li><b>Span</b>: wire-in to wire-out.</li><li><b>Clocks</b>: NIC/tap timestamps, PTP sync; monotonic clocks in software.</li><li><b>Stats</b>: percentile histograms (p50/p99/p99.9/max), per stage.</li><li><b>Load</b>: replay busy days, bursts, open-loop.</li><li><b>Hygiene</b>: no logging on the hot path; warm-up excluded but reported.</li></ul>",
+   "pitfalls": [
+    "Reporting the average, which hides tail spikes",
+    "Using wall-clock time that can jump (NTP adjustments) for intervals",
+    "Benchmarking an idle system",
+    "Closed-loop measurement that waits for each response (coordinated omission)",
+    "Timestamps taken in software after the kernel already queued the packet"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "The mean is the wrong statistic for a system that loses money in its worst microseconds.",
+   "Which clock would you trust to compare a receive and a send on different machines?"
+  ],
+  "solution": "<p><b>Define the span</b> that matters economically: from the market-data packet arriving on the wire to your order leaving on the wire. Measure it with hardware timestamps (NIC or network taps) in one clock domain, or PTP-synchronised clocks; in software use monotonic clocks for intervals.</p><p><b>Report a distribution</b>: median, p99, p99.9 and max, per stage (decode, book update, strategy, risk, gateway) so you can see where the tail comes from. The mean is dominated by the bulk and hides the spikes that cost money.</p><p><b>Test realistically</b>: replay a busy open, inject bursts, run on production-like hardware and settings. Avoid coordinated omission — a load generator that waits for each response before sending the next silently skips the moments the system was stalled; drive it open-loop at a fixed rate. Keep instrumentation cheap (timestamps into a ring buffer, aggregated off the hot path).</p>",
+  "key": "Measure wire-to-wire with hardware timestamps, report tail percentiles per stage, under realistic open-loop load.",
+  "plan": {
+   "keyIdea": "Latency is a distribution and its tail is the product.",
+   "method": "Span → clocks → statistics → load conditions → pitfalls.",
+   "sanityChecks": [
+    "Would a 1-in-1000 stall show in your report?",
+    "Are both timestamps from comparable clocks?"
+   ]
+  },
+  "par": 10,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>You collect 200,000 latency samples. With the nearest-rank definition (ascending rank ⌈0.999·n⌉), the p99.9 is the k-th largest sample. What is k?</p>",
+    "model": "<p>⌈0.999 × 200,000⌉ = 199,800 from the bottom, so k = 200,000 − 199,800 + 1 = 201: exactly 200 samples (0.1%) lie above it.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 201.0,
+     "display": "the 201st largest"
+    }
+   }
+  ]
+ },
+ {
+  "id": "js-050",
+  "cat": "systems",
+  "diff": 3,
+  "title": "Real-time ETF fair value engine",
+  "tags": [
+   "etf",
+   "fair-value",
+   "market-making",
+   "latency"
+  ],
+  "style": [
+   "coding-screen",
+   "research-stats"
+  ],
+  "prompt": "<p>You make markets in an ETF holding 500 stocks. Stock prices arrive in real time; your own ETF trade feed is 50 ms behind. Design the engine that computes the ETF's fair value continuously and feeds your quoting: which inputs, how you update it cheaply, and the main sources of error.</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Fair value per ETF share = (Σ shares<sub>i</sub> × price<sub>i</sub> + cash component + accruals) / creation-unit size, from the daily basket file",
+    "Use the mid or microprice of each constituent, not stale last trades; model illiquid or closed names (futures, beta)",
+    "Incremental update: on each constituent tick add shares<sub>i</sub> × Δprice<sub>i</sub> — O(1) per tick, not O(500)",
+    "Lead–lag: index futures or correlated instruments move first; use them to nowcast stale components",
+    "Treat the delayed ETF feed as a lagging signal; centre quotes on the basket-implied value, not the last ETF print",
+    "Error sources: stale/illiquid constituents, basket changes and corporate actions, FX for foreign stocks, cash and dividend accruals, timestamp misalignment",
+    "Quote width reflects fair-value uncertainty and hedging costs (basket spreads, creation/redemption fees)"
+   ],
+   "outline": "<ul><li><b>Static</b>: daily creation basket (shares, cash), corporate actions, FX.</li><li><b>Dynamic</b>: constituent mids/microprices; futures for nowcasting.</li><li><b>Update</b>: FV += w<sub>i</sub>·Δp<sub>i</sub> per tick; periodic full recompute to remove drift.</li><li><b>Adjust</b>: stale names via beta to futures; foreign names via FX and futures.</li><li><b>Output</b>: FV + uncertainty band → quoting engine; arbitrage band from costs.</li><li><b>Checks</b>: compare with the official indicative value, alert on divergence.</li></ul>",
+   "pitfalls": [
+    "Recomputing the full 500-name sum on every tick",
+    "Using last trade prices of illiquid names",
+    "Treating the official delayed indicative value as fair value",
+    "Ignoring the cash component and dividends",
+    "Floating-point drift from incremental updates never re-synchronised"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "Write fair value as a dot product — what changes when one stock ticks?",
+   "Which constituent prices are 'old' even though they are the latest you have?"
+  ],
+  "solution": "<p><b>Definition.</b> From the day's creation basket: FV = (Σ<sub>i</sub> n<sub>i</sub>·p<sub>i</sub> + cash + accrued items)/creation-unit shares. Use each constituent's mid or microprice (size-weighted mid), not the last trade.</p><p><b>Cheap updates.</b> Keep the running sum; when stock i ticks, FV += n<sub>i</sub>(p<sub>i</sub><sup>new</sup> − p<sub>i</sub><sup>old</sup>)/units — O(1). Recompute the full sum periodically to remove accumulated rounding error, and after any basket change.</p><p><b>Staleness.</b> Some constituents trade rarely or are closed (foreign markets); nowcast them with index futures or correlated instruments (p<sub>i</sub> ≈ p<sub>i,last</sub>(1 + β<sub>i</sub> × futures return since)), converting FX. The delayed ETF feed is not the reference — quotes are centred on the basket-implied value; the ETF's own book matters for inventory and queue position, not for fair value.</p><p><b>Errors and width.</b> Stale and illiquid names, basket changes and corporate actions, dividends/cash, FX, and timestamp misalignment across venues. The quote width should cover hedging costs (constituent spreads, fees) plus the fair-value uncertainty; inventory skews the centre.</p>",
+  "key": "ETF fair value is an incrementally maintained dot product of basket shares and live constituent mids, nowcast for stale names, with width set by hedging cost and uncertainty.",
+  "plan": {
+   "keyIdea": "Fair value is linear in constituent prices — exploit it for O(1) updates.",
+   "method": "Definition → inputs → incremental update → staleness handling → error budget → link to quotes.",
+   "sanityChecks": [
+    "What happens when a big constituent stops trading?",
+    "Do you ever re-sync the running sum?"
+   ]
+  },
+  "par": 20,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>One ETF share represents 0.25 shares of a stock that just ticked up by $0.80, and nothing else moved. By how much does fair value per ETF share change?</p>",
+    "model": "<p>0.25 × 0.80 = +$0.20 — the incremental O(1) update.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.2,
+     "display": "+$0.20"
+    }
+   },
+   {
+    "type": "explain",
+    "prompt": "<p>Why is the last ETF trade a poor estimate of its fair value here?</p>",
+    "model": "<p>It is 50 ms old in your feed and may be a small, noisy print; constituents (and futures) have already moved since. The basket is the hedge you actually trade against, so its live value is the right anchor.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-051",
+  "cat": "systems",
+  "diff": 3,
+  "title": "Fault-tolerant trading engine",
+  "tags": [
+   "distributed-systems",
+   "failover",
+   "determinism",
+   "event-sourcing"
+  ],
+  "style": [
+   "coding-screen"
+  ],
+  "prompt": "<p>Your matching/strategy engine is a single process holding critical state (orders, positions). Design it to survive a machine failure with no lost or duplicated orders and a failover of a few seconds at most.</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Deterministic state machine: state is a pure function of the ordered input event log",
+    "A sequencer assigns a total order to all inputs; events are journaled durably before acting",
+    "Hot standby replays the same ordered events (state-machine replication) and stays in sync",
+    "Outputs (orders) carry idempotent ids/sequence numbers so a re-sent order is detected and not duplicated",
+    "Failure detection by heartbeats with fencing to avoid two primaries (split brain)",
+    "Recovery from snapshot + replay of the log since the snapshot",
+    "Determinism discipline: no wall-clock reads, random numbers or thread timing inside the state machine (inject them as events)",
+    "Regular failover drills and reconciliation with exchange state"
+   ],
+   "outline": "<ul><li><b>Inputs</b> → sequencer → replicated journal.</li><li><b>Primary</b> and <b>standby</b> consume identical ordered events; only the primary emits.</li><li><b>Outputs</b> numbered; the gateway de-duplicates.</li><li><b>Failover</b>: heartbeat loss → fence old primary → promote standby at the last sequence.</li><li><b>Recovery</b>: snapshot + log replay.</li><li><b>Determinism</b>: time and randomness as input events.</li></ul>",
+   "pitfalls": [
+    "Two engines both believing they are primary (no fencing)",
+    "Non-deterministic logic so replicas diverge",
+    "Acting before the input is durably logged",
+    "Re-sending orders after failover without idempotent ids",
+    "Never exercising failover until a real outage"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "If the engine is deterministic, what is enough to rebuild its state?",
+   "How does the exchange-facing side avoid sending the same order twice after a switch?"
+  ],
+  "solution": "<p><b>Event sourcing.</b> Make the engine a deterministic state machine: given the same ordered inputs it produces the same state and outputs. A sequencer stamps every input (client requests, exchange messages, timer ticks) with a global sequence number and writes it to a replicated journal before the engine acts.</p><p><b>Replication.</b> A hot standby consumes the same journal and maintains identical state but does not emit. Outputs carry sequence numbers/idempotent ids so the gateway (or exchange) drops duplicates if the new primary re-emits the tail.</p><p><b>Failover.</b> Heartbeats detect failure; before promoting the standby, fence the old primary (revoke its gateway session or lease) so there are never two writers. The standby continues from the last journaled sequence. Cold recovery = latest snapshot + replay of the log since.</p><p><b>Discipline.</b> No direct wall-clock reads, randomness or thread-timing dependence inside the state machine — inject them as events. Reconcile with exchange order status after any failover, and drill failovers regularly.</p>",
+  "key": "Deterministic state machine + sequenced durable log + replicated standby + idempotent outputs + fencing.",
+  "plan": {
+   "keyIdea": "If state is a function of an ordered log, replication reduces to shipping the log.",
+   "method": "Determinism → sequencing/journal → standby → idempotent outputs → failure detection and fencing → recovery and drills.",
+   "sanityChecks": [
+    "Can two machines ever send orders at once?",
+    "Does replay produce identical outputs?"
+   ]
+  },
+  "par": 20,
+  "followups": [
+   {
+    "type": "explain",
+    "prompt": "<p>Why must time be an input event rather than read from the system clock inside the engine?</p>",
+    "model": "<p>The primary and the standby (or a replay next week) would read different clock values and could take different decisions — e.g. an order timeout firing on one and not the other — so their states diverge. Timer ticks journaled as events make every replica see the same time.</p>"
+   }
+  ]
+ },
+ {
+  "id": "js-052",
+  "cat": "systems",
+  "diff": 2,
+  "title": "Smart order router",
+  "tags": [
+   "smart-order-routing",
+   "execution",
+   "fragmentation",
+   "fees"
+  ],
+  "style": [
+   "coding-screen",
+   "research-stats"
+  ],
+  "prompt": "<p>A stock trades on several venues with different prices, displayed sizes, fees/rebates and latencies. Design a smart order router that buys 50,000 shares well. What information does it use, how does it decide where to send child orders, and how do you evaluate it?</p>",
+  "answer": {
+   "type": "open",
+   "points": [
+    "Consolidated view of all venues' books (with feed-latency awareness) and venue fee/rebate schedules",
+    "Effective price = quoted price + taker fee (or − rebate) per share; route to the best net price",
+    "Size and fill-probability models per venue (displayed vs hidden liquidity, fade/cancel behaviour)",
+    "Simultaneous sweeps timed so child orders arrive together (latency-aware) to reduce fading",
+    "Passive vs aggressive split: post where queue position and fill probability are good, take when urgency is high",
+    "Respect regulatory constraints (best execution, trade-through rules)",
+    "Evaluate with transaction-cost analysis: implementation shortfall vs arrival price, fill rates, markouts by venue"
+   ],
+   "outline": "<ul><li><b>Inputs</b>: books, fees, latencies, historical fill/markout statistics.</li><li><b>Decision</b>: net-price ranking, expected fill size, timing of sweeps, passive placement.</li><li><b>Parent schedule</b>: urgency/impact model decides how fast.</li><li><b>Feedback</b>: update venue models from fills and markouts.</li><li><b>TCA</b>: shortfall, slippage vs benchmarks, venue markouts.</li></ul>",
+   "pitfalls": [
+    "Ranking venues by quoted price ignoring fees",
+    "Sending child orders sequentially so the rest fade",
+    "Ignoring post-trade markouts (toxic venues)",
+    "Evaluating only by fill rate"
+   ],
+   "display": "Self-graded: key points"
+  },
+  "hints": [
+   "What does a share cost on each venue after fees?",
+   "What happens to displayed liquidity on venue B after you hit venue A?"
+  ],
+  "solution": "<p><b>Inputs.</b> A consolidated book from every venue, adjusted for each feed's latency; fee and rebate schedules; historical statistics per venue (fill probability, hidden liquidity, how quickly displayed size fades, post-fill markouts).</p><p><b>Routing.</b> Rank liquidity by net price (price + taker fee, or − rebate) and expected fillable size. For aggressive slices, sweep several venues at once with send times staggered by venue latency so all child orders arrive together, before others react. For passive slices, post where queue position and fill probability are good and markouts benign. A parent-level schedule (urgency vs impact) decides how much to take vs post over time.</p><p><b>Evaluation.</b> Transaction-cost analysis: implementation shortfall vs the arrival price, slippage vs interval VWAP, fill rates and markouts by venue; feed the results back into the venue models. Respect best-execution and trade-through rules.</p>",
+  "key": "Route on net price and expected fill (fees, latency, fade), sweep in sync, and judge by implementation shortfall and markouts.",
+  "plan": {
+   "keyIdea": "Venues differ in price, fees, size reliability and toxicity.",
+   "method": "Inputs → net-price ranking → timing of sweeps → passive placement → TCA feedback.",
+   "sanityChecks": [
+    "Did you include fees in the price?",
+    "Would your second child order still find liquidity?"
+   ]
+  },
+  "par": 12,
+  "followups": [
+   {
+    "type": "variant",
+    "prompt": "<p>Venue A offers at 20.00 with a taker fee of $0.003; venue B offers at 20.01 and pays takers a rebate of $0.001 (an inverted venue). What is the net cost difference per share, B − A?</p>",
+    "model": "<p>A costs 20.003, B costs 20.009: B − A = $0.006, so A is still cheaper despite its fee.</p>",
+    "answer": {
+     "type": "numeric",
+     "value": 0.006,
+     "display": "$0.006"
+    }
+   }
   ]
  }
 ];
@@ -10428,6 +37450,12 @@ window.SBT_TOPICS = {
     "formula": "For a bet won with probability p paying b-to-1, the growth-optimal fraction is f* = p − (1 − p)/b, and the growth rate is g(f) = p·ln(1 + bf) + (1 − p)·ln(1 − f).",
     "example": "p = 0.55 at even money: f* = 0.1 and g = 0.55·ln 1.1 + 0.45·ln 0.9 ≈ 0.0050 per bet; staking 2f* gives g ≈ −0.0001.",
     "trap": "Overbetting: growth falls to about zero at 2f* and turns negative beyond it although every bet has positive EV; half-Kelly keeps about 3/4 of the growth with far less variance."
+   },
+   {
+    "title": "Who holds the choice?",
+    "formula": "Value of a contract with an embedded choice = value under the chooser's optimal policy.",
+    "example": "d8 with one optional re-roll: 5.5 if the holder decides (re-roll 1–4), 3.5 if the seller decides (re-roll 5–8).",
+    "trap": "Pricing the option as if it were yours when the other side controls it."
    }
   ]
  },
@@ -10795,6 +37823,18 @@ window.SBT_TOPICS = {
     "formula": "P&L = Σ size × (edge vs settlement) = cash flows + final position × settlement.",
     "example": "Sold 5 @ 40, bought 3 @ 36, sold 2 @ 39, bought 6 @ 35, settle 37: 15 + 3 + 4 + 12 = 34.",
     "trap": "Forgetting to mark the open position, or counting a round trip's spread only once."
+   },
+   {
+    "title": "Reading a quote",
+    "formula": "“b at a, n up” = bid b for n and offer n at a; width = a − b; mid = (a + b)/2.",
+    "example": "“40 at 44, 10 up”: someone buys 4, someone else says “sold” → you sold 4 @ 44, bought 10 @ 40; at 41 your P&amp;L is 12 + 10 = 22.",
+    "trap": "Forgetting that the rest of your order is still live after a partial fill — say “I'm out” to cancel."
+   },
+   {
+    "title": "Updating after a fill",
+    "formula": "New fair = E[V | they traded with you]; odds multiply by P(trade | high)/P(trade | low).",
+    "example": "V = 20 or 60, half the flow informed: one lift → P(60) = 3/4, fair 50; a second lift → odds 9:1, fair 56 (not 60).",
+    "trap": "Moving your price by the same amount after every fill — updates are multiplicative in odds."
    }
   ]
  },
@@ -10832,7 +37872,142 @@ window.SBT_TOPICS = {
     "trap": "Adding heap sizes instead of XOR-ing them, or using raw heap sizes instead of Grundy values in a subtraction game."
    }
   ]
+ },
+ "micro": {
+  "desc": "How limit order books match orders, why queue position and fees decide whether a one-tick edge exists, and what can take it away.",
+  "cards": [
+   {
+    "title": "Order book and FIFO priority",
+    "formula": "best bid < best ask; at one price, fills go to orders in arrival order (price–time priority)",
+    "example": "Queue at 49.99: A 2 lots, B 3, you 1. A 4-lot market sell fills A (2) and 2 of B; you are now #2 with 1 lot ahead.",
+    "trap": "Thinking a bigger order fills first: at the same price only arrival time matters."
+   },
+   {
+    "title": "Queue position and queue strength",
+    "formula": "P(fill before the price leaves) = (s/(s+u))<sup>k+1</sup> with k lots ahead, sells s, up-ticks u",
+    "example": "Sells 2/3, up-ticks 1/3: as #1 you are filled with probability 2/3; with 3 lots ahead only (2/3)<sup>4</sup> = 16/81 ≈ 0.198.",
+    "trap": "Ignoring the size <i>behind</i> you: a thin queue behind means nobody to scratch into when the level weakens."
+   },
+   {
+    "title": "Scratching and fees vs tick",
+    "formula": "ideal 0+ trade: EV = p·tick − 2·fee; break-even fee = p·tick/2",
+    "example": "p = 0.55, 1-cent tick, fee 0.2 c per side: EV = 0.55 − 0.4 = 0.15 c. At 5 bp on a $40 stock the fee is 2 c per side and EV = 0.6 − 4 = −3.4 c.",
+    "trap": "Treating a scratch as free: it is 0 before fees, but it still pays two fees."
+   },
+   {
+    "title": "Adverse selection",
+    "formula": "EV per fill = h(1 − π) − (M − h)π, with half-spread h, informed share π, informed move M",
+    "example": "h = 0.5 tick, M = 2 ticks: EV = 0.5 − 2π, so the break-even informed share is π = 1/4.",
+    "trap": "Counting fills as wins: fills at the back of a dying queue are disproportionately informed."
+   },
+   {
+    "title": "Latency and rule risk",
+    "formula": "P(first) = Π P(rival slower); a privileged order of size L ahead multiplies your fill probability by s<sup>L</sup>",
+    "example": "Three rivals uniform on [20, 60] µs vs your 40 µs: (1/2)<sup>3</sup> = 1/8. A 5-lot privileged order ahead with sells at 3/4: fill probability 3/4 → (3/4)<sup>6</sup> ≈ 0.178.",
+    "trap": "Assuming the queue rules are fixed: when an order type such as the one in the “Hide Not Slide” story lets others jump ahead, a speed edge can vanish overnight."
+   },
+   {
+    "title": "Effective = realised + impact",
+    "formula": "effective = 2(fill − mid₀), realised = 2(fill − mid<sub>later</sub>), impact = 2(mid<sub>later</sub> − mid₀) (for a buy)",
+    "example": "Quote 49.99 @ 50.01, buy filled at 50.012, mid 5 minutes later 50.010: effective 0.024, realised 0.004, impact 0.020 (0.004 + 0.020 = 0.024).",
+    "trap": "Assuming the effective spread can never exceed the quoted spread — walking the book makes it larger."
+   },
+   {
+    "title": "ETF arbitrage band",
+    "formula": "Rich side: create when P<sub>ETF</sub>(1 − c<sub>ETF</sub>) &gt; NAV(1 + c<sub>basket</sub>); cheap side: buy ETF, redeem, sell basket",
+    "example": "NAV 100, basket cost 0.30%, ETF sale cost 0.10%: break-even ETF price 100.3/0.999 ≈ 100.40, a premium of about 40 bp.",
+    "trap": "Using only the basket cost (break-even 100.30) or using mids instead of the prices you can trade."
+   },
+   {
+    "title": "Adverse selection in your fills",
+    "formula": "P(informed | trade) = P(trade | I)P(I) / P(trade)",
+    "example": "20% informed who trade with probability 0.9, others trade with probability 0.3: 0.18/0.42 = 3/7 ≈ 43% of fills are informed.",
+    "trap": "Using the population share (20%) as the share of your fills."
+   },
+   {
+    "title": "Queue position = arrivals needed",
+    "formula": "P(fill by t) = P(N(t) ≥ k), N(t) ~ Poisson(λt), k = orders needed to reach you",
+    "example": "300 shares ahead, 100-share sell orders at 2 per second: you need 4 arrivals, P(N(1) ≥ 4) = 1 − e⁻²(1 + 2 + 2 + 4/3) ≈ 0.143.",
+    "trap": "Ignoring that back-of-queue fills are disproportionately from large, informed sweeps."
+   },
+   {
+    "title": "Latency cost of stale quotes",
+    "formula": "Expected pick-off loss per window = P(jump) × (jump − half-spread)⁺",
+    "example": "Half-spread 0.02, jumps of ±0.05 with probability 0.1 each per window: 0.2 × 0.03 = 0.006 per window; halving latency roughly halves it.",
+    "trap": "Thinking a wider spread is free — it also cuts the benign flow you trade with."
+   }
+  ]
+ },
+ "coding": {
+  "desc": "Live-coding screens: turn a clear spec into correct, efficient Python, state the complexity and test the edges — the habits interviewers grade.",
+  "cards": [
+   {
+    "title": "Complexity decides what is allowed",
+    "formula": "≈ 10<sup>7</sup>–10<sup>8</sup> simple Python steps per second: n = 10<sup>5</sup> ⇒ O(n log n) fine, O(n²) not.",
+    "example": "LIS on n = 10<sup>5</sup>: the O(n²) DP does ≈ 5·10<sup>9</sup> comparisons (minutes); tails + bisect does ≈ n·log₂n ≈ 1.7·10<sup>6</sup> (well under a second).",
+    "trap": "Quoting the complexity of the idea but writing code that hides an extra factor — <code>x in list</code>, <code>list.pop(0)</code> or slicing inside a loop are all O(n)."
+   },
+   {
+    "title": "Memoisation vs tabulation",
+    "formula": "State = what the future depends on; #states × work per state = cost.",
+    "example": "Target Sum on n = 20: plain ± DFS visits 2<sup>20</sup> = 1,048,576 leaves; memoising on (index, running sum) needs at most 21·(2S + 1) states — for [1,1,1,1,1], target 3, it gives 5.",
+    "trap": "Memoising on the wrong key (e.g. the path) or using lru_cache on unhashable lists; bottom-up tables avoid recursion-depth limits."
+   },
+   {
+    "title": "Heaps for order books and top-k",
+    "formula": "heapq: push/pop O(log n), peek O(1); max-heap = push −price.",
+    "example": "Bids at 100 and 101, asks at 103 and 104; cancel the 101 bid and the 103 ask → best bid/ask become 100/104. With lazy deletion the stale 101 is popped only when it reaches the top.",
+    "trap": "Trying to remove an arbitrary element from a heap (O(n)); keep a live-count map and pop stale tops instead. Add a sequence number to break price ties by time."
+   },
+   {
+    "title": "Sliding windows with deques",
+    "formula": "Running sums: S += x<sub>new</sub> − x<sub>old</sub>; monotone deque for max/min: each index pushed and popped once ⇒ O(n).",
+    "example": "VWAP of the last 2 trades of [[10,1],[20,1],[30,2]]: (20·1 + 30·2)/3 = 26.67. Rolling max of [1,3,−1,−3,5,3,6,7] with w = 3: 3, 3, 5, 5, 6, 7.",
+    "trap": "Using a list with pop(0) (O(n) per pop) or recomputing each window from scratch (O(n·w))."
+   },
+   {
+    "title": "Test the edges before you're asked",
+    "formula": "Empty · single element · all equal · all negative · ties · huge parameter (k ≫ n) · malformed input.",
+    "example": "Max subarray of [−5, −2, −8] is −2, not 0 — initialising best = 0 silently fails; min coins for [1, 3, 4], 6 is 2, which catches a greedy solution that returns 3.",
+    "trap": "Only running the happy-path example from the prompt; interviewers keep a list of edge cases and try them first."
+   }
+  ]
+ },
+ "systems": {
+  "desc": "Design and discussion questions about trading infrastructure: order books, feeds, risk, storage and research pipelines. Interviewers grade structure, trade-offs and failure modes.",
+  "cards": [
+   {
+    "title": "Order book layout",
+    "formula": "Book side = sorted price levels (tree or tick-indexed array) → FIFO of orders per level; plus a hash map order id → node",
+    "example": "Cancel is O(1) via the id map; top of book is a cached pointer. A tick array of 2,000 levels × 64 bytes = 128,000 bytes = 125 KB per side, small enough to stay mostly in cache.",
+    "trap": "Keying levels by floating-point prices, or searching a list to cancel an order (O(n))."
+   },
+   {
+    "title": "Sequence numbers drive recovery",
+    "formula": "gap = received seq − expected seq; gap &gt; 0 ⇒ buffer, try the other line, else snapshot + replay deltas with seq &gt; snapshot seq",
+    "example": "Expecting 1,001 and receiving 1,004 means 3 messages (1,001–1,003) are missing: buffer 1,004, wait briefly for line B, then request a snapshot and mark the book stale meanwhile.",
+    "trap": "Applying 1,004 anyway, or letting strategies quote on a book you know is stale."
+   },
+   {
+    "title": "Latency is a distribution",
+    "formula": "p-quantile (nearest rank) = sample at rank ⌈q·n⌉; report p50, p99, p99.9, max per stage",
+    "example": "With 200,000 samples exactly 200 lie above the p99.9 (it is the 201st largest). A 50 µs stall on 1 in 1,000 messages adds only 0.05 µs to the mean but defines the p99.9.",
+    "trap": "Reporting the mean, or closed-loop benchmarks that skip the stalls (coordinated omission)."
+   },
+   {
+    "title": "Backtest honesty budget",
+    "formula": "Annual cost drag ≈ round-trip cost × round trips per year; overlapping h-day labels have lag-k correlation (h − k)/h",
+    "example": "Turning the book over fully every day at 10 bp per round trip costs 0.001 × 252 = 25.2% of capital a year. 5-day forward-return labels have lag-1 correlation 4/5 = 0.8, so random CV folds leak.",
+    "trap": "Judging a strategy before costs, or with K-fold cross-validation on overlapping time-series labels."
+   },
+   {
+    "title": "Deterministic replay",
+    "formula": "State = f(snapshot, ordered event log); recovery time ≈ events since snapshot / replay rate",
+    "example": "Snapshot at sequence 5,000,000 plus 120,000 later events replayed at 1,000,000 events/s restores state in 0.12 s; a hot standby replaying the same log fails over almost instantly.",
+    "trap": "Reading the wall clock or random numbers inside the engine, so replicas and replays diverge."
+   }
+  ]
  }
 };
 /* Ordered must-do playlist. */
-window.SBT_CORE50 = ["prob-001", "ev-001", "stat-001", "comb-003", "brain-005", "mc-001", "kel-001", "opt-001", "mm-001", "gt-001", "nt-001", "fermi-005", "prob-007", "ev-020", "prob-011", "ev-012", "stat-005", "comb-007", "brain-008", "mc-006", "kel-006", "opt-005", "mm-008", "gt-010", "nt-011", "prob-025", "ev-101", "stat-102", "comb-101", "brain-102", "mc-021", "kel-020", "opt-018", "mm-015", "prob-035", "prob-008", "ev-010", "stat-107", "comb-105", "brain-104", "mc-019", "kel-022", "opt-022", "mm-022", "gt-021", "nt-018", "fermi-007", "prob-024", "ev-107", "prob-107"];
+window.SBT_CORE50 = ["ci-024", "dk-c01", "ci-003", "ci-007", "brain-005", "ci-036", "js-001", "js-023", "mm-001", "gt-001", "nt-001", "fermi-005", "pm-004", "ev-020", "prob-026", "dk-h05", "dk-c09", "ci-018", "comb-007", "brain-008", "dk-s06", "kel-006", "js-026", "mm-009", "gt-010", "nt-011", "prob-010", "ev-101", "stat-102", "comb-101", "brain-102", "mc-021", "opt-017", "pm-026", "prob-101", "dk-h12", "dk-c11", "stat-107", "comb-105", "brain-104", "mc-019", "js-002", "opt-022", "pm-030", "gt-021", "nt-018", "fermi-007", "prob-107", "ev-107", "pm-033"];

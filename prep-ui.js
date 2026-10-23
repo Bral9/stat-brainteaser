@@ -90,6 +90,7 @@
       (games.length ? '<span class="label">Arcade drills</span><div class="fmt-chips">' + games.map(arcadeLink).join('') + '</div>' : '') +
       '</div>';
     html += '<div class="card"><h2>Recommended books</h2>' + (books.length ? '<ul class="books">' + books.map(function (b) { return '<li><b>' + esc(b.t) + '</b> <span class="muted">— ' + esc(b.a) + '</span><br><span class="small muted">' + esc(b.why) + '</span></li>'; }).join('') + '</ul>' : '<p class="muted small">Best learned by doing: the problems here plus the official docs.</p>') + '</div>';
+    if (core.runHtmlHooks) html += core.runHtmlHooks(core.HOOKS.topicCards || [], cat);
     html += '</aside></div>';
     main.innerHTML = html;
     $('#tpStart').addEventListener('click', function () { core.startTopic(cat); });
@@ -140,6 +141,7 @@
       var p = BY_ID[id]; return '<li>' + core.statusIcon(core.status(id)) + '<span>' + esc(p.title) + ' <span class="muted small">· ' + esc(core.catName(p.cat)) + '</span></span></li>';
     }).join('') + '</ol></div>';
     html += '<div class="card"><h2>My notes on ' + esc(f.name) + '</h2><label class="sr-only" for="fmNotes">Notes</label><textarea id="fmNotes" rows="5" placeholder="Recruiter contacts, what the rounds looked like for you, questions to ask…">' + esc(fs.notes.text || '') + '</textarea><p class="muted small" id="fmSaved" style="margin:.4rem 0 0">Private; exported with your progress and your journal.</p></div>';
+    if (core.runHtmlHooks) html += core.runHtmlHooks(core.HOOKS.firmCards || [], f.id);
     html += '</div></div>';
     main.innerHTML = html;
     function ck() { var pr = P.firmProgress(f.id); $('#fmCk').textContent = pr.k + '/' + pr.n + ' done'; }
@@ -161,12 +163,13 @@
   /* ------------------------------------------------------------------ */
   /* Interview plan                                                      */
   /* ------------------------------------------------------------------ */
-  function taskHref(t) { return t.type === 'topic' ? '#prep/go/' + encodeURIComponent(t.k) : (t.href || ''); }
+  function taskHref(t) { return (t.type === 'topic' || t.type === 'code') ? '#prep/go/' + encodeURIComponent(t.k) : (t.href || ''); }
   function taskRow(t, day) {
     var done = P.isDone(t, day), extra = '';
     if (t.type === 'topic') { var pr = P.topicProgress(t, day); extra = ' <span class="muted small">· ' + pr.n + '/' + pr.of + ' tried</span>'; }
+    var badgeV21 = { mockiv: 'Mock interview', code: 'Coding', micro: 'Microstructure', read: 'Reading', lesson: 'Learn' };
     var href = taskHref(t);
-    var badge = { math: 'Mental maths', topic: 'Topic', format: 'Format', review: 'Review', mock: 'Mock', stamina: 'Stamina', stories: 'Stories' }[t.type] || '';
+    var badge = { math: 'Mental maths', topic: 'Topic', format: 'Format', review: 'Review', mock: 'Mock', stamina: 'Stamina', stories: 'Stories' }[t.type] || badgeV21[t.type] || '';
     return '<li class="task' + (done ? ' done' : '') + '"><button type="button" class="tick" data-ptick="' + esc(t.k) + '" aria-pressed="' + done + '" aria-label="' + (done ? 'Mark not done' : 'Mark done') + ': ' + esc(t.label) + '">' + (done ? ICONS.check : '') + '</button>' +
       '<span class="tl"><span class="slot slot-' + t.type + '">' + badge + '</span> ' + esc(t.label) + (t.min ? ' <span class="muted small">· ' + fmtMin(t.min) + '</span>' : '') + extra + '</span>' +
       (href ? '<a class="btn sm' + (done ? ' ghost' : '') + '" href="' + esc(href) + '">' + (done ? 'Open' : 'Go') + '</a>' : '') + '</li>';
@@ -189,13 +192,14 @@
   core.HOOKS.homeCards.push(function () {
     var c = C();
     if (!c.setup) {
-      return '<div class="card comp-home"><div class="row"><span class="ticon" style="--cat: var(--accent)">' + ICONS.route + '</span><div style="flex:1;min-width:0"><b>Interview coming up?</b><div class="muted small">A day-by-day plan for your target date and firm, adapted to your weak topics.</div></div>' +
-        '<a class="btn primary sm" href="#prep/setup">Plan my prep</a></div></div>';
+      // v2.1 calm Home: compact card, one quiet button
+      return '<div class="card comp-home home-card"><div class="hc-head"><b class="hc-t">Interview coming up?</b><a class="btn sm" href="#prep/setup">Plan my prep</a></div>' +
+        '<p class="hc-sub">A day-by-day plan for your target date and firm.</p></div>';
     }
     var day = P.todayDay();
     var firm = c.setup.firm && FIRMS[c.setup.firm];
-    return '<div class="card comp-home prep-home"><div class="row"><span class="ticon" style="--cat: var(--accent)">' + ICONS.route + '</span><div style="flex:1;min-width:0"><b>Today’s interview prep</b><div class="row" style="gap:.35rem;margin-top:.2rem"><span class="cdchip"><b>' + esc(firm ? firm.name : 'Interview') + '</b> ' + esc(inDays(c.setup.date)) + '</span></div></div>' +
-      '<a class="btn primary sm" href="#prep">Open</a></div>' +
+    return '<div class="card comp-home prep-home home-card"><div class="hc-head"><b class="hc-t">Today’s interview prep</b><a class="btn sm" href="#prep">Open</a></div>' +
+      '<p class="hc-sub"><span class="cdchip"><b>' + esc(firm ? firm.name : 'Interview') + '</b> ' + esc(inDays(c.setup.date)) + '</span></p>' +
       (day && day.tasks.length ? '<ul class="tasks compact">' + day.tasks.map(function (t) { return taskRow(t, day); }).join('') + '</ul>'
         : '<p class="muted small" style="margin:.5rem 0 0">' + (day && day.rest ? 'Rest day — nothing scheduled.' : P.daysBetween(today(), c.setup.date) <= 0 ? 'Interview day reached. Good luck — then log how it went.' : 'Nothing scheduled today.') + '</p>') + '</div>';
   });
@@ -444,12 +448,12 @@
     VIEWS.more = function (main, args) {
       mv(main, args);
       var l = $('.more-list', main);
-      if (l) l.insertAdjacentHTML('afterbegin', MORE_PREP);
+      if (l) l.insertAdjacentHTML('afterbegin', MORE_PREP + (core.runHtmlHooks ? core.runHtmlHooks(core.HOOKS.moreItems || []) : ''));
     };
   } else {
     core.TAB_OF.more = 'more'; core.TITLES.more = 'More';
     VIEWS.more = function (main) {
-      main.innerHTML = '<div class="page-head"><div><h1>More</h1></div></div><div class="more-list">' + MORE_PREP +
+      main.innerHTML = '<div class="page-head"><div><h1>More</h1></div></div><div class="more-list">' + MORE_PREP + (core.runHtmlHooks ? core.runHtmlHooks(core.HOOKS.moreItems || []) : '') +
         moreItem('#review', 'review', 'Review', 'Spaced repetition') + moreItem('#stats', 'stats', 'Stats', 'Heat map, streaks, progress') + moreItem('#settings', 'gear', 'Settings', 'Theme, export/import, updates') + '</div>';
     };
   }

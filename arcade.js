@@ -1538,7 +1538,9 @@
       rules: ['20 rounds, 60 seconds each. Cards are worth 2–10, J = 11, Q = 12, K = 13, A = 14.',
         'Easy: 3 cards, 2 face-up. Medium: 1 face-up. Hard: 0. Custom: 1–7 cards, any number face-up.',
         'The shoe is NOT reshuffled between rounds, so fair = visible sum + hidden count × the mean of every card you haven’t seen. Count!',
-        'Sell at the bid, Pass, or Buy at the ask, size 1–10 (keys 1–9, 0 = 10; S / Space / B). Timeout = pass.',
+        'The dealer makes you a market, e.g. “40 at 44”: you may sell at the bid (40) or buy at the ask (44). Width = ask − bid.',
+        'Hit the bid (Sell), Pass, or lift the offer (Buy), size 1–10 (keys 1–9, 0 = 10; S / Space / B). Timeout = pass.',
+        'Your edge per lot is fair − ask when you lift, bid − fair when you hit. Trade only when fair is outside the quote; pass when it is inside.',
         'Scored on EV captured — qty × your edge vs fair — out of the EV available at full size. P&L (vs the true sum) is shown too.'],
       recVariant: function (v, p) { if (v !== 'custom') return v; var c = cardCfg(v, p); return 'custom-' + c.n + 'x' + c.up; },
       fromRec: function (rv, p) { var m = /^custom-(\d)x(\d)$/.exec(rv); if (m) { p.n = +m[1]; p.up = +m[2]; return 'custom'; } return rv; },
@@ -1611,8 +1613,8 @@
       return h + '</div></div>';
     }
     function reportHtml(trueV, fair, res, timeout, bid, ask) {
-      var act = res.side === 'pass' ? (timeout ? 'Timed out — pass' : 'You passed') : 'You ' + (res.side === 'buy' ? 'bought ' + res.qty + ' @ ' + ask : 'sold ' + res.qty + ' @ ' + bid);
-      var bestTxt = res.best === 'pass' ? 'no edge either side (pass was right)' : res.best + ' at full size';
+      var act = res.side === 'pass' ? (timeout ? 'Timed out — pass' : 'You passed') : 'You ' + (res.side === 'buy' ? 'lifted the offer: bought ' + res.qty + ' @ ' + ask : 'hit the bid: sold ' + res.qty + ' @ ' + bid);
+      var bestTxt = res.best === 'pass' ? 'no edge either side, fair was inside the quote (pass was right)' : (res.best === 'buy' ? 'lift the offer' : 'hit the bid') + ' at full size';
       return '<div class="ar-report"><div class="ar-rgrid"><div><span class="label">True</span><b>' + num(trueV) + '</b></div><div><span class="label">Fair</span><b>' + num(fair, 2) + '</b></div>' +
         '<div><span class="label">P&amp;L</span><b class="' + (res.pnl > 0 ? 'res-ok' : res.pnl < 0 ? 'res-bad' : '') + '">' + signed(res.pnl, 2) + '</b></div><div><span class="label">EV</span><b class="' + (res.evc > 0 ? 'res-ok' : res.evc < 0 ? 'res-bad' : '') + '">' + signed(res.evc, 2) + '</b></div></div>' +
         '<p class="small" style="margin:.4rem 0 0">' + esc(act) + '. Best: ' + esc(bestTxt) + ' (EV ' + num(res.eva, 2) + ').</p></div>';
@@ -1624,7 +1626,7 @@
         return '<tr><td>' + (j + 1) + '</td><td class="mono">' + num(rd.fair, 2) + '</td><td class="mono">' + rd.bid + ' / ' + rd.ask + '</td><td>' + (res.side === 'pass' ? '<span class="muted">pass</span>' : res.side + ' ' + res.qty) + '</td><td class="mono">' + num(kind === 'card' ? rd.trueV : rd.trueSum) + '</td><td class="mono ' + (res.pnl > 0 ? 'res-ok' : res.pnl < 0 ? 'res-bad' : '') + '">' + signed(res.pnl, 1) + '</td><td class="mono">' + signed(res.evc, 1) + '</td></tr>';
       }).join('');
       return tiles([{ v: signed(pnl, 1), l: 'P&L', cls: pnl >= 0 ? 'res-ok' : 'res-bad' }, { v: signed(evc, 1), l: 'EV captured' }, { v: num(eva, 1), l: 'EV available (size 10)' }, { v: share === null ? '—' : share + '%', l: 'of available EV' }]) +
-        '<p class="small muted">EV uses fair value, so it measures decisions, not luck. P&amp;L uses the true outcome.</p>' +
+        '<p class="small muted">EV uses fair value, so it measures decisions, not luck. P&amp;L uses the true outcome. Lifting the offer earns fair − ask per lot, hitting the bid earns bid − fair: trade only when fair sits outside the quote.</p>' +
         '<details class="reveal"><summary>' + ICONS.book + '<span>Round by round</span><span class="chev" aria-hidden="true">▾</span></summary><div class="rbody table-scroll"><table class="simple"><thead><tr><th>#</th><th>Fair</th><th>Quote</th><th>You</th><th>True</th><th>P&amp;L</th><th>EV</th></tr></thead><tbody>' + rows + '</tbody></table></div></details>';
     }
 
@@ -1646,6 +1648,17 @@
         'Optional market events restrict the faces: high (5–6), low (1–2), tails (1 and 6), even, odd, or “ones count as 7”. fair = visible sum + hidden × mean allowed face.',
         'Take: trade the quote with size 1, 5, 10 or custom. Budget = 500 + P&L; a buy costs ask × qty, a sell risks (max sum − bid) × qty.',
         'Make: quote your own bid and ask. Orders of 5 lots arrive: informed traders know the true sum; noise traders trade if your price is within a random tolerance of fair. Watch your adverse selection.'],
+      variantRules: {
+        take: ['10 rounds, 60 seconds each, on the sum of 3 dice. Easy shows 2 dice, Medium 1, Hard none.',
+          'Optional market events restrict the faces: high (5–6), low (1–2), tails (1 and 6), even, odd, or “ones count as 7”. fair = visible sum + hidden × mean allowed face.',
+          'You are shown a market “bid at ask”. Hit the bid (sell) if fair is below it, lift the offer (buy) if fair is above it, otherwise pass.',
+          'Size 1, 5, 10 or custom. Budget = 500 + P&L; a buy costs ask × qty, a sell risks (max sum − bid) × qty — big size on a wide range can be refused.'],
+        make: ['10 rounds, 60 seconds each, on the sum of 3 dice. Easy shows 2 dice, Medium 1, Hard none.',
+          'You are the market maker: say a bid and an ask, e.g. “9 at 12, 5 up” — you buy 5 at 9 and sell 5 at 12. Centre it on fair (visible sum + hidden × mean face).',
+          'Width is your protection: wider when more dice are hidden, tighter when you can see more. Each order is 5 lots, up to your position limit.',
+          'Being lifted (they buy your ask) leaves you short; being hit (they sell your bid) leaves you long. Ask who did it: informed traders know the true sum and only trade when it is outside your quote.',
+          'That is adverse selection: if most of your fills are informed, your mid is off fair or your width is too tight. Noise traders paying your width is where the profit comes from.']
+      },
       recVariant: function (v, p) { return v + '-' + diceLevel(p); },
       fromRec: function (rv, p) { var m = /^(take|make)-(easy|medium|hard)$/.exec(rv); if (m) { p.level = m[2]; return m[1]; } return rv; },
       variantLabel: function (rv) { var a = rv.split('-'); return (a[0] === 'make' ? 'Make' : 'Take') + ' · ' + (a[1] ? a[1].charAt(0).toUpperCase() + a[1].slice(1) : ''); },
@@ -1722,15 +1735,15 @@
           sh.body.innerHTML = header(rd) +
             '<div class="ar-make"><div class="ar-mf"><label class="label" for="mBid">Your bid</label><div class="ar-step"><button type="button" data-st="mBid" data-d="-0.5" aria-label="Bid down">−</button><input class="ar-input sm" id="mBid" type="text" inputmode="decimal" autocomplete="off"><button type="button" data-st="mBid" data-d="0.5" aria-label="Bid up">+</button></div></div>' +
             '<div class="ar-mf"><label class="label" for="mAsk">Your ask</label><div class="ar-step"><button type="button" data-st="mAsk" data-d="-0.5" aria-label="Ask down">−</button><input class="ar-input sm" id="mAsk" type="text" inputmode="decimal" autocomplete="off"><button type="button" data-st="mAsk" data-d="0.5" aria-label="Ask up">+</button></div></div></div>' +
-            '<p class="small ar-helper" id="help">Quote a two-sided market on the final sum.</p>' +
+            '<p class="small ar-helper" id="help">Quote a two-sided market on the final sum: a bid you’d buy at and an ask you’d sell at, centred on fair.</p>' +
             '<div class="row center"><button type="button" class="btn primary" id="qb">Quote <span class="kbd">Enter</span></button></div>' +
             '<div class="ar-fb" id="fb"></div><div id="rep"></div>';
           var bi = sh.$('#mBid'), ai = sh.$('#mAsk');
           function upd() {
             var b = parseNum(bi.value), a = parseNum(ai.value), h = sh.$('#help');
-            if (b === null || a === null) { h.textContent = 'Quote a two-sided market on the final sum (max ' + rd.maxSum + ').'; return; }
+            if (b === null || a === null) { h.textContent = 'Quote a two-sided market on the final sum (possible ' + rd.minSum + '–' + rd.maxSum + '): a bid you’d buy at and an ask you’d sell at.'; return; }
             var err = E.makeValidate(b, a, rd.maxSum);
-            h.innerHTML = err ? '<span class="res-bad">' + esc(err) + '</span>' : 'You are <b>' + num(b) + ' at ' + num(a) + '</b>, ' + num(a - b) + ' wide, mid ' + num((a + b) / 2);
+            h.innerHTML = err ? '<span class="res-bad">' + esc(err) + '</span>' : 'You are <b>' + num(b) + ' at ' + num(a) + ', ' + L.lots + ' up</b> — ' + num(a - b) + ' wide, mid ' + num((a + b) / 2) + '. Lifted = you sell at ' + num(a) + '; hit = you buy at ' + num(b) + '.';
           }
           bi.addEventListener('input', upd); ai.addEventListener('input', upd);
           bi.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); if (parseNum(ai.value) === null) ai.focus(); else quoteMake(); } });
@@ -1774,7 +1787,8 @@
           sh.$('#rep').innerHTML = '<ul class="ar-fills">' + rows + '</ul>' +
             '<div class="ar-report"><div class="ar-rgrid"><div><span class="label">True</span><b>' + rd.trueSum + '</b></div><div><span class="label">Fair</span><b>' + num(rd.fair, 2) + '</b></div>' +
             '<div><span class="label">P&amp;L</span><b class="' + (fr.pnl > 0 ? 'res-ok' : fr.pnl < 0 ? 'res-bad' : '') + '">' + signed(fr.pnl, 1) + '</b></div><div><span class="label">Position</span><b>' + (fr.pos > 0 ? '+' : '') + fr.pos + '</b></div></div>' +
-            '<p class="small" style="margin:.4rem 0 0">Your mid was <b>' + num(err2, 2) + '</b> from fair on a ' + num(a - b) + '-wide market' + (err2 > (a - b) / 2 ? ' — fair was outside your quote, so informed flow picks you off.' : '.') + '</p></div>' + nextBtn();
+            '<p class="small" style="margin:.4rem 0 0">Your mid was <b>' + num(err2, 2) + '</b> from fair on a ' + num(a - b) + '-wide market' + (err2 > (a - b) / 2 ? ' — fair was outside your quote, so informed flow picks you off.' : '.') + '</p>' +
+            '<p class="small muted" style="margin:.25rem 0 0">' + esc(fillLesson(fr.fills, mid, rd.trueSum)) + '</p></div>' + nextBtn();
           bindNext();
         }
         sh.keys(function (e) {
@@ -1788,6 +1802,22 @@
         });
       }
     };
+    /* rule-based "what did the fills tell you?" line for a Make round */
+    function fillLesson(fills, mid, trueSum) {
+      var lifted = 0, hit = 0, liftInf = 0, hitInf = 0;
+      fills.forEach(function (f) {
+        if (!f.qty) return;
+        if (f.side === 'buy') { lifted += f.qty; if (f.who === 'informed') liftInf += f.qty; }
+        else if (f.side === 'sell') { hit += f.qty; if (f.who === 'informed') hitInf += f.qty; }
+      });
+      if (!lifted && !hit) return 'No fills: nobody wanted your prices. Quoting wide is safe but earns nothing — tighten if you are confident in fair.';
+      var s = 'You were lifted ' + lifted + ' and hit ' + hit + '. ';
+      if (lifted > hit) s += 'More buyers than sellers is a signal the sum is above your mid — in a live game you would move your market up before the next order' + (trueSum > mid ? ' (and here it was: ' + trueSum + ').' : ' (this time it wasn’t — noise flow).');
+      else if (hit > lifted) s += 'More sellers than buyers is a signal the sum is below your mid — in a live game you would move your market down before the next order' + (trueSum < mid ? ' (and here it was: ' + trueSum + ').' : ' (this time it wasn’t — noise flow).');
+      else s += 'Balanced flow: buyers and sellers paid your width and you stayed flat — the ideal for a market maker.';
+      if (liftInf + hitInf > 0) s += ' The informed lots (' + (liftInf + hitInf) + ') are the adverse selection: they only trade when you are wrong.';
+      return s;
+    }
     function makeStats(log) {
       var q = log.filter(function (l) { return l.quoted; }), vol = 0, inf = 0;
       q.forEach(function (l) { vol += l.fr.vol; inf += l.fr.volInf; });
@@ -1804,6 +1834,7 @@
         { v: st.midErr === null ? '—' : num(st.midErr, 2), l: 'avg |mid − fair|' }, { v: st.infPct + '%', l: 'volume from informed', cls: st.infPct > 50 ? 'res-bad' : '' }]) +
         '<p class="small">' + (st.infPct > 50 ? '<b class="res-bad">Most of your volume came from informed traders</b> — your quotes are too tight or off-centre, so you only trade when you are wrong.' : 'Informed flow was under half your volume. Profit comes from noise traders paying your spread.') +
         ' Keep the mid on fair, and widen when you can’t see the dice.</p>' +
+        '<p class="small muted">Adverse selection in one line: conditional on being filled, the value has usually moved against you. After a lift ask “why did they buy?”, after a hit “why did they sell?” — and re-centre before quoting again.</p>' +
         '<details class="reveal"><summary>' + ICONS.book + '<span>Round by round</span><span class="chev" aria-hidden="true">▾</span></summary><div class="rbody table-scroll"><table class="simple"><thead><tr><th>#</th><th>Fair</th><th>You</th><th>True</th><th>Fills</th><th>P&amp;L</th></tr></thead><tbody>' + rows + '</tbody></table></div></details>';
     }
 
@@ -2275,9 +2306,8 @@
     /* ================================================================== */
     core.HOOKS.homeCards.push(function () {
       var set = dailySet(), nDone = set.filter(function (x) { return x.done; }).length, dt = dailyToday(), pk = E.dailyPick(core.today());
-      return '<div class="card ar-home"><div class="row"><span class="ticon" style="--cat: var(--c-fermi)">' + IC.arcade + '</span><div style="flex:1;min-width:0"><b>Arcade</b> <span class="muted small">· daily set ' + nDone + '/3</span>' +
-        '<div class="small muted">' + (dt ? 'Daily Fermi #' + pk.n + ': <b>' + dt.score + '/1000</b>' : 'Daily Fermi #' + pk.n + ' is waiting') + '</div></div>' +
-        '<a class="btn ' + (dt ? '' : 'primary ') + 'sm" href="#arcade' + (dt ? '' : '/daily-fermi') + '">' + (dt ? 'Open' : 'Play') + '</a></div></div>';
+      return '<div class="card ar-home home-card"><div class="hc-head"><b class="hc-t">Arcade</b><a class="btn sm" href="#arcade' + (dt ? '' : '/daily-fermi') + '">' + (dt ? 'Open' : 'Play') + '</a></div>' +
+        '<p class="hc-sub">Daily set ' + nDone + '/3 · ' + (dt ? 'Daily Fermi #' + pk.n + ': <b>' + dt.score + '/1000</b>' : 'Daily Fermi #' + pk.n + ' is waiting') + '</p></div>';
     });
     core.HOOKS.settingsCards.push(function () {
       var n = 0, R = A().runs; Object.keys(R).forEach(function (k) { if (Array.isArray(R[k])) n += R[k].length; });
@@ -2333,6 +2363,573 @@
     });
     core.HOOKS.boot.push(function () { try { A(); } catch (e) { } });
 
-    root.SBT_ARCADE._ui = { A: A, saveRun: saveRun, runsOf: runsOf, startGame: startGame, GDEF: GDEF, trimList: trimList, sanitize: sanitizeArcade, dailySet: dailySet };
+    root.SBT_ARCADE._ui = { A: A, saveRun: saveRun, runsOf: runsOf, startGame: startGame, GDEF: GDEF, trimList: trimList, sanitize: sanitizeArcade, dailySet: dailySet, Shell: Shell, GAMES: GAMES, GAME: GAME, IC: IC };  // Shell/GAMES/GAME/IC: used by a7_queue.js
+  });
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ================================================================== */
+/* Part 7 (v2.1): Queue Position — a FIFO limit-order-book simulator  */
+/* of the "0+" queue strategy. Its own IIFE, appended after the hub.   */
+/* Pure engine: SBT_ARCADE.queue.engine (no DOM). UI: a plugin that    */
+/* registers GDEF.queue through SBT_ARCADE._ui.                         */
+/* The 0+ idea comes from a PROMOTIONAL exchange blog post (2023); the */
+/* model is illustrative and its claims are unverified.                */
+/* ================================================================== */
+(function (root) {
+  'use strict';
+  var AR = root.SBT_ARCADE;
+  if (!AR || !AR._engine) return;
+  var E = AR._engine;
+
+  /* ---------------- parameters ---------------- */
+  var STEPS = 150;          // ticks of game time per run
+  var NLV = 4;              // visible levels per side
+  var PX0 = 5000;           // ask starts at 50.00 (prices in cents; tick = 1 cent)
+  var LOT = 100;            // shares per order: 1 tick on one lot = $1
+  var P_MKT = 0.6;          // per tick, per side: chance of a small market order (1–3 lots)
+  var P_FADE = 0.05;        // per tick, per side: chance the crowd at the touch starts cancelling
+  var FADE_CUT = 0.55;      // during a fade each crowd order cancels with this probability
+  var P_CANCEL = 0.02;      // background cancel probability per crowd order per tick
+  var HZ_MAX = 0.2, HZ_SCALE = 3;    // sweep hazard h(q) = 0.2·exp(−q/3), q = lots resting at the touch
+  var CROWD_LAT = 50;       // crowd orders arrive after the fast phase
+  var BOTS = [
+    { id: 'alpha', name: 'Bot α', lat: 2, size: 2, pull: 3 },
+    { id: 'beta', name: 'Bot β', lat: 3, size: 1, pull: 2 },
+    { id: 'gamma', name: 'Bot γ', lat: 8, size: 3, pull: 4 }
+  ];
+  var PRIV = { id: 'priv', name: 'Privileged', lat: 999, size: 4, pull: 5 };
+  var SCEN = {
+    hft: { name: 'HFT fees (fee < tick)', maker: -0.2, taker: 0.3, priv: false },
+    retail: { name: 'Retail fees (fee > tick)', maker: 2.5, taker: 2.5, priv: false },
+    nofifo: { name: 'FIFO broken (privileged order type)', maker: -0.2, taker: 0.3, priv: true },
+    custom: { name: 'Custom fees', maker: 0, taker: 0.3, priv: false }
+  };
+  var LAT = {
+    colo: { name: 'Co-located', lat: 1, slow: false, desc: 'first at a new level — ahead of every bot' },
+    fast: { name: 'Fast', lat: 5, slow: false, desc: 'behind bots α and β, ahead of γ' },
+    retail: { name: 'Retail', lat: 100, slow: true, desc: 'arrives after the bots, the market events and the crowd' }
+  };
+  var MAKER_OPTS = [-0.3, -0.2, -0.1, 0, 0.1, 0.25, 0.5, 1, 2.5];
+  var TAKER_OPTS = [0, 0.1, 0.3, 0.5, 1, 2.5];
+  var AUTO = { cancelBelow: 3, scratchBelow: 6 };
+  /* tunable flow parameters (read at run time, so tests can probe them) */
+  var PRM = { pMkt: P_MKT, mktMax: 3, pFade: P_FADE, fadeCut: FADE_CUT, pCancel: P_CANCEL, hzMax: HZ_MAX, hzScale: HZ_SCALE, crowdOld: 0.5, crowdYoung: 0.85 };
+
+  /* ---------------- FIFO queue primitives ---------------- */
+  function mkLevel(px, side, born) { return { px: px, side: side, q: [], born: born == null ? -1 : born }; }
+  function levelSize(L) { var s = 0; for (var i = 0; i < L.q.length; i++) s += L.q[i].size; return s; }
+  function addOrder(L, o, atHead) { if (atHead) L.q.unshift(o); else L.q.push(o); return o; }
+  function findOrder(L, id) { for (var i = 0; i < L.q.length; i++) if (L.q[i].id === id) return i; return -1; }
+  function cancelOrder(L, id) { var k = findOrder(L, id); return k < 0 ? null : L.q.splice(k, 1)[0]; }
+  /* A market order of `size` lots fills resting orders strictly from the head (time priority). */
+  function fillMarket(L, size) {
+    var fills = [], left = size;
+    while (left > 0 && L.q.length) {
+      var o = L.q[0], take = Math.min(o.size, left);
+      fills.push({ id: o.id, who: o.who, bot: o.bot, size: take, partial: take < o.size });
+      o.size -= take; left -= take;
+      if (o.size <= 0) L.q.shift();
+    }
+    return { fills: fills, filled: size - left, left: left };
+  }
+  function queuePos(L, id) {
+    var k = findOrder(L, id); if (k < 0) return null;
+    var ahead = 0; for (var i = 0; i < k; i++) ahead += L.q[i].size;
+    var total = levelSize(L), mine = L.q[k].size;
+    return { pos: k + 1, n: L.q.length, ahead: ahead, size: mine, behind: total - ahead - mine, total: total };
+  }
+
+  /* ---------------- closed forms ---------------- */
+  function tickHazard(q) { return q > 0 ? PRM.hzMax * Math.exp(-q / PRM.hzScale) : 1; }
+  /* Idealised 0+ trade: win a tick with probability p, otherwise scratch at 0; pay `fee` per side. */
+  function zeroPlusEV(p, tick, fee) { return p * tick - 2 * fee; }
+  function breakevenFee(p, tick) { return p * tick / 2; }
+  /* With losses: entry is a maker order; a win exits as maker, a scratch or a stop-out as taker. */
+  function tradeEV(pw, ps, pl, f) { return pw * (1 - 2 * f.maker) + ps * (-f.maker - f.taker) + pl * (-1 - f.maker - f.taker); }
+  function tradeFee(exitKind, f) { return f.maker + (exitKind === 'maker' ? f.maker : f.taker); }
+  function fmtPx(px) { return (px / 100).toFixed(2); }
+
+  /* ---------------- the simulator ---------------- */
+  function createSim(seed, opt) {
+    opt = opt || {};
+    seed = seed >>> 0;
+    var scenId = SCEN[opt.scen] ? opt.scen : 'hft', sc = SCEN[scenId], latId = LAT[opt.lat] ? opt.lat : 'colo', lt = LAT[latId];
+    var fees = { maker: opt.maker != null && isFinite(opt.maker) ? +opt.maker : sc.maker, taker: opt.taker != null && isFinite(opt.taker) ? +opt.taker : sc.taker };
+    var S = {
+      seed: seed, t: 0, steps: opt.steps || STEPS, scen: scenId, lat: latId, latV: lt.lat, slow: lt.slow, fees: fees,
+      priv: opt.priv != null ? !!opt.priv : sc.priv, bids: [], asks: [], bots: [],
+      you: { order: null, pos: null, pending: null, tr: null },
+      trades: [], log: [], abandons: 0, pulled: 0, ticks: 0, newLevels: 0, privAhead: 0, nid: 0, done: false
+    };
+    var r0 = E.makeRng(E.deriveSeed(seed, 'qp-init'));
+    function oid(p) { S.nid++; return p + S.nid; }
+    function crowdFill(L, total, r) { while (total > 0) { var s = Math.min(total, 1 + Math.floor(r.next() * 4)); L.q.push({ id: oid('c'), who: 'crowd', size: s, t: S.t }); total -= s; } }
+    for (var i = 0; i < NLV; i++) {
+      var b = mkLevel(PX0 - 1 - i, 'bid', -1), a = mkLevel(PX0 + i, 'ask', -1);
+      crowdFill(b, i === 0 ? 8 + r0.int(0, 8) : 10 + r0.int(0, 10), r0);
+      crowdFill(a, i === 0 ? 8 + r0.int(0, 8) : 10 + r0.int(0, 10), r0);
+      S.bids.push(b); S.asks.push(a);
+    }
+    BOTS.concat(S.priv ? [PRIV] : []).forEach(function (d) { S.bots.push({ def: d, order: null, scratch: null }); });
+
+    function arr(side) { return side === 'bid' ? S.bids : S.asks; }
+    function touch(side) { return arr(side)[0]; }
+    function opp(side) { return side === 'bid' ? 'ask' : 'bid'; }
+    function levelAt(side, px) { var a = arr(side); for (var i = 0; i < a.length; i++) if (a[i].px === px) return a[i]; return null; }
+    function note(k, txt) { S.log.push({ t: S.t, k: k, txt: txt }); if (S.log.length > 80) S.log.shift(); }
+    function botById(id) { for (var i = 0; i < S.bots.length; i++) if (S.bots[i].def.id === id) return S.bots[i]; return null; }
+    function cancelAnywhere(id) {
+      var all = S.bids.concat(S.asks);
+      for (var i = 0; i < all.length; i++) if (cancelOrder(all[i], id)) return true;
+      return false;
+    }
+    function closeTrade(outcome, gross, exitKind, px, why) {
+      var y = S.you, tr = y.tr;
+      if (!tr || !y.pos) return;
+      if (y.pos.exitId) cancelAnywhere(y.pos.exitId);
+      tr.outcome = outcome; tr.gross = gross; if (outcome === 'loss') tr.lossBy = tr.tFill === S.t && tr.fillBy !== 'flow' ? 'adverse-fill' : 'held'; tr.exitKind = exitKind; tr.exitPx = px; tr.tExit = S.t; tr.why = why || '';
+      tr.fee = E.clean(tradeFee(exitKind, fees)); tr.net = E.clean(gross - tr.fee);
+      S.trades.push(tr); y.pos = null; y.tr = null;
+      note(outcome, outcome === 'win' ? 'Your exit filled at ' + fmtPx(px) + ': +1 tick.' : outcome === 'scratch' ? 'Scratched at ' + fmtPx(px) + ': 0 ticks before fees.' : 'Stopped out at ' + fmtPx(px) + ': ' + (gross > 0 ? '+' : '') + gross + ' tick' + (Math.abs(gross) === 1 ? '' : 's') + (why ? ' (' + why + ')' : '') + '.');
+    }
+    function onFill(f, L, kind, depleted, preYou) {
+      var y = S.you;
+      if (f.who === 'you') {
+        if (y.order && f.id === y.order.id) {
+          var tr = y.tr;
+          tr.tFill = S.t; tr.fillBy = kind === 'sweep' ? 'sweep' : depleted ? 'deplete' : 'flow';
+          tr.behindAtFill = preYou ? preYou.behind : 0; tr.entry = L.px;
+          y.order = null;
+          y.pos = { side: L.side === 'bid' ? 'long' : 'short', entry: L.px, lvSide: L.side, exitId: null };
+          var XL = touch(opp(L.side)), xpx = L.side === 'bid' ? L.px + 1 : L.px - 1;
+          if (XL.px === xpx) { var xo = { id: oid('x'), who: 'you', size: 1, t: S.t, exit: true }; XL.q.push(xo); y.pos.exitId = xo.id; }
+          note('fill', 'Filled: ' + (L.side === 'bid' ? 'bought' : 'sold') + ' 1 lot at ' + fmtPx(L.px) + (tr.fillBy === 'flow' ? '.' : ' — in a ' + (tr.fillBy === 'sweep' ? 'sweep' : 'queue wipe-out') + '.'));
+        } else if (y.pos && f.id === y.pos.exitId) {
+          y.pos.exitId = null;
+          closeTrade('win', 1, 'maker', L.px);
+        }
+      } else if (f.who === 'bot' || f.who === 'priv') {
+        var bt = botById(f.bot);
+        if (bt) {
+          bt.scratch = { side: L.side, px: L.px, size: (bt.scratch ? bt.scratch.size : 0) + f.size };
+          if (!f.partial) bt.order = null;
+        }
+      }
+    }
+    function marketHit(side, size, kind) {
+      var L = touch(side);
+      if (!levelSize(L) || size <= 0) return 0;
+      var preYou = S.you.order && S.you.order.side === side ? queuePos(L, S.you.order.id) : null;
+      var res = fillMarket(L, size), depleted = L.q.length === 0;
+      for (var i = 0; i < res.fills.length; i++) onFill(res.fills[i], L, kind, depleted, preYou);
+      if (depleted) tickThrough(side, kind);
+      return res.filled;
+    }
+    function tickThrough(side, kind) {
+      S.ticks++;
+      var a = arr(side), o = arr(opp(side));
+      var old = a.shift(), last = a[a.length - 1];
+      var deep = mkLevel(side === 'bid' ? last.px - 1 : last.px + 1, side, -1);
+      crowdFill(deep, 8 + Math.floor(E.makeRng(E.deriveSeed(seed, 'qp-d' + S.t + '-' + S.ticks)).next() * 10), E.makeRng(E.deriveSeed(seed, 'qp-dd' + S.t + '-' + S.ticks)));
+      a.push(deep);
+      var oldOpp = o[0], nl = mkLevel(old.px, opp(side), S.t);
+      o.unshift(nl); o.pop();
+      S.newLevels++;
+      note('tick', (side === 'bid' ? 'Bid ' + fmtPx(old.px) + ' ticked through: price down a tick.' : 'Ask ' + fmtPx(old.px) + ' ticked through: price up a tick.') + ' New empty ' + opp(side) + ' level at ' + fmtPx(old.px) + '.');
+      var y = S.you;
+      if (y.order && y.order.side === opp(side)) {        // your resting entry is no longer at the touch
+        cancelOrder(oldOpp, y.order.id); y.order = null; y.tr = null; S.pulled++;
+        note('pulled', 'Your ' + (side === 'bid' ? 'offer' : 'bid') + ' is no longer at the touch, so it was pulled.');
+      }
+      S.bots.forEach(function (bt) { if (bt.order && bt.order.side === opp(side)) { cancelOrder(oldOpp, bt.order.id); bt.order = null; } });
+      if (y.pos && y.pos.lvSide === side) {                 // the level you entered at is gone: flatten one tick worse
+        closeTrade('loss', -1, 'taker', side === 'bid' ? old.px - 1 : old.px + 1, kind === 'sweep' ? 'the queue was swept' : 'your entry level emptied');
+      }
+    }
+    function youAct(a) {
+      var y = S.you;
+      if (a === 'bid' || a === 'ask') {
+        if (y.pos) return;
+        if (y.order) { if (y.order.side === a) return; var Lo = levelAt(y.order.side, y.order.px); if (Lo) cancelOrder(Lo, y.order.id); y.order = null; y.tr = null; S.abandons++; }
+        var L = touch(a), o = { id: oid('y'), who: 'you', size: 1, t: S.t };
+        L.q.push(o); y.order = { side: a, px: L.px, id: o.id };
+        var qp = queuePos(L, o.id);
+        var privAt = L.q.some(function (x) { return x.who === 'priv'; });
+        if (privAt) S.privAhead++;
+        y.tr = { side: a === 'bid' ? 'long' : 'short', tJoin: S.t, joinPos: qp.pos, joinAhead: qp.ahead, newLevel: S.t - L.born <= 1, entry: L.px, decision: null, privAhead: privAt };
+        note('join', 'Joined the ' + a + ' at ' + fmtPx(L.px) + ' as #' + qp.pos + ' of ' + qp.n + ' (' + qp.ahead + ' lots ahead).');
+      } else if (a === 'cancel') {
+        if (y.order) { var Lc = levelAt(y.order.side, y.order.px); if (Lc) cancelOrder(Lc, y.order.id); y.order = null; y.tr = null; S.abandons++; note('cancel', 'You abandoned the level.'); }
+      } else if (a === 'scratch') {
+        if (!y.pos) return;
+        var p = y.pos, T = touch(p.lvSide);
+        if (T.px !== p.entry || levelSize(T) <= 0) return;
+        y.tr.decision = y.tr.decision === 'hold' ? 'hold-scratch' : 'scratch';
+        closeTrade('scratch', 0, 'taker', p.entry);
+        marketHit(p.lvSide, 1, 'scratch');
+      } else if (a === 'hold') {
+        if (y.pos && y.tr && !y.tr.decision) y.tr.decision = 'hold';
+      }
+    }
+    function step() {
+      if (S.done) return;
+      S.t++;
+      var t = S.t, r = E.makeRng(E.deriveSeed(seed, 'qp-m' + t)), rc = E.makeRng(E.deriveSeed(seed, 'qp-c' + t));
+      // fixed draw order, so the exogenous flow depends only on the seed
+      var d = { fadeB: r.next(), fadeA: r.next(), mS: r.next(), sS: 1 + Math.floor(r.next() * PRM.mktMax), mB: r.next(), sB: 1 + Math.floor(r.next() * PRM.mktMax),
+        hzB: r.next(), hzA: r.next(), cB: r.next(), csB: r.next(), cA: r.next(), csA: r.next(), first: r.next() };
+      /* phase 1: fast arrivals (bots, co-located and fast players), ranked by latency */
+      var acts = [];
+      S.bots.forEach(function (bt) {
+        var df = bt.def;
+        if (bt.scratch) acts.push({ lat: df.lat, fn: function () { var s = bt.scratch; if (!s) return; bt.scratch = null; var L = touch(s.side); if (L.px === s.px) marketHit(s.side, s.size, 'scratch'); } });
+        else if (bt.order) acts.push({ lat: df.lat, fn: function () {
+          if (!bt.order) return;
+          var L = levelAt(bt.order.side, bt.order.px), qp = L && queuePos(L, bt.order.id);
+          if (!qp) { bt.order = null; return; }
+          if (S.t - L.born >= 3 && qp.behind < df.pull) { cancelOrder(L, bt.order.id); bt.order = null; }
+        } });
+        else acts.push({ lat: df.lat, fn: function () {
+          if (bt.order || bt.scratch) return;
+          var side = S.bids[0].born === S.t - 1 ? 'bid' : S.asks[0].born === S.t - 1 ? 'ask' : null;
+          if (!side) return;
+          var L = touch(side), isPriv = df.id === 'priv';
+          var youThere = S.you.order && S.you.order.side === side && findOrder(L, S.you.order.id) >= 0;
+          addOrder(L, { id: oid('b'), who: isPriv ? 'priv' : 'bot', bot: df.id, size: df.size, t: S.t }, isPriv);   // privileged: straight to the head
+          bt.order = { side: side, px: L.px, id: L.q[isPriv ? 0 : L.q.length - 1].id };
+          if (isPriv && youThere) { S.privAhead++; if (S.you.tr && !S.you.tr.privAhead) { S.you.tr.privAhead = true; S.you.tr.joinPos++; S.you.tr.joinAhead += df.size; } }
+        } });
+      });
+      var pend = S.you.pending;
+      if (pend && !S.slow) { acts.push({ lat: S.latV, fn: function () { youAct(pend); } }); S.you.pending = null; }
+      acts.forEach(function (x, i) { x.i = i; });
+      acts.sort(function (a, b) { return a.lat - b.lat || a.i - b.i; });
+      acts.forEach(function (x) { x.fn(); });
+      /* phase 2: market events */
+      ['bid', 'ask'].forEach(function (side) {
+        var L = touch(side), u = side === 'bid' ? d.fadeB : d.fadeA;
+        var fade = u < PRM.pFade, cut = 0;
+        L.q.slice().forEach(function (o) { if (o.who === 'crowd' && rc.next() < (fade ? PRM.fadeCut : PRM.pCancel)) { cancelOrder(L, o.id); cut += o.size; } });
+        if (fade && cut) note('fade', 'The ' + side + ' queue at ' + fmtPx(L.px) + ' is fading: ' + cut + ' lots cancelled.');
+        if (!L.q.length && S.t - L.born >= 3) tickThrough(side, 'cancel');
+      });
+      var order = d.first < 0.5 ? ['bid', 'ask'] : ['ask', 'bid'];
+      order.forEach(function (side) {
+        var u = side === 'bid' ? d.mS : d.mB, sz = side === 'bid' ? d.sS : d.sB;
+        if (u < PRM.pMkt && levelSize(touch(side))) { var px = touch(side).px; var n = marketHit(side, sz, 'flow'); note('mkt', 'Market ' + (side === 'bid' ? 'sell' : 'buy') + ' ' + n + ' lot' + (n === 1 ? '' : 's') + ' at ' + fmtPx(px) + '.'); }
+      });
+      order.forEach(function (side) {
+        var L = touch(side), q = levelSize(L), u = side === 'bid' ? d.hzB : d.hzA;
+        if (q > 0 && L.born < S.t && u < tickHazard(q)) { note('sweep', 'A large ' + (side === 'bid' ? 'sell' : 'buy') + ' swept all ' + q + ' lots at ' + fmtPx(L.px) + '.'); marketHit(side, q, 'sweep'); }
+      });
+      /* phase 3: slow arrivals (the crowd, then a retail-latency player) */
+      ['bid', 'ask'].forEach(function (side) {
+        var L = touch(side), u = side === 'bid' ? d.cB : d.cA, us = side === 'bid' ? d.csB : d.csA;
+        if (L.born === S.t) return;            // nobody slow reaches a level born this tick
+        var young = S.t - L.born <= 3;
+        if (u < (young ? PRM.crowdYoung : PRM.crowdOld)) L.q.push({ id: oid('c'), who: 'crowd', size: young ? 2 + Math.floor(us * 4) : 1 + Math.floor(us * 3), t: S.t });
+      });
+      pend = S.you.pending;
+      if (pend && S.slow) { youAct(pend); S.you.pending = null; }
+      if (S.t >= S.steps) S.done = true;
+    }
+    function act(a) { if (['bid', 'ask', 'scratch', 'hold', 'cancel'].indexOf(a) >= 0) S.you.pending = a; }
+    function finish() {
+      var y = S.you;
+      if (y.order) { var L = levelAt(y.order.side, y.order.px); if (L) cancelOrder(L, y.order.id); y.order = null; y.tr = null; }
+      if (y.pos) {
+        var T = touch(y.pos.lvSide), g = y.pos.side === 'long' ? T.px - y.pos.entry : y.pos.entry - T.px;
+        y.tr.endFlat = true;
+        closeTrade(g > 0 ? 'win' : g < 0 ? 'loss' : 'scratch', g, 'taker', T.px, 'flattened at the end');
+      }
+      S.done = true;
+      return report();
+    }
+    function report() { return reportOf(S.trades, fees, S); }
+    function levelView(L, isTouch) {
+      var age = S.t - L.born;
+      return { px: L.px, side: L.side, size: levelSize(L), touch: isTouch, isNew: L.born >= 0 && age <= 1, age: L.born >= 0 ? age : null,
+        orders: isTouch ? L.q.map(function (o) { return { who: o.who, size: o.size, exit: !!o.exit, bot: o.bot }; }) : [{ who: 'crowd', size: levelSize(L) }] };
+    }
+    function view() {
+      var y = S.you, v = { t: S.t, steps: S.steps, bids: S.bids.map(function (L, i) { return levelView(L, i === 0); }), asks: S.asks.map(function (L, i) { return levelView(L, i === 0); }),
+        pending: y.pending, events: S.log.slice(-6), state: 'flat' };
+      if (y.order) { var L = levelAt(y.order.side, y.order.px); v.state = 'resting'; v.side = y.order.side; v.px = y.order.px; v.qp = L ? queuePos(L, y.order.id) : null; }
+      if (y.pos) {
+        var T = touch(y.pos.lvSide), XL = touch(opp(y.pos.lvSide));
+        v.state = y.pos.side; v.entry = y.pos.entry; v.entryLeft = T.px === y.pos.entry ? levelSize(T) : 0;
+        v.exitQp = y.pos.exitId ? queuePos(XL, y.pos.exitId) : null; v.exitPx = XL.px; v.decided = y.tr && y.tr.decision;
+      }
+      var rp = report(); v.tally = { n: rp.n, w: rp.w, s: rp.s, l: rp.l, gross: rp.gross, net: rp.net };
+      return v;
+    }
+    return { S: S, step: step, act: act, finish: finish, report: report, view: view, touch: touch, fees: fees,
+      get t() { return S.t; }, get steps() { return S.steps; }, get done() { return S.done; }, get you() { return S.you; } };
+  }
+
+  function reportOf(trades, fees, S) {
+    var n = trades.length, w = 0, s = 0, l = 0, gross = 0, net = 0, fee = 0, first = 0, firstW = 0, deepN = 0, deepW = 0, bad = 0, behind = 0, newLv = 0, holds = 0, scr = 0;
+    trades.forEach(function (tr) {
+      if (tr.outcome === 'win') w++; else if (tr.outcome === 'scratch') s++; else l++;
+      gross += tr.gross; net += tr.net; fee += tr.fee;
+      if (tr.joinPos === 1) { first++; if (tr.outcome === 'win') firstW++; } else { deepN++; if (tr.outcome === 'win') deepW++; }
+      if (tr.fillBy && tr.fillBy !== 'flow') bad++;
+      behind += tr.behindAtFill || 0;
+      if (tr.newLevel) newLv++;
+      if (tr.decision === 'scratch' || tr.decision === 'hold-scratch') scr++; else holds++;
+    });
+    return {
+      n: n, w: w, s: s, l: l, gross: E.clean(gross), net: E.clean(net), fee: E.clean(fee),
+      edgeGross: n ? E.clean(gross / n) : 0, edgeNet: n ? E.clean(net / n) : 0, scratchRate: n ? s / n : 0, winRate: n ? w / n : 0, lossRate: n ? l / n : 0,
+      firstRate: n ? first / n : 0, first: first, firstWin: first ? firstW / first : null, deepWin: deepN ? deepW / deepN : null, deepN: deepN,
+      badFills: bad, meanBehind: n ? behind / n : 0, newLevelRate: n ? newLv / n : 0, scratchCalls: scr, holds: holds,
+      abandons: S ? S.abandons : 0, pulled: S ? S.pulled : 0, ticks: S ? S.ticks : 0, newLevels: S ? S.newLevels : 0, privAhead: S ? S.privAhead : 0,
+      fees: { maker: fees.maker, taker: fees.taker }, closedFormEV: n ? E.clean(tradeEV(w / n, s / n, l / n, fees)) : 0
+    };
+  }
+
+  /* Reference 0+ algorithm: join only brand-new levels, abandon a level when fewer than 3 lots are queued behind,
+   * scratch as soon as fewer than 4 lots remain at the entry price, otherwise hold for the tick. */
+  function autoPolicy(sim) {
+    var S = sim.S, y = S.you;
+    if (y.pos) { var T = sim.touch(y.pos.lvSide); return T.px === y.pos.entry && sumSize(T) < AUTO.scratchBelow ? 'scratch' : null; }
+    if (y.order) {
+      var L = sim.touch(y.order.side);
+      if (L.px !== y.order.px) return null;
+      var qp = queuePos(L, y.order.id);
+      return qp && qp.behind < AUTO.cancelBelow && S.t - L.born >= 2 ? 'cancel' : null;
+    }
+    if (S.bids[0].born === S.t) return 'bid';
+    if (S.asks[0].born === S.t) return 'ask';
+    return null;
+  }
+  function sumSize(L) { return levelSize(L); }
+  function runAuto(seed, opt, policy) {
+    var sim = createSim(seed, opt);
+    policy = policy || autoPolicy;
+    while (!sim.done) { var a = policy(sim); if (a) sim.act(a); sim.step(); }
+    var rep = sim.finish();
+    rep.trades = sim.S.trades;
+    return rep;
+  }
+  /* Rule-based debrief. */
+  function debrief(rep, o) {
+    o = o || {};
+    var out = [], f = rep.fees, rt = f.maker + f.taker;
+    if (2 * f.maker >= 1 || rt >= 1) out.push({ k: 'bad', t: 'Fees: a win nets 1 − 2×' + f.maker + ' = ' + E.clean(1 - 2 * f.maker) + ' ticks and a scratch costs ' + E.clean(rt) + ' ticks. When the fee per side is above half a tick, even a perfect “win a tick or scratch” record loses money — scratching is negative EV at these fees.' });
+    if (!rep.n) { out.push({ k: 'info', t: 'No trades. Right after a tick-through the new level is empty: join it at once (B or A) to be first in the queue.' }); return out; }
+    if (o.scen === 'nofifo') out.push({ k: 'bad', t: 'A privileged order sat ahead of you at ' + rep.privAhead + ' level' + (rep.privAhead === 1 ? '' : 's') + '. Once an order type can jump the queue, being fastest no longer makes you #1, and the small, harmless fills go to the order in front of you. This is the rule risk behind the “Hide Not Slide” story.' });
+    if (o.lat === 'retail') out.push({ k: 'bad', t: 'With retail latency your orders landed after the bots and the crowd, so you were #1 in ' + Math.round(100 * rep.firstRate) + '% of trades. The strategy assumes you are the fastest.' });
+    else if (o.scen !== 'nofifo' && rep.n >= 3 && rep.firstRate < 0.4) out.push({ k: 'info', t: 'You were #1 in only ' + Math.round(100 * rep.firstRate) + '% of trades. Joining an established queue puts you at the back, where you mostly get filled when the level is about to break.' });
+    if (rep.lossRate > 0.3) out.push({ k: 'bad', t: Math.round(100 * rep.lossRate) + '% of trades lost a tick. Scratch as soon as the size left at your price gets thin (≈ 6 lots) — the scratch only works while someone is still queued behind you.' });
+    if (rep.badFills >= 2 && rep.badFills / rep.n > 0.25) out.push({ k: 'bad', t: rep.badFills + ' of your fills came from a sweep or from the last lots of a queue: adverse selection. Being filled at the back usually means the price is about to move against you.' });
+    if (rep.scratchRate > 0.75 && rep.n >= 4) out.push({ k: 'info', t: 'You scratched ' + Math.round(100 * rep.scratchRate) + '% of trades. Scratching is the insurance; the profit is the tick you earn when you hold a strong queue.' });
+    if (rep.firstWin != null && rep.deepWin != null && rep.first >= 2 && rep.deepN >= 2) out.push({ k: 'info', t: 'Win rate as #1: ' + Math.round(100 * rep.firstWin) + '%; deeper in the queue: ' + Math.round(100 * rep.deepWin) + '%.' });
+    if (rep.net > 0) out.push({ k: 'ok', t: 'Positive edge: ' + E.clean(E.round(rep.edgeNet, 3)) + ' ticks per trade after fees. Wins of +1 against scratches at 0 make the distribution lopsided — the “slightly better than 50/50” claim, in this toy model.' });
+    else if (rep.gross > 0) out.push({ k: 'info', t: 'Gross edge was positive (' + E.clean(E.round(rep.edgeGross, 3)) + ' ticks per trade) but fees took ' + E.clean(E.round(rep.fee / rep.n, 3)) + ' per trade.' });
+    return out;
+  }
+
+  var QE = {
+    STEPS: STEPS, NLV: NLV, PX0: PX0, LOT: LOT, P_MKT: P_MKT, P_FADE: P_FADE, HZ_MAX: HZ_MAX, HZ_SCALE: HZ_SCALE, CROWD_LAT: CROWD_LAT,
+    BOTS: BOTS, PRIV: PRIV, SCEN: SCEN, LAT: LAT, MAKER_OPTS: MAKER_OPTS, TAKER_OPTS: TAKER_OPTS, AUTO: AUTO, PRM: PRM,
+    mkLevel: mkLevel, levelSize: levelSize, addOrder: addOrder, cancelOrder: cancelOrder, fillMarket: fillMarket, queuePos: queuePos,
+    tickHazard: tickHazard, zeroPlusEV: zeroPlusEV, breakevenFee: breakevenFee, tradeEV: tradeEV, tradeFee: tradeFee, fmtPx: fmtPx,
+    createSim: createSim, reportOf: reportOf, autoPolicy: autoPolicy, runAuto: runAuto, debrief: debrief
+  };
+  var META = {
+    id: 'queue', name: 'Queue Position', icon: 'queue', group: 'market', color: 'var(--c-micro, var(--c-mm))',
+    desc: 'A FIFO limit-order book: race to the front of new price levels, then scratch at 0 or hold for a tick. Fees, latency and a broken-FIFO scenario.',
+    skills: ['Microstructure', 'Queue priority', 'Fees vs tick'],
+    firms: ['Hudson River Trading', 'Jump Trading', 'Virtu', 'Tower Research', 'Citadel Securities', 'XTX Markets'],
+    why: 'HFT and electronic market-making interviews probe queue priority, maker/taker fees versus the tick size, and adverse selection.',
+    variants: [{ id: 'hft', name: 'HFT fees' }, { id: 'retail', name: 'Retail fees' }, { id: 'nofifo', name: 'FIFO broken' }, { id: 'custom', name: 'Custom fees' }]
+  };
+  AR.queue = { engine: QE, meta: META };
+  if (Array.isArray(AR.games) && !AR.games.some(function (g) { return g.id === 'queue'; })) {
+    AR.games.push({ id: META.id, name: META.name, desc: META.desc, skills: META.skills.slice(), firms: META.firms.slice(), why: META.why, href: '#arcade/queue',
+      variants: META.variants.map(function (v) { return { id: v.id, name: v.name, href: '#arcade/queue/' + v.id }; }) });
+  }
+
+  /* ================================================================== */
+  /* UI plugin                                                           */
+  /* ================================================================== */
+  (root.SBT_PLUGINS = root.SBT_PLUGINS || []).push(function (core) {
+    var U = AR._ui;
+    if (!U || !U.Shell || !U.GDEF || !U.GAMES) return;
+    var esc = core.esc, $all = core.$all, ICONS = core.ICONS;
+    if (!U.GAME.queue) { U.GAMES.push(META); U.GAME.queue = META; }
+    U.IC.queue = core.svg('<path d="M4 5h8M4 9h12"/><path d="M4 15h6M4 19h11"/><path d="M19 4v16" stroke-dasharray="2 2"/>');
+    var TEMPO = { slow: 900, normal: 600, fast: 350 };
+
+    function num(x, dp) { if (x === null || x === undefined || !isFinite(x)) return '—'; var s = E.fmtNum(x, dp == null ? 2 : dp); return s.charAt(0) === '-' ? '−' + s.slice(1) : s; }
+    function signed(x, dp) { if (!isFinite(x)) return '—'; var v = E.round(x, dp == null ? 2 : dp); return (v > 0 ? '+' : v < 0 ? '−' : '') + E.fmtNum(Math.abs(v), dp == null ? 2 : dp); }
+    function pct(x) { return Math.round(100 * x) + '%'; }
+    function tiles(items) { return '<div class="ar-tiles">' + items.map(function (t) { return '<div class="stat-tile"><div class="v' + (t.cls ? ' ' + t.cls : '') + '">' + t.v + '</div><div class="l">' + esc(t.l) + '</div></div>'; }).join('') + '</div>'; }
+    function base(ctx, extra) { var o = { g: ctx.g, rv: ctx.rv, routeV: ctx.v, seed: ctx.seed, challenge: ctx.challenge, ghost: null, settings: ctx.settings || {} }; Object.keys(extra).forEach(function (k) { o[k] = extra[k]; }); return o; }
+    function latOf(p) { return LAT[p.lat] ? p.lat : 'colo'; }
+    function idx(v, list, d) { v = Math.round(+v); return v >= 0 && v < list.length ? v : d; }
+    function feesFor(v, p) {
+      if (v === 'custom') return { maker: MAKER_OPTS[idx(p.mk, MAKER_OPTS, 3)], taker: TAKER_OPTS[idx(p.tk, TAKER_OPTS, 2)] };
+      var s = SCEN[v] || SCEN.hft; return { maker: s.maker, taker: s.taker };
+    }
+    function feeTxt(x) { return x < 0 ? 'rebate ' + num(-x, 2) : num(x, 2); }
+
+    U.GDEF.queue = {
+      rules: ['A limit order book with a 1-cent tick (prices around $50). Each price level is a FIFO queue: market orders fill resting orders strictly in arrival order. Orders are 1 lot = 100 shares, so 1 tick = $1.',
+        'Join the best bid (B) or ask (A). Right after a tick-through a new, empty level appears — the fastest order there is #1. Bots α, β, γ race you by latency; the crowd arrives later.',
+        'When you are filled, an exit order is placed one tick better at the back of the other queue. Hold (H) for that tick, or Scratch (S): trade back at your entry price against the orders queued behind you — 0 ticks before fees. C cancels a resting order.',
+        'If your entry level empties (a sweep, or the queue simply runs out) you are flattened one tick worse. Thin queues tick through more often: sweep hazard h(q) = 0.2·e^(−q/3) per tick, q = lots at the touch.',
+        'Fees per share in ticks: entry is a maker order; a win exits as maker, a scratch or stop-out as taker. Score = net P&L in ticks per share (= $ per lot). Between ticks the clock is frozen: an order you send arrives on the next tick.'],
+      recVariant: function (v, p) { var l = latOf(p); if (v === 'custom') return 'custom-' + idx(p.mk, MAKER_OPTS, 3) + 'x' + idx(p.tk, TAKER_OPTS, 2) + '-' + l; return v + '-' + l; },
+      fromRec: function (rv, p) {
+        var m = /^(hft|retail|nofifo)-(colo|fast|retail)$/.exec(rv); if (m) { p.lat = m[2]; return m[1]; }
+        m = /^custom-(\d)x(\d)-(colo|fast|retail)$/.exec(rv); if (m) { p.mk = +m[1]; p.tk = +m[2]; p.lat = m[3]; return 'custom'; }
+        return rv;
+      },
+      variantLabel: function (rv) {
+        var m = /^custom-(\d)x(\d)-(colo|fast|retail)$/.exec(rv);
+        if (m) return 'Custom (maker ' + feeTxt(MAKER_OPTS[+m[1]] || 0) + ', taker ' + num(TAKER_OPTS[+m[2]] || 0, 2) + ') · ' + LAT[m[3]].name;
+        var a = /^(hft|retail|nofifo)-(colo|fast|retail)$/.exec(rv);
+        return a ? ({ hft: 'HFT fees', retail: 'Retail fees', nofifo: 'FIFO broken' })[a[1]] + ' · ' + LAT[a[2]].name : rv;
+      },
+      fmt: function (v) { return signed(v, 2); }, ghost: false,
+      landingTop: function () {
+        return '<div class="banner qp-note"><p class="small" style="margin:0"><b>Illustrative model.</b> The “0+” queue strategy comes from a promotional blog post by a crypto exchange (2023); its claims are unverified. ' +
+          'This toy book shows the logic — time priority, scratching, fees versus tick size, latency and rule risk — not evidence that the strategy works. ' +
+          '<a href="#learn/ms-zero-plus">Read the lesson</a>.</p></div>';
+      },
+      settings: function (v, p) {
+        var l = latOf(p), tp = TEMPO[p.tempo] ? p.tempo : 'normal', f = feesFor(v, p), h = '';
+        h += '<div class="frow"><span class="label">Your latency</span><div class="seg" role="group" aria-label="Latency">' + ['colo', 'fast', 'retail'].map(function (x) { return '<button type="button" data-setv="lat" data-val="' + x + '" aria-pressed="' + (x === l) + '">' + LAT[x].name + '</button>'; }).join('') + '</div>' +
+          '<span class="muted small">' + esc(LAT[l].name + ': ' + LAT[l].desc + '.') + '</span></div>';
+        h += '<div class="frow"><span class="label">Tempo</span><div class="seg" role="group" aria-label="Tempo">' + ['slow', 'normal', 'fast'].map(function (x) { return '<button type="button" data-setv="tempo" data-val="' + x + '" aria-pressed="' + (x === tp) + '">' + x.charAt(0).toUpperCase() + x.slice(1) + '</button>'; }).join('') + '</div>' +
+          '<span class="muted small">' + STEPS + ' ticks, one every ' + (TEMPO[tp] / 1000) + ' s.</span></div>';
+        if (v === 'custom') {
+          var opt = function (list, cur) { return list.map(function (x, i) { return '<option value="' + i + '"' + (i === cur ? ' selected' : '') + '>' + (x < 0 ? '−' + Math.abs(x) + ' (rebate)' : x) + '</option>'; }).join(''); };
+          h += '<div class="ar-setrow"><label class="frow"><span class="label">Maker fee (ticks/share)</span><select data-set="mk">' + opt(MAKER_OPTS, idx(p.mk, MAKER_OPTS, 3)) + '</select></label>' +
+            '<label class="frow"><span class="label">Taker fee (ticks/share)</span><select data-set="tk">' + opt(TAKER_OPTS, idx(p.tk, TAKER_OPTS, 2)) + '</select></label></div>';
+        }
+        var win = E.clean(1 - 2 * f.maker), scr = E.clean(-f.maker - f.taker), los = E.clean(-1 - f.maker - f.taker);
+        h += '<div class="table-scroll"><table class="simple small qp-ftab"><caption class="sr-only">Net ticks per trade outcome</caption><thead><tr><th>Fees (ticks/share)</th><th>Win</th><th>Scratch</th><th>Loss</th></tr></thead><tbody>' +
+          '<tr><td>maker ' + esc(feeTxt(f.maker)) + ' · taker ' + num(f.taker, 2) + '</td><td class="mono">' + signed(win, 2) + '</td><td class="mono">' + signed(scr, 2) + '</td><td class="mono">' + signed(los, 2) + '</td></tr></tbody></table></div>' +
+          '<p class="muted small" style="margin:0">Break-even for an ideal “win a tick or scratch” trader with win rate p: fee per side &lt; p/2 tick. ' + (v === 'retail' ? 'About 5 bp of a $50 stock is 2.5 cents a side — 2.5 ticks.' : v === 'nofifo' ? 'Same fees as HFT, but a privileged order type jumps ahead of you at every new level.' : '') + '</p>';
+        return h;
+      },
+      start: function (main, ctx) {
+        var p = ctx.prefs, l = latOf(p), f = feesFor(ctx.v, p);
+        var tempo = isFinite(+p.tempoMs) && +p.tempoMs > 0 ? E.clamp(+p.tempoMs, 20, 3000) : (TEMPO[p.tempo] || TEMPO.normal);
+        var simOpt = { scen: ctx.v, lat: l, maker: f.maker, taker: f.taker };
+        var sim = createSim(ctx.seed, simOpt), sh;
+        ctx.settings = { scen: ctx.v, lat: l, maker: f.maker, taker: f.taker };
+        sh = U.Shell(main, base(ctx, { title: 'Queue Position', scoreLabel: 'net ticks', scoreText: function (v) { return signed(v, 2); }, rounds: true,
+          rightText: function () { return Math.max(0, sim.steps - sim.t) + ' ticks left'; }, hint: 'B / A join · S scratch · H hold · C cancel.',
+          onStart: function () { render(); sh.later(loop, tempo); },
+          result: function () {
+            var rep = sim.finish(), ref = runAuto(ctx.seed, simOpt);
+            return { score: E.round(rep.net, 2), scoreText: signed(rep.net, 2) + ' ticks', scoreLabel: 'net P&L after fees · gross ' + signed(rep.gross, 2),
+              x: { n: rep.n, w: rep.w, s: rep.s, l: rep.l, gross: rep.gross, net: rep.net, first: E.round(rep.firstRate, 3), ref: ref.net },
+              details: details(rep, ref, sim.S.trades, ctx.v, l) };
+          } }));
+        sh.body.innerHTML = '<div class="qp-wrap">' +
+          '<div class="qp-meta small muted">' + esc(SCEN[ctx.v] ? SCEN[ctx.v].name : '') + ' · ' + esc(LAT[l].name) + ' · maker ' + esc(feeTxt(f.maker)) + ', taker ' + num(f.taker, 2) + ' ticks/share</div>' +
+          '<div class="qp-book" id="qpBook" role="img" aria-label="Order book"></div>' +
+          '<div class="qp-you" id="qpYou" aria-live="polite"></div>' +
+          '<div class="qp-actions" id="qpAct">' +
+          '<button type="button" class="btn" data-qa="bid">Join bid <span class="kbd">B</span></button>' +
+          '<button type="button" class="btn" data-qa="ask">Join ask <span class="kbd">A</span></button>' +
+          '<button type="button" class="btn" data-qa="scratch">Scratch <span class="kbd">S</span></button>' +
+          '<button type="button" class="btn" data-qa="hold">Hold <span class="kbd">H</span></button>' +
+          '<button type="button" class="btn ghost" data-qa="cancel">Cancel <span class="kbd">C</span></button></div>' +
+          '<div class="qp-tally small" id="qpTally"></div>' +
+          '<ul class="qp-feed small" id="qpFeed"></ul></div>';
+        $all('[data-qa]', sh.body).forEach(function (b) { b.addEventListener('click', function () { send(b.getAttribute('data-qa')); }); });
+        function send(a) {
+          if (!sh.running || sim.done) return;
+          var v = sim.view();
+          if ((a === 'bid' || a === 'ask') && (v.state === 'long' || v.state === 'short')) return;
+          if ((a === 'scratch' || a === 'hold') && !(v.state === 'long' || v.state === 'short')) return;
+          if (a === 'cancel' && v.state !== 'resting') return;
+          sim.act(a); render();
+        }
+        function loop() {
+          if (sim.done) return;
+          if (sh.running) {
+            sim.step(); render();
+            if (sim.done) { sh.finish(false); return; }
+          }
+          sh.later(loop, tempo);
+        }
+        function ladderRow(L, kind, maxV) {
+          var w = Math.max(L.size ? 6 : 0, Math.min(100, L.size / maxV * 100));
+          var segs = L.orders.filter(function (o) { return o.size > 0; }).map(function (o) {
+            return '<i class="qp-o ' + o.who + (o.exit ? ' exit' : '') + '" style="flex-grow:' + o.size + '" title="' + esc((o.who === 'you' ? (o.exit ? 'Your exit' : 'You') : o.who === 'bot' ? 'Bot' : o.who === 'priv' ? 'Privileged order' : 'Crowd') + ': ' + o.size + ' lot' + (o.size === 1 ? '' : 's')) + '"></i>';
+          }).join('');
+          return '<div class="qp-row ' + kind + (L.touch ? ' touch' : '') + (L.isNew ? ' new' : '') + '"><span class="qp-px mono">' + fmtPx(L.px) + '</span><span class="qp-sz mono">' + L.size + '</span>' +
+            '<span class="qp-track"><span class="qp-bar" style="width:' + w.toFixed(1) + '%">' + segs + '</span></span><span class="qp-tag">' + (L.isNew ? 'new' : L.touch ? (kind === 'ask' ? 'best ask' : 'best bid') : '') + '</span></div>';
+        }
+        function render() {
+          var v = sim.view(), maxV = 24;
+          v.bids.concat(v.asks).forEach(function (L) { if (L.size > maxV) maxV = L.size; });
+          sh.$('#qpBook').innerHTML = v.asks.slice().reverse().map(function (L) { return ladderRow(L, 'ask', maxV); }).join('') +
+            '<div class="qp-mid small muted">spread 1 tick · ' + v.t + ' / ' + v.steps + '</div>' + v.bids.map(function (L) { return ladderRow(L, 'bid', maxV); }).join('');
+          var y = '', st = v.state;
+          if (st === 'flat') y = '<b>Flat.</b> Join the bid or the ask. Right after a tick-through the new level is empty — the first order there is #1.';
+          else if (st === 'resting') {
+            var q = v.qp;
+            y = '<b>Resting ' + (v.side === 'bid' ? 'buy' : 'sell') + ' 1 lot @ ' + fmtPx(v.px) + '</b>' + (q ? ' · <b>#' + q.pos + ' of ' + q.n + '</b> · ahead ' + q.ahead + ' lots · behind ' + q.behind + ' lots · strength ' + q.total : '') +
+              (q && q.behind < 3 ? '<br><span class="res-bad">Thin queue behind you: if you get filled now there is little to scratch into.</span>' : '');
+          } else {
+            var lng = st === 'long';
+            y = '<b>' + (lng ? 'Long' : 'Short') + ' 1 lot from ' + fmtPx(v.entry) + '</b> · size left at ' + fmtPx(v.entry) + ': <b>' + v.entryLeft + ' lots</b>' +
+              (v.exitQp ? ' · exit ' + fmtPx(v.exitPx) + ': #' + v.exitQp.pos + ' of ' + v.exitQp.n + ' (' + v.exitQp.ahead + ' lots ahead)' : '') +
+              '<br>' + (v.decided ? '<span class="muted">Holding for the tick — S still scratches.</span>' : '<span>Scratch (S) at 0, or Hold (H) for +1?</span>') +
+              (v.entryLeft < 6 ? ' <span class="res-bad">The queue behind you is thin.</span>' : '');
+          }
+          if (v.pending) y += '<br><span class="muted small">Sent: ' + esc(v.pending) + ' — arrives next tick (' + esc(LAT[l].name.toLowerCase()) + ').</span>';
+          sh.$('#qpYou').innerHTML = y;
+          var pos = st === 'long' || st === 'short';
+          $all('[data-qa]', sh.body).forEach(function (b) {
+            var a = b.getAttribute('data-qa');
+            b.disabled = (a === 'bid' || a === 'ask') ? pos || (st === 'resting' && v.side === a) : (a === 'scratch') ? !pos : (a === 'hold') ? !pos || !!v.decided : st !== 'resting';
+            b.setAttribute('aria-pressed', String(v.pending === a));
+          });
+          var T = v.tally;
+          sh.$('#qpTally').innerHTML = '<span><b>' + T.n + '</b> trades</span><span>' + T.w + ' win · ' + T.s + ' scratch · ' + T.l + ' loss</span><span>gross <b class="mono">' + signed(T.gross, 2) + '</b></span><span>net <b class="mono">' + signed(T.net, 2) + '</b></span>';
+          sh.$('#qpFeed').innerHTML = v.events.slice(-4).reverse().map(function (e) { return '<li class="k-' + e.k + '"><span class="mono muted">t' + e.t + '</span> ' + esc(e.txt) + '</li>'; }).join('');
+          sh.setScore(E.round(T.net, 2), true);
+          var bar = sh.$('#arBar > div'); if (bar) bar.style.width = (100 * Math.max(0, v.steps - v.t) / v.steps).toFixed(1) + '%';
+        }
+        sh.keys(function (e) {
+          var k = (e.key || '').toLowerCase(), m = { b: 'bid', a: 'ask', s: 'scratch', h: 'hold', c: 'cancel' }[k];
+          if (m) { e.preventDefault(); send(m); }
+        });
+      }
+    };
+
+    function distBars(rep) {
+      var rows = [['win', 'Win (+1)', rep.w], ['scratch', 'Scratch (0)', rep.s], ['loss', 'Loss (−1)', rep.l]], n = Math.max(1, rep.n);
+      return '<div class="qp-dist" role="img" aria-label="Win ' + rep.w + ', scratch ' + rep.s + ', loss ' + rep.l + '">' + rows.map(function (r) {
+        return '<div class="qp-drow ' + r[0] + '"><span>' + r[1] + '</span><span class="qp-dtrack"><i class="qp-d ' + r[0] + '" style="width:' + (100 * r[2] / n).toFixed(1) + '%"></i></span><b class="mono">' + r[2] + '</b></div>';
+      }).join('') + '</div>';
+    }
+    function details(rep, ref, trades, scen, l) {
+      var db = debrief(rep, { scen: scen, lat: l }), f = rep.fees;
+      var rows = trades.map(function (tr, j) {
+        return '<tr><td>' + (j + 1) + '</td><td>' + (tr.side === 'long' ? 'buy' : 'sell') + ' ' + fmtPx(tr.entry) + '</td><td class="mono">#' + tr.joinPos + (tr.newLevel ? ' <span class="muted">new</span>' : '') + '</td><td>' + esc(tr.fillBy || '') + '</td><td>' + esc(tr.outcome) + (tr.endFlat ? ' <span class="muted">(end)</span>' : '') + '</td><td class="mono">' + signed(tr.gross, 0) + '</td><td class="mono">' + signed(tr.net, 2) + '</td></tr>';
+      }).join('');
+      var p = rep.n ? rep.w / rep.n : 0;
+      return tiles([{ v: rep.n, l: 'fills (trades)' }, { v: rep.n ? pct(rep.scratchRate) : '—', l: 'scratch rate' }, { v: signed(rep.gross, 2), l: 'P&L before fees (ticks)' },
+        { v: signed(rep.net, 2), l: 'P&L after fees (ticks)', cls: rep.net > 0 ? 'res-ok' : rep.net < 0 ? 'res-bad' : '' }]) +
+        '<div class="ar-panel"><h3>Win / scratch / loss</h3>' + distBars(rep) +
+        '<p class="small">Edge per trade: <b>' + signed(rep.edgeGross, 3) + '</b> ticks before fees, <b>' + signed(rep.edgeNet, 3) + '</b> after (×$1 per 100-share lot). You were #1 in ' + (rep.n ? pct(rep.firstRate) : '—') + ' of trades.</p>' +
+        '<p class="small">Closed form with your frequencies: EV = p<sub>w</sub>(1 − 2m) + p<sub>s</sub>(−m − t) + p<sub>l</sub>(−1 − m − t) = <b>' + signed(rep.closedFormEV, 3) + '</b> ticks per trade, with maker m = ' + num(f.maker, 2) + ' and taker t = ' + num(f.taker, 2) + '. ' +
+        'The ideal 0+ trader (never loses, fee c per side) earns p − 2c: at your win rate p = ' + num(p, 2) + ' that breaks even at c = ' + num(breakevenFee(p, 1), 3) + ' tick.</p></div>' +
+        '<div class="ar-panel"><h3>Reference algorithm, same seed</h3><p class="small">Joins only brand-new levels, abandons a level when fewer than ' + AUTO.cancelBelow + ' lots queue behind it, scratches when fewer than ' + AUTO.scratchBelow + ' lots remain at the entry price, otherwise holds: ' +
+        '<b>' + ref.n + '</b> trades (' + ref.w + ' / ' + ref.s + ' / ' + ref.l + '), net <b>' + signed(ref.net, 2) + '</b> ticks (gross ' + signed(ref.gross, 2) + ').</p></div>' +
+        '<div class="ar-panel"><h3>Debrief</h3><ul class="qp-debrief small">' + db.map(function (x) { return '<li class="' + x.k + '">' + esc(x.t) + '</li>'; }).join('') + '</ul>' +
+        '<p class="muted small" style="margin:.4rem 0 0">Toy model of a promotional idea: real books have hidden orders, many venues, queue-position games and fee tiers. <a href="#learn/ms-rule-risk">Rule risk: the Hide Not Slide story</a>.</p></div>' +
+        '<details class="reveal"><summary>' + ICONS.book + '<span>Trade by trade</span><span class="chev" aria-hidden="true">▾</span></summary><div class="rbody table-scroll"><table class="simple"><thead><tr><th>#</th><th>Entry</th><th>Queue</th><th>Fill</th><th>Outcome</th><th>Gross</th><th>Net</th></tr></thead><tbody>' + rows + '</tbody></table></div></details>';
+    }
   });
 })(typeof window !== 'undefined' ? window : globalThis);

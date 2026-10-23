@@ -1,6 +1,6 @@
 # Stat Brainteaser
 
-An offline-first Progressive Web App for preparing for **quant trading / quant research, data science and ML internship interviews** and **math competitions**: probability, statistics, brainteasers, expected value, Markov chains, Kelly betting, options, market making, game theory, number theory, combinatorics, Fermi estimation, Python, SQL, machine learning and mental math — plus an arcade, firm prep, interview study plans and superday mocks.
+An offline-first Progressive Web App for preparing for **quant trading / quant research, data science and ML internship interviews** and **math competitions**: probability, statistics, brainteasers, expected value, Markov chains, Kelly betting, options, market making, game theory, number theory, combinatorics, Fermi estimation, Python, SQL, machine learning and mental math — plus a rule-based mock interview, short concept lessons with a curated library, a Python coding lab, an interview guide, an arcade, firm prep, interview study plans and superday mocks.
 
 **Live:** https://bral9.github.io/stat-brainteaser/
 
@@ -8,7 +8,7 @@ It is plain static files with no build step, no frameworks, no CDNs and no track
 
 ## Features
 
-**369 curated problems in 15 topics**, each with difficulty 1–3, tags, an *interview-format* label, 1–2 progressive hints, a step-by-step solution and a one-line *key idea*. Every topic has its own page with concept cards (key formula, worked micro-example, common trap), recommended books and your progress.
+**601 curated problems in 18 topics** (340 of them with interviewer follow-ups), each with difficulty 1–3, tags, an *interview-format* label, 1–2 progressive hints, a step-by-step solution and a one-line *key idea*. Every topic has its own page with concept cards (key formula, worked micro-example, common trap), recommended books and your progress.
 
 | Group | Topic | Count | Highlights |
 | --- | --- | --- | --- |
@@ -27,6 +27,22 @@ It is plain static files with no build step, no frameworks, no CDNs and no track
 | Technical | Python | 24 | output prediction, Big-O, numpy broadcasting/axes/NaN, pandas groupby/merge |
 | Technical | SQL | 24 | join row counts, NULL semantics, window functions, running sums, top-N per group |
 | Technical | Machine learning | 25 | bias–variance, regularisation, leakage, metrics, gradient descent, k-means, PCA |
+
+The counts above are the 2.0 bank; 2.1 adds the packs listed below (bank total 601: probability 103, statistics 61, EV 52, Markov 40, ML 31, options 30, Kelly 29, market making 32, **microstructure 20**, **coding lab 33**, **systems & design 12**, …).
+
+### New in 2.1 (all content original, every number machine-verified)
+
+- **Mock interview** (`#mock`): a rule-based, offline recreation of a real quant interview. Formats: classic (2 maths + 1 coding, ~60 min), trading desk (probability + a market-making round + mental maths), research (stats/regression + ML/coding), a 30-minute phone screen, a conversational Jane-Street-style preset and firm-flavoured presets. Each round runs **Explain first → Solve (3-level hint ladder, stuck protocol) → Follow-up push-back (faster? n→∞? sanity check? new parameter? complexity? a planted mistake to correct) → between-round debrief**. The final scorecard covers communication, correctness, adaptability, handling stuck, speed, complexity awareness and the four published tips (approach methodically, communicate clearly, correct your mistakes, ask why); next actions feed the interview planner, the report goes to the journal and exports to Markdown. Optional speak-aloud via the Web Speech API.
+- **Follow-ups on 340 problems** (`plan`, `par`, `followups` in the schema): 687 scripted follow-ups, 641 with a checkable answer.
+- **New packs**: the classic interview pack (48: equicorrelation and PSD, conditional regression and collider bias, Bayes, order statistics, stopping times, OLS facts), a syllabus pack built from an unofficial question compilation (40 numeric + 12 open design questions; the source's errors are corrected), the Probability & Markets track (33), the **Probability deck** (`#deck`, 52 cards: ♣ expectation, ♦ conditional probability, ♥ geometric probability, ♠ random walks & martingales), microstructure (14) and 33 Python coding problems.
+- **Open questions** (answer type `open`): design / discussion questions (order book, OMS, backtesting pitfalls, risk system, tick storage, ML in trading…) graded against a key-points checklist on a 0–3 scale, with a model outline and pitfalls.
+- **Coding lab** (`#codelab`, answer type `code`): a plain editor (tab handling, line numbers) and real tests run by **Pyodide** in a Web Worker with a timeout. The runner is optional: one explicit download (~10 MB, pinned v0.26.4 from jsDelivr), then cached by the service worker for offline use. Without it, problems fall back to predict-the-output / complexity questions and a self-check. Each problem ends with the complexity follow-up ("why is the naive version slow? name the fix").
+- **Learn** (`#learn`): 82 short concept lessons in 12 tracks (probability, EV & Kelly, statistics & regression, linear algebra, Markov chains, markets & market making, microstructure & HFT, options, stat arb, coding, interview craft, mental maths). Each lesson is a 2–4 minute index card that points to the exact chapter or video to read next, with read / "confusing" flags, notes and Obsidian export.
+- **Library** (`#library`): 194 curated books, courses and guides — *curated from Quant Roadmap 2024/25 by Stat Arb (@quant_arb) and other sources* (titles and links only; descriptions are our own) — with search, filters, a "start here" shelf, per-item status / notes / rating and Obsidian export.
+- **Interview guide** (`#guide`): the typical pipeline, what interviewers evaluate, role differences, a firm comparison matrix and per-firm expectations; every fact carries a source tag and an as-of date, and conflicting claims are shown side by side. Content lives in `build/guide/guide.json`.
+- **Queue Position** arcade game (`#arcade/queue`): a FIFO limit-order-book simulator of the "0+" scratching idea (illustrative, from a promotional blog post): choose a latency tier, join levels, watch your queue position and queue strength, scratch or hold after a fill; presets show the edge vanish with retail fees and when a privileged order type breaks FIFO.
+- **Planner**: weekly mock interviews (twice a week in the last three weeks), a weekly coding-lab problem, a microstructure slot for trading-desk targets, Library "start here" reading in week 1 and weekly Learn lessons in your weakest topic; weak topics from mock reports are weighted up. Home's "Today" card shows these.
+- **Calmer design**: one muted accent, neutral graphite dark mode, low-chroma topic dots, one card / button / header style everywhere, no gradients; WCAG AA contrast in both themes.
 
 ### New in 2.0 (all content original)
 
@@ -209,6 +225,18 @@ Progress is saved under a stable key with a schema version (`state.v`, currently
 
 You don't have to bump anything for an update to reach users: every push gets a unique build id (see below). Bump `APP_VERSION` in `app.js` and `VERSION` in `sw.js` together, and only for releases you want a human-readable version number for. If you add a new file, also add it to the `PRECACHE` list in `sw.js`.
 
+### v2.1 fields
+
+- `plan: {keyIdea, method, sanityChecks: []}`: what a strong candidate says before computing (used by the mock interview's "explain first" phase).
+- `par`: realistic minutes for a strong candidate.
+- `followups: [{type, prompt, model, answer?}]`, where `type` is one of `faster`, `variant`, `limit`, `sanity`, `complexity`, `explain` or `correct` (the interviewer plants a mistake for you to correct). `answer` has the same shape as a problem answer and is machine-verified.
+- `deck: {suit, rank}`: a card in the probability deck.
+- Answer type `open`: `{points, outline, pitfalls}`, self-graded from 0 to 3.
+- Answer type `code`: `{fn, signature, starter, reference, tests, cmp, complexity, predict}`, run by the coding lab.
+- Follow-ups for existing problems live in `build/parts/overlay_followups.json`.
+
+`python build/check_part.py parts/<name>.json` validates a part. `python build/verify_all.py` re-runs every verifier, then the bank-level checks.
+
 ## Updates & notifications
 
 ### How a deploy works
@@ -259,6 +287,13 @@ coach-ui.js           competition & journal views
 prep-data.js          firm process notes, books, interview-plan templates, superday rubric
 prep.js               interview prep logic: deterministic planner, firm checklists/notes, mocks, journal export of notes
 prep-ui.js            topic pages, firm pages, interview plan, superday mock, Home "Today" card
+mock.js               mock interview mode (formats, phases, follow-ups, rule-based feedback, scorecard) + the `open` answer type
+learn.js, learn-data.js      Learn lessons (data generated by build/build_learn.py from build/learn/*.json)
+library.js, library-data.js  Library (data generated by build/build_library.py from build/library/*.json)
+guide.js, guide-data.js      Interview guide (data generated by build/build_guide.py from build/guide/guide.json)
+codelab.js, codelab-worker.js  coding lab: editor, `code` answer type, optional Pyodide runner in a Web Worker
+deck.js               the probability deck view
+features.css          styles of the v2.1 modules (generated by build/build_css.py from build/css/*.css)
 arcade*.js, arcade.css  the Arcade games (optional: the app still works if they are missing)
 manifest.webmanifest  PWA manifest (relative paths, scope "./")
 sw.js                 cache-first service worker; cache name = version + build; periodic update check

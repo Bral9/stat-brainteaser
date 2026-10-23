@@ -73,6 +73,10 @@
     var list = core.topicWeakness(), mx = 0, out = {};
     list.forEach(function (x) { mx = Math.max(mx, x.score); });
     list.forEach(function (x) { out[x.id] = mx ? x.score / mx : 0.5; });
+    // v2.1: topics flagged weak by recent mock-interview reports are weighted up (never down)
+    var MK = window.SBT_MOCK, mw = null;
+    try { mw = MK && MK.weakTopics ? MK.weakTopics() : null; } catch (e) { mw = null; }
+    if (mw) Object.keys(mw).forEach(function (c) { var v = +mw[c]; if (isFinite(v) && v > 0) out[c] = Math.max(out[c] == null ? 0.5 : out[c], Math.min(1, v)); });
     return out;
   }
   P.weaknessMap = weaknessMap;
@@ -115,6 +119,75 @@
       var out = [], mins = 0;
       for (var i = 0; i < pool.length && out.length < k; i++) { out.push(pool[i].id); used[pool[i].id] = 1; mins += MIN_PER[pool[i].diff]; }
       return { ids: out, mins: mins };
+    }
+    /* v2.1 slots: mock interviews (weekly, then twice a week in the last 3 weeks), a weekly coding-lab problem,
+     * a weekly microstructure slot for trading-desk targets, and reading slots (Library "start here" items in week 1, then
+     * a weekly Learn lesson / Library item in the weakest topic). All deterministic in (setup, saved state, date). */
+    var LIB = window.SBT_LIB, LRN = window.SBT_LEARN;
+    var usedRead = {}, usedLesson = {}, readN = 0;
+    var weakest = Object.keys(weak).filter(function (c) { return QUANT.concat(TECH).indexOf(c) >= 0; }).sort(function (a, b) { return weak[b] - weak[a] || (a < b ? -1 : 1); })[0] || 'probability';
+    var codingTarget = !firm || firm.topics.indexOf('coding') >= 0 || firm.topics.indexOf('python') >= 0 || firm.styles.indexOf('coding-screen') >= 0;
+    var tradingTarget = !!firm && (firm.topics.indexOf('micro') >= 0 || firm.styles.indexOf('market-making-game') >= 0 || firm.styles.indexOf('trading-desk') >= 0);
+    var mockFmt = firm ? (firm.id === 'jane-street' ? 'js' : 'firm:' + firm.id) : 'classic';
+    function libPick(cat, startOnly) {
+      if (!LIB) return null;
+      var list = [];
+      try { list = (startOnly ? LIB.startItems(6, cat) : LIB.forCat(cat, 8)) || []; } catch (e) { list = []; }
+      if (!list.length && startOnly) { try { list = LIB.startItems(6) || []; } catch (e) { list = []; } }
+      var st = (core.S.library && core.S.library.items) || {};
+      for (var j = 0; j < list.length; j++) {
+        var it = list[j]; if (!it || usedRead[it.id]) continue;
+        if ((st[it.id] || {}).status === 'done') continue;
+        usedRead[it.id] = 1; return it;
+      }
+      return null;
+    }
+    function lessonPick(cat) {
+      if (!LRN || !LRN.forCat) return null;
+      var list = []; try { list = LRN.forCat(cat) || []; } catch (e) { list = []; }
+      var ls = (core.S.learn && core.S.learn.lessons) || {};
+      for (var j = 0; j < list.length; j++) { var l = list[j]; if (l && !usedLesson[l.id] && !(ls[l.id] || {}).read) { usedLesson[l.id] = 1; return l; } }
+      return null;
+    }
+    function addV21Tasks(day, i, ph, superdayMock) {
+      if (day.diag) return;
+      var left = daysBetween(day.d, setup.date);
+      var busy = superdayMock || day.tasks.some(function (t) { return t.type === 'mock' || t.type === 'stamina'; });
+      // 1) mock interview (replaces that day's format practice)
+      var mockDay = left <= 21 ? (left % 7 === 2 || left % 7 === 5) : left % 7 === 4;
+      if (mockDay && !busy && left > 0) {
+        var fmt = studyN <= 7 ? 'phone' : mockFmt;
+        day.tasks = day.tasks.filter(function (t) { return t.type !== 'format'; });
+        day.tasks.push({ k: 'mockiv@' + day.d, type: 'mockiv', fmt: fmt, label: 'Mock interview: ' + (fmt === 'phone' ? '30-minute phone screen' : fmt === 'classic' ? '2 maths + 1 coding round' : fmt === 'js' ? 'conversational trading interview' : (firm ? firm.name + '-style rounds' : 'mixed rounds')) + ', out loud', href: '#mock/' + fmt, min: fmt === 'phone' ? 30 : 60 });
+        return;
+      }
+      // 2) coding lab: one problem a week, with the complexity follow-up
+      if (codingTarget && left % 7 === 1) {
+        var pk = pickProblems('coding', 1, [1, 2, 3], null);
+        if (!pk.ids.length) pk = pickProblems('python', 1, [2, 3], null);
+        if (pk.ids.length) day.tasks.push({ k: 'code@' + day.d, type: 'code', ids: pk.ids, label: 'Coding lab: ' + (BY_ID[pk.ids[0]] || {}).title + ' (+ complexity follow-up)', min: 25 });
+      }
+      // 3) microstructure slot for trading-desk targets: the queue game, alternating with a microstructure lesson
+      if (tradingTarget && left % 7 === 6) {
+        var ml = (Math.floor(i / 7) % 2) ? lessonPick('micro') : null;
+        if (ml) day.tasks.push({ k: 'lesson@' + day.d, type: 'lesson', lesson: ml.id, label: 'Microstructure lesson: ' + ml.title, href: '#learn/' + ml.id, min: 10 });
+        else day.tasks.push({ k: 'micro@' + day.d, type: 'micro', label: 'Microstructure: Queue Position game (queue strength, scratch vs hold, fees vs tick)', href: '#arcade/queue', min: 15 });
+      }
+      // 4) reading: week 1 = 1-2 Library "start here" items; afterwards a weekly Learn lesson / reading slot in the weakest topic
+      if (i < 7) {
+        if (readN < 2 && (readN === 0 || i >= 3)) {
+          var it = libPick(weakest, true);
+          if (it) { readN++; day.tasks.push({ k: 'read@' + day.d, type: 'read', item: it.id, label: 'Read: ' + it.title + (it.author ? ' (' + it.author + ')' : ''), href: '#library/' + encodeURIComponent(it.id), min: 20 }); }
+        }
+      } else if (left % 7 === 0) {
+        var les = Math.floor(i / 7) % 2 ? lessonPick(weakest) : null;
+        if (les) day.tasks.push({ k: 'lesson@' + day.d, type: 'lesson', lesson: les.id, label: 'Learn: ' + les.title + ' (' + core.catName(weakest) + ', your weakest topic)', href: '#learn/' + les.id, min: 10 });
+        else {
+          var it2 = libPick(weakest, false) || libPick(weakest, true);
+          if (it2) day.tasks.push({ k: 'read@' + day.d, type: 'read', item: it2.id, label: 'Reading: ' + it2.title, href: '#library/' + encodeURIComponent(it2.id), min: 20 });
+          else { var les2 = lessonPick(weakest); if (les2) day.tasks.push({ k: 'lesson@' + day.d, type: 'lesson', lesson: les2.id, label: 'Learn: ' + les2.title, href: '#learn/' + les2.id, min: 10 }); }
+        }
+      }
     }
     for (var i = 0; i < total; i++) {
       var d = addDays(start, i);
@@ -169,13 +242,14 @@
           var g = pool[fmtIdx++ % pool.length];
           day.tasks.push({ k: 'format@' + d, type: 'format', label: 'Format practice: ' + arcadeName(g), href: arcadeHref(g), min: fm });
         }
+        addV21Tasks(day, i, ph, isMock);
         if (ph.stories && !day.tasks.some(function (t) { return t.type === 'stories'; })) day.tasks.push({ k: 'stories@' + d, type: 'stories', label: 'Write and rehearse 3–4 two-minute behavioural stories', href: '#journal/new?kind=free', min: 20 });
         // 4) review misses
         day.tasks.push({ k: 'review@' + d, type: 'review', label: 'Review misses (spaced repetition)', href: '#review', min: rm });
       }
       days.push(day);
     }
-    return { built: from, template: tpl, start: start, end: setup.date, days: days, weights: weightsFor(setup, phaseAt(tpl, Math.min(0.999, daysBetween(start, from) / total)), weak) };
+    return { v21: 1, built: from, template: tpl, start: start, end: setup.date, days: days, weights: weightsFor(setup, phaseAt(tpl, Math.min(0.999, daysBetween(start, from) / total)), weak) };
   }
   P.buildPlan = buildPlan;
 
@@ -197,6 +271,12 @@
       case 'review': return day.d === today() && core.dueIds().length === 0 && (core.S.days[day.d] || 0) > 0;
       case 'mock': return c.mocks.some(function (m) { return m.d === day.d; });
       case 'stamina': return c.mocks.some(function (m) { return m.d === day.d && m.kind === 'stamina'; });
+      // v2.1 slots
+      case 'code': var pc = topicProgress(t, day); return pc.of > 0 && pc.n >= pc.of;
+      case 'mockiv': var ms = core.S.mock; return !!(ms && Array.isArray(ms.reports) && ms.reports.some(function (r) { return r && (r.d === day.d || (r.t && core.ymd(new Date(r.t)) === day.d)); }));
+      case 'micro': var R = (core.S.arcade && core.S.arcade.runs) || {}; return Object.keys(R).some(function (k) { return k.split('/')[0] === 'queue' && Array.isArray(R[k]) && R[k].some(function (r) { return r && r.t && core.ymd(new Date(r.t)) === day.d; }); });
+      case 'read': var li = core.S.library && core.S.library.items && core.S.library.items[t.item]; return !!(li && (li.status === 'reading' || li.status === 'done'));
+      case 'lesson': var le = core.S.learn && core.S.learn.lessons && core.S.learn.lessons[t.lesson]; return !!(le && le.read);
       default: return false;
     }
   }
@@ -222,7 +302,7 @@
   function refresh(force) {
     var c = C(), t = today();
     if (!c.setup || !c.plan) return;
-    if (!force && c.plan.built === t) return;
+    if (!force && c.plan.built === t && c.plan.v21) return; // v2.1: plans built by 2.0 are rebuilt once to add the new slots
     var past = (c.plan.days || []).filter(function (d) { return d.d < t; });
     var missedDays = past.filter(function (d) { return !d.rest && d.tasks.length && d.tasks.every(function (x) { return !isDone(x, d); }); });
     var undone = 0;
