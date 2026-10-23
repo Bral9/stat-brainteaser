@@ -4,7 +4,7 @@
  * BUILD is stamped by .github/workflows/deploy.yml on every push (commit sha + run number),
  * so this file's bytes change on every deploy and browsers detect a new service worker.
  * Locally it stays 'dev' and everything still works. */
-var VERSION = '1.3.0';
+var VERSION = '2.0.0';
 var BUILD = 'dev';
 var CACHE_PREFIX = 'stat-brainteaser-';
 var CACHE = CACHE_PREFIX + 'v' + VERSION + '-' + BUILD;
@@ -19,6 +19,9 @@ var PRECACHE = [
   './competitions.js',
   './coach.js',
   './coach-ui.js',
+  './prep-data.js',
+  './prep.js',
+  './prep-ui.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -27,6 +30,9 @@ var PRECACHE = [
   './icons/apple-touch-icon.png',
   './icons/favicon-32.png'
 ];
+// Arcade module (built separately). Precached too, but tolerantly: if one of these is missing the install
+// still succeeds and the app shows an "arcade not available" card instead.
+var OPTIONAL = ['./arcade.css', './arcade-data.js', './arcade.js'];
 // Never cached, always fetched fresh: the deploy manifest used for update checks.
 var NO_CACHE = ['version.json'];
 
@@ -34,7 +40,11 @@ self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE).then(function (cache) {
       // cache: 'reload' bypasses the HTTP cache so a new version never precaches stale files
-      return cache.addAll(PRECACHE.map(function (url) { return new Request(url, { cache: 'reload' }); }));
+      return cache.addAll(PRECACHE.map(function (url) { return new Request(url, { cache: 'reload' }); })).then(function () {
+        return Promise.all(OPTIONAL.map(function (url) {
+          return fetch(new Request(url, { cache: 'reload' })).then(function (res) { if (res && res.ok) return cache.put(url, res); }).catch(function () {});
+        }));
+      });
     })
   );
   // No skipWaiting() here: an updated worker waits until the user accepts the in-app update prompt.

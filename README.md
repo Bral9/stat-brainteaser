@@ -1,6 +1,6 @@
 # Stat Brainteaser
 
-An offline-first Progressive Web App for preparing for **quant trading / quant research, data science and ML internship interviews**: probability, statistics, brainteasers, expected value and betting games, combinatorics, Fermi estimation, Python, SQL, machine learning and mental math.
+An offline-first Progressive Web App for preparing for **quant trading / quant research, data science and ML internship interviews** and **math competitions**: probability, statistics, brainteasers, expected value, Markov chains, Kelly betting, options, market making, game theory, number theory, combinatorics, Fermi estimation, Python, SQL, machine learning and mental math — plus an arcade, firm prep, interview study plans and superday mocks.
 
 **Live:** https://bral9.github.io/stat-brainteaser/
 
@@ -8,21 +8,42 @@ It is plain static files with no build step, no frameworks, no CDNs and no track
 
 ## Features
 
-**205 curated problems in 9 topics**, each with difficulty 1–3, tags, 1–2 progressive hints, a step-by-step solution and a one-line *key idea*.
+**369 curated problems in 15 topics**, each with difficulty 1–3, tags, an *interview-format* label, 1–2 progressive hints, a step-by-step solution and a one-line *key idea*. Every topic has its own page with concept cards (key formula, worked micro-example, common trap), recommended books and your progress.
 
 | Group | Topic | Count | Highlights |
 | --- | --- | --- | --- |
-| Quant core | Probability | 36 | conditioning, Bayes, indicators, coupon collector, gambler's ruin, Markov chains, order statistics, broken stick, Pólya urn, ballot, secretary |
-| Quant core | Statistics | 20 | bias/variance, MLE, CLT, confidence intervals, p-values, multiple testing, regression and R², covariance of sums |
-| Quant core | EV & Games | 22 | fair prices, re-roll options, optimal stopping, red/black card game, Kelly sizing, "make me a market" |
-| Quant core | Combinatorics | 20 | stars and bars, derangements, Catalan, inclusion–exclusion, poker hands, surjections |
-| Quant core | Brainteasers | 22 | pirates, 100 prisoners, two eggs, bridge and torch, ants, lockers, blue-eyed islanders, weighings |
+| Quant core | Probability | 44 | conditioning, Bayes, indicators, coupon collector, gambler's ruin, order statistics, broken stick, Pólya urn, ballot, secretary |
+| Quant core | Statistics | 27 | bias/variance, MLE, CLT, confidence intervals, p-values, regression algebra, conjugate priors, correlation bounds |
+| Quant core | EV & Games | 29 | fair prices, re-roll options, optimal stopping, best-of-seven, bold play, "make me a market" |
+| Quant core | Combinatorics | 25 | stars and bars, derangements, Catalan, inclusion–exclusion, Burnside necklaces, poker hands |
+| Quant core | Brainteasers | 27 | pirates, 100 prisoners, egg drops, weighings, hats, knight tours |
 | Quant core | Fermi estimates | 12 | estimation graded against a reasoned acceptance range |
-| Technical | Python | 24 | output prediction (mutable defaults, aliasing, copy/deepcopy, closures, generators, rounding, slicing), Big-O, numpy broadcasting/axes/NaN, pandas groupby/merge/loc vs iloc, vectorization |
-| Technical | SQL | 24 | join row counts with duplicates and NULLs, GROUP BY/HAVING, NULL semantics, ROW_NUMBER/RANK/DENSE_RANK, running sums, LAG returns, CTEs, top-N per group |
-| Technical | Machine learning | 25 | bias–variance, L1 vs L2, CV and time-series leakage, precision/recall/F1, ROC-AUC, log-loss, gradient descent, logistic odds, Gini/entropy, k-means, PCA, MLE ↔ loss |
+| Quant core | **Markov chains** (new) | 22 | first-step analysis, stationary distributions, return times, biased gambler's ruin, pattern races, regime switching |
+| Quant core | **Number theory** (new) | 22 | last digits, CRT, divisor functions, Fermat/Euler, Legendre, Frobenius coin problem |
+| Trading & markets | **Kelly & betting** (new) | 22 | pricing a game, Kelly fraction, growth rates, fractional Kelly, doubling-before-halving, pot odds |
+| Trading & markets | **Options** (new) | 22 | payoffs, put–call parity & arbitrage, binomial trees, Greeks intuition, ATM ≈ 0.4·σ·√T·S, delta-hedged P&L |
+| Trading & markets | **Market making** (new) | 22 | quoting fair value ± width, adverse selection (Glosten–Milgrom), inventory skew, trade-stream P&L, ETF creation arbitrage |
+| Trading & markets | **Game theory** (new) | 22 | mixed equilibria, zero-sum values, auctions, Nim/Grundy, truels, Rubinstein bargaining |
+| Technical | Python | 24 | output prediction, Big-O, numpy broadcasting/axes/NaN, pandas groupby/merge |
+| Technical | SQL | 24 | join row counts, NULL semantics, window functions, running sums, top-N per group |
+| Technical | Machine learning | 25 | bias–variance, regularisation, leakage, metrics, gradient descent, k-means, PCA |
 
-**Every answer that can be computed was checked by a script before it shipped.** Numeric answers were recomputed with exact fractions, enumeration, DP or Monte Carlo. Every Python output was produced by running the snippet. Every SQL answer was produced by running the query on the shown tables in SQLite.
+### New in 2.0 (all content original)
+
+- **Problem status** with five states — unsolved, attempting, wrong, seen solution, solved — shown as icons everywhere. Opening a solution before solving marks it *seen solution* (never counted as solved); **Mark as not solved** resets a problem. Wrong and seen-solution problems come back in Review **2 days** later.
+- **Attempt timer** on every problem (visible, pausable with the button or <kbd>T</kbd>, pauses when the tab is hidden); time-to-solve is stored and charted per topic.
+- **Shareable filters**: topics, difficulty, status, interview format, set and search live in the URL (`#practice?t=kelly,mm&d=3&s=unsolved`). **Saved filter presets**, **Pick one** (random, unsolved first), and **Next** follows the filtered list ("That's the last problem in this list.").
+- **Custom problem sets** (create, rename, delete; a problem can be in many sets; "Add to" remembers the last set) and the ordered **Core 50** must-do playlist with a progress bar.
+- **Answer box**: comma-separated multi-value answers (bid, ask; equilibrium probabilities), typed multiple choice, an on-screen **math keypad** (digits, / ^ ! √ π ( ) , −) for phones, an **answer format help** popover and the canonical form shown on a correct answer — plus an encouraging message and light confetti (off with reduced motion).
+- **Related problems** (4 cards) after you answer, and private **notes** per problem (saved, exported, shown in the journal).
+- **Interview format labels** (trading desk, OA speed, research stats, market-making game, betting game, options desk, brainteaser screen, math test, coding screen) — describing the *kind* of round a problem resembles, never claiming a firm asked it.
+- **Firm prep** for 17 firms: process timeline, what each round tests, a tickable prep checklist, recommended topics and arcade drills, a one-tap practice set and your own notes. Notes written October 2026 — processes change.
+- **Interview study plan** (deterministic, rule-based — no AI): 12 / 8 / 4-week and 2-week superday templates chosen from your date, optional target firm and hours per day. Each day runs *mental maths → topic problems → format practice → review misses*; weak topics get more days, missed days re-flow, and today's tasks sit on Home next to the competition coach.
+- **Superday mock**: a timed 45-minute mixed set solved out loud, then a 1–5 self-assessment on the 5-point rubric and a mistake log saved to your journal. **Stamina mode** runs 4 mocks back to back.
+- **Arcade** (Train → Arcade): online-test style games — Arithmetic Mania, 80 in 8, number sequences, balloon risk, card-counting and dice market making, Fermi and Kelly.
+- **Stats**: a year-long activity heat map, current and longest streak, a "problems conquered" ring by difficulty, status breakdown, time to solve per topic and your weakest topics (which feed the planner).
+
+**Every answer was checked by a script before it shipped** (`build/verify_all.py` runs all verifiers). Numeric answers were recomputed with exact fractions, enumeration, DP or Monte Carlo. Every Python output was produced by running the snippet. Every SQL answer was produced by running the query on the shown tables in SQLite.
 
 ### Competitions: QUMC & Putnam coach (v1.3)
 
@@ -86,8 +107,8 @@ A separate **Compete** section prepares you for the Quebec University Mathematic
 
 ### Modes
 
-- **Home:** topic cards grouped into *Quant core* and *Technical*, each with a progress bar. Tap a card to start practising that topic. The *Continue* button resumes your last session; *Daily mix* builds 10 problems weighted toward due reviews and your weakest topics.
-- **Practice:** search plus filters for topic, difficulty and status (new / missed / solved), shown as a compact list with status icons.
+- **Home:** topic cards grouped into *Quant core*, *Trading & markets* and *Technical*, each with a progress bar. Tap a card to start practising that topic. The *Continue* button resumes your last session; *Daily mix* builds 10 problems weighted toward due reviews and your weakest topics.
+- **Practice:** search plus filters for topic, difficulty, status (unsolved / attempting / wrong / seen / solved), interview format and set, kept in the URL; saved presets, Pick one, and shortcuts to Topics, Firms, Sets and Core 50.
 - **Problem screen:**
   - breadcrumb (topic › difficulty) and a session counter (3 / 10)
   - a large prompt with scrollable code blocks and tables
@@ -96,7 +117,7 @@ A separate **Compete** section prepares you for the Quebec University Mathematic
   - Previous/Next buttons and a clear correct/incorrect state
   - On desktop, a side panel lists the session.
   - Browser and Android back buttons move between problems.
-- **Review:** Leitner spaced repetition with reviews after 1, 3, 7, 16 and 35 days. Missed problems return to box 1. A badge shows how many are due today.
+- **Review:** Leitner spaced repetition with reviews after 1, 3, 7, 16 and 35 days. Wrong answers and peeks at the solution return to box 1 and come back 2 days later. A badge shows how many are due today.
 - **Train:**
   - *Mental math sprint* (Zetamac/Optiver style, classic or quant mix, best scores and history)
   - *Probability drills* (endless generated questions with exact answers)
@@ -155,15 +176,16 @@ Wait for the "Offline ready" message on your first visit. After that, everything
 
 ## Adding problems
 
-Problems live in `problems.js` as `window.PROBLEMS = [ ... ]`. Append an object with this shape:
+Problems live in `problems.js` as `window.PROBLEMS = [ ... ]`, generated by `build/assemble.py` from `build/parts/*.json` (each part has a `src_*.py` generator and a `verify_*.py` verifier; concept cards and the Core 50 playlist are generated into the same file). A problem looks like this:
 
 ```js
 {
   "id": "prob-037",               // unique
-  "cat": "probability",           // probability | statistics | ev | combinatorics | brainteasers | fermi | python | sql | ml
+  "cat": "probability",           // probability | statistics | ev | combinatorics | brainteasers | fermi | markov | numbertheory | kelly | options | mm | gametheory | python | sql | ml
   "diff": 2,                      // 1 warm-up, 2 interview, 3 hard
   "title": "Short title",
   "tags": ["conditioning", "dice"],
+  "style": ["trading-desk"],     // 1–2 interview-format labels (see STYLES in app.js)
   "prompt": "<p>HTML allowed: p, b, i, sup, sub, br, ul, ol, li, code, pre, table. Use Unicode math (x², √, Σ). Code goes in <pre><code>…</code></pre>.</p>",
   "answer": { "type": "numeric", "value": 0.1388888888888889, "display": "5/36" },
   "hints": ["Gentle nudge", "Stronger hint"],
@@ -178,11 +200,12 @@ Answer types:
 | --- | --- | --- |
 | `numeric` | `value`, `display`, optional `tolRel` (default 0.005) or `tolAbs` | within tolerance; a correctly rounded decimal with ≥3 significant digits is also accepted |
 | `numeric` + `range` | `range: [lo, hi]` | accepted if inside the range (Fermi and market-making) |
-| `choice` | `options: [...]`, `correct: index` | click / keys 1–4 |
+| `choice` | `options: [...]`, `correct: index` | click / keys 1–4 (or type the letter) |
+| `multi` | `values: [...]`, `ordered: true/false`, optional `tolRel` | comma-separated values, each a number or expression; unordered lists accept any order |
 | `text` | `accept: ["[1, 2, 3]", ...]` | case-, whitespace- and quote-style-insensitive exact match (good for "what does this print?") |
 | `self` | `display` | the user reveals the solution and marks themselves right or wrong |
 
-Progress is saved under a stable key with a schema version (`state.v`). If you change its shape, add a step to `migrate()` in `app.js`.
+Progress is saved under a stable key with a schema version (`state.v`, currently 4). If you change its shape, add a step to `migrate()` in `app.js`. The v3 → v4 step (app 2.0) derives the five-state status from your attempts and keeps everything else, including competition and journal data.
 
 You don't have to bump anything for an update to reach users: every push gets a unique build id (see below). Bump `APP_VERSION` in `app.js` and `VERSION` in `sw.js` together, and only for releases you want a human-readable version number for. If you add a new file, also add it to the `PRECACHE` list in `sw.js`.
 
@@ -229,10 +252,14 @@ On https://github.com/bral9/stat-brainteaser, click **Watch → Custom**, then t
 index.html            app shell
 styles.css            all styles (light/dark tokens)
 app.js                router, views, sessions, parser, SRS, sprint, drills, stats, migration
-problems.js           problem bank (quant / technical)
+problems.js           problem bank, concept cards (SBT_TOPICS) and the Core 50 playlist (generated)
 competitions.js       competition content: QUMC & Putnam facts, skill tree, 139 problems, mocks, plans (generated from JSON)
 coach.js              competition coach logic: seasons, mastery, planner, adaptation, journal store, Markdown/zip export
 coach-ui.js           competition & journal views
+prep-data.js          firm process notes, books, interview-plan templates, superday rubric
+prep.js               interview prep logic: deterministic planner, firm checklists/notes, mocks, journal export of notes
+prep-ui.js            topic pages, firm pages, interview plan, superday mock, Home "Today" card
+arcade*.js, arcade.css  the Arcade games (optional: the app still works if they are missing)
 manifest.webmanifest  PWA manifest (relative paths, scope "./")
 sw.js                 cache-first service worker; cache name = version + build; periodic update check
 icons/                192/512 icons, maskable variants, apple-touch-icon, favicon
