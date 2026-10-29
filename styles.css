@@ -32,7 +32,7 @@
   --radius-sm: 8px;
   --c-probability: #6c739d; --c-statistics: #6c9d9a; --c-ev: #6c9d7c; --c-combinatorics: #9d6c85; --c-brainteasers: #896c9d;
   --c-fermi: #6c899d; --c-markov: #7b6c9d; --c-numbertheory: #9d896c; --c-kelly: #6c9d8b; --c-options: #6c819d; --c-mm: #9d7c6c;
-  --c-gametheory: #9d6c78; --c-micro: #899d6c; --c-python: #9d936c; --c-sql: #9d816c; --c-ml: #9d6c6c; --c-coding: #6c959d; --c-systems: #6c7c9d;
+  --c-gametheory: #9d6c78; --c-micro: #899d6c; --c-python: #9d936c; --c-sql: #9d816c; --c-ml: #9d6c6c; --c-coding: #6c959d; --c-systems: #6c7c9d; --c-dsa: #6c9d8a; --c-csfund: #7a6c9d;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Consolas, "Liberation Mono", monospace;
   --tabbar-h: 64px;
@@ -48,7 +48,7 @@
     --shadow: none; --shadow-pop: 0 8px 24px rgba(0, 0, 0, .45);
     --c-probability: #999db8; --c-statistics: #99b8b6; --c-ev: #99b8a3; --c-combinatorics: #b899a8; --c-brainteasers: #ab99b8;
     --c-fermi: #99abb8; --c-markov: #a299b8; --c-numbertheory: #b8ab99; --c-kelly: #99b8ac; --c-options: #99a6b8; --c-mm: #b8a399;
-    --c-gametheory: #b899a0; --c-micro: #abb899; --c-python: #b8b299; --c-sql: #b8a699; --c-ml: #b89999; --c-coding: #99b3b8; --c-systems: #99a3b8;
+    --c-gametheory: #b899a0; --c-micro: #abb899; --c-python: #b8b299; --c-sql: #b8a699; --c-ml: #b89999; --c-coding: #99b3b8; --c-systems: #99a3b8; --c-dsa: #99b8ab; --c-csfund: #a499b8;
     color-scheme: dark;
   }
 }
@@ -60,7 +60,7 @@
   --shadow: none; --shadow-pop: 0 8px 24px rgba(0, 0, 0, .45);
   --c-probability: #999db8; --c-statistics: #99b8b6; --c-ev: #99b8a3; --c-combinatorics: #b899a8; --c-brainteasers: #ab99b8;
   --c-fermi: #99abb8; --c-markov: #a299b8; --c-numbertheory: #b8ab99; --c-kelly: #99b8ac; --c-options: #99a6b8; --c-mm: #b8a399;
-  --c-gametheory: #b899a0; --c-micro: #abb899; --c-python: #b8b299; --c-sql: #b8a699; --c-ml: #b89999; --c-coding: #99b3b8; --c-systems: #99a3b8;
+  --c-gametheory: #b899a0; --c-micro: #abb899; --c-python: #b8b299; --c-sql: #b8a699; --c-ml: #b89999; --c-coding: #99b3b8; --c-systems: #99a3b8; --c-dsa: #99b8ab; --c-csfund: #a499b8;
   color-scheme: dark;
 }
 

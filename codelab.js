@@ -602,20 +602,35 @@
       CHEAT.map(function (r) { return '<tr><td class="mono">' + esc(r[0]) + '</td><td class="mono">' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td></tr>'; }).join('') +
       '</tbody></table></div><p class="small muted">Always say both: time and extra space, and what n is.</p></div>';
   }
+  /* v2.3: the lab holds three kinds of problems; a segmented control picks one (remembered in S.codelab.tab). */
+  var SECTIONS = [
+    { id: 'all', name: 'All' },
+    { id: 'dsa', name: 'Algorithms', desc: 'Classic SWE patterns: graphs, trees, stacks, linked lists, backtracking, tries, bits, design.' },
+    { id: 'coding', name: 'Quant coding', desc: 'Trading-flavoured problems: DP, heaps, sliding windows, P&L and order books.' },
+    { id: 'csfund', name: 'CS simulations', desc: 'Build the mechanism: page replacement, schedulers, caches, checksums, an assembler, WAL recovery.' }
+  ];
   core.VIEWS.codelab = function (main) {
-    var list = problems();
-    var solved = list.filter(function (p) { return core.status(p.id) === 'solved'; }).length;
+    var all = problems();
     var c = C();
+    var secs = SECTIONS.filter(function (x) { return x.id === 'all' || all.some(function (p) { return p.cat === x.id; }); });
+    var tab = secs.some(function (x) { return x.id === c.tab; }) ? c.tab : 'all';
+    var list = tab === 'all' ? all : all.filter(function (p) { return p.cat === tab; });
+    var solved = list.filter(function (p) { return core.status(p.id) === 'solved'; }).length;
+    var sec = SECTIONS.filter(function (x) { return x.id === tab; })[0];
     main.innerHTML = core.pageHead('Coding lab', 'Python interview problems with real test cases, then the complexity follow-up an interviewer always asks.', '#train', 'Train') +
       '<div class="cl-page">' +
       '<div class="cl-main">' +
       '<div data-clp-runner>' + runnerCardHtml() + '</div>' +
       '<div class="card"><div class="row"><p class="cl-h">Problems</p><span class="spacer"></span><span class="small muted">' + solved + '/' + list.length + ' solved</span></div>' +
+      (secs.length > 2 ? '<div class="seg cl-tabs" role="group" aria-label="Problem kind">' + secs.map(function (x) {
+        var n = x.id === 'all' ? all.length : all.filter(function (p) { return p.cat === x.id; }).length;
+        return '<button type="button" data-clp-tab="' + x.id + '" aria-pressed="' + (x.id === tab) + '">' + esc(x.name) + ' <span class="muted">' + n + '</span></button>';
+      }).join('') + '</div>' + (sec && sec.desc ? '<p class="small muted">' + esc(sec.desc) + '</p>' : '') : '') +
       (list.length ? '<div class="row cl-startrow"><button type="button" class="btn primary" data-clp="start">' + ICONS.play + ' Practice (unsolved first)</button></div>' +
         '<ul class="cl-list">' + list.map(function (p, i) {
           var e = c.code[p.id], cx = (p.answer || {}).complexity || {};
           return '<li><button type="button" class="cl-item" data-clp-open="' + i + '">' + core.statusIcon(core.status(p.id)) +
-            '<span class="cl-it"><b>' + esc(p.title) + '</b><small class="muted">' + core.diffDots(p.diff) + (cx.time ? ' <span class="mono">' + esc(cx.time) + '</span>' : '') +
+            '<span class="cl-it"><b>' + esc(p.title) + '</b><small class="muted">' + core.diffDots(p.diff) + (tab === 'all' && p.cat !== 'coding' ? ' ' + esc(core.catName(p.cat)) + ' ·' : '') + (p.cat !== 'coding' && p.tags && p.tags[0] ? ' ' + esc(p.tags[0].replace(/-/g, ' ')) + ' ·' : '') + (cx.time ? ' <span class="mono">' + esc(cx.time) + '</span>' : '') +
             (e && e.n ? ' · last run ' + (e.pass || 0) + '/' + e.n : e ? ' · draft saved' : '') + '</small></span>' + ICONS.right + '</button></li>';
         }).join('') + '</ul>'
         : '<p class="muted">No coding problems in this build yet.</p>') +
@@ -637,9 +652,13 @@
     autoStart();
     var ids = list.map(function (p) { return p.id; });
     var sb = main.querySelector('[data-clp="start"]');
-    if (sb) sb.addEventListener('click', function () { core.startSession(core.orderForPractice(list).map(function (p) { return p.id; }), 'Coding lab', 0); });
+    var label = tab === 'all' ? 'Coding lab' : 'Coding lab · ' + sec.name;
+    if (sb) sb.addEventListener('click', function () { core.startSession(core.orderForPractice(list).map(function (p) { return p.id; }), label, 0); });
+    core.$all('[data-clp-tab]', main).forEach(function (b) {
+      b.addEventListener('click', function () { C().tab = b.getAttribute('data-clp-tab'); core.save(); core.route(); });
+    });
     core.$all('[data-clp-open]', main).forEach(function (b) {
-      b.addEventListener('click', function () { core.startSession(ids, 'Coding lab', +b.getAttribute('data-clp-open')); });
+      b.addEventListener('click', function () { core.startSession(ids, label, +b.getAttribute('data-clp-open')); });
     });
   };
   core.TAB_OF.codelab = 'train';

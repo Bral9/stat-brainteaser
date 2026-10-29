@@ -113,7 +113,7 @@
     if (P && P.arcadeName) { try { return P.arcadeName(id); } catch (e) { } }
     return id;
   }
-  var MOCK_NAMES = { classic: 'Classic mock', trading: 'Trading mock', research: 'Research mock', phone: 'Phone screen mock', js: 'Collaborative mock' };
+  var MOCK_NAMES = { classic: 'Classic mock', trading: 'Trading mock', research: 'Research mock', phone: 'Phone screen mock', js: 'Collaborative mock', swe: 'SWE mock' };
   function mockName(id) {
     var M = window.SBT_MOCK, f = M && Array.isArray(M.FORMATS) ? M.FORMATS.filter(function (x) { return x.id === id; })[0] : null;
     if (f && f.name) return f.name;

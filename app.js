@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var APP_VERSION = '2.2.0';
+  var APP_VERSION = '2.3.0';
   var STORE_KEY = 'statbt.progress.v1'; // key kept stable across versions; schema version lives in state.v
   var SCHEMA = 4;
   var PROBLEMS = Array.isArray(window.PROBLEMS) ? window.PROBLEMS : [];
@@ -13,7 +13,8 @@
   var GROUPS = [
     { id: 'quant', name: 'Quant core', desc: 'Probability, statistics and puzzles asked in trading & research interviews.' },
     { id: 'trading', name: 'Trading & markets', desc: 'Betting, options, market making and strategic games — the trader-interview formats.' },
-    { id: 'tech', name: 'Technical', desc: 'Python, SQL and machine learning screens for quant, data and ML roles.' }
+    { id: 'tech', name: 'Technical', desc: 'Python, SQL and machine learning screens for quant, data and ML roles.' },
+    { id: 'swe', name: 'Software engineering', desc: 'Algorithms, data structures and CS fundamentals for SWE and quant-developer interviews.' }
   ];
   var CATS = [
     { id: 'probability', name: 'Probability', short: 'Prob', group: 'quant', icon: 'die' },
@@ -33,7 +34,9 @@
     { id: 'sql', name: 'SQL', short: 'SQL', group: 'tech', icon: 'db' },
     { id: 'ml', name: 'Machine learning', short: 'ML', group: 'tech', icon: 'nodes' },
     { id: 'coding', name: 'Coding lab', short: 'Code', group: 'tech', icon: 'code' },
-    { id: 'systems', name: 'Systems & design', short: 'Design', group: 'tech', icon: 'db' }
+    { id: 'systems', name: 'Systems & design', short: 'Design', group: 'tech', icon: 'db' },
+    { id: 'dsa', name: 'Algorithms & DS', short: 'DSA', group: 'swe', icon: 'tree' },
+    { id: 'csfund', name: 'CS fundamentals', short: 'CS', group: 'swe', icon: 'chip' }
   ];
   var CAT = {};
   CATS.forEach(function (c) { CAT[c.id] = c; });
@@ -133,6 +136,8 @@
     globe: svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'),
     code: svg('<path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/>'),
     db: svg('<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>'),
+    tree: svg('<circle cx="12" cy="5" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="17" r="2"/><circle cx="12" cy="17" r="2"/><path d="M11 6.8 7 15.2M13 6.8l4 8.4M12 7v8"/>'),
+    chip: svg('<rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>'),
     nodes: svg('<circle cx="5" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><path d="M7 6.8 10.2 11M7 17.2l3.2-4.2M14 12h3"/>'),
     chain: svg('<circle cx="6" cy="7" r="3"/><circle cx="18" cy="7" r="3"/><circle cx="12" cy="18" r="3"/><path d="M9 7h6M16.5 9.6l-3 5.8M7.5 9.6l3 5.8"/><path d="m13.6 5.6 1.4 1.4-1.4 1.4"/>'),
     hash: svg('<path d="M9 3 7 21M17 3l-2 18M4 8.5h17M3 15.5h17"/>'),
@@ -1458,14 +1463,16 @@
   var modalOpen = false;
   function showOnboarding() {
     var steps = [
-      { t: 'Welcome to Stat Brainteaser', b: '<p>' + PROBLEMS.length + ' interview problems across <b>' + CATS.filter(function (c) { return catStats(c.id).total; }).length + ' topics</b> — probability, EV, Markov chains, Kelly betting, options, market making, game theory, plus Python, SQL and ML.</p><ul>' +
+      { t: 'Welcome to Stat Brainteaser', b: '<p>' + PROBLEMS.length + ' interview problems across <b>' + CATS.filter(function (c) { return catStats(c.id).total; }).length + ' topics</b> — probability, EV, Markov chains, Kelly betting, options, market making, game theory, plus Python, SQL, ML, algorithms and CS fundamentals.</p><ul>' +
         '<li><b>Practice</b> by topic or interview format; <b>Review</b> brings back what you missed.</li>' +
         '<li><b>Train</b>: mental math, the <b>Arcade</b> (80 in 8, sequences, market-making games), a 45-minute <b>superday mock</b> and an <b>interview study plan</b> for your target firm and date.</li>' +
         '<li><b>Compete</b>: a coach for QUMC and the Putnam, with a day-by-day plan and a reflection journal.</li></ul>' },
       { t: 'Rehearse the real interview', b: '<ul>' +
         '<li><b>Mock interview</b>: timed rounds that run like the real thing — explain your plan first, solve with a hint ladder, answer the interviewer’s follow-up, then get a debrief and a scorecard.</li>' +
         '<li><b>Learn</b>: short concept lessons that point you to the best chapter or video, and a <b>Library</b> of curated books, courses and guides with your reading status and notes.</li>' +
-        '<li><b>Coding lab</b>: Python problems with real tests. The optional runner (about 10 MB, downloaded once) works offline afterwards.</li>' +
+        '<li><b>Coding lab</b>: Python problems with real tests: algorithms, quant coding and CS simulations. The optional runner (about 10 MB, downloaded once) works offline afterwards.</li>' +
+        '<li><b>Software engineering</b>: what SWE and quant-developer interviews test (algorithms, OS, networking, databases), by area, with free courses.</li>' +
+        '<li><b>Search</b>: press <b>/</b> or the search button to find any problem, lesson, resource or game.</li>' +
         '<li><b>Interview guide</b>: how the process runs and what each firm expects, with every fact tied to its source.</li></ul>' },
       { t: 'Install it — works offline', b: isIOS()
         ? '<p>On iPhone/iPad in <b>Safari</b>: tap <b>Share</b> then <b>Add to Home Screen</b>.</p><p>After the first visit everything is cached, so it works on the metro with no signal.</p>'
@@ -1694,8 +1701,10 @@
       '<nav class="quick-links" aria-label="Practice shortcuts">' +
       '<a class="qlink" href="#topics">' + ICONS.book + 'Topics</a><a class="qlink" href="#firms">' + ICONS.building + 'Firms</a>' +
       '<a class="qlink" href="#sets">' + ICONS.star + 'Sets</a><a class="qlink" href="#core50">' + ICONS.list + 'Core 50</a></nav>' +
-      '<div class="practice-layout"><aside class="filters card">' +
-      '<label class="search"><span class="sr-only">Search problems</span>' + ICONS.search + '<input type="search" id="q" placeholder="Search title, tag, text…" value="' + esc(f.q || '') + '" autocomplete="off"></label>' +
+      '<div class="practice-layout"><aside class="filters card' + (S.settings.filtersOpen ? ' open' : '') + '" id="fPanel">' +
+      '<div class="fhead"><label class="search"><span class="sr-only">Search problems</span>' + ICONS.search + '<input type="search" id="q" placeholder="Search title, tag, text…" value="' + esc(f.q || '') + '" autocomplete="off"></label>' +
+      '<button type="button" class="btn sm ftoggle" id="fToggle" aria-controls="fMore" aria-expanded="' + !!S.settings.filtersOpen + '">Filters <span id="fCount"></span></button></div>' +
+      '<div class="fmore" id="fMore">' +
       '<div class="frow"><span class="label" id="lblCat">Topic</span>' +
       GROUPS.map(function (g) {
         var cs = CATS.filter(function (c) { return c.group === g.id && catStats(c.id).total; });
@@ -1718,8 +1727,8 @@
       (sets.length ? '<div class="frow"><label class="label" for="fset">Set</label><select id="fset"><option value="">All problems</option>' + sets.map(function (s) { return '<option value="' + esc(s.id) + '"' + (f.set === s.id ? ' selected' : '') + '>' + esc(s.name) + ' (' + s.ids.length + ')</option>'; }).join('') + '</select></div>' : '') +
       '<div class="frow"><span class="label">Saved filters</span><div class="chips" id="presets"></div>' +
       '<div class="row preset-new hidden" id="presetNew"><input type="text" id="presetName" placeholder="Name this filter" maxlength="40" aria-label="Preset name"><button type="button" class="btn sm primary" id="presetSave">Save</button></div></div>' +
-      '<div class="row"><button type="button" class="btn sm ghost" id="clearF">Clear filters</button><button type="button" class="btn sm ghost" id="savePreset">' + ICONS.star + ' Save filter</button><button type="button" class="btn sm ghost" id="copyLink">' + ICONS.link + ' Copy link</button></div></aside>' +
-      '<section class="list-wrap"><ul class="plist" id="plist" aria-label="Problems"></ul></section></div>';
+      '<div class="row"><button type="button" class="btn sm ghost" id="clearF">Clear filters</button><button type="button" class="btn sm ghost" id="savePreset">' + ICONS.star + ' Save filter</button><button type="button" class="btn sm ghost" id="copyLink">' + ICONS.link + ' Copy link</button></div></div></aside>' +
+      '<section class="list-wrap"><div class="active-filters" id="activeF" aria-label="Active filters"></div><ul class="plist" id="plist" aria-label="Problems"></ul></section></div>';
 
     var list = [];
     function renderPresets() {
@@ -1731,7 +1740,45 @@
         b.addEventListener('click', function () { S.presets = S.presets.filter(function (p) { return p.id !== b.getAttribute('data-del'); }); save(); renderPresets(); });
       });
     }
+    /* Removable chips for every active filter, shown above the list (the panel itself is collapsed on phones). */
+    function renderActive() {
+      var items = [];
+      f.cats.forEach(function (c) { items.push(['cat', c, catName(c)]); });
+      f.diffs.forEach(function (d) { items.push(['diff', d, DIFF_NAME[d]]); });
+      if (f.status !== 'all') items.push(['st', f.status, STATUS_NAME[f.status] || f.status]);
+      f.styles.forEach(function (x) { items.push(['sty', x, styleName(x)]); });
+      if (f.set && S.sets[f.set]) items.push(['set', f.set, 'Set: ' + S.sets[f.set].name]);
+      if (f.q) items.push(['q', '', '“' + f.q + '”']);
+      $('#fCount').textContent = items.length ? '(' + items.length + ')' : '';
+      $('#activeF').innerHTML = items.length ? items.map(function (it) {
+        return '<button type="button" class="chip on" data-rm="' + it[0] + '" data-v="' + esc(String(it[1])) + '" aria-label="Remove filter ' + esc(it[2]) + '">' + esc(it[2]) + ' <span aria-hidden="true">✕</span></button>';
+      }).join('') + (items.length > 1 ? '<button type="button" class="btn sm ghost" data-rm="all">Clear all</button>' : '') : '';
+    }
+    $('#activeF').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-rm]'); if (!b) return;
+      var k = b.getAttribute('data-rm'), v = b.getAttribute('data-v');
+      if (k === 'all') { S.settings.filters = emptyFilters(); save(); go('#practice', true); return; }
+      if (k === 'cat') f.cats = f.cats.filter(function (x) { return x !== v; });
+      else if (k === 'diff') f.diffs = f.diffs.filter(function (x) { return String(x) !== v; });
+      else if (k === 'st') f.status = 'all';
+      else if (k === 'sty') f.styles = f.styles.filter(function (x) { return x !== v; });
+      else if (k === 'set') f.set = '';
+      else if (k === 'q') { f.q = ''; $('#q').value = ''; }
+      $all('[data-cat]', main).forEach(function (x) { x.setAttribute('aria-pressed', String(f.cats.indexOf(x.getAttribute('data-cat')) >= 0)); });
+      $all('[data-diff]', main).forEach(function (x) { x.setAttribute('aria-pressed', String(f.diffs.indexOf(+x.getAttribute('data-diff')) >= 0)); });
+      $all('[data-sty]', main).forEach(function (x) { x.setAttribute('aria-pressed', String(f.styles.indexOf(x.getAttribute('data-sty')) >= 0)); });
+      $all('[data-st]', main).forEach(function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-st') === f.status)); });
+      var fsel = $('#fset'); if (fsel) fsel.value = f.set;
+      persist(); refresh();
+    });
+    $('#fToggle').addEventListener('click', function () {
+      var open = !$('#fPanel').classList.contains('open');
+      $('#fPanel').classList.toggle('open', open);
+      this.setAttribute('aria-expanded', String(open));
+      S.settings.filtersOpen = open; save();
+    });
     function refresh() {
+      renderActive();
       list = filtered(f);
       $('#matchCount').textContent = list.length + ' of ' + PROBLEMS.length + ' problems' + (f.set && S.sets[f.set] ? ' · set “' + S.sets[f.set].name + '”' : '');
       $('#startN').textContent = list.length ? '(' + list.length + ')' : '';
@@ -1905,16 +1952,30 @@
   /* ------------------------------------------------------------------ */
   VIEWS.train = function (main) {
     var d = S.drills, ivs = S.interviews;
-    main.innerHTML = '<div class="page-head"><div><h1>Train</h1><p class="muted">Timed and generated practice, games and full mock days — the reps that make interviews feel easy.</p></div></div>' +
-      '<div class="train-grid">' +
+    var cards = [
       trainCard('#sprint', 'sprint', 'Mental math sprint', 'Timed arithmetic in the online-test format: + − × ÷ against the clock, or the quant mix (percentages, fractions, squares).', 'Best (classic 120s): ' + bestSprintText()) +
       trainCard('#drills', 'drills', 'Probability drills', 'Endless generated questions with exact answers: dice, cards, binomial, Bayes, 2×2 tables, waiting times.', d.n ? d.c + '/' + d.n + ' correct · best streak ' + (d.bestStreak || 0) : 'Not started') +
       trainCard('#interview', 'interview', 'Interview mode', '5 problems from different topics with a countdown on each. Summary and solutions at the end.', ivs.length ? ivs.length + ' sessions · last ' + ivs[ivs.length - 1].score + '/' + ivs[ivs.length - 1].total : 'Not started') +
       trainCard('#arcade', 'joystick', 'Arcade', 'Online-test style games: Arithmetic Mania, 80 in 8, number sequences, balloon risk, card-counting and dice market making, Fermi and Kelly.', arcadeStat()) +
       trainCard('#superday', 'mic', 'Superday mock', 'A timed 45-minute mixed set you solve out loud, then a 5-point self-assessment and a mistake log. Stamina mode: 4 back-to-back.', (S.prep && S.prep.mocks && S.prep.mocks.length) ? S.prep.mocks.length + ' mocks logged' : 'Not started') +
-      trainCard('#prep', 'route', 'Interview plan', 'A deterministic day-by-day plan for your target date and firm: mental math → topic problems → format practice → review misses.', S.prep && S.prep.setup ? 'Target ' + S.prep.setup.date : 'Not set up') +
-      runHtmlHooks(HOOKS.trainCards) +
-      '</div>';
+      trainCard('#prep', 'route', 'Interview plan', 'A deterministic day-by-day plan for your target date and firm: mental math → topic problems → format practice → review misses.', S.prep && S.prep.setup ? 'Target ' + S.prep.setup.date : 'Not set up')
+    ].join('') + runHtmlHooks(HOOKS.trainCards);
+    /* v2.3: group the cards (core + plugin hooks) into three sections instead of one long grid */
+    var SECT = [
+      { name: 'Timed practice', desc: 'Short, repeatable reps.', hrefs: ['#sprint', '#drills', '#interview', '#arcade', '#codelab', '#deck'] },
+      { name: 'Interview simulation', desc: 'Full rounds, plans and role tracks.', hrefs: ['#mock', '#swe', '#superday', '#prep'] },
+      { name: 'Study', desc: 'Lessons, resources and how interviews work.', hrefs: ['#learn', '#library', '#guide'] }
+    ];
+    var parts = cards.split('<a class="train-card').filter(Boolean).map(function (h) { return '<a class="train-card' + h; });
+    var hrefOf = function (h) { var m = /href="([^"]*)"/.exec(h); return m ? m[1] : ''; };
+    var used = {};
+    var html = SECT.map(function (sec) {
+      var mine = [];
+      sec.hrefs.forEach(function (hr) { parts.forEach(function (h, i) { if (!used[i] && hrefOf(h) === hr) { used[i] = 1; mine.push(h); } }); });
+      if (sec.name === 'Timed practice') parts.forEach(function (h, i) { if (!used[i] && SECT.every(function (x) { return x.hrefs.indexOf(hrefOf(h)) < 0; })) { used[i] = 1; mine.push(h); } });
+      return mine.length ? '<section class="train-sec"><h2 class="sec-h">' + esc(sec.name) + ' <span class="muted small">' + esc(sec.desc) + '</span></h2><div class="train-grid">' + mine.join('') + '</div></section>' : '';
+    }).join('');
+    main.innerHTML = '<div class="page-head"><div><h1>Train</h1><p class="muted">Timed and generated practice, games and full mock days — the reps that make interviews feel easy.</p></div></div>' + html;
   };
   function arcadeStat() {
     var A = window.SBT_ARCADE;
@@ -2326,7 +2387,7 @@
           return '<button type="button" data-ivd="' + o[0] + '" aria-pressed="' + (S.settings.ivDiff === o[0]) + '">' + o[1] + '</button>';
         }).join('') + '</div></div>' +
         '<div class="frow"><span class="label">Topics</span><div class="seg" role="group" aria-label="Topics">' +
-        [['all', 'All'], ['quant', 'Quant core'], ['trading', 'Trading'], ['tech', 'Technical']].map(function (o) {
+        [['all', 'All'], ['quant', 'Quant core'], ['trading', 'Trading'], ['tech', 'Technical'], ['swe', 'Software']].map(function (o) {
           return '<button type="button" data-ivc="' + o[0] + '" aria-pressed="' + (ivc === o[0]) + '">' + o[1] + '</button>';
         }).join('') + '</div></div>' +
         '<button class="btn primary block lg" type="button" id="ivStart">Start interview <span class="kbd">Enter</span></button></div>' +

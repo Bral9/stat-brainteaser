@@ -49,7 +49,8 @@
   /* Formats                                                             */
   /* ------------------------------------------------------------------ */
   var MATH_CATS = ['probability', 'statistics', 'combinatorics', 'markov', 'ev', 'numbertheory', 'brainteasers'];
-  var TECH = ['python', 'sql', 'ml', 'coding', 'systems'];
+  var TECH = ['python', 'sql', 'ml', 'coding', 'systems', 'dsa', 'csfund'];
+  var CODE_CATS = ['coding', 'dsa', 'python'];
   var BASE = {
     classic: { id: 'classic', name: 'Classic quant', mins: 60, desc: 'Two maths problems and one coding problem, with push-back and a debrief after every round.',
       rounds: [{ k: 'p', cats: ['probability', 'statistics', 'combinatorics', 'markov'], diffs: [2, 3] }, { k: 'p', cats: ['statistics', 'probability', 'ev', 'markov', 'numbertheory'], diffs: [2, 3] }, { k: 'code' }] },
@@ -62,7 +63,9 @@
     js: { id: 'js', name: 'Jane Street style', mins: 60, chat: true, desc: 'Conversational and collaborative: probability, a market and a betting problem. It should feel more like a conversation than a quiz, so ask questions.',
       rounds: [{ k: 'p', cats: ['probability', 'markov', 'combinatorics'], styles: ['trading-desk'], diffs: [2, 3] }, { k: 'mm' }, { k: 'p', cats: ['ev', 'kelly', 'gametheory', 'probability'], styles: ['betting-game', 'trading-desk'], diffs: [2, 3] }] }
   };
-  var ORDER = ['classic', 'trading', 'research', 'phone', 'js'];
+  BASE.swe = { id: 'swe', name: 'Software engineer', mins: 60, desc: 'Two algorithm problems coded and tested, then a CS-fundamentals question (OS, networking, databases, bits). State complexity and edge cases out loud.',
+    rounds: [{ k: 'code', cats: ['dsa'], diffs: [1, 2] }, { k: 'code', cats: ['dsa'], diffs: [2, 3] }, { k: 'p', cats: ['csfund'], diffs: [2, 3] }] };
+  var ORDER = ['classic', 'trading', 'research', 'phone', 'js', 'swe'];
   M.FORMATS = ORDER.map(function (k) { var f = BASE[k]; return { id: f.id, name: f.name, mins: f.mins, desc: f.desc }; });
 
   function firms() {
@@ -83,7 +86,7 @@
     var rounds = [{ k: 'p', cats: a, styles: styles, diffs: [2, 3] }];
     if (styles.indexOf('market-making-game') >= 0 || topics.indexOf('mm') >= 0) rounds.push({ k: 'mm' });
     if (styles.indexOf('OA-speed') >= 0) rounds.push({ k: 'mental' });
-    if (topics.some(function (c) { return c === 'coding' || c === 'python'; })) rounds.push({ k: 'code' });
+    if (topics.some(function (c) { return c === 'coding' || c === 'python' || c === 'dsa'; })) rounds.push({ k: 'code', cats: topics.indexOf('dsa') >= 0 ? ['coding', 'dsa'] : ['coding'] });
     else if (topics.indexOf('ml') >= 0) rounds.push({ k: 'p', cats: ['ml'], styles: styles, diffs: [2, 3] });
     while (rounds.length < 3) rounds.push({ k: 'p', cats: b, styles: styles, diffs: [2, 3] });
     rounds = rounds.slice(0, 3);
@@ -107,8 +110,9 @@
   function pickProblem(r, salt, used, cats, quick) {
     var P = core.PROBLEMS, weak = weakTopics(), cand;
     if (r.k === 'code') {
-      cand = core.ANSWER_TYPES.code ? P.filter(function (p) { return p.cat === 'coding' && p.answer && p.answer.type === 'code'; }) : [];
-      if (!cand.length) cand = P.filter(function (p) { return p.cat === 'python' && okType(p); });
+      var cc = r.cats || ['coding'];
+      cand = core.ANSWER_TYPES.code ? P.filter(function (p) { return cc.indexOf(p.cat) >= 0 && p.answer && p.answer.type === 'code'; }) : [];
+      if (!cand.length) cand = P.filter(function (p) { return (cc.indexOf(p.cat) >= 0 || p.cat === 'python') && okType(p); });
     } else cand = P.filter(function (p) { return r.cats.indexOf(p.cat) >= 0 && okType(p); });
     cand = cand.filter(function (p) { return !used[p.id]; });
     if (!cand.length) cand = P.filter(function (p) { return MATH_CATS.indexOf(p.cat) >= 0 && okType(p) && !used[p.id]; });
@@ -297,7 +301,7 @@
         opts = good.concat(bad);
       } else {
         opts = GENERIC_TICKS.map(function (g) { return { t: g.t, g: g.sanity ? 'Check' : 'Method', ok: null, sanity: !!g.sanity }; });
-        if (round.kind === 'code' || (p && (p.cat === 'python' || p.cat === 'coding'))) opts.push({ t: 'State the time and space complexity', g: 'Method', ok: null, complexity: true });
+        if (round.kind === 'code' || (p && CODE_CATS.indexOf(p.cat) >= 0)) opts.push({ t: 'State the time and space complexity', g: 'Method', ok: null, complexity: true });
       }
     }
     return opts.map(function (o, i) { o.i = i; return o; }).sort(function (a, b) { return hstr(seed + '|' + a.t) - hstr(seed + '|' + b.t); });
@@ -357,7 +361,7 @@
         model: '<p>' + esc(cx.time) + (cx.space ? ' time, ' + esc(cx.space) + ' space' : '') + '.' + (cx.why ? ' ' + cx.why : '') + '</p>',
         answer: { type: 'choice', options: order, correct: order.indexOf(cx.time) } };
     }
-    if (round.kind === 'code' || p.cat === 'python' || p.cat === 'coding') {
+    if (round.kind === 'code' || CODE_CATS.indexOf(p.cat) >= 0) {
       return { type: 'complexity', synthetic: true, prompt: '<p>What is the time and space complexity of the code you would write, and where is the bottleneck?</p>',
         model: '<p>Name the dominant loop or recursion and count how often it runs. If the same sub-problem is recomputed, memoise it; if you scan a list repeatedly, use a dict or set.</p>', answer: null };
     }

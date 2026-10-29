@@ -43,8 +43,8 @@
   /* Planner                                                             */
   /* ------------------------------------------------------------------ */
   var PROBS = core.PROBLEMS, BY_ID = core.BY_ID;
-  var QUANT = core.CATS.filter(function (c) { return c.group !== 'tech' && core.catStats(c.id).total; }).map(function (c) { return c.id; });
-  var TECH = core.CATS.filter(function (c) { return c.group === 'tech' && core.catStats(c.id).total; }).map(function (c) { return c.id; });
+  var QUANT = core.CATS.filter(function (c) { return c.group !== 'tech' && c.group !== 'swe' && core.catStats(c.id).total; }).map(function (c) { return c.id; });
+  var TECH = core.CATS.filter(function (c) { return (c.group === 'tech' || c.group === 'swe') && core.catStats(c.id).total; }).map(function (c) { return c.id; });
   var MIN_PER = { 1: 6, 2: 10, 3: 15 };
 
   function templateFor(days) { return days >= 70 ? 'w12' : days >= 42 ? 'w8' : days >= 21 ? 'w4' : 'd14'; }
@@ -126,7 +126,7 @@
     var LIB = window.SBT_LIB, LRN = window.SBT_LEARN;
     var usedRead = {}, usedLesson = {}, readN = 0;
     var weakest = Object.keys(weak).filter(function (c) { return QUANT.concat(TECH).indexOf(c) >= 0; }).sort(function (a, b) { return weak[b] - weak[a] || (a < b ? -1 : 1); })[0] || 'probability';
-    var codingTarget = !firm || firm.topics.indexOf('coding') >= 0 || firm.topics.indexOf('python') >= 0 || firm.styles.indexOf('coding-screen') >= 0;
+    var codingTarget = !firm || firm.topics.indexOf('coding') >= 0 || firm.topics.indexOf('python') >= 0 || firm.topics.indexOf('dsa') >= 0 || firm.styles.indexOf('coding-screen') >= 0;
     var tradingTarget = !!firm && (firm.topics.indexOf('micro') >= 0 || firm.styles.indexOf('market-making-game') >= 0 || firm.styles.indexOf('trading-desk') >= 0);
     var mockFmt = firm ? (firm.id === 'jane-street' ? 'js' : 'firm:' + firm.id) : 'classic';
     function libPick(cat, startOnly) {
@@ -163,7 +163,10 @@
       }
       // 2) coding lab: one problem a week, with the complexity follow-up
       if (codingTarget && left % 7 === 1) {
-        var pk = pickProblems('coding', 1, [1, 2, 3], null);
+        // v2.3: alternate the quant-flavoured coding lab with classic algorithms when the target codes algorithmically
+        var algoWeek = (!firm || firm.topics.indexOf('dsa') >= 0) && Math.floor(i / 7) % 2 === 1;
+        var pk = pickProblems(algoWeek ? 'dsa' : 'coding', 1, [1, 2, 3], null);
+        if (!pk.ids.length && algoWeek) pk = pickProblems('coding', 1, [1, 2, 3], null);
         if (!pk.ids.length) pk = pickProblems('python', 1, [2, 3], null);
         if (pk.ids.length) day.tasks.push({ k: 'code@' + day.d, type: 'code', ids: pk.ids, label: 'Coding lab: ' + (BY_ID[pk.ids[0]] || {}).title + ' (+ complexity follow-up)', min: 25 });
       }

@@ -4,7 +4,7 @@
  * BUILD is stamped by .github/workflows/deploy.yml on every push (commit sha + run number),
  * so this file's bytes change on every deploy and browsers detect a new service worker.
  * Locally it stays 'dev' and everything still works. */
-var VERSION = '2.2.0';
+var VERSION = '2.3.0';
 var BUILD = 'dev';
 var CACHE_PREFIX = 'stat-brainteaser-';
 var CACHE = CACHE_PREFIX + 'v' + VERSION + '-' + BUILD;
@@ -37,6 +37,8 @@ var PRECACHE = [
   './codelab.js',
   './codelab-worker.js',
   './mock.js',
+  './swe.js',
+  './search.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',

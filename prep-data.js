@@ -23,7 +23,7 @@ window.SBT_PREP_DATA = {
     probability: ['cards', 'dice'], statistics: ['fermi'], ev: ['balloon', 'kelly'], combinatorics: ['cards'], brainteasers: ['sequences'],
     fermi: ['fermi', 'daily-fermi'], markov: ['balloon'], numbertheory: ['sequences', 'mania'], kelly: ['kelly', 'balloon'],
     options: ['dice'], mm: ['dice', 'cards', 'queue'], gametheory: ['kelly'], python: [], sql: [], ml: [],
-    micro: ['queue', 'dice/make'], coding: [], systems: []
+    micro: ['queue', 'dice/make'], coding: [], systems: [], dsa: [], csfund: []
   },
 
   books: {
@@ -36,7 +36,11 @@ window.SBT_PREP_DATA = {
     natenberg: { t: 'Option Volatility and Pricing', a: 'Sheldon Natenberg', why: 'The trader’s options book: Greeks, volatility and spreads, without heavy maths.' },
     hull: { t: 'Options, Futures, and Other Derivatives', a: 'John C. Hull', why: 'The standard reference for parity, binomial trees and Black–Scholes.' },
     harris: { t: 'Trading and Exchanges', a: 'Larry Harris', why: 'Market microstructure: who trades, why spreads exist, adverse selection.' },
-    thorp: { t: 'A Man for All Markets', a: 'Edward O. Thorp', why: 'The Kelly criterion in practice, from blackjack to hedge funds.' }
+    thorp: { t: 'A Man for All Markets', a: 'Edward O. Thorp', why: 'The Kelly criterion in practice, from blackjack to hedge funds.' },
+    ctci: { t: 'Cracking the Coding Interview', a: 'Gayle Laakmann McDowell', why: 'The standard SWE interview book: patterns, the interview process and 189 practice problems.' },
+    clrs: { t: 'Introduction to Algorithms', a: 'Cormen, Leiserson, Rivest & Stein', why: 'The reference text behind MIT 6.006: proofs and analysis when you need the details.' },
+    ostep: { t: 'Operating Systems: Three Easy Pieces', a: 'Remzi & Andrea Arpaci-Dusseau', why: 'Free online. Processes, virtual memory, concurrency and file systems, short chapters.' },
+    csapp: { t: 'Computer Systems: A Programmer’s Perspective', a: 'Randal Bryant & David O’Hallaron', why: 'Bits, machine code, caches and linking from a programmer’s view; the basis of CMU 15-213.' }
   },
   booksForCat: {
     probability: ['blitzstein', 'mosteller', 'zhou'], statistics: ['blitzstein', 'zhou'], ev: ['mosteller', 'zhou', 'heard'],
@@ -44,7 +48,7 @@ window.SBT_PREP_DATA = {
     markov: ['norris', 'blitzstein'], numbertheory: ['winkler', 'zhou'], kelly: ['thorp', 'zhou'],
     options: ['natenberg', 'hull'], mm: ['harris', 'natenberg'], gametheory: ['winkler', 'zhou'],
     python: ['zhou'], sql: [], ml: [],
-    micro: ['harris'], coding: [], systems: []
+    micro: ['harris'], coding: [], systems: [], dsa: ['ctci', 'clrs'], csfund: ['ostep', 'csapp']
   },
 
   /* Firm cards. rounds: the process as steps; tests: what that round checks. topics: category ids; styles: interview-format
@@ -65,12 +69,12 @@ window.SBT_PREP_DATA = {
     { id: 'citadel', name: 'Citadel / Citadel Securities', kind: 'Hedge fund / market maker', summary: 'HackerRank or recruiter screen, a technical round, then a multi-interview onsite. Quant research is maths, stats, ML and code; Citadel Securities traders also play market-making games.',
       rounds: [{ n: 'HackerRank OA or recruiter screen', t: 'Timed coding / maths questions.' }, { n: 'Technical (45–60 min)', t: 'Probability and statistics; coding for QR roles.' },
         { n: 'Onsite (3–5 interviews)', t: 'QR: probability, statistics, ML and coding. CitSec trading: market-making games and quick mental maths.' }],
-      topics: ['probability', 'statistics', 'ml', 'python', 'mm', 'ev', 'micro', 'coding'], styles: ['research-stats', 'coding-screen', 'market-making-game'], arcade: ['dice/make', 'mania', 'queue'],
+      topics: ['probability', 'statistics', 'ml', 'python', 'mm', 'ev', 'micro', 'coding', 'dsa'], styles: ['research-stats', 'coding-screen', 'market-making-game'], arcade: ['dice/make', 'mania', 'queue'],
       checklist: ['Can derive OLS and explain bias–variance on a whiteboard', 'Solved 10 timed coding problems', 'Know your projects inside out (expect a deep-dive)', 'Played market-making games if applying to trading'] },
     { id: 'hrt', name: 'Hudson River Trading', kind: 'Algorithmic trading', summary: 'Engineering-heavy: HackerRank, phone screens mixing coding and maths, then a long onsite.',
       rounds: [{ n: 'HackerRank OA', t: 'Algorithmic coding.' }, { n: 'Phone screens (1–2)', t: 'Coding plus maths / probability.' },
         { n: 'Onsite (~5 interviews)', t: 'Competitive-programming-style problems, computing P&L from a stream of trades, expected-value games.' }],
-      topics: ['python', 'probability', 'ev', 'mm', 'combinatorics', 'micro', 'coding'], styles: ['coding-screen', 'trading-desk'], arcade: ['mania', 'dice', 'queue'],
+      topics: ['python', 'probability', 'ev', 'mm', 'combinatorics', 'micro', 'coding', 'dsa'], styles: ['coding-screen', 'trading-desk'], arcade: ['mania', 'dice', 'queue'],
       checklist: ['Solved 20 medium algorithm problems in your interview language', 'Can compute P&L and position from a trade log by hand', 'Comfortable with EV and recursion games'] },
     { id: 'imc', name: 'IMC', kind: 'Market maker', summary: 'Role-specific online assessment, a motivation interview, then a final round of stations.',
       rounds: [{ n: 'Online assessment', t: 'Role-specific: numerical / logical tests for traders, coding for developers.' }, { n: 'Motivation interview', t: 'Why trading, why IMC, teamwork.' },
@@ -100,7 +104,7 @@ window.SBT_PREP_DATA = {
     { id: 'tower', name: 'Tower Research Capital', kind: 'Algorithmic trading', summary: 'Online test (coding, or probability for traders), one or two screens, then a long onsite.',
       rounds: [{ n: 'Online test', t: 'Coding for developers; probability for traders.' }, { n: 'Screens (1–2 × 60 min)', t: 'Probability and maths.' },
         { n: 'Onsite (5–6 interviews)', t: 'Coupon collector, dice, random walks, order statistics, fast mental maths.' }],
-      topics: ['probability', 'markov', 'ev', 'combinatorics', 'statistics', 'micro', 'coding'], styles: ['trading-desk', 'math-test', 'OA-speed'], arcade: ['mania', 'dice', 'queue'],
+      topics: ['probability', 'markov', 'ev', 'combinatorics', 'statistics', 'micro', 'coding', 'dsa'], styles: ['trading-desk', 'math-test', 'OA-speed'], arcade: ['mania', 'dice', 'queue'],
       checklist: ['Coupon collector and its variants', 'Random walks and gambler’s ruin (p ≠ ½)', 'Order statistics of uniforms', 'Mental-maths sprint daily'] },
     { id: 'jump', name: 'Jump Trading', kind: 'Algorithmic trading', summary: 'Probability and brainteaser screen, then several short technical interviews and a behavioural one.',
       rounds: [{ n: 'Phone screen', t: 'Probability and brainteasers.' }, { n: 'Technical interviews (4–5, short)', t: 'Probability, statistics, data and coding.' }, { n: 'Behavioural', t: 'Teamwork and motivation.' }],
@@ -109,11 +113,11 @@ window.SBT_PREP_DATA = {
     { id: 'two-sigma', name: 'Two Sigma', kind: 'Quant hedge fund', summary: 'Statistics, ML and engineering rather than speed arithmetic.',
       rounds: [{ n: 'HackerRank online test', t: 'Algorithms plus data manipulation.' }, { n: 'Phone screens', t: 'Statistics, probability, coding.' },
         { n: 'Onsite (3–4)', t: 'Maths, coding and modelling discussions.' }],
-      topics: ['statistics', 'ml', 'python', 'sql', 'probability', 'coding'], styles: ['research-stats', 'coding-screen'], arcade: [],
+      topics: ['statistics', 'ml', 'python', 'sql', 'probability', 'coding', 'dsa'], styles: ['research-stats', 'coding-screen'], arcade: [],
       checklist: ['Regression assumptions and diagnostics', 'Cross-validation and leakage examples', 'pandas groupby / merge fluency', 'A modelling project you can defend'] },
     { id: 'qrt', name: 'QRT (Qube Research & Technologies)', kind: 'Quant hedge fund', summary: 'HackerRank test, then interviews on statistics, regression and Python, plus a project deep-dive.',
       rounds: [{ n: 'HackerRank online test', t: 'Coding and maths.' }, { n: 'Interviews (2–5)', t: 'Statistics, regression, Python and pandas; a deep-dive into one of your projects.' }],
-      topics: ['statistics', 'python', 'ml', 'probability'], styles: ['research-stats', 'coding-screen'], arcade: [],
+      topics: ['statistics', 'python', 'ml', 'probability', 'dsa'], styles: ['research-stats', 'coding-screen'], arcade: [],
       checklist: ['OLS algebra: slope, R², omitted-variable bias', 'pandas: rolling windows, joins, groupby', 'Project deep-dive rehearsed (data, method, what failed)'] },
     { id: 'xtx', name: 'XTX Markets', kind: 'Algorithmic market maker', summary: 'A very hard online test, a technical screen and a long onsite.',
       rounds: [{ n: 'Online test', t: 'Hard probability, statistics and ML questions.' }, { n: 'Screen (60 min)', t: 'Technical maths / stats.' }, { n: 'Onsite (5–6 interviews)', t: 'Deep probability, statistics, ML and coding.' }],
@@ -126,7 +130,7 @@ window.SBT_PREP_DATA = {
     { id: 'goldman', name: 'Goldman Sachs (strats / quant)', kind: 'Investment bank', summary: 'HackerRank, a HireVue, technical screens and a superday mixing coding, probability, statistics and options basics.',
       rounds: [{ n: 'HackerRank online test', t: 'Coding and maths.' }, { n: 'HireVue', t: 'Recorded behavioural and technical questions.' }, { n: 'Technical screens', t: 'Probability and statistics.' },
         { n: 'Superday', t: 'Coding, probability, statistics and options basics.' }],
-      topics: ['probability', 'statistics', 'options', 'python', 'sql'], styles: ['coding-screen', 'research-stats', 'options-desk'], arcade: ['mania'],
+      topics: ['probability', 'statistics', 'options', 'python', 'sql', 'dsa'], styles: ['coding-screen', 'research-stats', 'options-desk'], arcade: ['mania'],
       checklist: ['Options payoffs and put–call parity', 'Ten SQL / Python screen questions', 'Recorded-answer practice for the HireVue', 'Three behavioural stories (teamwork, failure, leadership)'] },
     { id: 'virtu', name: 'Virtu Financial', kind: 'Market maker', summary: 'A timed online test, a recruiter screen and a few conversational technical interviews.',
       rounds: [{ n: 'Timed online test', t: 'Probability and mental maths.' }, { n: 'Recruiter screen', t: 'Background and motivation.' }, { n: 'Technical interviews (2–3)', t: 'Conversational probability and market questions.' }],
